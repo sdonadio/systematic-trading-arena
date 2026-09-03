@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="data:," />
+<title>Week 9 · Integration &amp; Demo — Season Finale — Systematic Trading Arena</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root{
+    /* ── Systematic Trading Arena · shared palette (identical on every page) ── */
+    --accent:       #3b82f6;
+    --accent-2:     #7cb0ff;
+    --accent-3:     #b9d4ff;
+    --accent-rgb:   59,130,246;
+    --accent-2-rgb: 124,176,255;
+    --bg:           #0f1115;
+    --panel:        #181b22;
+    --panel2:       #1e222b;
+    --panel-2:      #13161b;
+    --ink:          #e8e6e3;
+    --ink-dim:      #c6c3bf;
+    --ink-mute:     #6f757f;
+    --muted:        #9aa0a6;
+    --dim:          #5f6673;
+    --line:         #272c36;
+    --line-2:       #333a47;
+    --border:       #272c36;
+    --ok:           #3fb950;
+    --warn:         #d29922;
+    --bad:          #f85149;
+    --info:         #6cb6ff;
+    --sky:          #58a6ff;
+    --violet:       #a78bfa;
+    --teal:         #2dd4bf;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14.5px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── nav / footer (series components) ───────────────────────── */
+  nav.top {
+    position: sticky; top: 0; z-index: 60;
+    display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+    padding: 11px 22px;
+    background: rgba(15,17,21,0.93);
+    backdrop-filter: blur(9px);
+    border-bottom: 1px solid var(--border);
+  }
+  nav.top > a {
+    color: var(--ink); font-weight: 700; font-size: 13.5px;
+    text-decoration: none; letter-spacing: -0.2px;
+    border-left: 3px solid var(--accent); padding-left: 10px;
+  }
+  nav.top > a:hover { color: var(--accent-2); }
+  nav.top .crumbs { font-size: 12px; color: var(--muted); }
+  nav.top .crumbs a { color: var(--muted); text-decoration: none; }
+  nav.top .crumbs a:hover { color: var(--ink); text-decoration: underline; }
+  nav.top .crumbs b { color: var(--ink); font-weight: 600; }
+
+  footer {
+    margin-top: 40px; border-top: 1px solid var(--border);
+    padding: 26px 22px 40px; text-align: center;
+    font-size: 11.5px; color: var(--muted); background: var(--panel-2);
+  }
+  footer a { color: var(--accent-2); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* ── layout ─────────────────────────────────────────────────── */
+  main { max-width: 1180px; margin: 0 auto; padding: 0 22px; }
+  section { padding: 34px 0; border-top: 1px solid var(--border); }
+  section:first-of-type { border-top: none; }
+
+  h1, h2, h3, h4 { letter-spacing: -0.4px; line-height: 1.24; }
+  h2 { font-size: 22px; font-weight: 700; }
+  h3 { font-size: 15px; font-weight: 700; }
+  p { margin-bottom: 11px; max-width: 78ch; }
+  p:last-child { margin-bottom: 0; }
+  a { color: var(--accent-2); }
+
+  .kicker {
+    display: inline-block; font-size: 9.5px; font-weight: 800;
+    letter-spacing: 1.6px; text-transform: uppercase;
+    color: var(--accent-2); padding: 3px 9px; border-radius: 4px;
+    background: rgba(var(--accent-rgb),0.16); border: 1px solid rgba(var(--accent-2-rgb),0.32);
+    margin-bottom: 10px;
+  }
+  .sec-head { margin-bottom: 14px; }
+  .sec-head p.lead { color: var(--muted); font-size: 13.5px; margin-top: 6px; }
+
+  code, .mono { font-family: var(--mono); }
+  p code, li code, td code {
+    font-size: 12px; color: var(--accent-2);
+    background: rgba(var(--accent-rgb),0.15); border: 1px solid rgba(var(--accent-2-rgb),0.2);
+    padding: 1px 5px; border-radius: 3px;
+  }
+  pre.code {
+    font-family: var(--mono); font-size: 11.5px; line-height: 1.62;
+    background: #0b0e13; border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 14px; overflow-x: auto; color: #cfd6dd;
+    white-space: pre; margin: 10px 0 0;
+  }
+  pre.code b { color: var(--accent-2); font-weight: 600; }
+  pre.code i { color: #6e7681; font-style: normal; }
+  pre.code u { color: var(--ok); text-decoration: none; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+  .grid2.narrow-right { grid-template-columns: 1.35fr 1fr; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+
+  /* ── widget shell ───────────────────────────────────────────── */
+  .widget {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 18px 18px; margin-top: 16px;
+  }
+  .widget.flat { background: var(--panel-2); }
+  .w-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .w-head h3 { color: var(--ink); }
+  .w-tag {
+    font-size: 9px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--muted); border: 1px solid var(--border); border-radius: 10px; padding: 2px 8px;
+  }
+  .w-sub { font-size: 12.5px; color: var(--muted); margin: 6px 0 12px; max-width: 88ch; }
+  .w-note { font-size: 11.5px; color: var(--muted); margin-top: 11px; line-height: 1.6; }
+  .w-note b { color: var(--ink); font-weight: 600; }
+
+  .controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 4px 0 12px; }
+  .ctl { display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--muted); }
+  .ctl output, .ctl .val { font-family: var(--mono); font-size: 11.5px; color: var(--ink); min-width: 46px; }
+
+  button {
+    font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer;
+    color: var(--ink); background: transparent;
+    border: 1px solid var(--border); border-radius: 7px; padding: 6px 13px;
+    transition: border-color .18s, color .18s, background .18s;
+  }
+  button:hover:not(:disabled) { border-color: var(--accent-2); color: #fff; }
+  button:focus-visible, [tabindex]:focus-visible, input:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--accent-2); outline-offset: 2px;
+  }
+  button:disabled { opacity: .38; cursor: not-allowed; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.primary:hover:not(:disabled) { background: #2563eb; border-color: var(--accent-2); }
+  button.on { background: rgba(var(--accent-rgb),0.28); border-color: var(--accent-2); color: #fff; }
+  button.seg { border-radius: 0; margin-left: -1px; }
+  button.seg:first-of-type { border-radius: 7px 0 0 7px; margin-left: 0; }
+  button.seg:last-of-type { border-radius: 0 7px 7px 0; }
+
+  input[type=range] { accent-color: var(--accent-2); width: 130px; height: 18px; cursor: pointer; }
+  input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
+  select {
+    font-family: inherit; font-size: 12px; color: var(--ink); background: var(--panel-2);
+    border: 1px solid var(--border); border-radius: 7px; padding: 5px 8px; cursor: pointer;
+  }
+
+  svg.stage { width: 100%; height: auto; display: block; }
+  .svg-wrap {
+    background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 9px; padding: 10px; overflow: hidden;
+  }
+
+  /* ── readouts, stats, logs, tables ──────────────────────────── */
+  .stats { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+  .stat {
+    flex: 1 1 120px; background: var(--panel-2); border: 1px solid var(--border);
+    border-left: 2px solid var(--c, var(--muted)); border-radius: 7px; padding: 8px 11px;
+  }
+  .stat .lbl { font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+  .stat .num { font-family: var(--mono); font-size: 17px; font-weight: 600; color: var(--c, var(--ink)); margin-top: 2px; }
+  .stat .sub { font-size: 10.5px; color: var(--muted); margin-top: 1px; }
+
+  .verdict {
+    margin-top: 12px; border-radius: 8px; padding: 10px 13px;
+    font-size: 12.5px; line-height: 1.62;
+    background: rgba(var(--accent-rgb),0.12); border: 1px solid rgba(var(--accent-2-rgb),0.3);
+  }
+  .verdict b { color: #fff; }
+  .verdict.ok   { background: rgba(63,185,80,0.10);  border-color: rgba(63,185,80,0.34); }
+  .verdict.warn { background: rgba(210,153,34,0.10); border-color: rgba(210,153,34,0.34); }
+  .verdict.bad  { background: rgba(248,81,73,0.10);  border-color: rgba(248,81,73,0.34); }
+
+  .log {
+    font-family: var(--mono); font-size: 11px; line-height: 1.75;
+    background: #0b0e13; border: 1px solid var(--border); border-radius: 8px;
+    padding: 9px 11px; height: 148px; overflow-y: auto; color: #b9c1c9;
+  }
+  .log div { white-space: pre-wrap; }
+  .log .t { color: #57606a; }
+  .log .g { color: var(--ok); }
+  .log .y { color: var(--warn); }
+  .log .r { color: var(--bad); }
+  .log .b { color: var(--sky); }
+
+  table.tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.tbl th {
+    text-align: left; font-size: 9px; font-weight: 800; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--muted);
+    padding: 6px 8px; border-bottom: 1px solid var(--border);
+  }
+  table.tbl td {
+    padding: 6px 8px; border-bottom: 1px solid rgba(39,44,54,0.6);
+    font-family: var(--mono); font-size: 11.5px; color: var(--ink);
+  }
+  table.tbl td.name { font-family: inherit; }
+  table.tbl tr.hl td { background: rgba(var(--accent-rgb),0.16); }
+  table.tbl tr.bad td { background: rgba(248,81,73,0.10); }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 9.5px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 10px; border: 1px solid currentColor; white-space: nowrap;
+  }
+  .badge.ok { color: var(--ok); background: rgba(63,185,80,0.12); }
+  .badge.warn { color: var(--warn); background: rgba(210,153,34,0.12); }
+  .badge.bad { color: var(--bad); background: rgba(248,81,73,0.12); }
+  .badge.idle { color: var(--muted); background: rgba(154,160,166,0.1); }
+
+  /* ── hero ───────────────────────────────────────────────────── */
+  #hero { padding: 46px 0 34px; }
+  #hero .wk { font-family: var(--mono); font-size: 12px; letter-spacing: 3px; color: var(--accent-2); }
+  #hero h1 { font-size: clamp(27px, 4.4vw, 41px); font-weight: 800; margin-top: 8px; }
+  #hero h1 em { font-style: normal; color: var(--accent-2); }
+  #hero .promise { font-size: 15.5px; color: var(--ink); margin-top: 13px; max-width: 76ch; }
+  #hero ul.able { list-style: none; margin-top: 18px; display: grid; gap: 8px; grid-template-columns: repeat(3, 1fr); }
+  #hero ul.able li {
+    background: var(--panel); border: 1px solid var(--border); border-top: 2px solid var(--accent);
+    border-radius: 9px; padding: 11px 13px; font-size: 12.5px; color: var(--muted); line-height: 1.55;
+  }
+  #hero ul.able li b { display: block; color: var(--ink); font-size: 12px; margin-bottom: 3px; }
+
+  /* ── pitfalls ───────────────────────────────────────────────── */
+  details.pit {
+    background: var(--panel); border: 1px solid var(--border);
+    border-left: 3px solid var(--bad); border-radius: 9px;
+    padding: 10px 14px; margin-bottom: 9px;
+  }
+  details.pit summary {
+    cursor: pointer; font-size: 13.5px; font-weight: 600; color: var(--ink);
+    list-style: none; display: flex; align-items: baseline; gap: 9px;
+  }
+  details.pit summary::-webkit-details-marker { display: none; }
+  details.pit summary::before {
+    content: '+'; font-family: var(--mono); color: var(--bad); font-weight: 700; flex-shrink: 0;
+  }
+  details.pit[open] summary::before { content: '\2212'; }
+  details.pit .body { font-size: 12.5px; color: var(--muted); margin-top: 9px; padding-left: 18px; }
+  details.pit .body b { color: var(--ink); }
+  details.pit .fix { margin-top: 8px; color: var(--ok); }
+
+  /* ── quiz ───────────────────────────────────────────────────── */
+  .q { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+  .q .qn { font-size: 9.5px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; color: var(--accent-2); }
+  .q .qt { font-size: 13.5px; font-weight: 600; margin-top: 5px; }
+  .q .opts { display: grid; gap: 7px; margin-top: 11px; }
+  .q button.opt {
+    text-align: left; padding: 8px 12px; font-weight: 500; font-size: 12.5px;
+    background: var(--panel-2); border-radius: 7px; line-height: 1.5;
+  }
+  .q button.opt .k { font-family: var(--mono); color: var(--muted); margin-right: 8px; }
+  .q button.opt.right { border-color: var(--ok); color: #fff; background: rgba(63,185,80,0.13); }
+  .q button.opt.right .k { color: var(--ok); }
+  .q button.opt.wrong { border-color: var(--bad); color: #fff; background: rgba(248,81,73,0.12); }
+  .q button.opt.wrong .k { color: var(--bad); }
+  .q .fb { font-size: 12.5px; margin-top: 10px; display: none; line-height: 1.62; color: var(--muted); }
+  .q .fb.show { display: block; }
+  .q .fb b { color: var(--ink); }
+
+  /* ── next ───────────────────────────────────────────────────── */
+  .nextgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+  a.nextcard {
+    display: block; text-decoration: none; color: inherit;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; transition: border-color .18s, transform .18s;
+  }
+  a.nextcard:hover { border-color: var(--accent-2); transform: translateY(-2px); }
+  a.nextcard .lbl { font-size: 9.5px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; color: var(--accent-2); }
+  a.nextcard .ttl { font-size: 14px; font-weight: 700; margin-top: 4px; }
+  a.nextcard .dsc { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .weeknav { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+  .weeknav a {
+    font-size: 12px; text-decoration: none; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 20px; padding: 5px 14px;
+  }
+  .weeknav a:hover { border-color: var(--accent-2); color: var(--ink); }
+
+  /* ── responsive ─────────────────────────────────────────────── */
+  @media (max-width: 720px) {
+    body { font-size: 14px; }
+    main { padding: 0 14px; }
+    .grid2, .grid2.narrow-right, .grid3, .nextgrid, #hero ul.able { grid-template-columns: minmax(0, 1fr); }
+    .stat { flex: 1 1 100%; }
+    nav.top { padding: 10px 14px; gap: 8px; }
+    input[type=range] { width: 100%; min-width: 120px; }
+    .ctl { flex: 1 1 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .001s !important; transition-duration: .001s !important; }
+  }
+
+  /* ── Week-9 specifics ───────────────────────────────────────── */
+  .sys-detail { background: var(--panel-2); border: 1px solid var(--border); border-radius: 9px; padding: 12px 14px; }
+  .sys-detail h4 { font-size: 13.5px; }
+  .sys-detail h4 span { color: var(--c, var(--accent-2)); }
+  .sys-detail .role { font-family: var(--mono); font-size: 11px; color: var(--sky); margin-top: 4px; }
+  .sys-detail p { font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+  .sys-detail .test { font-size: 12px; color: var(--ok); margin-top: 8px; }
+  .sys-detail .fail { font-size: 12px; color: var(--warn); margin-top: 6px; }
+
+  .lanes { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+  @media (max-width: 720px) { .lanes { grid-template-columns: minmax(0,1fr); } }
+  .lane { background: var(--panel-2); border: 1px solid var(--border); border-radius: 9px; padding: 11px 13px; }
+  .lane.naive { border-left: 3px solid var(--bad); }
+  .lane.robust { border-left: 3px solid var(--ok); }
+  .lane .lh {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    font-size: 11px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border); margin-bottom: 8px;
+  }
+  .lane.naive .lh { color: var(--bad); }
+  .lane.robust .lh { color: var(--ok); }
+  .ev { font-size: 12px; line-height: 1.55; padding: 4px 0 4px 16px; position: relative; color: var(--muted); }
+  .ev::before { content: '▸'; position: absolute; left: 0; color: var(--border); }
+  .ev b { color: var(--ink); font-weight: 600; }
+  .ev.r { color: #f0a9a4; } .ev.r::before { color: var(--bad); }
+  .ev.g { color: #a7e0ad; } .ev.g::before { color: var(--ok); }
+  .ev.y { color: #e3c98a; } .ev.y::before { color: var(--warn); }
+  .ev code { font-size: 11px; }
+
+  .chk { display: grid; gap: 6px; }
+  .chk h4 { font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--accent-2); margin-top: 6px; }
+  .chk label {
+    display: flex; align-items: flex-start; gap: 9px; cursor: pointer; font-size: 12.5px; line-height: 1.45;
+    background: var(--panel-2); border: 1px solid var(--border); border-radius: 7px; padding: 7px 10px;
+  }
+  .chk label:hover { border-color: var(--accent-2); }
+  .chk label input { margin-top: 3px; flex-shrink: 0; }
+  .chk label.done { border-color: rgba(63,185,80,0.4); background: rgba(63,185,80,0.07); }
+  .chk label .fd { display: block; color: var(--muted); font-size: 11px; }
+
+  /* ── mobile guard (identical on every page): single column under 720px,
+        no horizontal overflow. Must stay last in the sheet. ───────────── */
+  @media (max-width:720px){
+    .grid2,.grid3,.grid2.narrow-right,.split,.split-r,.codepair,
+    .nextgrid,.dash,.toggles,.lanes,.weeknav,.weeks,.roles,.stack{
+      grid-template-columns:minmax(0,1fr)}
+    [class*="grid"]>*,.stack>*,.wrap>*,.panel,.panel.tight,.nextcard,.wk,.row>*{min-width:0}
+    pre,pre.code,.svgwrap,svg,canvas,table,select,input,textarea,.mono{max-width:100%}
+    pre,pre.code,.svgwrap,.tablewrap{overflow-x:auto}
+    .ctl,.ctl>*,.controls>*,.row,.legend>*{min-width:0}
+    .ctl{flex-wrap:wrap} .ctl select,.ctl input[type=range]{flex:1 1 100%;width:100%}
+    p,.lead,.sub,.promise{max-width:none}
+  }
+</style>
+</head>
+<body>
+
+<nav class="top"><a href="index.html">Systematic Trading Arena</a><span class="crumbs"><a href="week8.html">&larr; Week 8</a> &middot; <b>Week 9 &middot; Integration &amp; Demo — Season Finale</b></span></nav>
+
+<main>
+
+<!-- ══ HERO ══════════════════════════════════════════════════ -->
+<section id="hero">
+  <div class="wk">WEEK 9 · SEASON FINALE</div>
+  <h1>Integration &amp; Demo &mdash; <em>Season Finale</em></h1>
+  <p class="promise">Nothing new to build; everything to connect. Tonight three independent processes run as one market,
+  the bugs that live in the seams come out, and the leaderboard locks on risk-adjusted return.</p>
+  <ul class="able">
+    <li><b>Trace the whole system</b> &mdash; every arrow between Yahoo, broker, exchange, trader, dashboard and score.</li>
+    <li><b>Survive partial failure</b> &mdash; stale feeds, dropped sockets, rejected orders, duplicate fills.</li>
+    <li><b>Defend your book</b> with a tearsheet, and know why the steadiest curve wins the season.</li>
+  </ul>
+</section>
+
+<!-- ══ WHAT ══════════════════════════════════════════════════ -->
+<section id="what">
+  <div class="sec-head">
+    <span class="kicker">What is it?</span>
+    <h2>Integration correctness is a different claim from unit correctness</h2>
+    <p class="lead">Every part passing its own tests does not mean the system works. Bugs live in the seams between
+    components that are each, individually, correct.</p>
+  </div>
+
+  <div class="grid2">
+    <div>
+      <p><b>Unit correctness</b> means each object honours its own contract in isolation &mdash; roughly 1,280 tests do
+      that for the platform. <b>Integration correctness</b> means the objects honour <em>each other's</em> contracts when
+      wired together, live, under load. The second does not follow from the first.</p>
+      <p>The classic seam bugs all have the same shape: two correct components disagree about timing or units. The signal
+      fires faster than risk can veto it. A fill arrives before its ack. Two messages race on the same book. One side
+      sends a price as a float, the other rounds to ticks &mdash; and both are right by their own spec.</p>
+      <p>In AlgoArena the seams are explicit, which is the whole reason the wire protocol is Pydantic. Three processes
+      speak only models from <code>shared/messages.py</code>; if a message round-trips, the seam holds. So test the
+      conversation, not just the speakers.</p>
+    </div>
+    <div>
+      <div class="widget" style="margin-top:0">
+        <div class="w-head"><h3>The five pillars, already built</h3></div>
+        <p class="w-sub">This week each maps to one live component and they all run on the same tick.</p>
+        <table class="tbl">
+          <tr><th>Pillar</th><th>Built in</th><th>Runs as</th></tr>
+          <tr><td class="name">Signal</td><td>W3, W7</td><td>on_tick()</td></tr>
+          <tr><td class="name">Execution</td><td>W2, W4</td><td>quotes + CLOB</td></tr>
+          <tr><td class="name">Risk</td><td>W5</td><td>check_order()</td></tr>
+          <tr><td class="name">Portfolio</td><td>W6</td><td>cash + positions</td></tr>
+          <tr><td class="name">Evaluation</td><td>W9</td><td>scoring.py</td></tr>
+        </table>
+        <div class="w-note"><b>The parts have been unit-correct for weeks.</b> The only open question tonight is whether
+        they are correct <em>together</em>.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WIDGET 1 -->
+  <div class="widget">
+    <div class="w-head"><span class="w-tag">Widget 1</span><h3>The integration surface</h3></div>
+    <p class="w-sub">Click a box for the component, or click an arrow for the seam &mdash; its wire contract, the test
+    that pins it, and how it fails at 6:05pm.</p>
+
+    <div class="controls">
+      <label class="ctl"><input type="checkbox" id="w9-traffic" /> animate message traffic</label>
+      <span class="ctl" id="w9-sys-hint">6 components · 5 seams</span>
+    </div>
+
+    <div class="grid2 narrow-right">
+      <div class="svg-wrap">
+        <svg class="stage" id="w9-sys" viewBox="0 0 720 330" role="img"
+             aria-label="AlgoArena system diagram: Yahoo feed to broker, broker and trader to the exchange, exchange to dashboard and scoring"></svg>
+      </div>
+      <div class="sys-detail" id="w9-sys-detail"></div>
+    </div>
+    <div class="w-note"><b>Every arrow is a seam you must test.</b> A smoke test walks the whole path once before you go
+    live: does it start, connect, place one order, get a fill, and score? That catches the obvious 90% &mdash; and the
+    finale is not the place to discover the obvious.</div>
+  </div>
+</section>
+
+<!-- ══ HOW ═══════════════════════════════════════════════════ -->
+<section id="how">
+  <div class="sec-head">
+    <span class="kicker">How does it work?</span>
+    <h2>Live systems fail partially. Design for degradation.</h2>
+    <p class="lead">A live system rarely dies all at once. The socket stays up while the data goes stale; the order is
+    rejected while the process is healthy. Detect, do not assume.</p>
+  </div>
+
+  <!-- WIDGET 2 -->
+  <div class="widget">
+    <div class="w-head"><span class="w-tag">Widget 2</span><h3>Failure-mode drill</h3></div>
+    <p class="w-sub">The same failure, injected into two bots. Left: the naive bot that assumes the happy path. Right:
+    the bot that was written for this. Same market, same signal, different survival.</p>
+
+    <div class="controls">
+      <div class="ctl">
+        <label for="w9-fm">failure</label>
+        <select id="w9-fm" aria-label="Choose a failure mode to inject"></select>
+      </div>
+      <button id="w9-fm-run" class="primary">&#9654; Run the drill</button>
+      <button id="w9-fm-reset">&#8634; Reset</button>
+    </div>
+
+    <div class="lanes">
+      <div class="lane naive">
+        <div class="lh"><span>Naive bot</span><span class="badge idle" id="w9-fm-nb">—</span></div>
+        <div id="w9-fm-nlog" aria-live="polite"></div>
+      </div>
+      <div class="lane robust">
+        <div class="lh"><span>Robust bot</span><span class="badge idle" id="w9-fm-rb">—</span></div>
+        <div id="w9-fm-rlog" aria-live="polite"></div>
+      </div>
+    </div>
+    <div class="verdict" id="w9-fm-verdict">Pick a failure and run the drill.</div>
+    <div class="w-note"><b>Fail loudly at the seam, fail safe at the edge.</b> Log the anomaly where you detect it, and
+    protect the capital where you act on it. Then write the run-book line: <em>symptom &rarr; diagnosis &rarr; action</em>.
+    Written cold, used hot &mdash; under pressure you follow steps, you do not reason from first principles.</div>
+  </div>
+
+  <!-- WIDGET 3 -->
+  <div class="widget">
+    <div class="w-head"><span class="w-tag">Widget 3</span><h3>Risk &amp; reconciliation</h3></div>
+    <p class="w-sub">Your bot's ledger against the exchange's. They must agree at every instant &mdash; and the exchange
+    is always the source of truth. Break them, then reconcile.</p>
+
+    <div class="controls">
+      <button id="w9-rec-miss">Inject a missed fill</button>
+      <button id="w9-rec-dup">Inject a duplicate ack</button>
+      <button id="w9-rec-run" class="primary">Reconcile</button>
+      <button id="w9-rec-reset">&#8634; Reset</button>
+      <span class="badge idle" id="w9-rec-badge">in agreement</span>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <table class="tbl" id="w9-rec-tbl"></table>
+        <div class="stats">
+          <div class="stat" style="--c:var(--sky)"><div class="lbl">Bot's net worth</div><div class="num" id="w9-rec-bot">&mdash;</div><div class="sub">what your P&amp;L print says</div></div>
+          <div class="stat" style="--c:var(--ok)"><div class="lbl">Exchange's net worth</div><div class="num" id="w9-rec-exch">&mdash;</div><div class="sub">what the leaderboard scores</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="log" id="w9-rec-log" style="height:172px" aria-live="polite" aria-label="Reconciliation log"></div>
+        <div class="verdict" id="w9-rec-verdict"></div>
+      </div>
+    </div>
+    <div class="w-note"><b>Idempotency is the fix for half of these.</b> Tie every action to an order id so a retry is a
+    no-op instead of a second fill. Reconcile on every reconnect, not only at the end of the session &mdash; a break you
+    find at 18:40 is a bug; a break you find at the close is a scoring dispute.</div>
+  </div>
+</section>
+
+<!-- ══ WHY ═══════════════════════════════════════════════════ -->
+<section id="why">
+  <div class="sec-head">
+    <span class="kicker">Why does it matter in trading?</span>
+    <h2>Raw return is the most misleading number in finance</h2>
+    <p class="lead">The same +12% can be skill or a coin flip that landed right. <code>exchange/scoring.py</code> ranks
+    return per unit of volatility, with a drawdown penalty &mdash; announced in Week 1, and it holds tonight.</p>
+  </div>
+
+  <div class="grid2">
+    <div>
+      <p>A tearsheet is one page that answers two questions: did this make money, and how much risk did it take to do
+      it? The equity curve tells the story before any number does &mdash; a smooth 20% beats a jagged 40%, because the
+      second is one bad tick from a blow-up. Then the numbers: Sharpe (return per unit of risk), max drawdown (the worst
+      pain an investor had to sit through), Calmar, turnover, exposure.</p>
+      <pre class="code"><i># exchange/scoring.py  (score_equity)</i>
+r      = returns(equity)        <i># per-snapshot returns</i>
+vol    = pstdev(r)              <i># volatility of the book</i>
+mdd    = max_drawdown(equity)   <i># worst peak-to-trough</i>
+excess = mean(r) - RISK_FREE    <i># above idle cash</i>
+ratio  = excess / max(vol, VOL_FLOOR)
+score  = ratio * max(0, 1 - <b>PENALTY</b>*mdd)   <i># PENALTY = 2.0</i>
+<i># ranked PER ROLE: traders vs traders, brokers vs brokers</i></pre>
+      <div class="w-note"><b>Excess return over idle cash</b> is why parking your cash and doing nothing scores about
+      zero rather than winning. <b>The drawdown penalty always hurts:</b> a 25% max drawdown halves your score.</div>
+    </div>
+    <div>
+      <div class="widget" style="margin-top:0">
+        <div class="w-head"><h3>How to present and defend it</h3></div>
+        <p class="w-sub">A great system badly explained loses to an average one told well.</p>
+        <div class="kv"><span>1 · Problem</span><b>the thesis, in one line</b></div>
+        <div class="kv"><span>2 · Design</span><b>the trade-offs you chose</b></div>
+        <div class="kv"><span>3 · Live run</span><b>it is real</b></div>
+        <div class="kv"><span>4 · Results</span><b>the tearsheet</b></div>
+        <div class="kv"><span>5 · Next</span><b>what you would fix</b></div>
+        <div class="w-note">Lead with the thesis &mdash; "I make markets and earn the spread" &mdash; then show the
+        tearsheet that proves it. Numbers support a narrative; they are not one. Be ready for "why this and not that?":
+        every choice, from spread width to stop level, was a trade-off. Name the trade-off. And keep a recorded
+        rehearsal as your safety net for when the demo gods are unkind.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WIDGET 4 -->
+  <div class="widget">
+    <div class="w-head"><span class="w-tag">Widget 4</span><h3>Season scoreboard &mdash; same P&amp;L, different rank</h3></div>
+    <p class="w-sub">All three books finish the season at <b>+12.0%</b>. Move your volatility and your drawdown and watch
+    the ranking rearrange itself around you.</p>
+
+    <div class="controls">
+      <div class="ctl"><label for="w9-vol">your realized vol</label>
+        <input type="range" id="w9-vol" min="20" max="220" step="5" value="70" aria-label="Your realized volatility, basis points per snapshot" />
+        <output id="w9-vol-out">70 bp</output></div>
+      <div class="ctl"><label for="w9-mdd">your max drawdown</label>
+        <input type="range" id="w9-mdd" min="1" max="40" step="1" value="8" aria-label="Your maximum drawdown in percent" />
+        <output id="w9-mdd-out">8%</output></div>
+    </div>
+
+    <div class="grid2 narrow-right">
+      <div class="svg-wrap">
+        <svg class="stage" id="w9-eq" viewBox="0 0 720 250" role="img"
+             aria-label="Three equity curves ending at the same return with different volatility"></svg>
+      </div>
+      <div>
+        <table class="tbl" id="w9-board"></table>
+        <div class="verdict" id="w9-board-verdict"></div>
+      </div>
+    </div>
+    <div class="w-note"><b>Consistency is the signal; luck is the spike.</b> A repeatable edge shows up as a steady
+    curve. Three winning trades prove nothing; a hundred with positive expectancy is an edge. Defend the process, not the
+    P&amp;L &mdash; a good process can have a bad week, and a bad process can get lucky.</div>
+  </div>
+</section>
+
+<!-- ══ PITFALLS ══════════════════════════════════════════════ -->
+<section id="pitfalls">
+  <div class="sec-head">
+    <span class="kicker">Common mistakes</span>
+    <h2>Five ways to lose the finale with working code</h2>
+    <p class="lead">None of these is a logic bug. Each expands.</p>
+  </div>
+
+  <details class="pit">
+    <summary><span>Debugging live for the first time</span></summary>
+    <div class="body">The finale is not a rehearsal. Teams that discover their config, their token or their
+      <code>EXCHANGE_HOST</code> at 6:05pm spend the session reconnecting instead of trading, and the leaderboard does
+      not wait.
+      <div class="fix">Fix: rehearse against the headless sim and then a staging run that mirrors the live setup.
+      Smoke-test the critical path — start, connect, one order, one fill, one score — before every session.</div></div>
+  </details>
+
+  <details class="pit">
+    <summary><span>Crashing on <code>ConnectionClosed</code></span></summary>
+    <div class="body">A socket blip is normal, not exceptional. A bot that lets the exception escape dies holding a
+      position and becomes a spectator for the rest of the night. Nothing in your test suite noticed, because your tests
+      never dropped the socket.
+      <div class="fix">Fix: catch it, back off exponentially, reconnect, re-sync state from the exchange, resume. Then
+      write the end-to-end test that kills the socket mid-session.</div></div>
+  </details>
+
+  <details class="pit">
+    <summary><span>Retries that are not idempotent</span></summary>
+    <div class="body">The ack was slow, so the bot re-sent the order. Now it has two fills, twice the position it
+      intended, and a P&amp;L that disagrees with the exchange. The "five whys" chain ends at: there was no order id, so
+      a replay was not a no-op.
+      <div class="fix">Fix: tie every action to a client order id, make the handler idempotent, and reconcile against
+      the exchange after any reconnect.</div></div>
+  </details>
+
+  <details class="pit">
+    <summary><span>Unbounded queues under back-pressure</span></summary>
+    <div class="body">Messages arrive faster than <code>on_tick</code> processes them. The queue grows, latency grows
+      with it, and your bot is soon trading on a market that existed thirty seconds ago — while memory climbs.
+      <div class="fix">Fix: bound the queue and shed load deliberately. Dropping a stale book snapshot is correct;
+      acting on it is not. Measure your per-tick budget and stay inside it.</div></div>
+  </details>
+
+  <details class="pit">
+    <summary><span>Presenting the P&amp;L instead of the process</span></summary>
+    <div class="body">"We made 14%" invites the one question you cannot answer: was that skill? Without the risk numbers
+      and the reasoning behind each trade-off, a good result is indistinguishable from a lucky one — and the score is
+      risk-adjusted anyway.
+      <div class="fix">Fix: five acts, timed and rehearsed — problem, design, live run, results, next steps. Lead with
+      the thesis, show the tearsheet, name the trade-offs, and say what you would fix with another week.</div></div>
+  </details>
+</section>
+
+<!-- ══ CHECK ═════════════════════════════════════════════════ -->
+<section id="check">
+  <div class="sec-head">
+    <span class="kicker">Check yourself</span>
+    <h2>Three questions</h2>
+    <p class="lead">Instant feedback, no grading.</p>
+  </div>
+
+  <div class="q" data-a="2">
+    <div class="qn">Question 1</div>
+    <div class="qt">Your risk module and your router both pass all their unit tests, yet in the live session an order
+      goes out that exceeds the position limit. What kind of bug is this?</div>
+    <div class="opts">
+      <button class="opt"><span class="k">A</span>A unit bug in the risk module — its check must be wrong.</button>
+      <button class="opt"><span class="k">B</span>A performance bug: the check was too slow to matter.</button>
+      <button class="opt"><span class="k">C</span>A seam bug — each component honours its own contract, but the router never consults risk before sending.</button>
+      <button class="opt"><span class="k">D</span>Not a bug: limits are advisory once the session is live.</button>
+    </div>
+    <div class="fb"><b>C.</b> This is the canonical integration failure: both speakers are correct and the conversation
+      is not. Only a test that wires the two together — bot plus book, risk plus router — can see it. Test the
+      conversation, not just the speakers.</div>
+  </div>
+
+  <div class="q" data-a="0">
+    <div class="qn">Question 2</div>
+    <div class="qt">Mid-session your bot's position ledger says 240 lots of AAPL; the exchange says 300. What do you do
+      first?</div>
+    <div class="opts">
+      <button class="opt"><span class="k">A</span>Treat the exchange as the source of truth, adopt 300, then find the fill your bot dropped.</button>
+      <button class="opt"><span class="k">B</span>Trust your own ledger — it is the one your risk checks use.</button>
+      <button class="opt"><span class="k">C</span>Send a market order for 60 lots to make the exchange agree with you.</button>
+      <button class="opt"><span class="k">D</span>Wait for the close, when the reconciliation runs automatically.</button>
+    </div>
+    <div class="fb"><b>A.</b> The venue's book is what settles and what the leaderboard scores; your ledger is a local
+      cache of it. Adopt the exchange's number, re-derive your risk from it, then hunt the missed fill. Option C trades
+      on a phantom position — that is how a reconciliation break becomes a real loss.</div>
+  </div>
+
+  <div class="q" data-a="1">
+    <div class="qn">Question 3</div>
+    <div class="qt">Two traders both finish the season at +12% net worth. Team A's equity curve is smooth; team B's swings
+      hard and had a 30% drawdown in week 6. How does <code>exchange/scoring.py</code> rank them?</div>
+    <div class="opts">
+      <button class="opt"><span class="k">A</span>Tied — the score is based on final net worth.</button>
+      <button class="opt"><span class="k">B</span>Team A well ahead: the score divides excess return by volatility and then multiplies by a drawdown penalty, so B is punished twice.</button>
+      <button class="opt"><span class="k">C</span>Team B ahead, for taking more risk to reach the same return.</button>
+      <button class="opt"><span class="k">D</span>Team B is disqualified for breaching a drawdown limit.</button>
+    </div>
+    <div class="fb"><b>B.</b> <code>ratio = excess / max(vol, VOL_FLOOR)</code>, then
+      <code>score = ratio × max(0, 1 − 2·mdd)</code>. B's higher volatility shrinks the ratio and its 30% drawdown cuts
+      what is left by 60%. Same P&amp;L, very different rank — the steadiest book wins, exactly as announced in Week 1.</div>
+  </div>
+</section>
+
+<!-- ══ NEXT ══════════════════════════════════════════════════ -->
+<section id="next">
+  <div class="sec-head">
+    <span class="kicker">Do the work</span>
+    <h2>Demo day &mdash; and this week's work</h2>
+    <p class="lead">Deliverables: the final integration checklist, a tearsheet from the season data, and a recorded demo
+    rehearsal. Lock and tag your final branch &mdash; the leaderboard locks tonight.</p>
+  </div>
+
+  <!-- WIDGET 5 -->
+  <div class="widget" style="margin-top:0">
+    <div class="w-head"><span class="w-tag">Widget 5</span><h3>Demo-day checklist</h3></div>
+    <p class="w-sub">Tick what is genuinely true. The readiness dial is not a grade &mdash; it is the honest answer to
+    "are we ready to run this in front of the class?"</p>
+    <div class="grid2 narrow-right">
+      <div class="chk" id="w9-chk"></div>
+      <div>
+        <div class="svg-wrap">
+          <svg class="stage" id="w9-ring" viewBox="0 0 220 180" role="img" aria-label="Demo readiness dial"></svg>
+        </div>
+        <div class="verdict" id="w9-chk-verdict"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nextgrid" style="margin-top:16px">
+    <a class="nextcard" href="https://github.com/sdonadio/algoarena-team-template">
+      <div class="lbl">Code</div>
+      <div class="ttl">Get the code</div>
+      <div class="dsc">Labs and homework live in your course&#8217;s LMS; the starter repo is public. Use it as a template, clone, <code>make install</code>.</div>
+    </a>
+  </div>
+  <div class="weeknav">
+    <a href="week8.html">&larr; Week 8 &middot; CI/CD, Testing &amp; UI</a>
+    <a href="index.html">All weeks</a>
+    <a href="week1.html">Week 1 &middot; start again from the top</a>
+  </div>
+</section>
+
+</main>
+
+<footer>Systematic Trading Arena · an interactive companion for a 9-week systematic-trading course · <a href="https://github.com/sdonadio/systematic-trading-arena">Source</a></footer>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   Systematic Trading Arena — shared page helpers
+   No dependencies, no network. Everything is drawn from data.
+   ══════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  var C = {
+    accent: '#3b82f6', accent2: '#7cb0ff', ink: '#e8e6e3', muted: '#9aa0a6',
+    dim: '#6e7681', ok: '#3fb950', warn: '#d29922', bad: '#f85149',
+    sky: '#58a6ff', violet: '#a78bfa', teal: '#2dd4bf',
+    border: '#272c36', panel: '#181b22', panel2: '#13161b'
+  };
+  var MONO = 'ui-monospace, Menlo, Consolas, monospace';
+  var SANS = 'system-ui, -apple-system, Segoe UI, sans-serif';
+
+  /* deterministic PRNG (mulberry32) — same seed, same picture */
+  function rng(seed) {
+    var s = seed >>> 0;
+    return function () {
+      s = (s + 0x6D2B79F5) >>> 0;
+      var t = s;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function gauss(r) {
+    var u = 0, v = 0;
+    while (u === 0) u = r();
+    while (v === 0) v = r();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+
+  function $(id) { return document.getElementById(id); }
+  function clear(el) { while (el && el.firstChild) el.removeChild(el.firstChild); }
+
+  /* add an SVG child: add(parent,'rect',{x:..}).
+     The namespace is inherited from the parent <svg>, so no URI literal is needed. */
+  function add(parent, tag, attrs, text) {
+    var e = document.createElementNS(parent.namespaceURI, tag), k;
+    if (attrs) for (k in attrs) { if (attrs[k] !== null && attrs[k] !== undefined) e.setAttribute(k, attrs[k]); }
+    if (text !== null && text !== undefined) e.textContent = text;
+    parent.appendChild(e);
+    return e;
+  }
+  /* label text: T(svg,x,y,'txt',{fill,size,anchor,mono,weight}) */
+  function T(parent, x, y, s, o) {
+    o = o || {};
+    return add(parent, 'text', {
+      x: x, y: y, fill: o.fill || C.muted,
+      'font-size': o.size || 9.5,
+      'font-family': o.mono === false ? SANS : MONO,
+      'font-weight': o.weight || 400,
+      'text-anchor': o.anchor || 'start',
+      opacity: o.opacity
+    }, s);
+  }
+  function path(parent, pts, attrs) {
+    var d = '', i;
+    for (i = 0; i < pts.length; i++) d += (i ? 'L' : 'M') + pts[i][0].toFixed(2) + ' ' + pts[i][1].toFixed(2);
+    var a = { d: d, fill: 'none', 'stroke-width': 1.6, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' };
+    for (var k in attrs) a[k] = attrs[k];
+    return add(parent, 'path', a);
+  }
+  function stdev(a) {
+    if (a.length < 2) return 0;
+    var m = 0, i;
+    for (i = 0; i < a.length; i++) m += a[i];
+    m /= a.length;
+    var v = 0;
+    for (i = 0; i < a.length; i++) v += (a[i] - m) * (a[i] - m);
+    return Math.sqrt(v / a.length);
+  }
+  function mean(a) { var m = 0, i; for (i = 0; i < a.length; i++) m += a[i]; return a.length ? m / a.length : 0; }
+  function pct(x, d) { return (x * 100).toFixed(d === undefined ? 1 : d) + '%'; }
+  function sgn(x, d) { return (x >= 0 ? '+' : '−') + Math.abs(x).toFixed(d === undefined ? 2 : d); }
+  function clampv(x, a, b) { return x < a ? a : (x > b ? b : x); }
+
+  /* segmented button groups: setSeg([btnA,btnB], idx) */
+  function setSeg(btns, idx) {
+    for (var i = 0; i < btns.length; i++) {
+      var on = i === idx;
+      btns[i].classList.toggle('on', on);
+      btns[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+  }
+
+  /* ── MCQs: instant feedback, no grading ─────────────────────── */
+  function wireQuiz() {
+    var qs = document.querySelectorAll('.q');
+    Array.prototype.forEach.call(qs, function (q) {
+      var ans = parseInt(q.getAttribute('data-a'), 10);
+      var opts = q.querySelectorAll('button.opt');
+      var fb = q.querySelector('.fb');
+      Array.prototype.forEach.call(opts, function (b, i) {
+        b.addEventListener('click', function () {
+          if (q.getAttribute('data-done')) return;
+          q.setAttribute('data-done', '1');
+          opts[ans].classList.add('right');
+          if (i !== ans) b.classList.add('wrong');
+          if (fb) fb.classList.add('show');
+          Array.prototype.forEach.call(opts, function (o) { o.setAttribute('aria-disabled', 'true'); });
+        });
+      });
+    });
+  }
+
+  window.ARENA = {
+    C: C, MONO: MONO, SANS: SANS, rng: rng, gauss: gauss, $: $, clear: clear,
+    add: add, T: T, path: path, stdev: stdev, mean: mean, pct: pct, sgn: sgn,
+    clamp: clampv, setSeg: setSeg, wireQuiz: wireQuiz
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wireQuiz);
+  else wireQuiz();
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   WEEK 9 · Widget 1 — the integration surface (clickable)
+   ══════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  var A = window.ARENA, C = A.C, cur = 'exchange', traffic = false, raf = null, dots = [];
+
+  var NODES = [
+    { k: 'yahoo', x: 18, y: 14, w: 152, h: 46, nm: 'Yahoo Finance', sub: 'yfinance · poll', col: C.muted,
+      role: 'broker/broker.py · YAHOO_POLL_INTERVAL',
+      p: 'The reference price the whole arena marks against. It is blocking HTTP, so it lives on a thread and never on the event loop — the one place threading is the right answer.',
+      test: 'Test: replay a recorded fixture of poll responses. A unit test must never reach the real feed.',
+      fail: 'Fails by: stalling silently. The call returns the previous value and nothing raises.' },
+    { k: 'broker', x: 18, y: 118, w: 162, h: 78, nm: 'BROKER', sub: 'market maker', col: C.sky,
+      role: 'broker/broker.py · arena.Broker hooks',
+      p: 'Polls the reference feed, posts two-sided quotes into the venue, manages inventory and skew, and earns the spread. It is the liquidity the traders trade against.',
+      test: 'Test: assert bid < ask on every quote, and that inventory skew moves the quoted mid the right way.',
+      fail: 'Fails by: quoting off a stale mid — and then being picked off on both sides by every trader in the room.' },
+    { k: 'exchange', x: 280, y: 108, w: 172, h: 96, nm: 'EXCHANGE', sub: 'CLOB · fees · halts', col: C.accent2,
+      role: 'exchange/server.py · shared/orderbook.py',
+      p: 'Matches on price-time priority, trades at the resting order\'s price, charges the taker and rebates the maker, and enforces circuit breakers and rate limits. Everyone depends on it, so it is the source of truth.',
+      test: 'Test: shared/orderbook.py is held at 100% coverage. A wrong fill corrupts every P&L, tearsheet and leaderboard row downstream.',
+      fail: 'Fails by: being the single point of failure. If it stops matching, the session stops — which is why the venue seat is scored on reliability.' },
+    { k: 'trader', x: 548, y: 118, w: 154, h: 78, nm: 'TRADER', sub: 'your bot', col: C.violet,
+      role: 'arena.Trader · on_tick / on_fill / on_event / on_ipo',
+      p: 'Reads the book, runs the signal through risk, sizes, routes, and holds the position. It earns P&L only when a view is right — and pays the spread for the privilege of being wrong quickly.',
+      test: 'Test: unit-test on_tick against a fake market; drive the whole path in tests/sim_session.py.',
+      fail: 'Fails by: dying on ConnectionClosed, or by trading a position it only thinks it has.' },
+    { k: 'dash', x: 548, y: 248, w: 154, h: 58, nm: 'DASHBOARD', sub: 'MARKET · FLOW · STATS · SEASON', col: C.teal,
+      role: 'teacher/web_dashboard.py',
+      p: 'Metrics made glanceable: live books, who is trading with whom, per-team analytics, and the standings across the season. The single pane of glass for a live session.',
+      test: 'Test: the dashboard is a read-only projection. Assert it can never mutate session state.',
+      fail: 'Fails by: omitting connectivity. Without feed age and socket state next to the money, a partial failure is invisible.' },
+    { k: 'score', x: 262, y: 248, w: 208, h: 58, nm: 'SCORING → season.json', sub: 'risk-adjusted · persists', col: C.warn,
+      role: 'exchange/scoring.py · exchange/persistence.py',
+      p: 'Turns each team\'s equity path into a risk-adjusted score, ranked per role, and persists standings, cash, upgrades and week progression so the season survives a restart.',
+      test: 'Test: restart the exchange mid-season and assert the standings resume identically. Verify your tearsheet numbers match the SEASON tab.',
+      fail: 'Fails by: a partial write. A half-flushed season file is a season you cannot reload.' }
+  ];
+
+  var SEAMS = [
+    { k: 's1', pts: [[94, 60], [94, 118]], lab: 'poll', lx: 100, ly: 92, nm: 'Yahoo → Broker',
+      role: 'HTTP poll every YAHOO_POLL_INTERVAL seconds (default 5)',
+      p: 'A blocking call on a thread, publishing the latest mid to the quoting loop. The only synchronous edge in an otherwise fully async system.',
+      test: 'Test the seam: inject a fake feed; assert the broker reports the age of its own data and refuses to quote past a staleness threshold.',
+      fail: 'Seam failure: the poll hangs. Wrap it in a timeout and publish a staleness flag — silence is not the same as "unchanged".' },
+    { k: 's2', pts: [[180, 150], [280, 150]], lab: 'quotes / fills', lx: 186, ly: 142, nm: 'Broker ⇄ Exchange',
+      role: 'PlaceOrder · CancelOrder · OrderAck · Fill',
+      p: 'The broker is just a well-behaved client with a quoting loop: it places two-sided limit orders, cancels and replaces them as the reference moves, and receives fills like anyone else.',
+      test: 'Test the seam: place a two-sided quote and assert both sides rest at the right prices; then move the reference and assert the requote.',
+      fail: 'Seam failure: the requote race. Cancel and replace are two messages, so there is a window where you are one-sided — and that is exactly when the aggressive trader arrives.' },
+    { k: 's3', pts: [[452, 150], [548, 150]], lab: 'orders / acks / books / fills', lx: 458, ly: 142, nm: 'Exchange ⇄ Trader',
+      role: 'PlaceOrder → OrderAck → Fill · BookSnapshot · SessionEvent',
+      p: 'The busiest seam in the system, and the one your grade runs through. Every message is a Pydantic model from shared/messages.py — dumped with model_dump_json, never as a raw dict.',
+      test: 'Test the seam: round-trip every message type (dump → parse → assert identical), then drive order-to-fill-to-P&L end to end in the headless sim.',
+      fail: 'Seam failure: ordering. A fill can arrive before the ack your bot was waiting for. Handle out-of-order events, and key everything by order id.' },
+    { k: 's4', pts: [[430, 204], [430, 228], [625, 228], [625, 248]], lab: 'flow / standings', lx: 470, ly: 222, nm: 'Exchange → Dashboard',
+      role: 'read-only projection of session state',
+      p: 'Books, flow, per-team stats and the leaderboard, pushed to the teacher UI. Deliberately one-directional: the UI observes and never commands.',
+      test: 'Test the seam: assert the dashboard client has no write path, and that a slow client cannot block the matching loop.',
+      fail: 'Seam failure: back-pressure. A slow observer that is allowed to block the venue turns a UI problem into a market outage.' },
+    { k: 's5', pts: [[366, 204], [366, 248]], lab: 'equity → score', lx: 372, ly: 230, nm: 'Exchange → Scoring',
+      role: 'equity snapshots → score_equity() → data/season.json',
+      p: 'Each snapshot of every team\'s net worth becomes an equity path; the path becomes a risk-adjusted score; the score persists. Your tearsheet is computed from exactly this data with exactly this function.',
+      test: 'Test the seam: run scripts/season_sim.py and assert the tearsheet numbers equal what the SEASON tab shows.',
+      fail: 'Seam failure: gaps in the equity path. Missing snapshots understate volatility, which flatters the score — and then live disagrees.' }
+  ];
+
+  function find(k) {
+    var i;
+    for (i = 0; i < NODES.length; i++) if (NODES[i].k === k) return NODES[i];
+    for (i = 0; i < SEAMS.length; i++) if (SEAMS[i].k === k) return SEAMS[i];
+    return NODES[2];
+  }
+
+  function ptAt(pts, t) {
+    var segs = [], tot = 0, i;
+    for (i = 1; i < pts.length; i++) {
+      var d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+      segs.push(d); tot += d;
+    }
+    var want = t * tot, acc = 0;
+    for (i = 0; i < segs.length; i++) {
+      if (acc + segs[i] >= want) {
+        var u = (want - acc) / segs[i];
+        return [pts[i][0] + (pts[i + 1][0] - pts[i][0]) * u, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * u];
+      }
+      acc += segs[i];
+    }
+    return pts[pts.length - 1];
+  }
+
+  function draw() {
+    var svg = A.$('w9-sys'); A.clear(svg);
+    dots = [];
+
+    SEAMS.forEach(function (s) {
+      var on = cur === s.k;
+      A.path(svg, s.pts, { stroke: on ? C.ink : C.border, 'stroke-width': on ? 2.2 : 1.6 });
+      var end = s.pts[s.pts.length - 1], prev = s.pts[s.pts.length - 2];
+      var ang = Math.atan2(end[1] - prev[1], end[0] - prev[0]);
+      A.add(svg, 'polygon', {
+        points: [
+          [end[0], end[1]],
+          [end[0] - 7 * Math.cos(ang - 0.4), end[1] - 7 * Math.sin(ang - 0.4)],
+          [end[0] - 7 * Math.cos(ang + 0.4), end[1] - 7 * Math.sin(ang + 0.4)]
+        ].map(function (p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' '),
+        fill: on ? C.ink : C.muted
+      });
+      if (s.k === 's2' || s.k === 's3') {
+        var st = s.pts[0], nx = s.pts[1];
+        var a2 = Math.atan2(st[1] - nx[1], st[0] - nx[0]);
+        A.add(svg, 'polygon', {
+          points: [
+            [st[0], st[1] + 7],
+            [st[0] - 7 * Math.cos(a2 - 0.4), st[1] + 7 - 7 * Math.sin(a2 - 0.4)],
+            [st[0] - 7 * Math.cos(a2 + 0.4), st[1] + 7 - 7 * Math.sin(a2 + 0.4)]
+          ].map(function (p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' '),
+          fill: on ? C.ink : C.muted
+        });
+        A.path(svg, s.pts.map(function (p) { return [p[0], p[1] + 7]; }),
+          { stroke: on ? C.ink : C.border, 'stroke-width': on ? 2.2 : 1.6 });
+      }
+      A.T(svg, s.lx, s.ly, s.lab, { fill: on ? C.ink : C.dim, size: 9, weight: on ? 700 : 400 });
+      var hit = A.path(svg, s.pts, {
+        stroke: '#fff', 'stroke-opacity': 0, 'stroke-width': 18, cursor: 'pointer',
+        tabindex: '0', role: 'button', 'aria-label': 'inspect the seam ' + s.nm
+      });
+      hit.addEventListener('click', function () { cur = s.k; render(); });
+      hit.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); cur = s.k; render(); }
+      });
+      if (traffic) {
+        dots.push({ s: s, c: A.add(svg, 'circle', { cx: s.pts[0][0], cy: s.pts[0][1], r: 2.8, fill: C.ok, opacity: 0.9 }) });
+        dots.push({ s: s, c: A.add(svg, 'circle', { cx: s.pts[0][0], cy: s.pts[0][1], r: 2.2, fill: C.sky, opacity: 0.6 }), off: 0.5 });
+      }
+    });
+
+    NODES.forEach(function (nd) {
+      var on = cur === nd.k;
+      var g = A.add(svg, 'g', {
+        cursor: 'pointer', tabindex: '0', role: 'button', 'aria-label': 'inspect the component ' + nd.nm
+      });
+      A.add(g, 'rect', { x: nd.x, y: nd.y, width: nd.w, height: nd.h, rx: 8,
+        fill: nd.col, opacity: on ? 0.22 : 0.09, stroke: nd.col, 'stroke-width': on ? 2 : 1 });
+      A.T(g, nd.x + nd.w / 2, nd.y + (nd.h > 60 ? 30 : 22), nd.nm,
+        { fill: on ? '#fff' : nd.col, size: 12, anchor: 'middle', weight: 700, mono: false });
+      A.T(g, nd.x + nd.w / 2, nd.y + (nd.h > 60 ? 48 : 38), nd.sub,
+        { fill: C.muted, size: 8.5, anchor: 'middle' });
+      if (nd.k === 'exchange') {
+        A.T(g, nd.x + nd.w / 2, nd.y + 70, 'price-time priority', { fill: C.dim, size: 8, anchor: 'middle' });
+        A.T(g, nd.x + nd.w / 2, nd.y + 84, 'maker rebate / taker fee', { fill: C.dim, size: 8, anchor: 'middle' });
+      }
+      g.addEventListener('click', function () { cur = nd.k; render(); });
+      g.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); cur = nd.k; render(); }
+      });
+    });
+
+    A.T(svg, 18, 322, 'three OS processes · one Pydantic wire contract (shared/messages.py) · every arrow is a seam',
+      { fill: C.dim, size: 9 });
+  }
+
+  function loop(ts) {
+    if (!traffic) return;
+    var t = (ts / 2200) % 1;
+    dots.forEach(function (d) {
+      var u = (t + (d.off || 0)) % 1;
+      var p = ptAt(d.s.pts, u);
+      d.c.setAttribute('cx', p[0].toFixed(1));
+      d.c.setAttribute('cy', p[1].toFixed(1));
+    });
+    raf = requestAnimationFrame(loop);
+  }
+
+  function render() {
+    draw();
+    var d = find(cur), isNode = !!d.nm && !!d.x;
+    A.$('w9-sys-detail').innerHTML =
+      '<h4><span>' + (isNode ? 'component' : 'seam') + '</span> · ' + d.nm + '</h4>' +
+      '<div class="role">' + d.role + '</div>' +
+      '<p>' + d.p + '</p>' +
+      '<div class="test">' + d.test + '</div>' +
+      '<div class="fail">' + d.fail + '</div>';
+    if (traffic && !raf) raf = requestAnimationFrame(loop);
+    if (!traffic && raf) { cancelAnimationFrame(raf); raf = null; }
+  }
+
+  function init() {
+    if (!A.$('w9-sys')) return;
+    A.$('w9-traffic').addEventListener('change', function () { traffic = this.checked; render(); });
+    render();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   WEEK 9 · Widget 2 — failure-mode drill (naive vs robust)
+   ══════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  var A = window.ARENA;
+  var cur = 0, timers = [], running = false;
+
+  var FM = [
+    { t: 'The Yahoo feed stalls — prices go stale',
+      n: [['y', 'feed last updated 18:04:12 — <b>no exception, socket healthy</b>'],
+          ['', 'keeps quoting off the frozen mid, as if nothing happened'],
+          ['r', 'the market moves 40 bp; the stale bid is now the best in the book'],
+          ['r', 'picked off on both sides by two traders inside 9 seconds'],
+          ['r', '<b>−$1,840</b> · and nothing in the log to explain it']],
+      r: [['y', 'feed age counter crosses the 6 s threshold'],
+          ['g', '<b>staleness alarm</b>: log WARN, pull both quotes from the book'],
+          ['g', 'widen to 3× and re-quote only after a genuinely fresh tick'],
+          ['g', 'feed returns at 18:04:41; quotes resume around the new mid'],
+          ['g', '<b>−$40</b> · one run-book line: feed stale → pull quotes → verify']],
+      nb: '−$1,840', rb: '−$40',
+      v: '<b>Detect, do not assume.</b> The transport was fine the whole time; only the data was dead. A bot that treats "unchanged" as "current" hands its quotes to anyone with a live feed. Staleness must be a first-class alarm with a number attached — <code>feed_age &gt; 6s</code>, not a vibe.' },
+    { t: 'The WebSocket drops mid-session',
+      n: [['r', 'websockets.exceptions.ConnectionClosed escapes on_message'],
+          ['r', 'traceback printed; <b>the process exits</b>'],
+          ['r', '260 lots still open at the venue, unmanaged'],
+          ['r', 'no reconnect, no flatten, no alert — the seat is simply gone'],
+          ['r', '<b>marked out at the close</b>, whatever the market did meanwhile']],
+      r: [['y', 'ConnectionClosed caught at the read loop, not at the top level'],
+          ['g', 'backoff 1s → 2s → 4s with jitter; a single attempt in flight'],
+          ['g', 'reconnected; <b>re-syncs positions and open orders from the exchange</b>'],
+          ['g', 'resumes on_tick with the venue\'s numbers, not its own stale cache'],
+          ['g', '<b>28 s of downtime</b>, position intact, one WARN line']],
+      nb: 'session lost', rb: '28 s gap',
+      v: '<b>Sockets drop; that is not exceptional.</b> Handle <code>ConnectionClosed</code> where it happens, back off, reconnect, and re-sync state before you trade again. The re-sync is the part teams forget: reconnecting with a stale local ledger is how a blip becomes a reconciliation break.' },
+    { t: 'Reconnect storm — every bot retries at once',
+      n: [['r', 'tight <code>while True: connect()</code> with no delay'],
+          ['r', '40 attempts/second from each of nine naive bots'],
+          ['y', 'the venue spends its budget on handshakes instead of matching'],
+          ['r', 'rate limiter kicks in; your bot is throttled hardest'],
+          ['r', '<b>last to reconnect</b> — you queue behind the storm you helped make']],
+      r: [['g', 'exponential backoff with jitter: 1s, 2.3s, 4.1s, 8.7s, capped'],
+          ['g', 'one connection attempt in flight; the rest is patience'],
+          ['g', 'reconnects on the second attempt, into a venue that is still responsive'],
+          ['g', 'logs the outage with a duration so the postmortem writes itself'],
+          ['g', '<b>first back in the book</b>, quoting while others still hammer']],
+      nb: 'throttled', rb: 'first back',
+      v: '<b>Jitter is not a detail.</b> Synchronised retries are a self-inflicted denial of service: everyone fails, everyone retries on the same clock, nobody gets in. Exponential backoff <em>with randomness</em>, a cap, and one attempt at a time make you a good citizen — and, selfishly, the first one trading again.' },
+    { t: 'An order is rejected — over the position limit',
+      n: [['y', 'OrderAck(status=REJECTED, reason=POSITION_LIMIT)'],
+          ['r', 'the bot never reads the reason and <b>re-sends immediately</b>'],
+          ['r', 'the same order is rejected 300 times in twelve seconds'],
+          ['r', 'rate-limit budget exhausted on orders that can never fill'],
+          ['r', '<b>the signal was right</b> — and there was no budget left to trade it']],
+      r: [['y', 'reject parsed; reason mapped to a risk state, not a retry'],
+          ['g', 'stops adding; the limit becomes a fact about the world'],
+          ['g', 'de-risks a little and waits for room, logging the breach once'],
+          ['g', 'when the position frees up, sends <b>one</b> order'],
+          ['g', '<b>fills at the price it wanted</b>, budget intact']],
+      nb: 'budget burned', rb: 'filled',
+      v: '<b>A reject is information, not an error to swallow.</b> Read the reason and let it change your state. Blind retry loops are how a rate limit turns into a self-inflicted outage — and from Week 8 those limits are enforced, so the naive lane is not hypothetical.' },
+    { t: 'A retry double-fills',
+      n: [['y', 'ack is slow; the bot assumes the order was lost'],
+          ['r', 're-sends with <b>no client order id</b>'],
+          ['r', 'both orders fill: 200 lots where 100 were intended'],
+          ['r', 'bot ledger says 100, exchange says 200 — nobody notices'],
+          ['r', '<b>2× the risk</b>, and a P&L that disagrees with the leaderboard']],
+      r: [['y', 'ack is slow; retry fires with the <b>same client order id</b>'],
+          ['g', 'the exchange recognises the id and treats the replay as a no-op'],
+          ['g', 'one fill, for the intended 100 lots'],
+          ['g', 'post-reconnect reconciliation confirms bot == exchange'],
+          ['g', '<b>position exactly as designed</b>']],
+      nb: '2× position', rb: 'idempotent',
+      v: '<b>Idempotency is what makes a retry safe.</b> Tie every action to an id so that sending it twice means the same as sending it once. Without that, "just retry" quietly doubles your risk — and the five-whys chain always ends at the missing id.' }
+  ];
+
+  function clearAll() {
+    timers.forEach(clearTimeout); timers = []; running = false;
+    A.clear(A.$('w9-fm-nlog')); A.clear(A.$('w9-fm-rlog'));
+    A.$('w9-fm-nb').className = 'badge idle'; A.$('w9-fm-nb').textContent = '—';
+    A.$('w9-fm-rb').className = 'badge idle'; A.$('w9-fm-rb').textContent = '—';
+    var v = A.$('w9-fm-verdict');
+    v.className = 'verdict';
+    v.innerHTML = '<b>' + FM[cur].t + '</b> — run the drill to watch both bots meet it.';
+  }
+
+  function line(box, cls, html) {
+    var d = document.createElement('div');
+    d.className = 'ev ' + cls;
+    d.innerHTML = html;
+    A.$(box).appendChild(d);
+  }
+
+  function run() {
+    if (running) return;
+    clearAll();
+    running = true;
+    var f = FM[cur], i;
+    for (i = 0; i < f.n.length; i++) {
+      (function (k) {
+        timers.push(setTimeout(function () {
+          line('w9-fm-nlog', f.n[k][0], f.n[k][1]);
+          line('w9-fm-rlog', f.r[k][0], f.r[k][1]);
+          if (k === f.n.length - 1) {
+            A.$('w9-fm-nb').className = 'badge bad';
+            A.$('w9-fm-nb').textContent = f.nb;
+            A.$('w9-fm-rb').className = 'badge ok';
+            A.$('w9-fm-rb').textContent = f.rb;
+            var v = A.$('w9-fm-verdict');
+            v.className = 'verdict warn';
+            v.innerHTML = f.v;
+            running = false;
+          }
+        }, 560 * (k + 1)));
+      })(i);
+    }
+  }
+
+  function init() {
+    if (!A.$('w9-fm')) return;
+    var sel = A.$('w9-fm');
+    FM.forEach(function (f, i) {
+      var o = document.createElement('option');
+      o.value = String(i); o.textContent = f.t;
+      sel.appendChild(o);
+    });
+    sel.addEventListener('change', function () {
+      cur = Math.max(0, Math.min(FM.length - 1, +this.value || 0));
+      clearAll();
+    });
+    A.$('w9-fm-run').addEventListener('click', run);
+    A.$('w9-fm-reset').addEventListener('click', clearAll);
+    clearAll();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   WEEK 9 · Widget 3 — risk & reconciliation
+   ══════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  var A = window.ARENA, C = A.C;
+  var SYMS = ['AAPL', 'NVDA'], MARK = { AAPL: 228.40, NVDA: 121.80 };
+  var st;
+
+  function fresh() {
+    return { bot: { AAPL: 240, NVDA: 180 }, exch: { AAPL: 240, NVDA: 180 },
+      botCash: 24160, exchCash: 24160, breaks: 0, log: [] };
+  }
+  function nw(pos, cash) {
+    var v = cash, i;
+    for (i = 0; i < SYMS.length; i++) v += pos[SYMS[i]] * MARK[SYMS[i]];
+    return v;
+  }
+  function logln(cls, s) {
+    var el = A.$('w9-rec-log'), d = document.createElement('div');
+    d.innerHTML = '<span class="' + cls + '">' + s + '</span>';
+    el.appendChild(d); el.scrollTop = el.scrollHeight;
+  }
+
+  function render() {
+    var tb = A.$('w9-rec-tbl'); A.clear(tb);
+    var hr = document.createElement('tr');
+    hr.innerHTML = '<th>ledger</th><th>bot says</th><th>exchange says</th><th>Δ</th>';
+    tb.appendChild(hr);
+    var anyBreak = false, i;
+    for (i = 0; i < SYMS.length; i++) {
+      var s = SYMS[i], d = st.bot[s] - st.exch[s];
+      if (d !== 0) anyBreak = true;
+      var tr = document.createElement('tr');
+      if (d !== 0) tr.className = 'bad';
+      tr.innerHTML = '<td class="name">' + s + ' position</td><td>' + st.bot[s] + '</td><td>' + st.exch[s] +
+        '</td><td style="color:' + (d ? C.bad : C.dim) + '">' + (d ? A.sgn(d, 0) : '0') + '</td>';
+      tb.appendChild(tr);
+    }
+    var dc = st.botCash - st.exchCash;
+    if (dc !== 0) anyBreak = true;
+    var cr = document.createElement('tr');
+    if (dc !== 0) cr.className = 'bad';
+    cr.innerHTML = '<td class="name">cash</td><td>$' + st.botCash.toFixed(0) + '</td><td>$' + st.exchCash.toFixed(0) +
+      '</td><td style="color:' + (dc ? C.bad : C.dim) + '">' + (dc ? A.sgn(dc, 0) : '0') + '</td>';
+    tb.appendChild(cr);
+
+    var b = nw(st.bot, st.botCash), e = nw(st.exch, st.exchCash);
+    A.$('w9-rec-bot').textContent = '$' + b.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    A.$('w9-rec-exch').textContent = '$' + e.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    var bd = A.$('w9-rec-badge');
+    bd.className = 'badge ' + (anyBreak ? 'bad' : 'ok');
+    bd.textContent = anyBreak ? st.breaks + ' break' + (st.breaks === 1 ? '' : 's') : 'in agreement';
+
+    var v = A.$('w9-rec-verdict');
+    if (!anyBreak && !st.breaks) {
+      v.className = 'verdict ok';
+      v.innerHTML = '<b>Agreement.</b> Two independent ledgers, the same numbers. This is the only state in which your ' +
+        'risk checks mean anything — they are computed from your side of this table.';
+    } else if (anyBreak) {
+      v.className = 'verdict bad';
+      v.innerHTML = '<b>Break.</b> Your risk limits, your P&L print and your sizing are all being computed from the ' +
+        'left-hand column, which is now fiction. Worse, nothing has thrown: both processes are healthy and confidently ' +
+        'disagree. Reconcile before you send another order.';
+    } else {
+      v.className = 'verdict ok';
+      v.innerHTML = '<b>Reconciled.</b> The exchange is the source of truth, so the bot adopts its numbers and ' +
+        're-derives risk from them. Do this on every reconnect: a break found at 18:40 is a bug, a break found at the ' +
+        'close is a scoring dispute.';
+    }
+  }
+
+  function init() {
+    if (!A.$('w9-rec-tbl')) return;
+    st = fresh();
+    A.$('w9-rec-miss').addEventListener('click', function () {
+      st.exch.AAPL += 60; st.exchCash -= 60 * MARK.AAPL; st.breaks++;
+      logln('r', 'FILL 60 AAPL @ 228.40 — venue booked it, bot never processed it');
+      logln('t', '  cause: the fill arrived while the socket was reconnecting');
+      render();
+    });
+    A.$('w9-rec-dup').addEventListener('click', function () {
+      st.bot.NVDA += 90; st.botCash -= 90 * MARK.NVDA; st.breaks++;
+      logln('r', 'DUPLICATE ack for 90 NVDA — bot counted one fill twice');
+      logln('t', '  cause: retry without a client order id, handler not idempotent');
+      render();
+    });
+    A.$('w9-rec-run').addEventListener('click', function () {
+      var i, moved = false;
+      for (i = 0; i < SYMS.length; i++) {
+        var s = SYMS[i], d = st.exch[s] - st.bot[s];
+        if (d !== 0) {
+          logln('y', 'RECONCILE ' + s + ': bot ' + st.bot[s] + ' → ' + st.exch[s] + ' (' + A.sgn(d, 0) + ')');
+          st.bot[s] = st.exch[s]; moved = true;
+        }
+      }
+      if (st.botCash !== st.exchCash) {
+        logln('y', 'RECONCILE cash: ' + A.sgn(st.exchCash - st.botCash, 0) + ' adopted from the venue');
+        st.botCash = st.exchCash; moved = true;
+      }
+      logln(moved ? 'g' : 'b', moved ? 'ledgers agree · risk re-derived from the venue position'
+        : 'nothing to reconcile — already in agreement');
+      render();
+    });
+    A.$('w9-rec-reset').addEventListener('click', function () {
+      st = fresh(); A.clear(A.$('w9-rec-log')); render();
+    });
+    render();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   WEEK 9 · Widget 4 — season scoreboard (risk-adjusted)
+   ══════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  var A = window.ARENA, C = A.C;
+  var NS = 240, RF = 0.00002, FLOOR = 0.0005, RET = 0.12;
+  var myVol = 70, myMdd = 8;
+
+  var TEAMS = [
+    { nm: 'Halstead Capital', vol: 45, mdd: 5, col: C.teal, seed: 11, you: false },
+    { nm: 'your book', vol: 70, mdd: 8, col: C.accent2, seed: 7, you: true },
+    { nm: 'Kimbark Trading', vol: 150, mdd: 22, col: C.violet, seed: 23, you: false }
+  ];
+
+  function curve(t) {
+    var r = A.rng(t.seed), p = [0], i;
+    var v = t.vol / 10000;
+    for (i = 1; i <= NS; i++) p.push(p[i - 1] + A.gauss(r) * v);
+    var adj = (RET - p[NS]) / NS;
+    for (i = 1; i <= NS; i++) p[i] += adj * i;
+    var dip = t.mdd / 100, c = 0.62 * NS, w = 0.075 * NS;
+    for (i = 0; i <= NS; i++) p[i] -= dip * Math.exp(-Math.pow((i - c) / w, 2));
+    var adj2 = (RET - p[NS]) / NS;
+    for (i = 1; i <= NS; i++) p[i] += adj2 * i;
+    return p;
+  }
+  function metrics(t) {
+    var vd = t.vol / 10000;
+    var sharpe = (RET / NS - RF) / Math.max(vd, FLOOR) * Math.sqrt(NS);
+    var score = Math.max(0, sharpe) * Math.max(0, 1 - 2 * (t.mdd / 100));
+    return { sharpe: sharpe, score: score };
+  }
+
+  function draw() {
+    var svg = A.$('w9-eq'); A.clear(svg);
+    var x0 = 46, x1 = 700, y0 = 16, y1 = 206;
+    var mn = -0.30, mx = 0.18;
+    var X = function (i) { return x0 + (x1 - x0) * i / NS; };
+    var Y = function (v) { return y1 - (v - mn) / (mx - mn) * (y1 - y0); };
+    A.add(svg, 'line', { x1: x0, y1: Y(0), x2: x1, y2: Y(0), stroke: C.border });
+    A.add(svg, 'line', { x1: x0, y1: Y(RET), x2: x1, y2: Y(RET), stroke: C.ink, 'stroke-dasharray': '3 3', opacity: 0.45 });
+    A.T(svg, x0 - 6, Y(RET) + 3, '+12%', { fill: C.ink, size: 9, anchor: 'end' });
+    A.T(svg, x0 - 6, Y(0) + 3, '0', { fill: C.dim, size: 9, anchor: 'end' });
+    A.T(svg, x0 - 6, Y(-0.25) + 3, '−25%', { fill: C.dim, size: 9, anchor: 'end' });
+    TEAMS.forEach(function (t) {
+      var p = curve(t), pts = p.map(function (v, i) { return [X(i), Y(v)]; });
+      A.path(svg, pts, { stroke: t.col, 'stroke-width': t.you ? 2.2 : 1.3, opacity: t.you ? 1 : 0.7 });
+      A.add(svg, 'circle', { cx: X(NS), cy: Y(p[NS]), r: 3, fill: t.col });
+    });
+    var ly = 0;
+    TEAMS.forEach(function (t) {
+      A.add(svg, 'rect', { x: x0 + 4 + ly, y: 222, width: 9, height: 9, rx: 2, fill: t.col });
+      A.T(svg, x0 + 18 + ly, 230, t.nm + ' · vol ' + t.vol + ' bp · mdd ' + t.mdd + '%',
+        { fill: t.you ? C.ink : C.muted, size: 9, weight: t.you ? 700 : 400 });
+      ly += 218;
+    });
+    A.T(svg, x1, 230, 'all three end at +12.0%', { fill: C.dim, size: 9, anchor: 'end' });
+  }
+
+  function render() {
+    TEAMS[1].vol = myVol; TEAMS[1].mdd = myMdd;
+    A.$('w9-vol-out').textContent = myVol + ' bp';
+    A.$('w9-mdd-out').textContent = myMdd + '%';
+    draw();
+    var rows = TEAMS.map(function (t) {
+      var m = metrics(t);
+      return { nm: t.nm, vol: t.vol, mdd: t.mdd, sharpe: m.sharpe, score: m.score, you: t.you, col: t.col };
+    }).sort(function (a, b) { return b.score - a.score; });
+
+    var tb = A.$('w9-board'); A.clear(tb);
+    var hr = document.createElement('tr');
+    hr.innerHTML = '<th>#</th><th>team</th><th>return</th><th>vol</th><th>mdd</th><th>score</th>';
+    tb.appendChild(hr);
+    var myRank = 0;
+    rows.forEach(function (rw, i) {
+      if (rw.you) myRank = i + 1;
+      var tr = document.createElement('tr');
+      if (rw.you) tr.className = 'hl';
+      tr.innerHTML = '<td>' + (i + 1) + '</td><td class="name" style="color:' + rw.col + '">' + rw.nm +
+        '</td><td>+12.0%</td><td>' + rw.vol + ' bp</td><td>' + rw.mdd + '%</td><td style="color:' +
+        (rw.you ? C.ink : C.muted) + '">' + rw.score.toFixed(2) + '</td>';
+      tb.appendChild(tr);
+    });
+
+    var me = rows.filter(function (r) { return r.you; })[0];
+    var v = A.$('w9-board-verdict');
+    if (myRank === 1) {
+      v.className = 'verdict ok';
+      v.innerHTML = '<b>First, on identical P&L.</b> Sharpe-like ' + me.sharpe.toFixed(2) + ' × drawdown penalty ' +
+        (1 - 2 * me.mdd / 100).toFixed(2) + ' = <b>' + me.score.toFixed(2) + '</b>. You did not make more money than ' +
+        'the others — you made the same money with less variance, and that is the entire thesis of the course.';
+    } else if (myRank === 2) {
+      v.className = 'verdict warn';
+      v.innerHTML = '<b>Second, on identical P&L.</b> Score ' + me.score.toFixed(2) + ' = Sharpe-like ' +
+        me.sharpe.toFixed(2) + ' × ' + (1 - 2 * me.mdd / 100).toFixed(2) + '. Pull volatility down or the drawdown in, ' +
+        'and the same +12% moves you up a place. Nothing about your returns has to change.';
+    } else {
+      v.className = 'verdict bad';
+      v.innerHTML = '<b>Last, on identical P&L.</b> Score ' + me.score.toFixed(2) + ': the ratio divides by your ' +
+        myVol + ' bp of volatility and then the ' + myMdd + '% drawdown removes ' + (2 * myMdd) + '% of what is left. ' +
+        'Raw return rewards the gambler; this leaderboard does not.';
+    }
+  }
+
+  function init() {
+    if (!A.$('w9-eq')) return;
+    A.$('w9-vol').addEventListener('input', function () { myVol = +this.value; render(); });
+    A.$('w9-mdd').addEventListener('input', function () { myMdd = +this.value; render(); });
+    render();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   WEEK 9 · Widget 5 — demo-day checklist
+   ══════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  var A = window.ARENA, C = A.C;
+
+  var GROUPS = [
+    { g: 'Pre-flight', items: [
+      ['Smoke test passes', 'start → connect → place one order → get one fill → see one score'],
+      ['Reproducible build', 'deps pinned; docker build then docker run works from a clean clone'],
+      ['Config and secrets separated', 'ports and intervals in env vars; the token injected at runtime, never in git'],
+      ['Run-book written', 'symptom → diagnosis → action for: bot disconnected, feed stale, orders rejected']
+    ] },
+    { g: 'Live run', items: [
+      ['Reconnect tested, not hoped', 'the socket was actually killed mid-session and the bot came back and re-synced'],
+      ['Reconciliation runs mid-session', 'bot ledger checked against the exchange, not only at the close'],
+      ['Rate limits respected', 'no re-send on every tick; rejects change state instead of triggering retries']
+    ] },
+    { g: 'The story', items: [
+      ['Five acts rehearsed and timed', 'problem → design → live run → results → next steps'],
+      ['Tearsheet ready', 'equity curve, Sharpe, max drawdown, score — from score_equity(), matching the SEASON tab'],
+      ['Recorded rehearsal as a fallback', 'because the demo gods are occasionally unkind'],
+      ['Final branch tagged', 'the leaderboard locks tonight']
+    ] }
+  ];
+  var done = {};
+
+  function total() { var n = 0, i; for (i = 0; i < GROUPS.length; i++) n += GROUPS[i].items.length; return n; }
+  function count() { var n = 0, k; for (k in done) if (done[k]) n++; return n; }
+
+  function ring() {
+    var svg = A.$('w9-ring'); A.clear(svg);
+    var cx = 110, cy = 84, rr = 54, n = count(), tot = total(), f = n / tot;
+    var col = f >= 0.999 ? C.ok : f >= 0.6 ? C.warn : C.bad;
+    var circ = 2 * Math.PI * rr;
+    A.add(svg, 'circle', { cx: cx, cy: cy, r: rr, fill: 'none', stroke: C.border, 'stroke-width': 11 });
+    A.add(svg, 'circle', { cx: cx, cy: cy, r: rr, fill: 'none', stroke: col, 'stroke-width': 11,
+      'stroke-linecap': 'round', 'stroke-dasharray': circ.toFixed(1),
+      'stroke-dashoffset': (circ * (1 - f)).toFixed(1),
+      transform: 'rotate(-90 ' + cx + ' ' + cy + ')' });
+    A.T(svg, cx, cy + 2, n + '/' + tot, { fill: C.ink, size: 24, anchor: 'middle', weight: 700 });
+    A.T(svg, cx, cy + 20, 'ready', { fill: C.muted, size: 10, anchor: 'middle' });
+    A.T(svg, cx, 160, f >= 0.999 ? 'cleared for demo day' : 'not yet cleared',
+      { fill: col, size: 10.5, anchor: 'middle', weight: 700 });
+  }
+
+  function render() {
+    ring();
+    var n = count(), tot = total(), v = A.$('w9-chk-verdict');
+    if (n === tot) {
+      v.className = 'verdict ok';
+      v.innerHTML = '<b>Cleared.</b> Tested, reproducible, observable, rehearsed. Now the only variable left is the ' +
+        'market — which is the one variable you were always allowed to be surprised by.';
+    } else if (n >= tot * 0.6) {
+      v.className = 'verdict warn';
+      v.innerHTML = '<b>' + (tot - n) + ' item' + (tot - n === 1 ? '' : 's') + ' open.</b> Everything unticked is ' +
+        'something you are planning to discover live, in front of the class. Close the pre-flight ones first — they are ' +
+        'the cheapest.';
+    } else {
+      v.className = 'verdict bad';
+      v.innerHTML = '<b>Not ready.</b> With ' + (tot - n) + ' items open, the finale becomes the rehearsal. Rehearse ' +
+        'against the headless sim, then a staging run, and keep the recording as your safety net.';
+    }
+  }
+
+  function init() {
+    var box = A.$('w9-chk');
+    if (!box) return;
+    GROUPS.forEach(function (grp, gi) {
+      var h = document.createElement('h4');
+      h.textContent = grp.g;
+      box.appendChild(h);
+      grp.items.forEach(function (it, ii) {
+        var key = gi + '-' + ii;
+        var lab = document.createElement('label');
+        var cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.setAttribute('aria-label', it[0]);
+        cb.addEventListener('change', function () {
+          done[key] = cb.checked;
+          lab.className = cb.checked ? 'done' : '';
+          render();
+        });
+        var sp = document.createElement('span');
+        sp.innerHTML = it[0] + '<span class="fd">' + it[1] + '</span>';
+        lab.appendChild(cb); lab.appendChild(sp); box.appendChild(lab);
+      });
+    });
+    render();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+</script>
+</body>
+</html>

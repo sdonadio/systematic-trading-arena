@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="data:," />
+<title>Week 5 · Algorithmic Complexity &amp; Data Structures — Systematic Trading Arena</title>
+<style>
+  /* ══ Reset & tokens ═══════════════════════════════════════════ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root{
+    /* ── Systematic Trading Arena · shared palette (identical on every page) ── */
+    --accent:       #3b82f6;
+    --accent-2:     #7cb0ff;
+    --accent-3:     #b9d4ff;
+    --accent-rgb:   59,130,246;
+    --accent-2-rgb: 124,176,255;
+    --bg:           #0f1115;
+    --panel:        #181b22;
+    --panel2:       #1e222b;
+    --panel-2:      #13161b;
+    --ink:          #e8e6e3;
+    --ink-dim:      #c6c3bf;
+    --ink-mute:     #6f757f;
+    --muted:        #9aa0a6;
+    --dim:          #5f6673;
+    --line:         #272c36;
+    --line-2:       #333a47;
+    --border:       #272c36;
+    --ok:           #3fb950;
+    --warn:         #d29922;
+    --bad:          #f85149;
+    --info:         #6cb6ff;
+    --sky:          #58a6ff;
+    --violet:       #a78bfa;
+    --teal:         #2dd4bf;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.65;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .mono { font-family: var(--mono); }
+
+  a { color: var(--accent-3); }
+
+  /* ══ Top nav ══════════════════════════════════════════════════ */
+  nav.top {
+    position: sticky; top: 0; z-index: 40;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    padding: 11px 26px;
+    background: rgba(15,17,21,0.94);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  nav.top::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2) 42%, transparent 82%);
+    opacity: 0.85; pointer-events: none;
+  }
+  nav.top > a:first-child {
+    font-weight: 800; font-size: 14.5px; letter-spacing: -0.2px;
+    color: var(--ink); text-decoration: none;
+    padding-left: 12px; border-left: 3px solid var(--accent);
+  }
+  nav.top > a:first-child:hover { color: var(--accent-3); }
+  nav.top .crumbs {
+    font-size: 12px; color: var(--muted);
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  nav.top .crumbs a { color: var(--muted); text-decoration: none; }
+  nav.top .crumbs a:hover { color: var(--accent-3); }
+  nav.top .crumbs b { color: var(--ink); font-weight: 700; }
+
+  /* ══ Shell ════════════════════════════════════════════════════ */
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 26px; }
+
+  section { padding: 40px 0 44px; border-top: 1px solid var(--line); }
+  section:first-of-type { border-top: none; }
+
+  .eyebrow {
+    font-size: 10.5px; font-weight: 800; letter-spacing: 2.2px;
+    text-transform: uppercase; color: var(--accent-2);
+  }
+  h1 { font-size: clamp(28px, 4.4vw, 42px); font-weight: 800; letter-spacing: -1px; line-height: 1.12; }
+  h2 { font-size: 23px; font-weight: 750; letter-spacing: -0.4px; margin-top: 4px; }
+  h3 { font-size: 15px; font-weight: 700; letter-spacing: -0.1px; }
+  h4 { font-size: 12.5px; font-weight: 700; letter-spacing: 0.2px; color: var(--ink-dim); }
+  p  { color: var(--ink-dim); margin-top: 12px; max-width: 76ch; }
+  p.lead { font-size: 15.5px; color: var(--ink); }
+  p b, li b { color: var(--ink); font-weight: 650; }
+  .sub { color: var(--muted); font-size: 13px; margin-top: 8px; max-width: 82ch; }
+
+  /* ══ Hero ═════════════════════════════════════════════════════ */
+  .hero {
+    padding: 54px 0 46px;
+    background:
+      radial-gradient(ellipse 820px 340px at 12% -30%, rgba(var(--accent-rgb),0.30), transparent 68%),
+      radial-gradient(ellipse 620px 260px at 92% 120%, rgba(var(--accent-2-rgb),0.10), transparent 70%);
+    border-bottom: 1px solid var(--line);
+  }
+  .hero .promise {
+    margin-top: 14px; font-size: 16px; color: var(--ink); max-width: 74ch; font-weight: 500;
+  }
+  .willbe { list-style: none; margin-top: 22px; display: grid; gap: 9px; max-width: 78ch; }
+  .willbe li {
+    position: relative; padding-left: 26px; font-size: 13.5px; color: var(--ink-dim);
+  }
+  .willbe li::before {
+    content: ''; position: absolute; left: 6px; top: 8px;
+    width: 7px; height: 7px; border-radius: 2px;
+    background: var(--accent-2); box-shadow: 0 0 10px -1px var(--accent-2);
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 22px; }
+  .chip {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.6px; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 20px;
+    border: 1px solid var(--line-2); color: var(--muted);
+  }
+  .chip.hl { color: var(--accent-3); border-color: rgba(var(--accent-2-rgb),0.55); }
+
+  /* ══ Panels & grids ═══════════════════════════════════════════ */
+  .panel {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    overflow: hidden; margin-top: 22px;
+  }
+  .panel-head {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 10px 15px; border-bottom: 1px solid var(--line);
+    background: linear-gradient(90deg, rgba(var(--accent-rgb),0.16), transparent 62%), var(--panel-2);
+  }
+  .panel-head h3 { flex: 1; min-width: 180px; }
+  .panel-head .tag {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--muted); border: 1px solid var(--line-2); border-radius: 4px; padding: 2px 7px;
+  }
+  .panel-body { padding: 15px; }
+  .panel-note {
+    padding: 9px 15px; border-top: 1px solid var(--line);
+    background: var(--panel-2); font-size: 12px; color: var(--muted);
+  }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .grid-side { display: grid; grid-template-columns: 1.55fr 1fr; gap: 16px; }
+  .grid-side-l { display: grid; grid-template-columns: 1fr 1.55fr; gap: 16px; }
+
+  .box {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 13px 15px;
+  }
+  .box h4 { color: var(--accent-3); margin-bottom: 5px; }
+  .box p { margin-top: 4px; font-size: 12.5px; }
+
+  /* ══ Controls ═════════════════════════════════════════════════ */
+  .ctls {
+    display: flex; flex-wrap: wrap; gap: 14px 20px; align-items: flex-end;
+    padding: 13px 15px; border-bottom: 1px solid var(--line); background: var(--panel-2);
+  }
+  .ctl { display: flex; flex-direction: column; gap: 5px; min-width: 178px; flex: 1 1 178px; }
+  .ctl label {
+    font-size: 10.5px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase;
+    color: var(--muted); display: flex; justify-content: space-between; gap: 10px;
+  }
+  .ctl label .v { font-family: var(--mono); color: var(--accent-3); letter-spacing: 0; text-transform: none; }
+
+  input[type=range] {
+    -webkit-appearance: none; appearance: none; width: 100%; height: 22px;
+    background: transparent; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    height: 4px; border-radius: 3px; background: var(--line-2);
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; margin-top: -6px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--accent-2); border: 2px solid #f2e7e7;
+    box-shadow: 0 0 12px -2px var(--accent-2);
+  }
+  input[type=range]::-moz-range-track { height: 4px; border-radius: 3px; background: var(--line-2); }
+  input[type=range]::-moz-range-thumb {
+    width: 14px; height: 14px; border: 2px solid #f2e7e7; border-radius: 50%;
+    background: var(--accent-2);
+  }
+  input[type=range]:focus-visible { outline: 2px solid var(--accent-3); outline-offset: 3px; border-radius: 4px; }
+
+  .btn {
+    font-family: var(--sans); font-size: 12px; font-weight: 700;
+    padding: 7px 13px; border-radius: 7px; cursor: pointer;
+    background: var(--panel); color: var(--ink-dim);
+    border: 1px solid var(--line-2);
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .btn:hover { border-color: var(--accent-2); color: var(--ink); }
+  .btn:focus-visible { outline: 2px solid var(--accent-3); outline-offset: 2px; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fdf2f2; }
+  .btn.primary:hover { background: #2563eb; }
+  .btn[aria-pressed="true"], .btn.on {
+    background: rgba(var(--accent-rgb),0.34); border-color: var(--accent-2); color: #eaf2ff;
+  }
+  .btn:disabled { opacity: 0.42; cursor: not-allowed; }
+  .btnrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+  .tabs { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 1px solid var(--line); background: var(--panel-2); }
+  .tab {
+    flex: 1 1 auto; min-width: 120px; text-align: left;
+    padding: 10px 14px; cursor: pointer;
+    background: transparent; border: none; border-right: 1px solid var(--line);
+    border-bottom: 2px solid transparent;
+    color: var(--muted); font-family: var(--sans); font-size: 12.5px; font-weight: 700;
+  }
+  .tab .s { display: block; font-weight: 400; font-size: 11px; color: var(--ink-mute); margin-top: 1px; }
+  .tab:hover { color: var(--ink-dim); }
+  .tab[aria-selected="true"] {
+    color: var(--ink); border-bottom-color: var(--accent-2);
+    background: linear-gradient(180deg, rgba(var(--accent-rgb),0.20), transparent);
+  }
+  .tab:focus-visible { outline: 2px solid var(--accent-3); outline-offset: -3px; }
+
+  /* switches */
+  .sw { display: inline-flex; align-items: center; gap: 9px; cursor: pointer; font-size: 12.5px; color: var(--ink-dim); }
+  .sw input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .sw .track {
+    width: 36px; height: 19px; border-radius: 20px; flex-shrink: 0;
+    background: var(--line-2); border: 1px solid var(--line-2); position: relative; transition: background 0.18s;
+  }
+  .sw .track::after {
+    content: ''; position: absolute; top: 2px; left: 2px; width: 13px; height: 13px;
+    border-radius: 50%; background: var(--muted); transition: transform 0.18s, background 0.18s;
+  }
+  .sw input:checked + .track { background: rgba(var(--accent-rgb),0.55); border-color: var(--accent-2); }
+  .sw input:checked + .track::after { transform: translateX(17px); background: var(--accent-3); }
+  .sw input:focus-visible + .track { outline: 2px solid var(--accent-3); outline-offset: 2px; }
+
+  /* ══ Stats ════════════════════════════════════════════════════ */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); gap: 1px; background: var(--line); }
+  .stat { background: var(--panel-2); padding: 10px 13px; }
+  .stat .k { font-size: 9.5px; font-weight: 800; letter-spacing: 1.1px; text-transform: uppercase; color: var(--ink-mute); }
+  .stat .v { font-family: var(--mono); font-size: 17px; font-weight: 600; margin-top: 3px; color: var(--ink); }
+  .stat .v.ok { color: var(--ok); } .stat .v.bad { color: var(--bad); } .stat .v.warn { color: var(--warn); }
+  .stat .d { font-size: 10.5px; color: var(--ink-mute); margin-top: 1px; }
+
+  /* ══ Tables ═══════════════════════════════════════════════════ */
+  table.mini { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.mini th, table.mini td { padding: 6px 9px; border-bottom: 1px solid var(--line); text-align: left; }
+  table.mini th {
+    font-size: 9.5px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-mute);
+  }
+  table.mini td.num, table.mini th.num { text-align: right; font-family: var(--mono); }
+  table.mini tr.hl td { background: rgba(var(--accent-rgb),0.20); }
+  .tscroll { overflow-x: auto; }
+
+  /* ══ Code ═════════════════════════════════════════════════════ */
+  pre.code {
+    font-family: var(--mono); font-size: 11.5px; line-height: 1.62;
+    background: #0b0e14; border: 1px solid var(--line); border-radius: 9px;
+    padding: 12px 14px; overflow-x: auto; color: #dfe4ec; margin-top: 12px;
+  }
+  pre.code .c { color: #6f757f; }
+  pre.code .k { color: var(--info); }
+  pre.code .s { color: #9ee6a4; }
+  pre.code .bad { color: var(--bad); }
+  pre.code .good { color: var(--ok); }
+  code {
+    font-family: var(--mono); font-size: 0.92em;
+    background: #0b0e14; border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px;
+  }
+
+  /* ══ SVG / canvas ═════════════════════════════════════════════ */
+  svg.viz, canvas.viz { display: block; width: 100%; height: auto; }
+  svg text { font-family: var(--mono); }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; font-size: 11.5px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 13px; height: 3px; border-radius: 2px; background: var(--accent-2); display: inline-block; }
+
+  /* ══ Pitfalls (accordion) ═════════════════════════════════════ */
+  details.pit {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    margin-top: 10px; overflow: hidden;
+  }
+  details.pit + details.pit { margin-top: 8px; }
+  details.pit summary {
+    cursor: pointer; list-style: none; padding: 12px 15px;
+    display: flex; align-items: flex-start; gap: 11px;
+    font-size: 13.5px; font-weight: 650; color: var(--ink);
+  }
+  details.pit summary::-webkit-details-marker { display: none; }
+  details.pit summary::before {
+    content: '+'; font-family: var(--mono); font-weight: 700; color: var(--accent-2);
+    width: 15px; flex-shrink: 0; text-align: center;
+  }
+  details.pit[open] summary::before { content: '\2212'; }
+  details.pit[open] summary { border-bottom: 1px solid var(--line); background: var(--panel-2); }
+  details.pit summary:focus-visible { outline: 2px solid var(--accent-3); outline-offset: -3px; }
+  details.pit .pit-body { padding: 12px 15px 14px 41px; }
+  details.pit .pit-body p { margin-top: 0; font-size: 12.5px; }
+  details.pit .pit-body p + p { margin-top: 9px; }
+  details.pit .fix { color: var(--ok); font-weight: 700; }
+
+  /* ══ Quiz ═════════════════════════════════════════════════════ */
+  .q { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 15px; margin-top: 14px; }
+  .q .qn { font-size: 10.5px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: var(--accent-2); }
+  .q .qt { font-size: 14px; font-weight: 650; margin-top: 5px; color: var(--ink); }
+  .opts { display: grid; gap: 7px; margin-top: 12px; }
+  .opt {
+    text-align: left; cursor: pointer; font-family: var(--sans); font-size: 13px;
+    padding: 9px 12px; border-radius: 8px; color: var(--ink-dim);
+    background: var(--panel-2); border: 1px solid var(--line);
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .opt .ltr { font-family: var(--mono); font-weight: 700; color: var(--ink-mute); flex-shrink: 0; }
+  .opt:hover:not(.locked) { border-color: var(--accent-2); color: var(--ink); }
+  .opt:focus-visible { outline: 2px solid var(--accent-3); outline-offset: 2px; }
+  .opt.right { border-color: var(--ok); background: rgba(63,185,80,0.13); color: var(--ink); }
+  .opt.right .ltr { color: var(--ok); }
+  .opt.wrong { border-color: var(--bad); background: rgba(248,81,73,0.12); }
+  .opt.wrong .ltr { color: var(--bad); }
+  .fb { margin-top: 11px; padding: 10px 12px; border-radius: 8px; font-size: 12.5px; display: none; }
+  .fb.show { display: block; }
+  .fb.ok  { background: rgba(63,185,80,0.10); border: 1px solid rgba(63,185,80,0.4); color: #cfe9d2; }
+  .fb.no  { background: rgba(248,81,73,0.09); border: 1px solid rgba(248,81,73,0.38); color: #f0d5d3; }
+  .fb b { color: var(--ink); }
+
+  /* ══ Next / links ═════════════════════════════════════════════ */
+  .nextgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin-top: 20px; }
+  a.nextcard {
+    display: block; text-decoration: none; color: inherit;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 11px; padding: 15px 17px;
+    transition: border-color 0.18s, transform 0.18s;
+  }
+  a.nextcard:hover { border-color: var(--accent-2); transform: translateY(-2px); }
+  a.nextcard .l { font-size: 10px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: var(--accent-2); }
+  a.nextcard .t { font-size: 15px; font-weight: 700; margin-top: 5px; color: var(--ink); }
+  a.nextcard .d { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* ══ Footer ═══════════════════════════════════════════════════ */
+  footer {
+    border-top: 1px solid var(--line); margin-top: 10px;
+    padding: 26px; text-align: center; font-size: 12px; color: var(--ink-mute);
+    background: var(--panel-2);
+  }
+  footer a { color: var(--accent-3); }
+
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* ══ Responsive ═══════════════════════════════════════════════ */
+  @media (max-width: 900px) {
+    .grid3 { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 720px) {
+    .wrap { padding: 0 16px; }
+    nav.top { padding: 10px 16px; gap: 8px; }
+    nav.top .crumbs { font-size: 11.5px; }
+    section { padding: 30px 0 32px; }
+    .grid2, .grid3, .grid-side, .grid-side-l { grid-template-columns: 1fr; }
+    h1 { font-size: 27px; }
+    h2 { font-size: 20px; }
+    .ctl { min-width: 100%; flex: 1 1 100%; }
+    .tab { min-width: 100%; border-right: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+    html { scroll-behavior: auto; }
+  }
+
+  /* ══ page-local ═══════════════════════════════════════════════ */
+  .bigo-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; align-items: start; }
+  .ladder-row { display: flex; align-items: center; gap: 6px; }
+  .pricebtn {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    padding: 5px 8px; border-radius: 5px; cursor: pointer;
+    background: var(--panel); border: 1px solid var(--line-2); color: var(--ink-dim);
+  }
+  .pricebtn:hover { border-color: var(--accent-2); color: var(--ink); }
+  .pricebtn:focus-visible { outline: 2px solid var(--accent-3); outline-offset: 2px; }
+  .pricebtn.bidside { border-color: rgba(63,185,80,0.45); color: #a9dfb2; }
+  .pricebtn.askside { border-color: rgba(248,81,73,0.45); color: #f0b0ac; }
+  .heaplist { font-family: var(--mono); font-size: 11px; line-height: 1.85; }
+  .heaplist .row { display: flex; justify-content: space-between; gap: 8px; padding: 0 2px; border-bottom: 1px dotted var(--line); }
+  .heaplist .row.stale { color: var(--ink-mute); text-decoration: line-through; }
+  .heaplist .row .why { font-size: 9.5px; text-decoration: none; color: var(--warn); letter-spacing: 0.4px; }
+  .oplog {
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+    max-height: 118px; overflow-y: auto; background: #0b0e14;
+    border: 1px solid var(--line); border-radius: 7px; padding: 8px 10px;
+  }
+  .oplog div { white-space: nowrap; }
+  .oplog b { color: var(--accent-3); font-weight: 600; }
+  .lane { display: grid; grid-template-columns: 116px 1fr 92px; gap: 10px; align-items: center; margin-top: 9px; }
+  .lane .nm { font-size: 11.5px; font-weight: 700; }
+  .lane .tr { height: 15px; border-radius: 8px; background: var(--panel-2); border: 1px solid var(--line); overflow: hidden; }
+  .lane .fl { height: 100%; border-radius: 8px 0 0 8px; transition: width 0.32s ease-out; }
+  .lane .tm { font-family: var(--mono); font-size: 11.5px; text-align: right; }
+  .warnbar {
+    margin-top: 12px; padding: 9px 12px; border-radius: 8px; font-size: 12px;
+    border: 1px solid var(--line-2); background: var(--panel-2); color: var(--muted);
+  }
+  .warnbar.hot { border-color: rgba(248,81,73,0.5); background: rgba(248,81,73,0.10); color: #f0d5d3; }
+  .warnbar.cool { border-color: rgba(63,185,80,0.4); background: rgba(63,185,80,0.09); color: #cfe9d2; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-family: var(--mono); font-size: 11.5px; margin-top: 4px; }
+  .kv .k2 { color: var(--ink-mute); }
+  .kv .v2 { color: var(--ink); text-align: right; }
+  @media (max-width: 720px) {
+    .bigo-grid { grid-template-columns: 1fr; }
+    .lane { grid-template-columns: 84px 1fr 76px; gap: 7px; }
+  }
+
+  /* ── mobile guard (identical on every page): single column under 720px,
+        no horizontal overflow. Must stay last in the sheet. ───────────── */
+  @media (max-width:720px){
+    .grid2,.grid3,.grid2.narrow-right,.split,.split-r,.codepair,
+    .nextgrid,.dash,.toggles,.lanes,.weeknav,.weeks,.roles,.stack{
+      grid-template-columns:minmax(0,1fr)}
+    [class*="grid"]>*,.stack>*,.wrap>*,.panel,.panel.tight,.nextcard,.wk,.row>*{min-width:0}
+    pre,pre.code,.svgwrap,svg,canvas,table,select,input,textarea,.mono{max-width:100%}
+    pre,pre.code,.svgwrap,.tablewrap{overflow-x:auto}
+    .ctl,.ctl>*,.controls>*,.row,.legend>*{min-width:0}
+    .ctl{flex-wrap:wrap} .ctl select,.ctl input[type=range]{flex:1 1 100%;width:100%}
+    p,.lead,.sub,.promise{max-width:none}
+  }
+</style>
+</head>
+<body>
+
+<nav class="top"><a href="index.html">Systematic Trading Arena</a><span class="crumbs"><a href="week4.html">&larr; Week 4</a> &middot; <b>Week 5 &middot; Algorithmic Complexity &amp; Data Structures</b> &middot; <a href="week6.html">Week 6 &rarr;</a></span></nav>
+
+<section id="hero" class="hero">
+ <div class="wrap">
+  <div class="eyebrow">Week 5 &middot; Midterm</div>
+  <h1>Algorithmic Complexity<br/>&amp; Data Structures</h1>
+  <p class="promise">Pick the right data structure, know its cost, and profile the hot path &mdash; before the market punishes you for guessing.</p>
+  <ul class="willbe">
+    <li><b>You will be able to</b> profile your bot with <code>cProfile</code> and name the one function that dominates the run.</li>
+    <li><b>You will be able to</b> convert an O(n)-per-tick statistic into O(1) rolling state with a <code>deque</code> and Welford's method.</li>
+    <li><b>You will be able to</b> defend a complexity claim with a sound microbenchmark &mdash; warm up, repeat, take the minimum.</li>
+  </ul>
+  <div class="chips">
+    <span class="chip hl">3 hours</span>
+    <span class="chip hl">Midterm session</span>
+    <span class="chip">Big-O</span>
+    <span class="chip">dict &middot; deque &middot; heap</span>
+    <span class="chip">Welford O(1)</span>
+    <span class="chip">shared/orderbook.py</span>
+    <span class="chip">p99 tail latency</span>
+  </div>
+ </div>
+</section>
+
+<section id="what">
+ <div class="wrap">
+  <div class="eyebrow">What is it?</div>
+  <h2>Big-O is a statement about growth, not a stopwatch</h2>
+  <p class="lead">Big-O describes how the work an algorithm does <b>scales with the size of its input</b>, ignoring
+  constants. It answers one question: what breaks as <span class="mono">n</span> grows? It deliberately refuses to
+  answer a different one: how many microseconds does this take on my laptop today.</p>
+  <p>Those are complementary. Big-O tells you <b>which curve you are on</b>; profiling tells you <b>where you sit on
+  it</b>. You need both, and you need them in that order, because you cannot optimise your way out of the wrong curve.
+  Complexity is a design decision made when you choose the container &mdash; not a tweak you apply afterwards.</p>
+  <p>The ladder below is the whole vocabulary. O(1) is a dict lookup or a <code>deque</code> append: it does not care
+  about <span class="mono">n</span>. O(log n) is a binary search or a heap push &mdash; doubling
+  <span class="mono">n</span> adds a single step. O(n) is scanning a list. O(n log n) is a sort, the realistic floor
+  for comparison sorting. O(n&sup2;) is a nested loop over the data: perfectly fine at
+  <span class="mono">n = 100</span>, and fatal at <span class="mono">n = 10&#8310;</span>.</p>
+
+  <div class="panel">
+   <div class="panel-head">
+     <h3>The Big-O race</h3>
+     <span class="tag">Widget 1 &middot; drag n</span>
+   </div>
+   <div class="ctls">
+     <div class="ctl">
+       <label for="bo-n">Input size n <span class="v" id="bo-nv">1,024</span></label>
+       <input type="range" id="bo-n" min="0" max="48" step="1" value="24"
+              aria-label="Input size n, logarithmic from 8 to one million" />
+     </div>
+     <div class="ctl" style="flex:0 0 auto;min-width:auto">
+       <label>Bar axis</label>
+       <div class="btnrow" role="tablist" aria-label="Bar axis scale">
+         <button class="btn" id="bo-log" role="tab" aria-selected="true">Log</button>
+         <button class="btn" id="bo-lin" role="tab" aria-selected="false">Linear</button>
+       </div>
+     </div>
+     <div class="ctl" style="flex:0 0 auto;min-width:auto">
+       <label>Per-tick budget</label>
+       <div class="btnrow">
+         <span class="chip hl mono">1 ms &middot; 25,000 ops</span>
+       </div>
+     </div>
+   </div>
+   <div class="panel-body">
+    <div class="bigo-grid">
+     <div>
+       <svg class="viz" id="bo-svg" viewBox="0 0 620 262" aria-label="Horizontal bar chart comparing operation counts for constant, logarithmic, linear, linearithmic and quadratic complexity at the selected input size, with a one millisecond per-tick budget marker."></svg>
+       <div class="legend">
+         <span><i style="background:var(--ok)"></i> inside budget</span>
+         <span><i style="background:var(--warn)"></i> at the edge</span>
+         <span><i style="background:var(--bad)"></i> blown &mdash; you are trading stale prices</span>
+         <span><i style="background:var(--accent-3)"></i> 1 ms budget marker</span>
+       </div>
+     </div>
+     <div>
+       <h4>Double n and see who notices</h4>
+       <div class="tscroll">
+         <table class="mini" id="bo-tbl">
+           <thead><tr><th>Class</th><th class="num">ops at n</th><th class="num">ops at 2n</th><th class="num">&times;</th></tr></thead>
+           <tbody></tbody>
+         </table>
+       </div>
+       <div class="warnbar" id="bo-note"></div>
+     </div>
+    </div>
+   </div>
+   <div class="panel-note">Wall times assume a flat <b>40 ns per elementary operation</b> &mdash; roughly interpreted
+   Python. The constant is a guess; the <i>shape</i> is not. Switch to the linear axis to see why O(n&sup2;) is a
+   different kind of animal, then switch back to log to read all five at once.</div>
+  </div>
+
+  <div class="grid2" style="margin-top:22px">
+    <div class="box">
+      <h4>Reading Big-O correctly</h4>
+      <p><b>Constants still matter.</b> O(n) with a tight inner loop can beat O(log n) with heavy per-call overhead
+      at small <span class="mono">n</span> &mdash; but <span class="mono">n</span> grows, and the curve always wins
+      eventually.</p>
+      <p><b>Worst versus average.</b> A dict is O(1) average and O(n) worst under pathological collisions. You design
+      for the common case and you guard the tail.</p>
+      <p><b>Amortised cost</b> is the honest average over a sequence. <code>list.append</code> is O(1) amortised: the
+      occasional O(n) resize is averaged over many cheap appends. Judge the workload, not the worst single call.</p>
+    </div>
+    <div class="box">
+      <h4>Time versus space</h4>
+      <p><b>Time complexity</b> is what you usually optimise in a hot path &mdash; cycles are the scarce resource per
+      tick.</p>
+      <p><b>Space complexity</b> is how much memory grows with <span class="mono">n</span>. A cache or lookup table
+      buys speed with memory: the classic space-for-time trade.</p>
+      <p>In a live market that trade is usually worth taking. Memory is cheap and refills overnight; a tick you were
+      too slow to price is gone forever.</p>
+    </div>
+  </div>
+
+  <h3 style="margin-top:26px">Choosing the container <i>is</i> choosing the complexity</h3>
+  <p>Know the cost of the operation you perform most often, then pick the structure that makes that one operation
+  cheap. Everything else is negotiable.</p>
+  <div class="panel">
+    <div class="panel-head"><h3>Core structures &amp; their costs</h3><span class="tag">the four that carry trading code</span></div>
+    <div class="tscroll">
+     <table class="mini">
+      <thead><tr><th>structure</th><th>access</th><th>search</th><th>insert</th><th>delete</th><th>the question it answers</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">list / array</td><td class="mono">O(1) idx</td><td class="mono">O(n)</td><td class="mono">O(n) mid</td><td class="mono">O(n) mid</td><td>ordered sequence; append is O(1) amortised</td></tr>
+        <tr class="hl"><td class="mono">dict</td><td class="mono">O(1) key</td><td class="mono">O(1) avg</td><td class="mono">O(1) avg</td><td class="mono">O(1) avg</td><td><b>&ldquo;what is X?&rdquo;</b> &mdash; order id &rarr; Order</td></tr>
+        <tr class="hl"><td class="mono">set</td><td class="mono">&mdash;</td><td class="mono">O(1) avg</td><td class="mono">O(1) avg</td><td class="mono">O(1) avg</td><td><b>&ldquo;have I seen X?&rdquo;</b> &mdash; dedup seen ids</td></tr>
+        <tr class="hl"><td class="mono">deque</td><td class="mono">O(n) mid</td><td class="mono">O(n)</td><td class="mono">O(1) ends</td><td class="mono">O(1) ends</td><td><b>&ldquo;last k things?&rdquo;</b> &mdash; <code>maxlen</code> is a free window</td></tr>
+        <tr class="hl"><td class="mono">heap / pq</td><td class="mono">O(1) min</td><td class="mono">O(n)</td><td class="mono">O(log n)</td><td class="mono">O(log n)</td><td><b>&ldquo;best of many?&rdquo;</b> &mdash; best bid/ask, top-k</td></tr>
+        <tr><td class="mono">binary search</td><td class="mono">O(log n)</td><td class="mono">O(log n)</td><td class="mono">&mdash;</td><td class="mono">&mdash;</td><td>lookup in a <i>sorted</i> sequence</td></tr>
+      </tbody>
+     </table>
+    </div>
+    <div class="panel-note"><code>heapq</code> is a <b>min</b>-heap over tuples &mdash; negate the key for a max-heap.
+    That single detail is why the bid side of a book stores <span class="mono">-price</span>.</div>
+  </div>
+ </div>
+</section>
+
+<section id="how">
+ <div class="wrap">
+  <div class="eyebrow">How does it work?</div>
+  <h2>The order book is a data-structure problem</h2>
+  <p class="lead">An order book must answer <b>&ldquo;what is the best price?&rdquo;</b> constantly, and it must match by
+  <b>price&ndash;time priority</b>: best price first, and within a price, earliest arrival first. Every design decision
+  in <code>shared/orderbook.py</code> follows from those two sentences.</p>
+  <p>The naive answer is a list of resting orders that you scan to find the best bid and ask. That scan is O(n), and
+  you do it on <i>every single incoming order</i>. Book depth is not small and it grows during exactly the volatile
+  moments when you need speed most.</p>
+  <p>The arena's answer is a <b>min-heap plus a dict</b>. The heap gives O(log n) insert and O(1) peek at the extreme
+  &mdash; exactly the operation repeated most. The heap is keyed on the tuple
+  <code>(price, seq, order_id)</code>: price orders the book, <span class="mono">seq</span> breaks ties by strict
+  arrival order, and the id is the final tiebreak. It is <span class="mono">seq</span> and not a timestamp because
+  floats tie and a monotonic counter never does &mdash; that is what makes time priority <i>true</i> rather than
+  approximate.</p>
+  <p>The last trick is where students get surprised. A <code>dict</code> of live orders is the <b>canonical source of
+  truth</b>; the heaps are only a fast index into it. Cancelling deletes from the dict and leaves the heap entry
+  behind &mdash; <b>lazy deletion</b> &mdash; so cancels are O(1) and stale entries are discarded when they surface at
+  the top. Reads iterate the canonical set, so a lazily-stale heap entry can never leak into an answer.</p>
+
+  <div class="panel">
+   <div class="panel-head">
+     <h3>Order-book structure explorer</h3>
+     <span class="tag">Widget 2 &middot; same command stream, two structures</span>
+   </div>
+   <div class="ctls">
+     <div class="ctl" style="flex:0 0 auto;min-width:auto">
+       <label>Side of the order you send</label>
+       <div class="btnrow" role="group" aria-label="Order side">
+         <button class="btn on" id="ob-buy" aria-pressed="true">Buy (bid)</button>
+         <button class="btn" id="ob-sell" aria-pressed="false">Sell (ask)</button>
+       </div>
+     </div>
+     <div class="ctl">
+       <label for="ob-qty">Quantity <span class="v" id="ob-qtyv">200</span></label>
+       <input type="range" id="ob-qty" min="100" max="1500" step="100" value="200" aria-label="Order quantity" />
+     </div>
+     <div class="ctl" style="flex:1 1 260px">
+       <label>Click a price to rest a limit order there</label>
+       <div class="ladder-row" id="ob-prices" role="group" aria-label="Price levels"></div>
+     </div>
+   </div>
+   <div class="ctls" style="border-top:1px solid var(--line)">
+     <div class="btnrow">
+       <button class="btn primary" id="ob-mkt">Send market order &rarr;</button>
+       <button class="btn" id="ob-cancel">Cancel a random resting order</button>
+       <button class="btn" id="ob-run50">Run 50 random ops</button>
+       <button class="btn" id="ob-reset">&#8634; Reset</button>
+     </div>
+   </div>
+   <div class="panel-body">
+    <div class="grid-side">
+     <div>
+       <h4>The book &mdash; canonical state (the dict)</h4>
+       <svg class="viz" id="ob-svg" viewBox="0 0 560 300" aria-label="Order book ladder showing ask levels above and bid levels below, with resting quantity per price level and the best bid and best ask marked."></svg>
+       <div class="legend">
+         <span><i style="background:rgba(63,185,80,0.55)"></i> bids</span>
+         <span><i style="background:rgba(248,81,73,0.55)"></i> asks</span>
+         <span><i style="background:var(--accent-3)"></i> best bid / best ask</span>
+       </div>
+       <h4 style="margin-top:16px">Operation log</h4>
+       <div class="oplog" id="ob-log" aria-live="polite" aria-label="Operation log"></div>
+     </div>
+     <div>
+       <h4>Cumulative elementary operations</h4>
+       <div class="lane">
+         <div class="nm" style="color:var(--accent-3)">heap + dict</div>
+         <div class="tr"><div class="fl" id="ob-fill-a" style="width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-2))"></div></div>
+         <div class="tm" id="ob-ops-a">0</div>
+       </div>
+       <div class="lane">
+         <div class="nm" style="color:var(--bad)">sorted list</div>
+         <div class="tr"><div class="fl" id="ob-fill-b" style="width:0%;background:linear-gradient(90deg,#8f2b26,var(--bad))"></div></div>
+         <div class="tm" id="ob-ops-b">0</div>
+       </div>
+       <div class="stats" style="margin-top:14px;border:1px solid var(--line);border-radius:9px;overflow:hidden">
+         <div class="stat"><div class="k">resting orders</div><div class="v" id="ob-n">0</div><div class="d">book depth n</div></div>
+         <div class="stat"><div class="k">ops this action</div><div class="v" id="ob-last">&mdash;</div><div class="d">heap+dict / list</div></div>
+         <div class="stat"><div class="k">list overhead</div><div class="v" id="ob-ratio">&mdash;</div><div class="d">&times; the heap design</div></div>
+       </div>
+       <h4 style="margin-top:16px">Bid heap &mdash; top entries <span class="mono" style="color:var(--ink-mute)">(-price, seq, id)</span></h4>
+       <div class="heaplist" id="ob-heap"></div>
+       <div class="warnbar" id="ob-note"></div>
+     </div>
+    </div>
+   </div>
+   <div class="panel-note">Costs are counted as elementary operations, not seconds. <b>heap + dict:</b> one dict write
+   plus <span class="mono">&lceil;log&#8322;n&rceil;</span> sift steps on insert, a single dict delete on cancel (lazy),
+   and a sift per stale entry discarded at the top. <b>sorted list:</b> a binary search to find the slot plus the
+   <span class="mono">O(n)</span> shift to make room, and a linear scan plus shift to cancel. Push the depth up and
+   watch only one of the two counters care.</div>
+  </div>
+
+  <h3 style="margin-top:30px">The other hot path: statistics that recompute themselves</h3>
+  <p><code>on_tick</code> fires on every price update. If it recomputes a mean and a volatility over the full window
+  each time, the per-tick cost is O(k) and the session cost is O(n&middot;k) &mdash; the classic O(n&sup2;) trap when
+  the window is the whole history. The fix is to keep <b>running state</b> instead of rescanning: a running sum gives
+  an O(1) mean, and <b>Welford's method</b> gives mean <i>and</i> variance in one pass, in constant time, without ever
+  storing history.</p>
+
+  <div class="panel">
+   <div class="panel-head">
+     <h3>Rolling statistics: full recompute vs Welford</h3>
+     <span class="tag">Widget 3 &middot; same numbers, different curve</span>
+   </div>
+   <div class="ctls">
+     <div class="ctl">
+       <label for="rs-k">Window k <span class="v" id="rs-kv">50</span></label>
+       <input type="range" id="rs-k" min="5" max="500" step="5" value="50" aria-label="Rolling window size k" />
+     </div>
+     <div class="ctl">
+       <label for="rs-n">Ticks in the session <span class="v" id="rs-nv">4,000</span></label>
+       <input type="range" id="rs-n" min="200" max="20000" step="200" value="4000" aria-label="Number of ticks in the session" />
+     </div>
+     <div class="ctl" style="flex:0 0 auto;min-width:auto">
+       <label>Stream it</label>
+       <div class="btnrow">
+         <button class="btn" id="rs-play">&#9654; Play the session</button>
+         <button class="btn" id="rs-reset">&#8634; Reset</button>
+       </div>
+     </div>
+   </div>
+   <div class="panel-body">
+    <div class="grid-side">
+     <div>
+       <h4>Cumulative operations across the session</h4>
+       <svg class="viz" id="rs-svg" viewBox="0 0 600 250" aria-label="Line chart of cumulative elementary operations over the session for the naive full-window recompute versus the incremental constant-time update."></svg>
+       <div class="legend">
+         <span><i style="background:var(--bad)"></i> naive full-window recompute &mdash; O(k) per tick</span>
+         <span><i style="background:var(--ok)"></i> deque + Welford &mdash; O(1) per tick</span>
+       </div>
+       <div class="lane">
+         <div class="nm" style="color:var(--bad)">naive</div>
+         <div class="tr"><div class="fl" id="rs-fill-slow" style="width:0%;background:linear-gradient(90deg,#8f2b26,var(--bad))"></div></div>
+         <div class="tm" id="rs-t-slow">&mdash;</div>
+       </div>
+       <div class="lane">
+         <div class="nm" style="color:var(--ok)">O(1) rolling</div>
+         <div class="tr"><div class="fl" id="rs-fill-fast" style="width:0%;background:linear-gradient(90deg,#1f7a33,var(--ok))"></div></div>
+         <div class="tm" id="rs-t-fast">&mdash;</div>
+       </div>
+       <div class="warnbar" id="rs-note"></div>
+     </div>
+     <div>
+       <div class="stats" style="border:1px solid var(--line);border-radius:9px;overflow:hidden">
+         <div class="stat"><div class="k">ops / tick naive</div><div class="v bad" id="rs-ot-slow">&mdash;</div><div class="d">grows with k</div></div>
+         <div class="stat"><div class="k">ops / tick O(1)</div><div class="v ok" id="rs-ot-fast">&mdash;</div><div class="d">flat, forever</div></div>
+         <div class="stat"><div class="k">speed-up</div><div class="v warn" id="rs-speed">&mdash;</div><div class="d">total ops ratio</div></div>
+       </div>
+       <h4 style="margin-top:15px">Both methods agree &mdash; that is the point</h4>
+       <div class="kv">
+         <span class="k2">mean &mdash; naive rescan</span><span class="v2" id="rs-m-slow">&mdash;</span>
+         <span class="k2">mean &mdash; Welford</span><span class="v2" id="rs-m-fast">&mdash;</span>
+         <span class="k2">variance &mdash; naive rescan</span><span class="v2" id="rs-v-slow">&mdash;</span>
+         <span class="k2">variance &mdash; Welford</span><span class="v2" id="rs-v-fast">&mdash;</span>
+         <span class="k2">absolute disagreement</span><span class="v2" id="rs-diff">&mdash;</span>
+       </div>
+       <p class="sub">Welford is not just faster, it is <b>more trustworthy</b>. The textbook
+       <span class="mono">E[x&sup2;] &minus; E[x]&sup2;</span> shortcut subtracts two large, nearly equal numbers and
+       loses catastrophic precision on price levels far from zero &mdash; and every equity price is far from zero.
+       Welford never forms the sum of squares at all.</p>
+<pre class="code"><span class="c"># O(1) per tick, numerically stable</span>
+<span class="k">class</span> Welford:
+    <span class="k">def</span> __init__(self):
+        self.n=0; self.mean=0.0; self.m2=0.0
+    <span class="k">def</span> update(self, x):
+        self.n += 1
+        d = x - self.mean
+        self.mean += d / self.n
+        self.m2   += d * (x - self.mean)
+    @property
+    <span class="k">def</span> var(self):
+        <span class="k">return</span> self.m2/(self.n-1) <span class="k">if</span> self.n&gt;1 <span class="k">else</span> 0.0</pre>
+     </div>
+    </div>
+   </div>
+   <div class="panel-note">Same 40 ns per operation. The naive lane charges
+   <span class="mono">2 &times; min(t, k)</span> operations per tick &mdash; one pass for the mean, one for the variance
+   &mdash; while the rolling lane charges a constant four. Nothing about the <i>answer</i> changes; only the curve does.</div>
+  </div>
+
+  <p style="margin-top:22px">Put the two together and <code>on_tick</code> becomes cheap and flat for the whole
+  session. This is the pattern to copy into your bot this week:</p>
+<pre class="code"><span class="k">class</span> MyBot(Trader):
+    <span class="k">def</span> __init__(self):
+        self.win  = deque(maxlen=<span class="s">50</span>)   <span class="c"># O(1) window, free eviction</span>
+        self.stat = Welford()          <span class="c"># O(1) mean + variance</span>
+    <span class="k">def</span> on_tick(self, market, portfolio):
+        px = market.mid(<span class="s">'AAPL'</span>)
+        self.win.append(px)            <span class="c"># O(1)</span>
+        self.stat.update(px)           <span class="c"># O(1)</span>
+        z = (px - self.stat.mean) / (self.stat.var**<span class="s">0.5</span> <span class="k">or</span> <span class="s">1</span>)
+        <span class="k">if</span> z &lt; -<span class="s">2</span>: <span class="k">return</span> Signal(<span class="s">'AAPL'</span>,<span class="s">'buy'</span>,<span class="s">5</span>,px)
+        <span class="k">return</span> <span class="k">None</span></pre>
+ </div>
+</section>
+
+<section id="why">
+ <div class="wrap">
+  <div class="eyebrow">Why does it matter in trading?</div>
+  <h2>Slow code is not a style problem. It is a P&amp;L problem.</h2>
+  <p class="lead">Prices move while you compute. A signal that takes 50 ms to produce is a signal acting on
+  <b>stale data</b> &mdash; the edge you detected has already been taken by someone whose loop was tighter. Complexity
+  in a hot path is not an engineering nicety; it is the difference between providing liquidity and donating it.</p>
+  <p>There are two distinct questions and they pull in opposite directions. <b>Latency</b> is the time for
+  <i>one</i> operation, end to end &mdash; and for a trader, latency <i>is</i> edge. <b>Throughput</b> is operations
+  <i>per second</i> &mdash; and for an exchange, throughput is capacity under load. Batching raises throughput and adds
+  latency. Tune for the role you actually play.</p>
+  <p>Then there is the part that averages hide. A mean of 1 ms with a p99 of 200 ms means one tick in a hundred is
+  catastrophic &mdash; and it will be one of the volatile ticks, because that is when queues are deepest and the book
+  is thickest. <b>Report p50, p95 and p99.</b> The p99 is what gets you picked off during a shock.</p>
+
+  <div class="panel">
+   <div class="panel-head">
+     <h3>Ticks per second you can sustain &mdash; and the tail that kills you</h3>
+     <span class="tag">Widget 4 &middot; pick a structure, then hit it with a shock</span>
+   </div>
+   <div class="tabs" role="tablist" aria-label="Order book implementation">
+     <button class="tab" id="tl-t0" role="tab" aria-selected="false">Linear scan list<span class="s">O(n) &mdash; scan every resting order</span></button>
+     <button class="tab" id="tl-t1" role="tab" aria-selected="false">Sorted list<span class="s">O(n) shift &mdash; cheap peek, dear insert</span></button>
+     <button class="tab" id="tl-t2" role="tab" aria-selected="true">Heap + dict<span class="s">O(log n) &mdash; the arena design</span></button>
+   </div>
+   <div class="ctls">
+     <div class="ctl">
+       <label for="tl-depth">Book depth n <span class="v" id="tl-depthv">800</span></label>
+       <input type="range" id="tl-depth" min="20" max="5000" step="20" value="800" aria-label="Book depth, number of resting orders" />
+     </div>
+     <div class="ctl">
+       <label for="tl-rate">Arriving ticks / second <span class="v" id="tl-ratev">2,000</span></label>
+       <input type="range" id="tl-rate" min="200" max="12000" step="200" value="2000" aria-label="Arriving message rate in ticks per second" />
+     </div>
+     <div class="ctl" style="flex:0 0 auto;min-width:auto">
+       <label>Market condition</label>
+       <div class="btnrow">
+         <button class="btn" id="tl-shock" aria-pressed="false">&#9889; Shock burst &times;6</button>
+       </div>
+     </div>
+   </div>
+   <div class="panel-body">
+    <div class="stats" style="border:1px solid var(--line);border-radius:9px;overflow:hidden">
+      <div class="stat"><div class="k">service cost</div><div class="v" id="tl-svc">&mdash;</div><div class="d">per message</div></div>
+      <div class="stat"><div class="k">sustainable</div><div class="v" id="tl-cap">&mdash;</div><div class="d">ticks / second</div></div>
+      <div class="stat"><div class="k">utilisation &rho;</div><div class="v" id="tl-rho">&mdash;</div><div class="d">arrival / capacity</div></div>
+      <div class="stat"><div class="k">mean</div><div class="v" id="tl-mean">&mdash;</div><div class="d">looks fine</div></div>
+      <div class="stat"><div class="k">p50</div><div class="v" id="tl-p50">&mdash;</div><div class="d">median tick</div></div>
+      <div class="stat"><div class="k">p95</div><div class="v" id="tl-p95">&mdash;</div><div class="d">1 in 20</div></div>
+      <div class="stat"><div class="k">p99</div><div class="v" id="tl-p99">&mdash;</div><div class="d">this is the one</div></div>
+    </div>
+    <svg class="viz" id="tl-svg" viewBox="0 0 620 262" style="margin-top:14px" aria-label="Histogram of per-message response latency on a logarithmic axis, with median, ninety-fifth and ninety-ninth percentile markers and a shaded region beyond the one millisecond decision budget."></svg>
+    <div class="legend">
+      <span><i style="background:var(--accent-2)"></i> response-time distribution</span>
+      <span><i style="background:var(--ok)"></i> p50</span>
+      <span><i style="background:var(--warn)"></i> p95</span>
+      <span><i style="background:var(--bad)"></i> p99</span>
+      <span><i style="background:rgba(248,81,73,0.35)"></i> past the 1 ms budget &mdash; picked off</span>
+    </div>
+    <div class="warnbar" id="tl-note"></div>
+   </div>
+   <div class="panel-note">A single-server queue: each message costs
+   <span class="mono">ops &times; 40 ns</span> to service, and response time inflates by
+   <span class="mono">1/(1&minus;&rho;)</span> as arrivals approach capacity. That is why the tail explodes long before
+   the mean does &mdash; and why &ldquo;it was fast on my laptop&rdquo; is not a defence. Samples are drawn from a
+   fixed seed, so the picture is reproducible.</div>
+  </div>
+
+  <div class="grid2" style="margin-top:22px">
+    <div class="box">
+      <h4>Budget per tick, tail included</h4>
+      <p>Know your ceiling. At a five-second Yahoo poll you have enormous slack; inside a shock burst, when a hundred
+      messages land in the same second, you do not. Measure the p99 rather than the mean, and sit well under the
+      ceiling with room to spare.</p>
+      <p>In the arena this is directly scored: <code>exchange/scoring.py</code> ranks on risk-adjusted return, and a
+      bot that goes blind for 200 ms during the shock is the bot that takes the drawdown.</p>
+    </div>
+    <div class="box">
+      <h4>The levers, in order of payoff</h4>
+      <p><b>1. The right structure.</b> The biggest lever by an order of magnitude. <code>oid in seen_set</code> is
+      O(1); <code>oid in seen_list</code> is O(n).</p>
+      <p><b>2. Hoist allocation out of the loop.</b> Allocate the <code>deque</code> once and reuse it per tick.</p>
+      <p><b>3. Bind methods to locals</b> in a tight loop to skip the attribute lookup.</p>
+      <p><b>4. Vectorise batch maths</b> with numpy where it fits &mdash; batches, not per-tick scalars.</p>
+      <p><b>5. Then stop.</b> Do not tune cold code.</p>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section id="pitfalls">
+ <div class="wrap">
+  <div class="eyebrow">Common mistakes</div>
+  <h2>Five ways this week goes wrong</h2>
+  <p>Every one of these has been submitted, defended in class, and quietly walked back. Read them before you write
+  your benchmark, not after.</p>
+
+  <details class="pit">
+    <summary>Benchmarking once, cold, and reporting the mean</summary>
+    <div class="pit-body">
+      <p>A single call is pure noise: imports, cold caches and the interpreter settling all land inside your one
+      measurement. Then the arithmetic mean drags in every unrelated OS hiccup that happened during the run, so the
+      number you publish describes your machine's mood rather than your code.</p>
+      <p><span class="fix">The fix.</span> Warm up and discard the first runs. Loop enough that the total sits well
+      above timer resolution. Repeat the whole measurement and <b>report the minimum</b>, noting the spread &mdash;
+      the minimum is the least-contaminated run. Use <code>timeit</code> for micro-comparisons and
+      <code>time.perf_counter</code> around a block in situ.</p>
+    </div>
+  </details>
+
+  <details class="pit">
+    <summary>Micro-tuning a function that is on the wrong curve</summary>
+    <div class="pit-body">
+      <p>Shaving 15% off an O(n&sup2;) loop feels productive and accomplishes nothing: double the data and you have
+      given the 15% back with interest. Local-name binding and loop unrolling are constant-factor tools, and constants
+      cannot rescue you from the wrong complexity class.</p>
+      <p><span class="fix">The fix.</span> Fix the curve first &mdash; change the data structure &mdash; then chase
+      constants if the profile still says so. Algorithm beats micro-tuning, every time.</p>
+    </div>
+  </details>
+
+  <details class="pit">
+    <summary>Optimising code that runs twice per session</summary>
+    <div class="pit-body">
+      <p>Programmer intuition about where time goes is famously, reliably wrong. The satisfying function to optimise
+      is rarely the expensive one, and a function called twice a session is worth exactly zero seconds of your
+      attention no matter how ugly it is.</p>
+      <p><span class="fix">The fix.</span> Profile before you touch anything. <code>cProfile</code> gives call counts
+      and cumulative time per function and will name the dominator for you. Spend cycles only where they are
+      multiplied by millions of ticks. Measure, do not guess.</p>
+    </div>
+  </details>
+
+  <details class="pit">
+    <summary>Keeping full history so you can &ldquo;recompute properly&rdquo;</summary>
+    <div class="pit-body">
+      <p>Appending every price to a list and calling <code>sum(hist[-k:]) / k</code> in <code>on_tick</code> looks
+      harmless and correct. It is correct. It is also O(k) per tick, which makes the whole session O(n&middot;k), and
+      the slice allocates a fresh list on every single tick inside your hot loop.</p>
+      <p><span class="fix">The fix.</span> Keep running state instead of history: a running sum for the mean, Welford
+      for the variance, and <code>deque(maxlen=k)</code> so the oldest observation evicts itself for free. Per-tick
+      cost stops growing with the session, and allocation leaves the loop.</p>
+    </div>
+  </details>
+
+  <details class="pit">
+    <summary>Trusting one machine, and one run, on an idle laptop</summary>
+    <div class="pit-body">
+      <p>A laptop with nothing else running, thermal headroom and a warm cache is not the server your bot competes on.
+      Absolute microsecond figures measured there do not transfer, and a result that only reproduces on your hardware
+      is not a result.</p>
+      <p><span class="fix">The fix.</span> Compare <b>relative</b> numbers &mdash; before versus after, structure A
+      versus structure B &mdash; on the same machine in the same session. Pin your seeds so the workload is identical
+      across runs, and state your environment when you report. Relative speed-ups travel; absolute ones do not.</p>
+    </div>
+  </details>
+ </div>
+</section>
+
+<section id="check">
+ <div class="wrap">
+  <div class="eyebrow">Check yourself</div>
+  <h2>Three questions</h2>
+  <p class="sub">Instant feedback, nothing recorded. Pick the best answer.</p>
+
+  <div class="q" data-q="1" data-why="Cancelling only deletes from the canonical dict, which is O(1); the matching heap entry is left behind and discarded when it surfaces at the top. Because every read iterates the canonical set rather than the heap, a stale entry can never leak into a snapshot or a queue-position answer.">
+    <div class="qn">Question 1</div>
+    <div class="qt">In <code>shared/orderbook.py</code>, cancelling an order removes it from the <code>_orders</code>
+    dict but leaves its entry in the heap. Why is that correct?</div>
+    <div class="opts" role="group" aria-label="Question 1 options">
+      <button class="opt" data-ok="0"><span class="ltr">A</span><span>Heaps cannot support deletion at all, so the stale entry is an unavoidable memory leak that is tolerated for speed.</span></button>
+      <button class="opt" data-ok="1"><span class="ltr">B</span><span>Cancels stay O(1), stale entries are discarded lazily when they reach the top, and reads iterate the canonical dict so they never observe a stale entry.</span></button>
+      <button class="opt" data-ok="0"><span class="ltr">C</span><span>The heap is rebuilt from scratch after every cancel, which is cheaper than an in-place delete.</span></button>
+    </div>
+    <div class="fb" role="status"></div>
+  </div>
+
+  <div class="q" data-q="2" data-why="Big-O deliberately discards constants, so it describes the shape of the growth curve rather than a duration. At n = 40 a heavier-overhead O(log n) implementation can genuinely lose to a tight O(n) scan; the crossover is an empirical question that only a profiler answers.">
+    <div class="qn">Question 2</div>
+    <div class="qt">Your teammate replaces an O(n) list scan with an O(log n) structure and the benchmark gets
+    <i>slower</i> at the book depth you actually run. What is the most defensible reading?</div>
+    <div class="opts" role="group" aria-label="Question 2 options">
+      <button class="opt" data-ok="0"><span class="ltr">A</span><span>The benchmark is wrong, because a lower complexity class is always faster.</span></button>
+      <button class="opt" data-ok="0"><span class="ltr">B</span><span>Big-O has been disproven for this workload and should be ignored in the write-up.</span></button>
+      <button class="opt" data-ok="1"><span class="ltr">C</span><span>Constants matter and n is still small, so the crossover has not been reached &mdash; Big-O tells you which curve you are on, profiling tells you where you sit on it.</span></button>
+    </div>
+    <div class="fb" role="status"></div>
+  </div>
+
+  <div class="q" data-q="3" data-why="A 1 ms mean with a 200 ms p99 means one tick in a hundred goes blind for a fifth of a second, and those ticks cluster during shocks when the book is thickest and queues are deepest. That is precisely when a stale quote gets picked off, which is why you budget against the p99 and not the average.">
+    <div class="qn">Question 3</div>
+    <div class="qt">Your <code>on_tick</code> averages 1 ms but has a p99 of 200 ms. Why is this worse than a flat
+    5 ms every tick?</div>
+    <div class="opts" role="group" aria-label="Question 3 options">
+      <button class="opt" data-ok="0"><span class="ltr">A</span><span>It is not worse &mdash; a lower mean means more ticks processed per second, so throughput decides it.</span></button>
+      <button class="opt" data-ok="1"><span class="ltr">B</span><span>The slow 1% clusters during volatile bursts, so you go blind exactly when a stale quote gets picked off &mdash; budget against the tail, not the average.</span></button>
+      <button class="opt" data-ok="0"><span class="ltr">C</span><span>Because 200 ms exceeds the WebSocket timeout, so those ticks are dropped by the exchange rather than processed late.</span></button>
+    </div>
+    <div class="fb" role="status"></div>
+  </div>
+ </div>
+</section>
+
+<section id="next">
+ <div class="wrap">
+  <div class="eyebrow">Take it further</div>
+  <h2>This week's work</h2>
+  <p class="sub">Deliverable: an <b>algorithmic improvement plan</b> for one hot path, backed by a before/after
+  microbenchmark. Graded 40 / 30 / 20 / 10 &mdash; improvement plan with correct complexity analysis, benchmark
+  method and numbers, one O(n)&rarr;O(1) or O(n&sup2;)&rarr;O(n log n) improvement actually landed, and a clean branch
+  with a readable write-up. This session also carries the midterm.</p>
+  <div class="nextgrid">
+      <a class="nextcard" href="https://github.com/sdonadio/algoarena-team-template">
+        <div class="l">Code</div>
+        <div class="t">Get the code</div>
+        <div class="d">Labs and homework live in your course&#8217;s LMS; the starter repo is public. Use it as a template, clone, <code>make install</code>.</div>
+      </a>
+    <a class="nextcard" href="week4.html">
+      <div class="l">Previous</div><div class="t">&larr; Week 4 &middot; Backtester Architecture</div>
+      <div class="d">The event loop, honest fills and the biases that flatter a backtest.</div></a>
+    <a class="nextcard" href="week6.html">
+      <div class="l">Next</div><div class="t">Week 6 &middot; Big Data &amp; Distributed Computing &rarr;</div>
+      <div class="d">When one process is not enough: columnar storage, chunking and fanning a parameter sweep across cores.</div></a>
+  </div>
+  <p class="sub" style="margin-top:18px">Reading before next class: <code>shared/orderbook.py</code> &mdash; the
+  heap-plus-dict CLOB with lazy deletion, exhaustively covered by <code>tests/test_orderbook.py</code> because the
+  book is the source of truth.</p>
+ </div>
+</section>
+
+<footer>Systematic Trading Arena · an interactive companion for a 9-week systematic-trading course · <a href="https://github.com/sdonadio/systematic-trading-arena">Source</a></footer>
+
+<script>
+'use strict';
+
+/* ══ shared helpers ═══════════════════════════════════════════════ */
+var C = {
+  ok:'#3fb950', warn:'#d29922', bad:'#f85149',
+  a1:'#3b82f6', a2:'#7cb0ff', a3:'#b9d4ff',
+  line:'#262b35', line2:'#333a47', p2:'#12151b', panel:'#181b22',
+  mute:'#6f757f', dim:'#c6c3bf', ink:'#e8e6e3', info:'#6cb6ff'
+};
+
+function mul32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+function commas(x) {
+  var s = String(Math.round(x)), o = '', c = 0, i;
+  for (i = s.length - 1; i >= 0; i--) {
+    o = s.charAt(i) + o; c++;
+    if (c % 3 === 0 && i > 0) o = ',' + o;
+  }
+  return o;
+}
+
+function fmtOps(x) {
+  if (x >= 1e13) return x.toExponential(2).replace('e+', 'e');
+  return commas(x);
+}
+
+/* nanoseconds -> readable */
+function fmtNs(ns) {
+  if (ns < 1000) return ns.toFixed(0) + ' ns';
+  if (ns < 1e6) return (ns / 1e3).toFixed(ns < 1e5 ? 1 : 0) + ' µs';
+  if (ns < 1e9) return (ns / 1e6).toFixed(ns < 1e8 ? 1 : 0) + ' ms';
+  if (ns < 6e10) return (ns / 1e9).toFixed(1) + ' s';
+  if (ns < 3.6e12) return (ns / 6e10).toFixed(1) + ' min';
+  if (ns < 8.64e13) return (ns / 3.6e12).toFixed(1) + ' h';
+  return (ns / 8.64e13).toFixed(1) + ' days';
+}
+
+/* seconds -> readable */
+function fmtS(s) { return fmtNs(s * 1e9); }
+
+function esc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/* ══ WIDGET 1 · the Big-O race ════════════════════════════════════ */
+(function () {
+  var sl = document.getElementById('bo-n');
+  var nv = document.getElementById('bo-nv');
+  var svg = document.getElementById('bo-svg');
+  var tb = document.querySelector('#bo-tbl tbody');
+  var note = document.getElementById('bo-note');
+  var bLog = document.getElementById('bo-log');
+  var bLin = document.getElementById('bo-lin');
+  if (!sl || !svg) return;
+
+  var NSOP = 40;                 /* nanoseconds per elementary op */
+  var BUDGET_NS = 1e6;           /* 1 ms decision budget */
+  var BUDGET_OPS = BUDGET_NS / NSOP;
+  var mode = 'log';
+
+  var CL = [
+    { nm: 'O(1)',       d: 'dict lookup, deque append', f: function (n) { return 1; } },
+    { nm: 'O(log n)',   d: 'heap push, binary search',   f: function (n) { return Math.max(1, Math.log2(n)); } },
+    { nm: 'O(n)',       d: 'scan a list',                f: function (n) { return n; } },
+    { nm: 'O(n log n)', d: 'sort',                       f: function (n) { return n * Math.max(1, Math.log2(n)); } },
+    { nm: 'O(n²)', d: 'nested loop over the data',  f: function (n) { return n * n; } }
+  ];
+
+  function nAt(i) { return Math.round(8 * Math.pow(125000, i / 48)); }
+
+  function draw() {
+    var n = nAt(+sl.value);
+    nv.textContent = commas(n);
+
+    var ops = CL.map(function (c) { return c.f(n); });
+    var maxOps = Math.max.apply(null, ops);
+    var X0 = 122, W = 424, ROW = 42, TOP = 34;
+
+    function frac(v) {
+      if (mode === 'log') return Math.log10(1 + v) / Math.log10(1 + maxOps);
+      return v / maxOps;
+    }
+
+    var s = '';
+    s += '<text x="8" y="16" font-size="9.5" fill="' + C.mute + '" letter-spacing="1.2">COMPLEXITY CLASS</text>';
+    s += '<text x="' + X0 + '" y="16" font-size="9.5" fill="' + C.mute + '" letter-spacing="1.2">'
+       + (mode === 'log' ? 'OPERATIONS · LOG SCALE' : 'OPERATIONS · LINEAR SCALE') + '</text>';
+
+    /* budget marker */
+    var bx = X0 + Math.min(1, frac(BUDGET_OPS)) * W;
+    if (BUDGET_OPS <= maxOps) {
+      s += '<line x1="' + bx.toFixed(1) + '" y1="24" x2="' + bx.toFixed(1) + '" y2="' + (TOP + 5 * ROW - 10)
+         + '" stroke="' + C.a3 + '" stroke-width="1.3" stroke-dasharray="4 3" />';
+      s += '<text x="' + (bx + 4).toFixed(1) + '" y="' + (TOP + 5 * ROW - 14) + '" font-size="9" fill="' + C.a3 + '">1 ms budget</text>';
+    }
+
+    CL.forEach(function (c, i) {
+      var y = TOP + i * ROW;
+      var v = ops[i];
+      var ns = v * NSOP;
+      var col = ns <= BUDGET_NS * 0.5 ? C.ok : (ns <= BUDGET_NS ? C.warn : C.bad);
+      var w = Math.max(2, frac(v) * W);
+
+      s += '<text x="8" y="' + (y + 11) + '" font-size="12" fill="' + C.ink + '" font-weight="600">' + c.nm + '</text>';
+      s += '<text x="8" y="' + (y + 23) + '" font-size="8.5" fill="' + C.mute + '">' + esc(c.d) + '</text>';
+      s += '<rect x="' + X0 + '" y="' + (y + 1) + '" width="' + W + '" height="19" rx="4" fill="' + C.p2 + '" stroke="' + C.line + '" />';
+      s += '<rect x="' + X0 + '" y="' + (y + 1) + '" width="' + w.toFixed(1) + '" height="19" rx="4" fill="' + col + '" opacity="0.82" />';
+      var lx = X0 + w + 7, anch = 'start', lcol = col;
+      if (lx > 500) { lx = X0 + w - 7; anch = 'end'; lcol = '#0f1115'; }
+      s += '<text x="' + lx.toFixed(1) + '" y="' + (y + 15) + '" font-size="10.5" text-anchor="' + anch
+         + '" fill="' + lcol + '" font-weight="600">' + fmtOps(v) + ' ops · ' + fmtNs(ns) + '</text>';
+    });
+
+    svg.innerHTML = s;
+
+    /* ratio table */
+    var n2 = n * 2, rows = '';
+    CL.forEach(function (c) {
+      var a = c.f(n), b = c.f(n2);
+      rows += '<tr><td class="mono">' + c.nm + '</td><td class="num">' + fmtOps(a)
+            + '</td><td class="num">' + fmtOps(b) + '</td><td class="num" style="color:'
+            + (b / a >= 3.5 ? C.bad : (b / a >= 1.9 ? C.warn : C.ok)) + '">'
+            + (b / a).toFixed(2) + '</td></tr>';
+    });
+    tb.innerHTML = rows;
+
+    var fit = 0, i;
+    for (i = 0; i < ops.length; i++) if (ops[i] * NSOP <= BUDGET_NS) fit++;
+    var cls = fit === 5 ? 'cool' : (fit <= 2 ? 'hot' : '');
+    note.className = 'warnbar ' + cls;
+    note.innerHTML = 'At <b>n = ' + commas(n) + '</b>, <b>' + fit + ' of 5</b> classes finish inside the 1 ms budget. '
+      + 'The quadratic loop needs <b>' + fmtOps(ops[4]) + '</b> operations &mdash; <b>' + fmtNs(ops[4] * NSOP)
+      + '</b>. Doubling n costs the logarithm <b>one extra step</b> and the quadratic loop <b>four times everything</b>.';
+  }
+
+  function setMode(m) {
+    mode = m;
+    bLog.setAttribute('aria-selected', m === 'log' ? 'true' : 'false');
+    bLin.setAttribute('aria-selected', m === 'linear' ? 'true' : 'false');
+    bLog.classList.toggle('on', m === 'log');
+    bLin.classList.toggle('on', m === 'linear');
+    draw();
+  }
+
+  sl.addEventListener('input', draw);
+  bLog.addEventListener('click', function () { setMode('log'); });
+  bLin.addEventListener('click', function () { setMode('linear'); });
+  setMode('log');
+})();
+
+/* ══ WIDGET 2 · order-book structure explorer ═════════════════════ */
+(function () {
+  var svg = document.getElementById('ob-svg');
+  if (!svg) return;
+  var priceHost = document.getElementById('ob-prices');
+  var qtySl = document.getElementById('ob-qty'), qtyV = document.getElementById('ob-qtyv');
+  var bBuy = document.getElementById('ob-buy'), bSell = document.getElementById('ob-sell');
+  var bMkt = document.getElementById('ob-mkt'), bCan = document.getElementById('ob-cancel');
+  var bRun = document.getElementById('ob-run50'), bRes = document.getElementById('ob-reset');
+  var oA = document.getElementById('ob-ops-a'), oB = document.getElementById('ob-ops-b');
+  var fA = document.getElementById('ob-fill-a'), fB = document.getElementById('ob-fill-b');
+  var sN = document.getElementById('ob-n'), sL = document.getElementById('ob-last'), sR = document.getElementById('ob-ratio');
+  var heapBox = document.getElementById('ob-heap'), logBox = document.getElementById('ob-log');
+  var note = document.getElementById('ob-note');
+
+  var PRICES = [401.70, 401.80, 401.90, 402.00, 402.10, 402.20, 402.30, 402.40];
+  var MIDREF = 402.05;
+  var st, rnd;
+
+  /* ── heap with counted sift steps ── */
+  function cmp(a, b) { return (a[0] - b[0]) || (a[1] - b[1]); }
+  function hpush(h, it) {
+    var c = 0, i;
+    h.push(it); i = h.length - 1;
+    while (i > 0) {
+      var p = (i - 1) >> 1; c++;
+      if (cmp(h[i], h[p]) < 0) { var t = h[i]; h[i] = h[p]; h[p] = t; i = p; } else break;
+    }
+    return c + 1;
+  }
+  function hpop(h) {
+    var c = 0, top = h[0], last = h.pop();
+    if (h.length) {
+      h[0] = last;
+      var i = 0;
+      for (;;) {
+        var l = 2 * i + 1, r = l + 1, m = i;
+        if (l < h.length) { c++; if (cmp(h[l], h[m]) < 0) m = l; }
+        if (r < h.length) { c++; if (cmp(h[r], h[m]) < 0) m = r; }
+        if (m === i) break;
+        var t = h[i]; h[i] = h[m]; h[m] = t; i = m;
+      }
+    }
+    return { item: top, cost: c + 1 };
+  }
+
+  /* ── sorted list with counted comparisons + shifts ── */
+  function kBid(o) { return -o.price * 1e7 + o.seq; }
+  function kAsk(o) { return o.price * 1e7 + o.seq; }
+  function sortedInsert(arr, it, kf) {
+    var lo = 0, hi = arr.length, c = 0;
+    while (lo < hi) { var m = (lo + hi) >> 1; c++; if (kf(arr[m]) < kf(it)) lo = m + 1; else hi = m; }
+    arr.splice(lo, 0, it);
+    return c + (arr.length - lo);
+  }
+  function sortedCancel(arr, id) {
+    var i = 0;
+    for (i = 0; i < arr.length; i++) { if (arr[i].id === id) break; }
+    var cost = i + 1;
+    if (i < arr.length) { arr.splice(i, 1); cost += arr.length - i; }
+    return cost;
+  }
+
+  function bump(a, b, msg) {
+    st.opsA += a; st.opsB += b; st.lastA = a; st.lastB = b;
+    st.log.unshift(msg);
+    if (st.log.length > 40) st.log.pop();
+  }
+
+  function insert(side, price, qty) {
+    st.seq++; st.nid++;
+    var o = { id: st.nid, side: side, price: price, qty: qty, seq: st.seq };
+    st.orders[o.id] = o;
+    var a = 1;
+    a += side === 'buy' ? hpush(st.bidHeap, [-price, o.seq, o.id]) : hpush(st.askHeap, [price, o.seq, o.id]);
+    var b = side === 'buy' ? sortedInsert(st.bidSorted, o, kBid) : sortedInsert(st.askSorted, o, kAsk);
+    bump(a, b, 'insert  ' + (side === 'buy' ? 'BID' : 'ASK') + '  ' + qty + ' @ ' + price.toFixed(2)
+       + '   <b>id ' + o.id + '</b> seq ' + o.seq);
+  }
+
+  function cancelRandom() {
+    var ids = Object.keys(st.orders);
+    if (!ids.length) { bump(0, 0, 'cancel  &mdash; book is empty'); return; }
+    var id = ids[Math.floor(rnd() * ids.length)];
+    var o = st.orders[id];
+    delete st.orders[id];
+    var b = o.side === 'buy' ? sortedCancel(st.bidSorted, o.id) : sortedCancel(st.askSorted, o.id);
+    st.stale++;
+    bump(1, b, 'cancel  <b>id ' + o.id + '</b> @ ' + o.price.toFixed(2)
+       + '   dict delete only &mdash; heap entry left stale');
+  }
+
+  function market(qty) {
+    var side = st.side;
+    var heap = side === 'buy' ? st.askHeap : st.bidHeap;
+    var arr = side === 'buy' ? st.askSorted : st.bidSorted;
+    var need = qty, a = 0, b = 0, filled = 0, disc = 0, lv = 0;
+    while (need > 0 && arr.length) {
+      while (heap.length) {
+        a += 1;
+        if (st.orders[heap[0][2]]) break;
+        a += hpop(heap).cost; disc++;
+      }
+      var o = arr[0];
+      var take = Math.min(need, o.qty);
+      need -= take; filled += take; lv++;
+      b += 1;
+      if (take >= o.qty) {
+        delete st.orders[o.id];
+        arr.splice(0, 1);
+        b += arr.length;
+        if (heap.length) a += hpop(heap).cost;
+      } else { o.qty -= take; a += 1; b += 1; }
+    }
+    bump(a, b, 'market  ' + (side === 'buy' ? 'BUY' : 'SELL') + ' ' + qty + '  filled ' + filled
+       + ' across ' + lv + ' order' + (lv === 1 ? '' : 's')
+       + (disc ? '   <b>' + disc + ' stale</b> heap entr' + (disc === 1 ? 'y' : 'ies') + ' cleaned' : ''));
+  }
+
+  function reset() {
+    st = {
+      orders: {}, seq: 0, nid: 0, side: 'buy',
+      bidHeap: [], askHeap: [], bidSorted: [], askSorted: [],
+      opsA: 0, opsB: 0, lastA: 0, lastB: 0, stale: 0, log: []
+    };
+    rnd = mul32(20240905);
+    insert('buy', 402.00, 600); insert('buy', 401.90, 900); insert('buy', 401.80, 1300);
+    insert('sell', 402.10, 500); insert('sell', 402.20, 800); insert('sell', 402.30, 1200);
+    st.opsA = 0; st.opsB = 0; st.lastA = 0; st.lastB = 0; st.log = [];
+    st.log.unshift('reset   book seeded with 6 resting orders, counters zeroed');
+    setSide('buy');
+    render();
+  }
+
+  function run50() {
+    var i;
+    for (i = 0; i < 50; i++) {
+      var r = rnd();
+      if (r < 0.58) {
+        var p = PRICES[Math.floor(rnd() * PRICES.length)];
+        var sd = p <= MIDREF ? 'buy' : 'sell';
+        insert(sd, p, 100 * (1 + Math.floor(rnd() * 12)));
+      } else if (r < 0.82) {
+        cancelRandom();
+      } else {
+        st.side = rnd() < 0.5 ? 'buy' : 'sell';
+        market(100 * (1 + Math.floor(rnd() * 8)));
+      }
+    }
+    setSide(st.side);
+    render();
+  }
+
+  function setSide(s) {
+    st.side = s;
+    bBuy.setAttribute('aria-pressed', s === 'buy' ? 'true' : 'false');
+    bSell.setAttribute('aria-pressed', s === 'sell' ? 'true' : 'false');
+    bBuy.classList.toggle('on', s === 'buy');
+    bSell.classList.toggle('on', s === 'sell');
+  }
+
+  function render() {
+    /* aggregate canonical dict into levels */
+    var bid = {}, ask = {}, k, o, depth = 0;
+    for (k in st.orders) {
+      o = st.orders[k]; depth++;
+      var m = o.side === 'buy' ? bid : ask;
+      var key = o.price.toFixed(2);
+      m[key] = (m[key] || 0) + o.qty;
+    }
+    var bl = Object.keys(bid).map(Number).sort(function (x, y) { return y - x; }).slice(0, 5);
+    var al = Object.keys(ask).map(Number).sort(function (x, y) { return x - y; }).slice(0, 5);
+
+    var maxQ = 100, i;
+    for (i = 0; i < bl.length; i++) maxQ = Math.max(maxQ, bid[bl[i].toFixed(2)]);
+    for (i = 0; i < al.length; i++) maxQ = Math.max(maxQ, ask[al[i].toFixed(2)]);
+
+    var s = '', BX = 214, BW = 328, RH = 24;
+    function row(y, px, qty, isBid, best) {
+      var w = Math.max(2, qty / maxQ * BW);
+      var fill = isBid ? 'rgba(63,185,80,0.30)' : 'rgba(248,81,73,0.28)';
+      var stroke = isBid ? 'rgba(63,185,80,0.65)' : 'rgba(248,81,73,0.6)';
+      var pcol = isBid ? '#8fd39b' : '#f0a49f';
+      s += '<rect x="' + BX + '" y="' + y + '" width="' + BW + '" height="' + (RH - 6) + '" rx="3" fill="' + C.p2 + '" />';
+      s += '<rect x="' + BX + '" y="' + y + '" width="' + w.toFixed(1) + '" height="' + (RH - 6)
+         + '" rx="3" fill="' + fill + '" stroke="' + stroke + '" />';
+      s += '<text x="52" y="' + (y + 13) + '" font-size="11.5" fill="' + pcol + '" font-weight="600">' + px.toFixed(2) + '</text>';
+      s += '<text x="200" y="' + (y + 13) + '" font-size="11" text-anchor="end" fill="' + C.dim + '">' + commas(qty) + '</text>';
+      if (best) {
+        s += '<text x="14" y="' + (y + 13) + '" font-size="9" fill="' + C.a3 + '">BEST</text>';
+        s += '<rect x="' + (BX - 3) + '" y="' + (y - 2) + '" width="' + (BW + 6) + '" height="' + (RH - 2)
+           + '" rx="4" fill="none" stroke="' + C.a3 + '" stroke-width="1" opacity="0.75" />';
+      }
+    }
+
+    s += '<text x="14" y="11" font-size="9" fill="' + C.mute + '" letter-spacing="1.2">ASKS · SELL SIDE</text>';
+    for (i = 0; i < 5; i++) {
+      var idx = al.length - 1 - i;      /* worst ask at the top */
+      var y = 18 + i * RH;
+      if (idx >= 0) row(y, al[idx], ask[al[idx].toFixed(2)], false, idx === 0);
+      else s += '<rect x="' + BX + '" y="' + y + '" width="' + BW + '" height="' + (RH - 6) + '" rx="3" fill="' + C.p2 + '" opacity="0.45" />';
+    }
+    var midY = 18 + 5 * RH + 6;
+    var bestBid = bl.length ? bl[0] : null, bestAsk = al.length ? al[0] : null;
+    var spread = (bestBid !== null && bestAsk !== null) ? (bestAsk - bestBid) : null;
+    s += '<line x1="14" y1="' + midY + '" x2="546" y2="' + midY + '" stroke="' + C.line2 + '" stroke-dasharray="3 3" />';
+    s += '<text x="14" y="' + (midY + 15) + '" font-size="10" fill="' + C.a3 + '">'
+       + (spread === null ? 'no two-sided market' :
+          'spread ' + spread.toFixed(2) + '   mid ' + ((bestAsk + bestBid) / 2).toFixed(3)) + '</text>';
+    s += '<text x="546" y="' + (midY + 15) + '" font-size="10" text-anchor="end" fill="' + C.mute + '">'
+       + depth + ' resting orders in the dict</text>';
+    s += '<text x="14" y="' + (midY + 34) + '" font-size="9" fill="' + C.mute + '" letter-spacing="1.2">BIDS · BUY SIDE</text>';
+    for (i = 0; i < 5; i++) {
+      var y2 = midY + 40 + i * RH;
+      if (i < bl.length) row(y2, bl[i], bid[bl[i].toFixed(2)], true, i === 0);
+      else s += '<rect x="' + BX + '" y="' + y2 + '" width="' + BW + '" height="' + (RH - 6) + '" rx="3" fill="' + C.p2 + '" opacity="0.45" />';
+    }
+    svg.innerHTML = s;
+
+    /* counters */
+    var mx = Math.max(st.opsA, st.opsB, 1);
+    oA.textContent = commas(st.opsA);
+    oB.textContent = commas(st.opsB);
+    fA.style.width = (st.opsA / mx * 100).toFixed(1) + '%';
+    fB.style.width = (st.opsB / mx * 100).toFixed(1) + '%';
+    sN.textContent = commas(depth);
+    sL.textContent = st.lastA + ' / ' + st.lastB;
+    var ratio = st.opsA > 0 ? st.opsB / st.opsA : 0;
+    sR.textContent = ratio ? ratio.toFixed(2) + '×' : '—';
+
+    /* heap peek */
+    var hs = '', shown = Math.min(6, st.bidHeap.length);
+    if (!shown) hs = '<div class="row"><span>bid heap empty</span><span></span></div>';
+    for (i = 0; i < shown; i++) {
+      var e = st.bidHeap[i];
+      var live = !!st.orders[e[2]];
+      hs += '<div class="row' + (live ? '' : ' stale') + '"><span>[' + i + ']  ('
+          + e[0].toFixed(2) + ', ' + e[1] + ', ' + e[2] + ')</span><span class="why">'
+          + (live ? '' : 'STALE · cleaned on access') + '</span></div>';
+    }
+    if (st.bidHeap.length > shown) {
+      hs += '<div class="row" style="border:none"><span style="color:' + C.mute + '">… '
+          + (st.bidHeap.length - shown) + ' more heap entries</span><span></span></div>';
+    }
+    heapBox.innerHTML = hs;
+
+    var staleN = 0;
+    for (i = 0; i < st.bidHeap.length; i++) if (!st.orders[st.bidHeap[i][2]]) staleN++;
+    for (i = 0; i < st.askHeap.length; i++) if (!st.orders[st.askHeap[i][2]]) staleN++;
+
+    var cls = ratio >= 3 ? 'hot' : (ratio > 0 && ratio < 1.6 ? '' : '');
+    note.className = 'warnbar ' + (ratio >= 3 ? 'hot' : (ratio >= 1.6 ? '' : 'cool'));
+    note.innerHTML = 'The sorted list has spent <b>' + (ratio ? ratio.toFixed(2) + '×' : '—')
+      + '</b> the operations of the heap-plus-dict design on the same command stream, and the gap widens with book '
+      + 'depth because every insert and cancel shifts the array. There '
+      + (staleN === 1 ? 'is <b>1</b> lazily-stale heap entry' : 'are <b>' + staleN + '</b> lazily-stale heap entries')
+      + ' right now &mdash; invisible to every read, because reads iterate the canonical dict.';
+
+    /* log */
+    logBox.innerHTML = st.log.map(function (l) { return '<div>' + l + '</div>'; }).join('');
+  }
+
+  /* price ladder buttons */
+  (function () {
+    var h = '', i;
+    for (i = 0; i < PRICES.length; i++) {
+      var p = PRICES[i];
+      h += '<button class="pricebtn ' + (p <= MIDREF ? 'bidside' : 'askside') + '" data-p="' + p.toFixed(2)
+         + '" aria-label="Rest a limit order at ' + p.toFixed(2) + '">' + p.toFixed(2) + '</button>';
+    }
+    priceHost.innerHTML = h;
+    priceHost.addEventListener('click', function (ev) {
+      var t = ev.target.closest ? ev.target.closest('.pricebtn') : null;
+      if (!t) return;
+      insert(st.side, parseFloat(t.getAttribute('data-p')), +qtySl.value);
+      render();
+    });
+  })();
+
+  qtySl.addEventListener('input', function () { qtyV.textContent = commas(+qtySl.value); });
+  bBuy.addEventListener('click', function () { setSide('buy'); });
+  bSell.addEventListener('click', function () { setSide('sell'); });
+  bMkt.addEventListener('click', function () { market(+qtySl.value); render(); });
+  bCan.addEventListener('click', function () { cancelRandom(); render(); });
+  bRun.addEventListener('click', run50);
+  bRes.addEventListener('click', reset);
+  reset();
+})();
+
+/* ══ WIDGET 3 · rolling statistics, naive vs Welford ══════════════ */
+(function () {
+  var svg = document.getElementById('rs-svg');
+  if (!svg) return;
+  var kS = document.getElementById('rs-k'), kV = document.getElementById('rs-kv');
+  var nS = document.getElementById('rs-n'), nV = document.getElementById('rs-nv');
+  var play = document.getElementById('rs-play'), rst = document.getElementById('rs-reset');
+  var fSlow = document.getElementById('rs-fill-slow'), fFast = document.getElementById('rs-fill-fast');
+  var tSlow = document.getElementById('rs-t-slow'), tFast = document.getElementById('rs-t-fast');
+  var otS = document.getElementById('rs-ot-slow'), otF = document.getElementById('rs-ot-fast');
+  var spd = document.getElementById('rs-speed'), note = document.getElementById('rs-note');
+  var mS = document.getElementById('rs-m-slow'), mF = document.getElementById('rs-m-fast');
+  var vS = document.getElementById('rs-v-slow'), vF = document.getElementById('rs-v-fast');
+  var dEl = document.getElementById('rs-diff');
+
+  var NSOP = 40, MAXN = 20000;
+  var PX = new Float64Array(MAXN);
+  (function () {
+    var r = mul32(70707), p = 402.15, i;
+    for (i = 0; i < MAXN; i++) {
+      p += (r() - 0.5) * 0.09 + (402.15 - p) * 0.0012;
+      PX[i] = p;
+    }
+  })();
+
+  var timer = null, tCur = 0;
+
+  function cumSlow(T, k) {
+    if (T <= k) return T * (T + 1);
+    return k * (k + 1) + 2 * k * (T - k);
+  }
+  function cumFast(T) { return 4 * T; }
+
+  function stats(T, k) {
+    var w = Math.min(T, k), start = Math.max(0, T - w), i;
+    /* naive: two full passes over the window */
+    var sum = 0;
+    for (i = start; i < T; i++) sum += PX[i];
+    var mn = sum / w, ss = 0;
+    for (i = start; i < T; i++) { var d = PX[i] - mn; ss += d * d; }
+    var vn = w > 1 ? ss / (w - 1) : 0;
+    /* Welford: one incremental pass, no history */
+    var n = 0, mean = 0, m2 = 0;
+    for (i = start; i < T; i++) {
+      n++;
+      var dd = PX[i] - mean;
+      mean += dd / n;
+      m2 += dd * (PX[i] - mean);
+    }
+    var vw = n > 1 ? m2 / (n - 1) : 0;
+    return { mn: mn, vn: vn, mw: mean, vw: vw };
+  }
+
+  function draw() {
+    var k = +kS.value, n = +nS.value;
+    kV.textContent = commas(k);
+    nV.textContent = commas(n);
+    var T = timer ? Math.max(1, Math.min(n, tCur)) : n;
+
+    var L = 62, R = 12, TP = 16, B = 30, W = 600 - L - R, H = 250 - TP - B;
+    var maxY = Math.max(1, cumSlow(n, k));
+    var s = '';
+
+    /* grid */
+    var g;
+    for (g = 0; g <= 4; g++) {
+      var gy = TP + H - g / 4 * H;
+      s += '<line x1="' + L + '" y1="' + gy.toFixed(1) + '" x2="' + (L + W) + '" y2="' + gy.toFixed(1)
+         + '" stroke="' + C.line + '" stroke-width="1" />';
+      s += '<text x="' + (L - 7) + '" y="' + (gy + 3.5).toFixed(1) + '" font-size="9" text-anchor="end" fill="'
+         + C.mute + '">' + fmtOps(maxY * g / 4) + '</text>';
+    }
+    for (g = 0; g <= 4; g++) {
+      var gx = L + g / 4 * W;
+      s += '<text x="' + gx.toFixed(1) + '" y="' + (TP + H + 16) + '" font-size="9" text-anchor="middle" fill="'
+         + C.mute + '">' + commas(n * g / 4) + '</text>';
+    }
+    s += '<text x="' + (L + W / 2) + '" y="' + (TP + H + 28) + '" font-size="9" text-anchor="middle" fill="'
+       + C.mute + '" letter-spacing="1.1">TICKS ELAPSED</text>';
+
+    function path(fn, upto) {
+      var d = '', i, STEPS = 90;
+      for (i = 0; i <= STEPS; i++) {
+        var t = upto * i / STEPS;
+        var x = L + (t / n) * W;
+        var y = TP + H - Math.min(1, fn(t) / maxY) * H;
+        d += (i ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1) + ' ';
+      }
+      return d;
+    }
+
+    /* faint full-session curves for reference while playing */
+    if (timer) {
+      s += '<path d="' + path(function (t) { return cumSlow(t, k); }, n) + '" fill="none" stroke="' + C.bad
+         + '" stroke-width="1" opacity="0.22" stroke-dasharray="3 3" />';
+    }
+    s += '<path d="' + path(function (t) { return cumSlow(t, k); }, T) + '" fill="none" stroke="' + C.bad + '" stroke-width="2.1" />';
+    s += '<path d="' + path(cumFast, T) + '" fill="none" stroke="' + C.ok + '" stroke-width="2.1" />';
+
+    /* end dots + labels */
+    var xe = L + (T / n) * W;
+    var ys = TP + H - Math.min(1, cumSlow(T, k) / maxY) * H;
+    var yf = TP + H - Math.min(1, cumFast(T) / maxY) * H;
+    s += '<circle cx="' + xe.toFixed(1) + '" cy="' + ys.toFixed(1) + '" r="3.2" fill="' + C.bad + '" />';
+    s += '<circle cx="' + xe.toFixed(1) + '" cy="' + yf.toFixed(1) + '" r="3.2" fill="' + C.ok + '" />';
+    s += '<text x="' + (L + 8) + '" y="' + (TP + 14) + '" font-size="10" fill="' + C.bad
+       + '">naive recompute · O(k) per tick</text>';
+    s += '<text x="' + (L + 8) + '" y="' + (TP + H - 8) + '" font-size="10" fill="' + C.ok
+       + '">deque + Welford · O(1) per tick</text>';
+    svg.innerHTML = s;
+
+    /* numbers */
+    var cs = cumSlow(T, k), cf = cumFast(T);
+    var ratio = cf > 0 ? cs / cf : 0;
+    var mx = Math.max(cs, cf, 1);
+    fSlow.style.width = (cs / mx * 100).toFixed(1) + '%';
+    fFast.style.width = Math.max(0.6, cf / mx * 100).toFixed(1) + '%';
+    tSlow.textContent = fmtNs(cs * NSOP);
+    tFast.textContent = fmtNs(cf * NSOP);
+    otS.textContent = commas(2 * Math.min(T, k));
+    otF.textContent = '4';
+    spd.textContent = ratio.toFixed(1) + '×';
+
+    var q = stats(T, k);
+    mS.textContent = q.mn.toFixed(9);
+    mF.textContent = q.mw.toFixed(9);
+    vS.textContent = q.vn.toFixed(9);
+    vF.textContent = q.vw.toFixed(9);
+    var diff = Math.max(Math.abs(q.mn - q.mw), Math.abs(q.vn - q.vw));
+    dEl.textContent = diff === 0 ? '0 (exact)' : diff.toExponential(1);
+
+    note.className = 'warnbar ' + (ratio >= 20 ? 'hot' : (ratio >= 5 ? '' : 'cool'));
+    note.innerHTML = 'Over <b>' + commas(T) + '</b> ticks with a window of <b>' + commas(k)
+      + '</b>, the naive rescan burns <b>' + fmtOps(cs) + '</b> operations against <b>' + fmtOps(cf)
+      + '</b> for the rolling version &mdash; <b>' + ratio.toFixed(1) + '×</b> more work for an answer that agrees '
+      + 'to ' + (diff === 0 ? 'the last bit' : diff.toExponential(1)) + '. '
+      + 'Widen the window and the naive lane gets worse; the rolling lane never moves.';
+  }
+
+  function stop() {
+    if (timer) { clearInterval(timer); timer = null; }
+    play.textContent = '▶ Play the session';
+    play.setAttribute('aria-pressed', 'false');
+  }
+
+  play.addEventListener('click', function () {
+    if (timer) { stop(); draw(); return; }
+    var n = +nS.value;
+    tCur = 0;
+    play.textContent = '⏸ Pause';
+    play.setAttribute('aria-pressed', 'true');
+    timer = setInterval(function () {
+      tCur += Math.max(1, Math.round(n / 60));
+      if (tCur >= n) { tCur = n; draw(); stop(); return; }
+      draw();
+    }, 40);
+  });
+  rst.addEventListener('click', function () { stop(); tCur = 0; draw(); });
+  kS.addEventListener('input', draw);
+  nS.addEventListener('input', function () { if (timer) { stop(); } draw(); });
+  draw();
+})();
+
+/* ══ WIDGET 4 · sustainable ticks/second and the tail ═════════════ */
+(function () {
+  var svg = document.getElementById('tl-svg');
+  if (!svg) return;
+  var tabs = [document.getElementById('tl-t0'), document.getElementById('tl-t1'), document.getElementById('tl-t2')];
+  var dS = document.getElementById('tl-depth'), dV = document.getElementById('tl-depthv');
+  var rS = document.getElementById('tl-rate'), rV = document.getElementById('tl-ratev');
+  var shock = document.getElementById('tl-shock');
+  var eSvc = document.getElementById('tl-svc'), eCap = document.getElementById('tl-cap');
+  var eRho = document.getElementById('tl-rho'), eMean = document.getElementById('tl-mean');
+  var e50 = document.getElementById('tl-p50'), e95 = document.getElementById('tl-p95'), e99 = document.getElementById('tl-p99');
+  var note = document.getElementById('tl-note');
+
+  var NSOP = 40e-9;            /* seconds per elementary op */
+  var BUDGET = 1e-3;           /* 1 ms decision budget */
+  var impl = 2, burst = false;
+
+  var OPS = [
+    function (n) { return n; },                                   /* linear scan */
+    function (n) { return 0.5 * n + Math.max(1, Math.log2(n)); }, /* sorted list */
+    function (n) { return Math.max(1, Math.log2(n)) + 2; }        /* heap + dict */
+  ];
+  var NAMES = ['linear scan list', 'sorted list', 'heap + dict'];
+
+  /* fixed-seed exponential sample bank, reused so the picture is reproducible */
+  var UNI = new Float64Array(5000);
+  (function () {
+    var r = mul32(31337), i;
+    for (i = 0; i < UNI.length; i++) UNI[i] = Math.max(1e-9, r());
+  })();
+
+  function draw() {
+    var n = +dS.value, rate = +rS.value;
+    dV.textContent = commas(n);
+    rV.textContent = commas(rate);
+
+    var ops = OPS[impl](n);
+    var S = ops * NSOP;
+    var cap = 1 / S;
+    var lam = rate * (burst ? 6 : 1);
+    var rho = lam * S;
+    var sat = rho >= 1;
+    var rhoE = Math.min(rho, 0.985);
+    var W = S / (1 - rhoE);
+
+    var p50 = Math.LN2 * W, p95 = Math.log(20) * W, p99 = Math.log(100) * W;
+
+    eSvc.textContent = fmtS(S);
+    eCap.textContent = cap >= 1e6 ? (cap / 1e6).toFixed(2) + 'M' : commas(cap);
+    eRho.textContent = (rho * 100).toFixed(rho < 10 ? 1 : 0) + '%';
+    eRho.className = 'v ' + (rho >= 0.9 ? 'bad' : (rho >= 0.6 ? 'warn' : 'ok'));
+    eMean.textContent = fmtS(W);
+    eMean.className = 'v ' + (W > BUDGET ? 'bad' : 'ok');
+    e50.textContent = fmtS(p50); e50.className = 'v ' + (p50 > BUDGET ? 'bad' : 'ok');
+    e95.textContent = fmtS(p95); e95.className = 'v ' + (p95 > BUDGET ? 'bad' : 'warn');
+    e99.textContent = fmtS(p99); e99.className = 'v ' + (p99 > BUDGET ? 'bad' : 'ok');
+
+    /* histogram on a log-decade axis: 10 ns .. 1 s */
+    var L = 54, R = 14, TP = 18, B = 36, WD = 620 - L - R, H = 262 - TP - B;
+    var LO = -8, HI = 0, BINS = 96;
+    var counts = new Float64Array(BINS), i;
+    for (i = 0; i < UNI.length; i++) {
+      var x = -Math.log(UNI[i]) * W;
+      var lg = Math.log10(x);
+      if (lg < LO) lg = LO;
+      if (lg > HI) lg = HI - 1e-9;
+      var b = Math.floor((lg - LO) / (HI - LO) * BINS);
+      if (b >= 0 && b < BINS) counts[b] += 1;
+    }
+    var mxc = 1;
+    for (i = 0; i < BINS; i++) mxc = Math.max(mxc, counts[i]);
+
+    function px(sec) {
+      var lg = Math.log10(Math.max(1e-9, sec));
+      return L + Math.max(0, Math.min(1, (lg - LO) / (HI - LO))) * WD;
+    }
+
+    var s = '';
+    /* past-budget shading */
+    var bx = px(BUDGET);
+    s += '<rect x="' + bx.toFixed(1) + '" y="' + TP + '" width="' + Math.max(0, L + WD - bx).toFixed(1)
+       + '" height="' + H + '" fill="rgba(248,81,73,0.13)" />';
+
+    /* decade gridlines */
+    var LBL = ['10ns', '100ns', '1µs', '10µs', '100µs', '1ms', '10ms', '100ms', '1s'];
+    for (i = 0; i <= 8; i++) {
+      var gx = L + i / 8 * WD;
+      s += '<line x1="' + gx.toFixed(1) + '" y1="' + TP + '" x2="' + gx.toFixed(1) + '" y2="' + (TP + H)
+         + '" stroke="' + C.line + '" stroke-width="1" />';
+      s += '<text x="' + gx.toFixed(1) + '" y="' + (TP + H + 15) + '" font-size="9" text-anchor="middle" fill="'
+         + C.mute + '">' + LBL[i] + '</text>';
+    }
+
+    /* bars */
+    var bw = WD / BINS;
+    for (i = 0; i < BINS; i++) {
+      if (!counts[i]) continue;
+      var h = counts[i] / mxc * (H - 16);
+      var bxx = L + i * bw;
+      var over = (L + i * bw + bw / 2) >= bx;
+      s += '<rect x="' + bxx.toFixed(1) + '" y="' + (TP + H - h).toFixed(1) + '" width="'
+         + Math.max(1, bw - 0.6).toFixed(1) + '" height="' + h.toFixed(1) + '" fill="'
+         + (over ? C.bad : C.a2) + '" opacity="' + (over ? '0.85' : '0.72') + '" />';
+    }
+
+    /* percentile markers */
+    function mark(sec, col, lbl, dy) {
+      var x = px(sec);
+      s += '<line x1="' + x.toFixed(1) + '" y1="' + TP + '" x2="' + x.toFixed(1) + '" y2="' + (TP + H)
+         + '" stroke="' + col + '" stroke-width="1.5" />';
+      var anch = x > L + WD - 60 ? 'end' : 'start';
+      s += '<text x="' + (x + (anch === 'end' ? -4 : 4)).toFixed(1) + '" y="' + (TP + dy)
+         + '" font-size="9.5" text-anchor="' + anch + '" fill="' + col + '" font-weight="600">' + lbl + '</text>';
+    }
+    mark(p50, C.ok, 'p50 ' + fmtS(p50), 12);
+    mark(p95, C.warn, 'p95 ' + fmtS(p95), 26);
+    mark(p99, C.bad, 'p99 ' + fmtS(p99), 40);
+    s += '<line x1="' + bx.toFixed(1) + '" y1="' + TP + '" x2="' + bx.toFixed(1) + '" y2="' + (TP + H)
+       + '" stroke="' + C.a3 + '" stroke-width="1.3" stroke-dasharray="4 3" />';
+    s += '<text x="' + (bx - 5).toFixed(1) + '" y="' + (TP + H - 6) + '" font-size="9.5" text-anchor="end" fill="'
+       + C.a3 + '">1 ms budget</text>';
+    s += '<text x="' + L + '" y="' + (TP - 6) + '" font-size="9" fill="' + C.mute
+       + '" letter-spacing="1.1">RESPONSE TIME PER MESSAGE · ' + NAMES[impl].toUpperCase() + '</text>';
+    s += '<text x="' + (L + WD / 2) + '" y="' + (TP + H + 30) + '" font-size="9" text-anchor="middle" fill="'
+       + C.mute + '" letter-spacing="1.1">LATENCY · LOG SCALE</text>';
+    svg.innerHTML = s;
+
+    var over99 = p99 > BUDGET, overMean = W > BUDGET;
+    note.className = 'warnbar ' + (sat || over99 ? 'hot' : 'cool');
+    if (sat) {
+      note.innerHTML = '<b>Saturated.</b> ' + commas(lam) + ' messages/second arriving against a capacity of <b>'
+        + commas(cap) + '</b>: utilisation is <b>' + (rho * 100).toFixed(0)
+        + '%</b>, the queue grows without bound and every quote you publish is stale. This is not a tuning problem, '
+        + 'it is the wrong data structure &mdash; switch to heap + dict and watch the service cost collapse.';
+    } else if (over99) {
+      note.innerHTML = 'The mean looks survivable at <b>' + fmtS(W) + '</b>, but the <b>p99 is ' + fmtS(p99)
+        + '</b> &mdash; past the 1 ms budget. One message in a hundred goes blind, and at utilisation <b>'
+        + (rho * 100).toFixed(0) + '%</b> those hundredths cluster into bursts. That is where you get picked off, '
+        + 'and it is invisible in the average.';
+    } else {
+      note.innerHTML = 'Comfortable: <b>' + fmtS(p99) + '</b> at the p99 against a 1 ms budget, utilisation <b>'
+        + (rho * 100).toFixed(1) + '%</b>, sustainable throughput <b>' + commas(cap)
+        + '</b> messages/second. Push the depth or fire the shock burst and find the edge before the market does.';
+    }
+  }
+
+  function setImpl(i) {
+    impl = i;
+    tabs.forEach(function (t, j) { t.setAttribute('aria-selected', i === j ? 'true' : 'false'); });
+    draw();
+  }
+  tabs.forEach(function (t, j) { t.addEventListener('click', function () { setImpl(j); }); });
+  dS.addEventListener('input', draw);
+  rS.addEventListener('input', draw);
+  shock.addEventListener('click', function () {
+    burst = !burst;
+    shock.setAttribute('aria-pressed', burst ? 'true' : 'false');
+    shock.classList.toggle('on', burst);
+    draw();
+  });
+  setImpl(2);
+})();
+
+/* ══ Check-yourself quiz ══════════════════════════════════════════ */
+(function () {
+  var qs = document.querySelectorAll('#check .q');
+  Array.prototype.forEach.call(qs, function (q) {
+    var fb = q.querySelector('.fb');
+    var opts = Array.prototype.slice.call(q.querySelectorAll('.opt'));
+    opts.forEach(function (o) {
+      o.addEventListener('click', function () {
+        if (q.dataset.done === '1') return;
+        q.dataset.done = '1';
+        var right = o.dataset.ok === '1';
+        opts.forEach(function (x) {
+          x.classList.add('locked');
+          if (x.dataset.ok === '1') x.classList.add('right');
+        });
+        if (!right) o.classList.add('wrong');
+        fb.className = 'fb show ' + (right ? 'ok' : 'no');
+        fb.innerHTML = '<b>' + (right ? 'Correct.' : 'Not quite.') + '</b> ' + q.dataset.why;
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>

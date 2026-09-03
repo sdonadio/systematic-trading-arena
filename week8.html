@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="data:," />
+<title>Week 8 · CI/CD, Testing &amp; UI — Systematic Trading Arena</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root{
+    /* ── Systematic Trading Arena · shared palette (identical on every page) ── */
+    --accent:       #3b82f6;
+    --accent-2:     #7cb0ff;
+    --accent-3:     #b9d4ff;
+    --accent-rgb:   59,130,246;
+    --accent-2-rgb: 124,176,255;
+    --bg:           #0f1115;
+    --panel:        #181b22;
+    --panel2:       #1e222b;
+    --panel-2:      #13161b;
+    --ink:          #e8e6e3;
+    --ink-dim:      #c6c3bf;
+    --ink-mute:     #6f757f;
+    --muted:        #9aa0a6;
+    --dim:          #5f6673;
+    --line:         #272c36;
+    --line-2:       #333a47;
+    --border:       #272c36;
+    --ok:           #3fb950;
+    --warn:         #d29922;
+    --bad:          #f85149;
+    --info:         #6cb6ff;
+    --sky:          #58a6ff;
+    --violet:       #a78bfa;
+    --teal:         #2dd4bf;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14.5px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── nav / footer (series components) ───────────────────────── */
+  nav.top {
+    position: sticky; top: 0; z-index: 60;
+    display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+    padding: 11px 22px;
+    background: rgba(15,17,21,0.93);
+    backdrop-filter: blur(9px);
+    border-bottom: 1px solid var(--border);
+  }
+  nav.top > a {
+    color: var(--ink); font-weight: 700; font-size: 13.5px;
+    text-decoration: none; letter-spacing: -0.2px;
+    border-left: 3px solid var(--accent); padding-left: 10px;
+  }
+  nav.top > a:hover { color: var(--accent-2); }
+  nav.top .crumbs { font-size: 12px; color: var(--muted); }
+  nav.top .crumbs a { color: var(--muted); text-decoration: none; }
+  nav.top .crumbs a:hover { color: var(--ink); text-decoration: underline; }
+  nav.top .crumbs b { color: var(--ink); font-weight: 600; }
+
+  footer {
+    margin-top: 40px; border-top: 1px solid var(--border);
+    padding: 26px 22px 40px; text-align: center;
+    font-size: 11.5px; color: var(--muted); background: var(--panel-2);
+  }
+  footer a { color: var(--accent-2); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* ── layout ─────────────────────────────────────────────────── */
+  main { max-width: 1180px; margin: 0 auto; padding: 0 22px; }
+  section { padding: 34px 0; border-top: 1px solid var(--border); }
+  section:first-of-type { border-top: none; }
+
+  h1, h2, h3, h4 { letter-spacing: -0.4px; line-height: 1.24; }
+  h2 { font-size: 22px; font-weight: 700; }
+  h3 { font-size: 15px; font-weight: 700; }
+  p { margin-bottom: 11px; max-width: 78ch; }
+  p:last-child { margin-bottom: 0; }
+  a { color: var(--accent-2); }
+
+  .kicker {
+    display: inline-block; font-size: 9.5px; font-weight: 800;
+    letter-spacing: 1.6px; text-transform: uppercase;
+    color: var(--accent-2); padding: 3px 9px; border-radius: 4px;
+    background: rgba(var(--accent-rgb),0.16); border: 1px solid rgba(var(--accent-2-rgb),0.32);
+    margin-bottom: 10px;
+  }
+  .sec-head { margin-bottom: 14px; }
+  .sec-head p.lead { color: var(--muted); font-size: 13.5px; margin-top: 6px; }
+
+  code, .mono { font-family: var(--mono); }
+  p code, li code, td code {
+    font-size: 12px; color: var(--accent-2);
+    background: rgba(var(--accent-rgb),0.15); border: 1px solid rgba(var(--accent-2-rgb),0.2);
+    padding: 1px 5px; border-radius: 3px;
+  }
+  pre.code {
+    font-family: var(--mono); font-size: 11.5px; line-height: 1.62;
+    background: #0b0e13; border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 14px; overflow-x: auto; color: #cfd6dd;
+    white-space: pre; margin: 10px 0 0;
+  }
+  pre.code b { color: var(--accent-2); font-weight: 600; }
+  pre.code i { color: #6e7681; font-style: normal; }
+  pre.code u { color: var(--ok); text-decoration: none; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+  .grid2.narrow-right { grid-template-columns: 1.35fr 1fr; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+
+  /* ── widget shell ───────────────────────────────────────────── */
+  .widget {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 18px 18px; margin-top: 16px;
+  }
+  .widget.flat { background: var(--panel-2); }
+  .w-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .w-head h3 { color: var(--ink); }
+  .w-tag {
+    font-size: 9px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--muted); border: 1px solid var(--border); border-radius: 10px; padding: 2px 8px;
+  }
+  .w-sub { font-size: 12.5px; color: var(--muted); margin: 6px 0 12px; max-width: 88ch; }
+  .w-note { font-size: 11.5px; color: var(--muted); margin-top: 11px; line-height: 1.6; }
+  .w-note b { color: var(--ink); font-weight: 600; }
+
+  .controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 4px 0 12px; }
+  .ctl { display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--muted); }
+  .ctl output, .ctl .val { font-family: var(--mono); font-size: 11.5px; color: var(--ink); min-width: 46px; }
+
+  button {
+    font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer;
+    color: var(--ink); background: transparent;
+    border: 1px solid var(--border); border-radius: 7px; padding: 6px 13px;
+    transition: border-color .18s, color .18s, background .18s;
+  }
+  button:hover:not(:disabled) { border-color: var(--accent-2); color: #fff; }
+  button:focus-visible, [tabindex]:focus-visible, input:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--accent-2); outline-offset: 2px;
+  }
+  button:disabled { opacity: .38; cursor: not-allowed; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.primary:hover:not(:disabled) { background: #2563eb; border-color: var(--accent-2); }
+  button.on { background: rgba(var(--accent-rgb),0.28); border-color: var(--accent-2); color: #fff; }
+  button.seg { border-radius: 0; margin-left: -1px; }
+  button.seg:first-of-type { border-radius: 7px 0 0 7px; margin-left: 0; }
+  button.seg:last-of-type { border-radius: 0 7px 7px 0; }
+
+  input[type=range] { accent-color: var(--accent-2); width: 130px; height: 18px; cursor: pointer; }
+  input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
+  select {
+    font-family: inherit; font-size: 12px; color: var(--ink); background: var(--panel-2);
+    border: 1px solid var(--border); border-radius: 7px; padding: 5px 8px; cursor: pointer;
+  }
+
+  svg.stage { width: 100%; height: auto; display: block; }
+  .svg-wrap {
+    background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 9px; padding: 10px; overflow: hidden;
+  }
+
+  /* ── readouts, stats, logs, tables ──────────────────────────── */
+  .stats { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+  .stat {
+    flex: 1 1 120px; background: var(--panel-2); border: 1px solid var(--border);
+    border-left: 2px solid var(--c, var(--muted)); border-radius: 7px; padding: 8px 11px;
+  }
+  .stat .lbl { font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+  .stat .num { font-family: var(--mono); font-size: 17px; font-weight: 600; color: var(--c, var(--ink)); margin-top: 2px; }
+  .stat .sub { font-size: 10.5px; color: var(--muted); margin-top: 1px; }
+
+  .verdict {
+    margin-top: 12px; border-radius: 8px; padding: 10px 13px;
+    font-size: 12.5px; line-height: 1.62;
+    background: rgba(var(--accent-rgb),0.12); border: 1px solid rgba(var(--accent-2-rgb),0.3);
+  }
+  .verdict b { color: #fff; }
+  .verdict.ok   { background: rgba(63,185,80,0.10);  border-color: rgba(63,185,80,0.34); }
+  .verdict.warn { background: rgba(210,153,34,0.10); border-color: rgba(210,153,34,0.34); }
+  .verdict.bad  { background: rgba(248,81,73,0.10);  border-color: rgba(248,81,73,0.34); }
+
+  .log {
+    font-family: var(--mono); font-size: 11px; line-height: 1.75;
+    background: #0b0e13; border: 1px solid var(--border); border-radius: 8px;
+    padding: 9px 11px; height: 148px; overflow-y: auto; color: #b9c1c9;
+  }
+  .log div { white-space: pre-wrap; }
+  .log .t { color: #57606a; }
+  .log .g { color: var(--ok); }
+  .log .y { color: var(--warn); }
+  .log .r { color: var(--bad); }
+  .log .b { color: var(--sky); }
+
+  table.tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.tbl th {
+    text-align: left; font-size: 9px; font-weight: 800; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--muted);
+    padding: 6px 8px; border-bottom: 1px solid var(--border);
+  }
+  table.tbl td {
+    padding: 6px 8px; border-bottom: 1px solid rgba(39,44,54,0.6);
+    font-family: var(--mono); font-size: 11.5px; color: var(--ink);
+  }
+  table.tbl td.name { font-family: inherit; }
+  table.tbl tr.hl td { background: rgba(var(--accent-rgb),0.16); }
+  table.tbl tr.bad td { background: rgba(248,81,73,0.10); }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 9.5px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 10px; border: 1px solid currentColor; white-space: nowrap;
+  }
+  .badge.ok { color: var(--ok); background: rgba(63,185,80,0.12); }
+  .badge.warn { color: var(--warn); background: rgba(210,153,34,0.12); }
+  .badge.bad { color: var(--bad); background: rgba(248,81,73,0.12); }
+  .badge.idle { color: var(--muted); background: rgba(154,160,166,0.1); }
+
+  /* ── hero ───────────────────────────────────────────────────── */
+  #hero { padding: 46px 0 34px; }
+  #hero .wk { font-family: var(--mono); font-size: 12px; letter-spacing: 3px; color: var(--accent-2); }
+  #hero h1 { font-size: clamp(27px, 4.4vw, 41px); font-weight: 800; margin-top: 8px; }
+  #hero h1 em { font-style: normal; color: var(--accent-2); }
+  #hero .promise { font-size: 15.5px; color: var(--ink); margin-top: 13px; max-width: 76ch; }
+  #hero ul.able { list-style: none; margin-top: 18px; display: grid; gap: 8px; grid-template-columns: repeat(3, 1fr); }
+  #hero ul.able li {
+    background: var(--panel); border: 1px solid var(--border); border-top: 2px solid var(--accent);
+    border-radius: 9px; padding: 11px 13px; font-size: 12.5px; color: var(--muted); line-height: 1.55;
+  }
+  #hero ul.able li b { display: block; color: var(--ink); font-size: 12px; margin-bottom: 3px; }
+
+  /* ── pitfalls ───────────────────────────────────────────────── */
+  details.pit {
+    background: var(--panel); border: 1px solid var(--border);
+    border-left: 3px solid var(--bad); border-radius: 9px;
+    padding: 10px 14px; margin-bottom: 9px;
+  }
+  details.pit summary {
+    cursor: pointer; font-size: 13.5px; font-weight: 600; color: var(--ink);
+    list-style: none; display: flex; align-items: baseline; gap: 9px;
+  }
+  details.pit summary::-webkit-details-marker { display: none; }
+  details.pit summary::before {
+    content: '+'; font-family: var(--mono); color: var(--bad); font-weight: 700; flex-shrink: 0;
+  }
+  details.pit[open] summary::before { content: '\2212'; }
+  details.pit .body { font-size: 12.5px; color: var(--muted); margin-top: 9px; padding-left: 18px; }
+  details.pit .body b { color: var(--ink); }
+  details.pit .fix { margin-top: 8px; color: var(--ok); }
+
+  /* ── quiz ───────────────────────────────────────────────────── */
+  .q { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+  .q .qn { font-size: 9.5px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; color: var(--accent-2); }
+  .q .qt { font-size: 13.5px; font-weight: 600; margin-top: 5px; }
+  .q .opts { display: grid; gap: 7px; margin-top: 11px; }
+  .q button.opt {
+    text-align: left; padding: 8px 12px; font-weight: 500; font-size: 12.5px;
+    background: var(--panel-2); border-radius: 7px; line-height: 1.5;
+  }
+  .q button.opt .k { font-family: var(--mono); color: var(--muted); margin-right: 8px; }
+  .q button.opt.right { border-color: var(--ok); color: #fff; background: rgba(63,185,80,0.13); }
+  .q button.opt.right .k { color: var(--ok); }
+  .q button.opt.wrong { border-color: var(--bad); color: #fff; background: rgba(248,81,73,0.12); }
+  .q button.opt.wrong .k { color: var(--bad); }
+  .q .fb { font-size: 12.5px; margin-top: 10px; display: none; line-height: 1.62; color: var(--muted); }
+  .q .fb.show { display: block; }
+  .q .fb b { color: var(--ink); }
+
+  /* ── next ───────────────────────────────────────────────────── */
+  .nextgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+  a.nextcard {
+    display: block; text-decoration: none; color: inherit;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; transition: border-color .18s, transform .18s;
+  }
+  a.nextcard:hover { border-color: var(--accent-2); transform: translateY(-2px); }
+  a.nextcard .lbl { font-size: 9.5px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; color: var(--accent-2); }
+  a.nextcard .ttl { font-size: 14px; font-weight: 700; margin-top: 4px; }
+  a.nextcard .dsc { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .weeknav { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+  .weeknav a {
+    font-size: 12px; text-decoration: none; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 20px; padding: 5px 14px;
+  }
+  .weeknav a:hover { border-color: var(--accent-2); color: var(--ink); }
+
+  /* ── responsive ─────────────────────────────────────────────── */
+  @media (max-width: 720px) {
+    body { font-size: 14px; }
+    main { padding: 0 14px; }
+    .grid2, .grid2.narrow-right, .grid3, .nextgrid, #hero ul.able { grid-template-columns: minmax(0, 1fr); }
+    .stat { flex: 1 1 100%; }
+    nav.top { padding: 10px 14px; gap: 8px; }
+    input[type=range] { width: 100%; min-width: 120px; }
+    .ctl { flex: 1 1 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .001s !important; transition-duration: .001s !important; }
+  }
+
+  /* ── Week-8 specifics ───────────────────────────────────────── */
+  .layer-chips { display: flex; gap: 0; flex-wrap: wrap; }
+  .lay-detail { background: var(--panel-2); border: 1px solid var(--border); border-radius: 9px; padding: 12px 14px; }
+  .lay-detail h4 { font-size: 13.5px; }
+  .lay-detail h4 span { color: var(--c, var(--accent-2)); }
+  .lay-detail .meta { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px; }
+  .lay-detail .meta div { font-size: 11px; color: var(--muted); }
+  .lay-detail .meta b { display: block; font-family: var(--mono); font-size: 13px; color: var(--ink); }
+  .lay-detail p { font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+
+  .toggles { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 6px; }
+  .toggles label {
+    display: flex; align-items: flex-start; gap: 8px; cursor: pointer; font-size: 12px; line-height: 1.45;
+    background: var(--panel-2); border: 1px solid var(--border); border-radius: 7px; padding: 7px 10px;
+  }
+  .toggles label:hover { border-color: var(--accent-2); }
+  .toggles label input { margin-top: 3px; flex-shrink: 0; }
+  .toggles label .fd { display: block; color: var(--muted); font-size: 11px; }
+  @media (max-width: 720px) { .toggles { grid-template-columns: minmax(0,1fr); } }
+
+  /* mini dashboard mock */
+  .dash { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+  @media (max-width: 720px) { .dash { grid-template-columns: minmax(0,1fr); } }
+  .tile { background: var(--panel-2); border: 1px solid var(--border); border-radius: 9px; padding: 10px 12px 12px; }
+  .tile .th {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    font-size: 9px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted);
+    padding-bottom: 7px; margin-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+  .kv { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 12px; padding: 3px 0; }
+  .kv span { color: var(--muted); }
+  .kv b { font-family: var(--mono); font-size: 12.5px; color: var(--ink); font-weight: 600; }
+  .kv b.ok { color: var(--ok); } .kv b.warn { color: var(--warn); } .kv b.bad { color: var(--bad); }
+  .banner {
+    display: flex; align-items: center; gap: 10px; border-radius: 8px; padding: 8px 12px; margin-bottom: 10px;
+    font-size: 12.5px; border: 1px solid var(--border); background: var(--panel-2); color: var(--muted);
+  }
+  .banner.live { border-color: rgba(63,185,80,0.34); background: rgba(63,185,80,0.09); color: var(--ink); }
+  .banner.warn { border-color: rgba(210,153,34,0.4); background: rgba(210,153,34,0.10); color: var(--ink); }
+  .banner.bad { border-color: rgba(248,81,73,0.4); background: rgba(248,81,73,0.10); color: var(--ink); }
+  .banner .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+  /* ── mobile guard (identical on every page): single column under 720px,
+        no horizontal overflow. Must stay last in the sheet. ───────────── */
+  @media (max-width:720px){
+    .grid2,.grid3,.grid2.narrow-right,.split,.split-r,.codepair,
+    .nextgrid,.dash,.toggles,.lanes,.weeknav,.weeks,.roles,.stack{
+      grid-template-columns:minmax(0,1fr)}
+    [class*="grid"]>*,.stack>*,.wrap>*,.panel,.panel.tight,.nextcard,.wk,.row>*{min-width:0}
+    pre,pre.code,.svgwrap,svg,canvas,table,select,input,textarea,.mono{max-width:100%}
+    pre,pre.code,.svgwrap,.tablewrap{overflow-x:auto}
+    .ctl,.ctl>*,.controls>*,.row,.legend>*{min-width:0}
+    .ctl{flex-wrap:wrap} .ctl select,.ctl input[type=range]{flex:1 1 100%;width:100%}
+    p,.lead,.sub,.promise{max-width:none}
+  }
+</style>
+</head>
+<body>
+
+<nav class="top"><a href="index.html">Systematic Trading Arena</a><span class="crumbs"><a href="week7.html">&larr; Week 7</a> &middot; <b>Week 8 &middot; CI/CD, Testing &amp; UI</b> &middot; <a href="week9.html">Week 9 &rarr;</a></span></nav>
+
+<main>
+
+<!-- ══ HERO ══════════════════════════════════════════════════ -->
+<section id="hero">
+  <div class="wk">WEEK 8</div>
+  <h1>CI/CD, Testing &amp; <em>UI</em></h1>
+  <p class="promise">A green run on your laptop proves nothing. This week your bot becomes trustworthy: tests that pin
+  its behaviour, a pipeline that refuses to merge red code, an image that runs identically anywhere, and a dashboard
+  that tells you it is alive.</p>
+  <ul class="able">
+    <li><b>Test at the right layer</b> &mdash; and know which layer would have caught the bug that just cost you a session.</li>
+    <li><b>Wire a pipeline</b> that runs <code>pytest</code> on every push and blocks the merge when it fails.</li>
+    <li><b>Read a live dashboard</b> and say, in one glance, whether your bot is healthy or quietly broken.</li>
+  </ul>
+</section>
+
+<!-- ══ WHAT ══════════════════════════════════════════════════ -->
+<section id="what">
+  <div class="sec-head">
+    <span class="kicker">What is it?</span>
+    <h2>Production engineering: proving it works, everywhere, every time</h2>
+    <p class="lead">Three habits, one goal &mdash; your bot behaves the same on your laptop, in CI, and on the live arena
+    at 6:05pm with the class watching the leaderboard.</p>
+  </div>
+
+  <div class="grid2">
+    <div>
+      <p>A test is an executable claim about your code. <code>pytest</code> discovers every function named
+      <code>test_*</code>, runs it, and reports which claims still hold. That is all. The engineering judgement is not in
+      writing asserts &mdash; it is in choosing <em>which claim to make at which layer</em>.</p>
+      <p>The pyramid is that judgement made visible. Many unit tests at the base, each pinning one function in
+      milliseconds with no I/O. Fewer integration tests, wiring two or three components together with fakes instead of
+      the network. A handful of end-to-end runs that drive the whole path &mdash; bot to exchange to fill to P&amp;L
+      &mdash; and catch the wiring bugs nothing else can see, slowly and a little flakily.</p>
+      <p>Push logic down. A bug caught by a unit test costs you seconds; the same bug caught end-to-end costs a minute
+      of CI; the same bug caught live costs you a session, in public.</p>
+      <pre class="code"><i># tests/test_signal.py</i>
+<b>from</b> strategy <b>import</b> momentum_signal
+
+<b>def</b> test_momentum_goes_long_on_uptrend():
+    prices = [100, 101, 102, 103, 104]
+    sig = momentum_signal(prices, lookback=3)
+    <b>assert</b> sig.side == 'buy'
+    <b>assert</b> sig.qty &gt; 0
+
+<b>def</b> test_momentum_flat_when_no_trend():
+    <b>assert</b> momentum_signal([100, 100, 100], 3) <b>is</b> None</pre>
+      <div class="w-note"><b>Name the test after the behaviour it pins.</b> When it goes red six weeks from now, the name
+      is the whole bug report. One behaviour per test, and <code>@pytest.mark.parametrize</code> for the variations.</div>
+    </div>
+    <div>
+      <div class="widget" style="margin-top:0">
+        <div class="w-head"><h3>The platform is built on its tests</h3><span class="w-tag">~1,280</span></div>
+        <p class="w-sub">Why we can change the engine under you every week without breaking your bot.</p>
+        <div class="stats" style="flex-direction:column">
+          <div class="stat" style="--c:var(--ok)">
+            <div class="lbl">100% on the source of truth</div>
+            <div class="num">orderbook.py</div>
+            <div class="sub">The matching engine gets zero slack: a wrong fill corrupts every downstream P&amp;L, leaderboard row and tearsheet.</div>
+          </div>
+          <div class="stat" style="--c:var(--sky)">
+            <div class="lbl">Round-trip message tests</div>
+            <div class="num">dump → parse</div>
+            <div class="sub">Every wire message in <code>tests/test_messages.py</code> is dumped to JSON, parsed back, and asserted identical. The schema is the contract.</div>
+          </div>
+          <div class="stat" style="--c:var(--violet)">
+            <div class="lbl">Network-free simulator</div>
+            <div class="num">sim_session</div>
+            <div class="sub">A full season in one process with no sockets — deterministic, CI-friendly, and the model for your own tests.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WIDGET 1 -->
+  <div class="widget">
+    <div class="w-head"><span class="w-tag">Widget 1</span><h3>Test-pyramid explorer</h3></div>
+    <p class="w-sub">Click a layer for an example test against a trading bot. Then inject a bug and see which layer
+    would have caught it &mdash; and what the delay cost.</p>
+
+    <div class="controls">
+      <div class="ctl layer-chips">
+        <button id="w8-lay-0" class="seg on" aria-pressed="true">Unit</button><button id="w8-lay-1" class="seg" aria-pressed="false">Integration</button><button id="w8-lay-2" class="seg" aria-pressed="false">End-to-end</button>
+      </div>
+      <div class="ctl">
+        <label for="w8-bug">inject a bug</label>
+        <select id="w8-bug" aria-label="Choose a bug to inject into the bot"></select>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="svg-wrap">
+        <svg class="stage" id="w8-pyr" viewBox="0 0 360 232" role="img"
+             aria-label="Testing pyramid: many fast unit tests at the base, fewer integration tests, a few end-to-end runs at the top"></svg>
+      </div>
+      <div>
+        <div class="lay-detail" id="w8-lay-detail"></div>
+        <div class="verdict" id="w8-bug-verdict"></div>
+      </div>
+    </div>
+    <div class="w-note"><b>The layer is a cost decision.</b> Every bug is catchable somewhere; the question is how many
+    minutes &mdash; or how many sessions &mdash; pass before you find out. Pick the cheapest layer that can see it.</div>
+  </div>
+</section>
+
+<!-- ══ HOW ═══════════════════════════════════════════════════ -->
+<section id="how">
+  <div class="sec-head">
+    <span class="kicker">How does it work?</span>
+    <h2>A pipeline is a gate, and determinism is what makes it mean something</h2>
+    <p class="lead">Continuous integration runs your suite on every push, on a clean machine that is not yours.
+    Continuous delivery ships what passes. The merge stays blocked until the checks are green.</p>
+  </div>
+
+  <div class="grid2">
+    <div>
+      <p>A GitHub Actions workflow is YAML in <code>.github/workflows/</code>. An event (<code>on: [push]</code>)
+      triggers jobs; each job runs ordered steps on a fresh runner; a matrix fans the same job out across Python
+      versions. Nothing in it is clever &mdash; and that is the point. The runner has no internet by design, no cached
+      state, and none of your local environment. If your suite passes there, it passes anywhere.</p>
+      <pre class="code">on: [push, pull_request]        <i># trigger</i>
+jobs:
+  test:                         <i># a job</i>
+    runs-on: ubuntu-latest      <i># the runner</i>
+    strategy:
+      matrix:
+        python: ['3.11', '3.12']  <i># fan out</i>
+    steps:                      <i># ordered</i>
+      - uses: actions/checkout@v4
+      - run: make install
+      - run: pytest -q</pre>
+    </div>
+    <div>
+      <p>Reproducibility is the other half. Same code plus same dependencies plus same OS equals same behaviour, so pin
+      exact versions (<code>==</code>, never <code>&gt;=</code>), isolate in a venv, and freeze the whole environment in
+      an image. Order the Docker layers stable-to-volatile so the <code>pip install</code> layer stays cached and only
+      your code layer rebuilds.</p>
+      <pre class="code"><i># requirements.txt — pin exact versions</i>
+websockets==12.0
+pydantic==2.7.1
+
+<i># Dockerfile — freeze the environment</i>
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .         <i># cached layer</i>
+RUN pip install -r requirements.txt
+COPY . .                        <i># code layer</i>
+CMD ["python", "-m", "team.trader"]</pre>
+    </div>
+  </div>
+
+  <!-- WIDGET 2 -->
+  <div class="widget">
+    <div class="w-head"><span class="w-tag">Widget 2</span><h3>CI pipeline simulator</h3></div>
+    <p class="w-sub">Push a commit and watch the gate. Break something and the pipeline stops at the first red stage
+    &mdash; nothing downstream runs, and the merge is blocked.</p>
+
+    <div class="grid2 narrow-right">
+      <div>
+        <div class="svg-wrap">
+          <svg class="stage" id="w8-pipe" viewBox="0 0 720 130" role="img"
+               aria-label="CI pipeline stages from push through lint, tests, build and deploy"></svg>
+        </div>
+        <div class="controls" style="margin-top:12px">
+          <button id="w8-pipe-run" class="primary">&#9654; git push</button>
+          <button id="w8-pipe-reset">&#8634; Reset</button>
+          <span class="badge idle" id="w8-pipe-badge">no run yet</span>
+        </div>
+        <div class="stats" style="margin-top:0">
+          <div class="stat" style="--c:var(--sky)"><div class="lbl">Runs</div><div class="num" id="w8-pipe-runs">0</div><div class="sub">pushes to this branch</div></div>
+          <div class="stat" style="--c:var(--bad)"><div class="lbl">Red</div><div class="num" id="w8-pipe-red">0</div><div class="sub">blocked merges</div></div>
+          <div class="stat" style="--c:var(--warn)"><div class="lbl">Flaky failures</div><div class="num" id="w8-pipe-flake">0</div><div class="sub">red without a code change</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="toggles" id="w8-pipe-toggles"></div>
+        <div class="log" id="w8-pipe-log" style="margin-top:10px" aria-live="polite" aria-label="CI run log"></div>
+      </div>
+    </div>
+    <div class="verdict" id="w8-pipe-verdict">Push a commit to run the pipeline.</div>
+  </div>
+
+  <!-- WIDGET 3 -->
+  <div class="widget">
+    <div class="w-head"><span class="w-tag">Widget 3</span><h3>Determinism: same input, same result</h3></div>
+    <p class="w-sub">The same strategy test, run repeatedly. On the left the randomness is seeded; on the right it is
+    not. Both panels overlay every run you trigger.</p>
+
+    <div class="controls">
+      <button id="w8-det-1">Run once</button>
+      <button id="w8-det-5" class="primary">Run 5&times;</button>
+      <button id="w8-det-reset">&#8634; Reset</button>
+      <span class="ctl">assertion: <code>final_pnl == 412</code></span>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <div class="svg-wrap">
+          <svg class="stage" id="w8-det-seed" viewBox="0 0 340 150" role="img"
+               aria-label="Overlaid equity paths from seeded runs, all identical"></svg>
+        </div>
+        <div class="stats" style="margin-top:10px">
+          <div class="stat" style="--c:var(--ok)"><div class="lbl">random.seed(0)</div><div class="num" id="w8-det-seed-n">0 runs</div><div class="sub" id="w8-det-seed-sub">distinct results: —</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="svg-wrap">
+          <svg class="stage" id="w8-det-rand" viewBox="0 0 340 150" role="img"
+               aria-label="Overlaid equity paths from unseeded runs, diverging"></svg>
+        </div>
+        <div class="stats" style="margin-top:10px">
+          <div class="stat" style="--c:var(--bad)"><div class="lbl">no seed</div><div class="num" id="w8-det-rand-n">0 runs</div><div class="sub" id="w8-det-rand-sub">distinct results: —</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="verdict" id="w8-det-verdict">Run the test a few times in each mode.</div>
+    <div class="w-note"><b>Three sources of nondeterminism, three fixes.</b> Randomness &rarr; seed it. The network
+    &rarr; inject a fake or a recorded fixture; a CI runner has no internet anyway. The clock and IDs &rarr; pass them
+    in, never call <code>datetime.now()</code> deep inside logic. A test that fails one run in twenty trains your team
+    to ignore red, which defeats the entire point of having a suite.</div>
+  </div>
+</section>
+
+<!-- ══ WHY ═══════════════════════════════════════════════════ -->
+<section id="why">
+  <div class="sec-head">
+    <span class="kicker">Why does it matter in trading?</span>
+    <h2>Live failures are public, and you cannot fix what you cannot see</h2>
+    <p class="lead">A missing dependency, a hardcoded path, an untested edge case &mdash; any one of them crashes your bot
+    mid-session while the dashboard shows the whole class your equity curve flatlining.</p>
+  </div>
+
+  <div class="grid2">
+    <div>
+      <p>Shipping is not the end of the job. A running bot needs configuration you can change without a rebuild
+      (ports, poll intervals &mdash; plain env vars), secrets that never enter git or the image (tokens injected at
+      runtime), and observability: structured logs for what happened, metrics for what is happening now.</p>
+      <p>A dashboard is metrics made glanceable, and a trading dashboard has four non-negotiable panes. <b>Positions</b>
+      &mdash; what do I own, and is it what I think I own. <b>P&amp;L</b> &mdash; realized, unrealized, and the shape of
+      the curve. <b>Risk</b> &mdash; how close am I to a limit, and what is my worst case right now. <b>Connectivity</b>
+      &mdash; is the socket up, is the feed fresh, am I being throttled. Miss the fourth pane and you will confidently
+      quote on a price that stopped updating four minutes ago.</p>
+      <p>The arena's own UI is exactly this: <code>teacher/web_dashboard.py</code> with MARKET (live books), FLOW (who
+      trades with whom), STATS and SEASON (per-team analytics and standings). The deploy kit behind it &mdash;
+      <code>systemd</code> units, Caddy for TLS, Docker for the environment &mdash; is how the hosted arena becomes
+      reproducible from bare metal up.</p>
+    </div>
+    <div>
+      <div class="widget" style="margin-top:0">
+        <div class="w-head"><h3>The healthy baseline</h3></div>
+        <p class="w-sub">You must know what normal looks like <em>before</em> the incident, or you cannot recognise
+        abnormal during it. Write these down in calm markets.</p>
+        <div class="kv"><span>Feed age</span><b class="ok">&lt; 6 s</b></div>
+        <div class="kv"><span>Socket state</span><b class="ok">OPEN</b></div>
+        <div class="kv"><span>Fills per minute</span><b>2 – 9</b></div>
+        <div class="kv"><span>Reject rate</span><b class="ok">&lt; 2%</b></div>
+        <div class="kv"><span>Position vs limit</span><b>&lt; 70%</b></div>
+        <div class="kv"><span>on_tick latency</span><b>&lt; 8 ms</b></div>
+        <div class="w-note">Rate limits are enforced from this week on. A bot that over-sends gets throttled &mdash;
+        which shows up first as a rising reject rate, not as an error.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WIDGET 4 -->
+  <div class="widget">
+    <div class="w-head"><span class="w-tag">Widget 4</span><h3>Mini live dashboard</h3></div>
+    <p class="w-sub">A mock of the four panes, ticking on a seeded feed. Pause it, step one tick at a time, and inject an
+    incident &mdash; then ask which pane told you first.</p>
+
+    <div class="controls">
+      <button id="w8-dash-play" class="primary">&#9654; Play</button>
+      <button id="w8-dash-step">Step 1 tick</button>
+      <button id="w8-dash-reset">&#8634; Reset</button>
+      <div class="ctl">
+        <label for="w8-dash-inc">inject incident</label>
+        <select id="w8-dash-inc" aria-label="Inject an incident into the live session">
+          <option value="none">none — healthy session</option>
+          <option value="stale">the Yahoo feed stalls</option>
+          <option value="drop">the WebSocket drops</option>
+          <option value="limit">position limit breached</option>
+          <option value="throttle">rate limit: orders throttled</option>
+        </select>
+      </div>
+      <span class="ctl">tick <output id="w8-dash-tick">0</output></span>
+    </div>
+
+    <div class="banner" id="w8-dash-banner"><span class="dot"></span><span id="w8-dash-banner-txt">Session idle. Press play.</span></div>
+
+    <div class="dash">
+      <div class="tile">
+        <div class="th"><span>Positions</span><span id="w8-dash-pos-badge" class="badge idle">flat</span></div>
+        <table class="tbl" id="w8-dash-pos"></table>
+      </div>
+      <div class="tile">
+        <div class="th"><span>P&amp;L</span><span id="w8-dash-pnl-badge" class="badge idle">—</span></div>
+        <svg class="stage" id="w8-dash-pnl" viewBox="0 0 340 118" role="img" aria-label="Net worth over the session"></svg>
+        <div class="kv"><span>realized</span><b id="w8-dash-real">$0</b></div>
+        <div class="kv"><span>unrealized</span><b id="w8-dash-unreal">$0</b></div>
+        <div class="kv"><span>net worth</span><b id="w8-dash-nw">$100,000</b></div>
+      </div>
+      <div class="tile">
+        <div class="th"><span>Risk</span><span id="w8-dash-risk-badge" class="badge idle">within limits</span></div>
+        <svg class="stage" id="w8-dash-risk" viewBox="0 0 340 108" role="img" aria-label="Limit usage gauges"></svg>
+        <div class="kv"><span>worst-case loss if flat now</span><b id="w8-dash-wc">$0</b></div>
+      </div>
+      <div class="tile">
+        <div class="th"><span>Connectivity</span><span id="w8-dash-conn-badge" class="badge idle">idle</span></div>
+        <div class="kv"><span>WebSocket</span><b id="w8-dash-ws">CLOSED</b></div>
+        <div class="kv"><span>feed age</span><b id="w8-dash-age">—</b></div>
+        <div class="kv"><span>msgs / s</span><b id="w8-dash-msgs">0</b></div>
+        <div class="kv"><span>on_tick latency</span><b id="w8-dash-lat">—</b></div>
+        <div class="kv"><span>rejects</span><b id="w8-dash-rej">0</b></div>
+      </div>
+    </div>
+    <div class="verdict" id="w8-dash-verdict">Nothing is wrong yet. Note what healthy looks like before you break it.</div>
+  </div>
+</section>
+
+<!-- ══ PITFALLS ══════════════════════════════════════════════ -->
+<section id="pitfalls">
+  <div class="sec-head">
+    <span class="kicker">Common mistakes</span>
+    <h2>Five ways a tested bot still dies live</h2>
+    <p class="lead">Each of these has cost a team a session. Each expands.</p>
+  </div>
+
+  <details class="pit">
+    <summary><span>Tests that reach the network</span></summary>
+    <div class="body">A unit test that calls <code>yfinance</code> is not a unit test: it is slow, it changes every
+      second, it fails on a plane, and it fails in CI where there is no internet by design. Worse, it passes locally, so
+      you only discover it after you push.
+      <div class="fix">Fix: inject a fake feed (<code>class FakeFeed: def price(self, sym): return 185.0</code>) or
+      <code>monkeypatch</code> the call. Use <code>tests/sim_session.py</code> when you need a whole session.</div></div>
+  </details>
+
+  <details class="pit">
+    <summary><span>Tolerating a flaky test</span></summary>
+    <div class="body">One test fails roughly one run in twenty, so the team learns to click "re-run". Now red means
+      nothing, and the day a real regression lands nobody notices. A flaky test is worse than no test because it
+      destroys the signal value of the whole suite.
+      <div class="fix">Fix: treat a flake as a P1 bug. Seed the randomness, freeze the clock, remove the sleep-based
+      timing, or delete the test. Never leave it amber.</div></div>
+  </details>
+
+  <details class="pit">
+    <summary><span>Chasing the coverage number</span></summary>
+    <div class="body">Coverage measures which lines executed, not whether anything was asserted. You can reach 95% with
+      tests that call every function and check nothing. Meanwhile the two branches that matter &mdash; the reject path
+      and the reconnect path &mdash; are the untested ones, because they are the awkward ones.
+      <div class="fix">Fix: read the report to find the gaps you did not know you had, and hold the source of truth
+      (your signal and risk logic) to a high bar. Do not pad the number with trivial tests.</div></div>
+  </details>
+
+  <details class="pit">
+    <summary><span>Unpinned dependencies and "works on my machine"</span></summary>
+    <div class="body">Your <code>requirements.txt</code> says <code>pydantic&gt;=2</code>. Three weeks later the runner
+      resolves a new minor version, a validator becomes stricter, and your bot cannot parse a message it has parsed all
+      season. The code did not change; the environment did.
+      <div class="fix">Fix: pin exact versions, commit the pin, and containerise. Order Docker layers stable-to-volatile
+      so the dependency layer stays cached and the rebuild only touches your code.</div></div>
+  </details>
+
+  <details class="pit">
+    <summary><span>A dashboard with no connectivity pane</span></summary>
+    <div class="body">Positions, P&amp;L and risk all look perfect &mdash; because they are computed from a price that
+      stopped updating four minutes ago. The socket is open, the process is alive, nothing has thrown, and you are
+      quoting into a market that has moved on. Partial failure is the normal failure mode of a live system.
+      <div class="fix">Fix: show feed age, socket state and reject rate next to the money, and alarm on staleness rather
+      than on exceptions. Detect, do not assume.</div></div>
+  </details>
+</section>
+
+<!-- ══ CHECK ═════════════════════════════════════════════════ -->
+<section id="check">
+  <div class="sec-head">
+    <span class="kicker">Check yourself</span>
+    <h2>Three questions</h2>
+    <p class="lead">Instant feedback, no grading.</p>
+  </div>
+
+  <div class="q" data-a="1">
+    <div class="qn">Question 1</div>
+    <div class="qt">Your <code>on_tick</code> returns a buy signal when it should return <code>None</code>. Which test
+      layer should have caught it, and why that one?</div>
+    <div class="opts">
+      <button class="opt"><span class="k">A</span>End-to-end &mdash; only a full session exercises <code>on_tick</code> realistically.</button>
+      <button class="opt"><span class="k">B</span>Unit &mdash; it is one function over a fixed price list, so it costs milliseconds and needs no I/O.</button>
+      <button class="opt"><span class="k">C</span>Integration &mdash; the signal only means something once the order book is wired in.</button>
+      <button class="opt"><span class="k">D</span>None &mdash; signal logic is inherently probabilistic and cannot be unit-tested.</button>
+    </div>
+    <div class="fb"><b>B.</b> Arrange a fake market and a portfolio, call <code>on_tick</code>, assert the
+      <code>Signal</code> (or the <code>None</code>). Pushing this claim down to the base of the pyramid is what makes it
+      cheap enough to run on every push.</div>
+  </div>
+
+  <div class="q" data-a="3">
+    <div class="qn">Question 2</div>
+    <div class="qt">A test in your suite fails about one run in twenty, always with a different P&amp;L. What is the
+      correct response?</div>
+    <div class="opts">
+      <button class="opt"><span class="k">A</span>Add a retry so CI re-runs the job automatically.</button>
+      <button class="opt"><span class="k">B</span>Mark it <code>@pytest.mark.skip</code> until after the season.</button>
+      <button class="opt"><span class="k">C</span>Loosen the assertion to a range wide enough to always pass.</button>
+      <button class="opt"><span class="k">D</span>Find the nondeterminism &mdash; unseeded randomness, a real clock, or network I/O &mdash; and remove it.</button>
+    </div>
+    <div class="fb"><b>D.</b> The other three all preserve the flake and destroy the signal. Seed the RNG, inject the
+      clock, fake the feed. With the seed fixed, a red test fails the same way every time &mdash; which is the only
+      reason a failure is debuggable.</div>
+  </div>
+
+  <div class="q" data-a="0">
+    <div class="qn">Question 3</div>
+    <div class="qt">Mid-session, your dashboard shows a flat P&amp;L, no rejects, positions unchanged, and a socket in
+      <code>OPEN</code>. What is the first thing you check?</div>
+    <div class="opts">
+      <button class="opt"><span class="k">A</span>Feed age &mdash; a stalled price feed produces exactly this picture while the socket stays healthy.</button>
+      <button class="opt"><span class="k">B</span>The signal thresholds, since the model has clearly stopped firing.</button>
+      <button class="opt"><span class="k">C</span>The exchange's fee schedule.</button>
+      <button class="opt"><span class="k">D</span>Nothing &mdash; a flat P&amp;L with an open socket is a healthy session.</button>
+    </div>
+    <div class="fb"><b>A.</b> This is the classic partial failure: the transport is fine, the data is dead. Everything
+      downstream still computes, confidently, from a frozen price. That is why the connectivity pane sits next to the
+      money, and why staleness is an alarm rather than an exception.</div>
+  </div>
+</section>
+
+<!-- ══ NEXT ══════════════════════════════════════════════════ -->
+<section id="next">
+  <div class="sec-head">
+    <span class="kicker">Do the work</span>
+    <h2>This week's work</h2>
+    <p class="lead">Deliverables: a CI pipeline review, a Docker reproducibility sign-off, and your dashboard plan.</p>
+  </div>
+  <div class="nextgrid">
+    <a class="nextcard" href="https://github.com/sdonadio/algoarena-team-template">
+      <div class="lbl">Code</div>
+      <div class="ttl">Get the code</div>
+      <div class="dsc">Labs and homework live in your course&#8217;s LMS; the starter repo is public. Use it as a template, clone, <code>make install</code>.</div>
+    </a>
+  </div>
+  <div class="weeknav">
+    <a href="week7.html">&larr; Week 7 &middot; Machine Learning Signals &amp; Model Ops</a>
+    <a href="index.html">All weeks</a>
+    <a href="week9.html">Week 9 &middot; Integration &amp; Demo &rarr;</a>
+  </div>
+</section>
+
+</main>
+
+<footer>Systematic Trading Arena · an interactive companion for a 9-week systematic-trading course · <a href="https://github.com/sdonadio/systematic-trading-arena">Source</a></footer>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   Systematic Trading Arena — shared page helpers
+   No dependencies, no network. Everything is drawn from data.
+   ══════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  var C = {
+    accent: '#3b82f6', accent2: '#7cb0ff', ink: '#e8e6e3', muted: '#9aa0a6',
+    dim: '#6e7681', ok: '#3fb950', warn: '#d29922', bad: '#f85149',
+    sky: '#58a6ff', violet: '#a78bfa', teal: '#2dd4bf',
+    border: '#272c36', panel: '#181b22', panel2: '#13161b'
+  };
+  var MONO = 'ui-monospace, Menlo, Consolas, monospace';
+  var SANS = 'system-ui, -apple-system, Segoe UI, sans-serif';
+
+  /* deterministic PRNG (mulberry32) — same seed, same picture */
+  function rng(seed) {
+    var s = seed >>> 0;
+    return function () {
+      s = (s + 0x6D2B79F5) >>> 0;
+      var t = s;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function gauss(r) {
+    var u = 0, v = 0;
+    while (u === 0) u = r();
+    while (v === 0) v = r();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+
+  function $(id) { return document.getElementById(id); }
+  function clear(el) { while (el && el.firstChild) el.removeChild(el.firstChild); }
+
+  /* add an SVG child: add(parent,'rect',{x:..}).
+     The namespace is inherited from the parent <svg>, so no URI literal is needed. */
+  function add(parent, tag, attrs, text) {
+    var e = document.createElementNS(parent.namespaceURI, tag), k;
+    if (attrs) for (k in attrs) { if (attrs[k] !== null && attrs[k] !== undefined) e.setAttribute(k, attrs[k]); }
+    if (text !== null && text !== undefined) e.textContent = text;
+    parent.appendChild(e);
+    return e;
+  }
+  /* label text: T(svg,x,y,'txt',{fill,size,anchor,mono,weight}) */
+  function T(parent, x, y, s, o) {
+    o = o || {};
+    return add(parent, 'text', {
+      x: x, y: y, fill: o.fill || C.muted,
+      'font-size': o.size || 9.5,
+      'font-family': o.mono === false ? SANS : MONO,
+      'font-weight': o.weight || 400,
+      'text-anchor': o.anchor || 'start',
+      opacity: o.opacity
+    }, s);
+  }
+  function path(parent, pts, attrs) {
+    var d = '', i;
+    for (i = 0; i < pts.length; i++) d += (i ? 'L' : 'M') + pts[i][0].toFixed(2) + ' ' + pts[i][1].toFixed(2);
+    var a = { d: d, fill: 'none', 'stroke-width': 1.6, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' };
+    for (var k in attrs) a[k] = attrs[k];
+    return add(parent, 'path', a);
+  }
+  function stdev(a) {
+    if (a.length < 2) return 0;
+    var m = 0, i;
+    for (i = 0; i < a.length; i++) m += a[i];
+    m /= a.length;
+    var v = 0;
+    for (i = 0; i < a.length; i++) v += (a[i] - m) * (a[i] - m);
+    return Math.sqrt(v / a.length);
+  }
+  function mean(a) { var m = 0, i; for (i = 0; i < a.length; i++) m += a[i]; return a.length ? m / a.length : 0; }
+  function pct(x, d) { return (x * 100).toFixed(d === undefined ? 1 : d) + '%'; }
+  function sgn(x, d) { return (x >= 0 ? '+' : '−') + Math.abs(x).toFixed(d === undefined ? 2 : d); }
+  function clampv(x, a, b) { return x < a ? a : (x > b ? b : x); }
+
+  /* segmented button groups: setSeg([btnA,btnB], idx) */
+  function setSeg(btns, idx) {
+    for (var i = 0; i < btns.length; i++) {
+      var on = i === idx;
+      btns[i].classList.toggle('on', on);
+      btns[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+  }
+
+  /* ── MCQs: instant feedback, no grading ─────────────────────── */
+  function wireQuiz() {
+    var qs = document.querySelectorAll('.q');
+    Array.prototype.forEach.call(qs, function (q) {
+      var ans = parseInt(q.getAttribute('data-a'), 10);
+      var opts = q.querySelectorAll('button.opt');
+      var fb = q.querySelector('.fb');
+      Array.prototype.forEach.call(opts, function (b, i) {
+        b.addEventListener('click', function () {
+          if (q.getAttribute('data-done')) return;
+          q.setAttribute('data-done', '1');
+          opts[ans].classList.add('right');
+          if (i !== ans) b.classList.add('wrong');
+          if (fb) fb.classList.add('show');
+          Array.prototype.forEach.call(opts, function (o) { o.setAttribute('aria-disabled', 'true'); });
+        });
+      });
+    });
+  }
+
+  window.ARENA = {
+    C: C, MONO: MONO, SANS: SANS, rng: rng, gauss: gauss, $: $, clear: clear,
+    add: add, T: T, path: path, stdev: stdev, mean: mean, pct: pct, sgn: sgn,
+    clamp: clampv, setSeg: setSeg, wireQuiz: wireQuiz
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wireQuiz);
+  else wireQuiz();
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   WEEK 8 · Widget 1 — test-pyramid explorer + bug injector
+   ══════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  var A = window.ARENA, C = A.C, cur = 0, bug = 0;
+
+  var LAYERS = [
+    { nm: 'Unit', col: C.ok, tag: 'many · fast · no I/O', count: '≈ 60', time: '1.2 s', flake: 'none',
+      what: 'One function or class, isolated, in milliseconds. No sockets, no files, no clock. This is the bulk of your suite and the layer you should reach for first.',
+      code: '<i># tests/test_my_bot.py</i>\n<b>from</b> team.trader <b>import</b> MyBot\n\n<b>def</b> test_buys_on_uptrend():\n    bot = MyBot()\n    mkt = FakeMarket(prices=[100,101,102,103])\n    pf  = Portfolio(cash=10_000)\n    sig = bot.on_tick(mkt, pf)\n    <b>assert</b> sig.side == \'buy\'\n    <b>assert</b> sig.quantity &gt; 0' },
+    { nm: 'Integration', col: C.sky, tag: 'some · seconds · fakes, not sockets', count: '≈ 8', time: '6 s', flake: 'low',
+      what: 'Two or three components wired together — bot plus order book, risk plus router — with fakes standing in for the network. Catches contract mismatches between parts that each pass their own tests.',
+      code: '<i># tests/test_bot_book.py</i>\n<b>def</b> test_risk_vetoes_before_the_book_sees_it():\n    book = OrderBook(\'AAPL\')\n    bot  = MyBot(limit=100)\n    bot.portfolio.position[\'AAPL\'] = 100   <i># at limit</i>\n    sig  = bot.on_tick(FakeMarket(), bot.portfolio)\n    orders = bot.route(sig, book)\n    <b>assert</b> orders == []                 <i># vetoed</i>\n    <b>assert</b> book.best_bid() <b>is</b> None' },
+    { nm: 'End-to-end', col: C.violet, tag: 'few · slow · brittle', count: '1 – 2', time: '45 s', flake: 'medium',
+      what: 'The whole path: bot to exchange to fill to P&L to leaderboard. Slow and a little flaky, but the only layer that sees wiring, ordering and reconnection bugs. Run it against the headless sim, never against the live venue.',
+      code: '<i># tests/test_session_e2e.py</i>\n<b>from</b> tests.sim_session <b>import</b> SimSession\n\n<b>def</b> test_full_session_settles_and_scores():\n    res = SimSession(seed=0).run(\n        n_ticks=600, symbols=[\'AAPL\',\'TSLA\'],\n        strategies=[(\'mine\', my_signal_fn)])\n    <b>assert</b> res.fills > 0\n    <b>assert</b> res.net_worth(\'mine\') == res.cash(\'mine\') \\\n         + res.unrealized(\'mine\')' }
+  ];
+
+  var BUGS = [
+    { t: 'Momentum sign flipped — the bot buys the downtrend', L: 0, test: 'test_momentum_goes_long_on_uptrend',
+      cost: '0.4 s, on your laptop, before you push',
+      live: 'Unnoticed, it is a strategy that loses money confidently for a whole session — and looks like "the market was hard".' },
+    { t: 'Rolling window off by one — px[-11] instead of px[-10]', L: 0, test: 'test_momentum_lookback_is_exactly_10',
+      cost: '0.4 s, if you assert the value and not just the side',
+      live: 'A one-tick shift in every feature. Small enough to survive review, large enough to destroy an ML signal.' },
+    { t: 'Message schema renamed: quantity → qty', L: 0, test: 'test_messages.py round-trip',
+      cost: '0.2 s, in the round-trip test that dumps to JSON and parses back',
+      live: 'Your bot cannot parse an ack it has parsed all season. Every order looks lost; the bot retries; the rate limiter throttles you.' },
+    { t: 'Risk veto is never consulted before the order is sent', L: 1, test: 'test_risk_vetoes_before_the_book_sees_it',
+      cost: '6 s, in CI, on the push that introduced it',
+      live: 'Both components pass their own tests. The seam is what is broken — so only a test of the conversation can see it.' },
+    { t: 'A fill arrives but the portfolio never marks it', L: 1, test: 'test_fill_updates_position_and_cash',
+      cost: '6 s, in CI',
+      live: 'Your P&L is fiction and your position is a guess. This is the bug that turns into a Week-9 reconciliation break.' },
+    { t: 'The bot never reconnects after ConnectionClosed', L: 2, test: 'test_session_survives_socket_drop',
+      cost: '45 s, in the end-to-end run against the headless sim',
+      live: 'One blip and your bot is a spectator with an open position for the rest of the session. Nothing throws; the process is alive.' },
+    { t: 'Two orders race on the same order id under load', L: 2, test: 'test_session_e2e under a load burst',
+      cost: '45 s, and only under load — this is why you run the E2E at all',
+      live: 'A double fill. The retry was not idempotent, so a replay stopped being a no-op.' }
+  ];
+
+  function drawPyr() {
+    var svg = A.$('w8-pyr'); A.clear(svg);
+    var cx = 168, geo = [
+      { y: 14, h: 58, wt: 54, wb: 124 },
+      { y: 76, h: 62, wt: 132, wb: 218 },
+      { y: 142, h: 72, wt: 226, wb: 330 }
+    ];
+    var order = [2, 1, 0];
+    order.forEach(function (li, i) {
+      var g = geo[i], L = LAYERS[li], on = cur === li, catches = BUGS[bug].L === li;
+      var pts = [
+        [cx - g.wt / 2, g.y], [cx + g.wt / 2, g.y],
+        [cx + g.wb / 2, g.y + g.h], [cx - g.wb / 2, g.y + g.h]
+      ].map(function (p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' ');
+      var poly = A.add(svg, 'polygon', {
+        points: pts, fill: L.col, opacity: on ? 0.34 : 0.13,
+        stroke: catches ? C.warn : L.col, 'stroke-width': catches ? 2.2 : (on ? 1.8 : 1),
+        'stroke-dasharray': catches && !on ? '4 3' : null,
+        tabindex: '0', role: 'button', cursor: 'pointer',
+        'aria-label': 'show the ' + L.nm + ' layer'
+      });
+      poly.addEventListener('click', function () { cur = li; render(); });
+      poly.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); cur = li; render(); }
+      });
+      A.T(svg, cx, g.y + g.h / 2 + 1, L.nm, { fill: on ? '#fff' : L.col, size: 12, anchor: 'middle', weight: 700, mono: false });
+      A.T(svg, cx, g.y + g.h / 2 + 15, L.tag, { fill: C.muted, size: 8.5, anchor: 'middle' });
+      A.T(svg, 344, g.y + g.h / 2 + 4, L.count, { fill: C.dim, size: 9.5, anchor: 'end' });
+      if (catches) A.T(svg, 16, g.y + g.h / 2 + 4, '◀ catches it', { fill: C.warn, size: 9, weight: 700 });
+    });
+    A.T(svg, cx, 228, 'a bug caught at the base costs seconds; at the top, a minute; live, a session',
+      { fill: C.dim, size: 8.5, anchor: 'middle' });
+  }
+
+  function render() {
+    var L = LAYERS[cur], b = BUGS[bug];
+    A.setSeg([A.$('w8-lay-0'), A.$('w8-lay-1'), A.$('w8-lay-2')], cur);
+    drawPyr();
+    A.$('w8-lay-detail').innerHTML =
+      '<h4><span>' + L.nm + '</span> tests</h4>' +
+      '<div class="meta"><div>count<b>' + L.count + '</b></div><div>suite time<b>' + L.time +
+      '</b></div><div>flakiness<b>' + L.flake + '</b></div></div>' +
+      '<p>' + L.what + '</p>' +
+      '<pre class="code">' + L.code + '</pre>';
+    var v = A.$('w8-bug-verdict');
+    v.className = 'verdict ' + (b.L === 0 ? 'ok' : (b.L === 1 ? 'warn' : 'bad'));
+    v.innerHTML = '<b>Injected:</b> ' + b.t + '<br/><b>Caught by:</b> ' + LAYERS[b.L].nm.toLowerCase() +
+      ' — <code>' + b.test + '</code> · <b>cost to catch:</b> ' + b.cost + '.<br/><b>If you have no such test:</b> ' + b.live;
+  }
+
+  function init() {
+    if (!A.$('w8-pyr')) return;
+    [0, 1, 2].forEach(function (i) {
+      A.$('w8-lay-' + i).addEventListener('click', function () { cur = i; render(); });
+    });
+    var sel = A.$('w8-bug');
+    BUGS.forEach(function (b, i) {
+      var o = document.createElement('option');
+      o.value = String(i); o.textContent = b.t;
+      sel.appendChild(o);
+    });
+    sel.addEventListener('change', function () {
+      bug = Math.max(0, Math.min(BUGS.length - 1, +this.value || 0));
+      cur = BUGS[bug].L;
+      render();
+    });
+    render();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   WEEK 8 · Widget 2 — CI pipeline simulator
+   ══════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  var A = window.ARENA, C = A.C;
+  var STAGES = ['push', 'lint · ruff', 'unit tests', 'integration', 'build image', 'deploy'];
+  var state = [], runs = 0, red = 0, flakes = 0, busy = false, timers = [];
+
+  var TOG = [
+    { id: 'fail', nm: 'a failing unit test', dsc: 'assert flipped in test_buys_on_uptrend', stage: 2, on: false,
+      log: 'FAILED tests/test_my_bot.py::test_buys_on_uptrend — assert \'sell\' == \'buy\'',
+      fix: 'Read the diff pytest printed, fix the logic (or the claim), push again. This is CI doing its only job.' },
+    { id: 'net', nm: 'a test that hits the network', dsc: 'calls yfinance instead of a fake', stage: 3, on: false,
+      log: 'ERROR tests/test_feed.py — ConnectionError: runner has no internet',
+      fix: 'Inject a FakeFeed or monkeypatch the call. It passed locally only because your laptop has Wi-Fi.' },
+    { id: 'unpinned', nm: 'unpinned dependency', dsc: 'pydantic>=2 instead of ==2.7.1', stage: 4, on: false,
+      log: 'ERROR pip resolved pydantic 2.11.0 — image build fails on a stricter validator',
+      fix: 'Pin exact versions and commit the pin. The code did not change; the environment did.' },
+    { id: 'flaky', nm: 'one flaky test', dsc: 'unseeded RNG — fails about 1 run in 4', stage: 2, on: false,
+      log: 'FAILED tests/test_sim.py::test_pnl — assert 397 == 412  (no seed)',
+      fix: 'Seed the RNG. Until you do, red means nothing and everyone learns to click re-run.' }
+  ];
+
+  function tog(id) { for (var i = 0; i < TOG.length; i++) if (TOG[i].id === id) return TOG[i]; return null; }
+
+  function draw() {
+    var svg = A.$('w8-pipe'); A.clear(svg);
+    var x0 = 8, w = 106, gap = 12, i;
+    for (i = 0; i < STAGES.length; i++) {
+      var st = state[i] || 'idle', x = x0 + i * (w + gap);
+      var col = st === 'pass' ? C.ok : st === 'fail' ? C.bad : st === 'run' ? C.warn : st === 'skip' ? C.dim : C.muted;
+      A.add(svg, 'rect', { x: x, y: 34, width: w, height: 44, rx: 7, fill: col,
+        opacity: st === 'idle' ? 0.08 : (st === 'skip' ? 0.06 : 0.2), stroke: col,
+        'stroke-width': st === 'run' ? 2 : 1, 'stroke-dasharray': st === 'skip' ? '3 3' : null });
+      A.T(svg, x + w / 2, 54, STAGES[i], { fill: st === 'idle' || st === 'skip' ? C.muted : '#fff', size: 10, anchor: 'middle', weight: 600 });
+      var mark = st === 'pass' ? '✓ passed' : st === 'fail' ? '✕ failed' : st === 'run' ? '· running' : st === 'skip' ? '– skipped' : 'idle';
+      A.T(svg, x + w / 2, 68, mark, { fill: col, size: 9, anchor: 'middle' });
+      if (i < STAGES.length - 1) {
+        A.T(svg, x + w + gap / 2, 60, '▸', { fill: C.border, size: 12, anchor: 'middle' });
+      }
+    }
+    A.T(svg, x0, 22, 'on: [push, pull_request]   →   jobs run in order; a red stage stops everything after it',
+      { fill: C.dim, size: 9.5 });
+    var anyFail = state.indexOf('fail') >= 0;
+    A.T(svg, x0, 104, anyFail ? '⛔ merge blocked — main is protected by these checks'
+      : (state[5] === 'pass' ? '✓ green — this commit is release-ready' : ''),
+      { fill: anyFail ? C.bad : C.ok, size: 10.5, weight: 700 });
+  }
+
+  function logln(cls, s) {
+    var el = A.$('w8-pipe-log'), d = document.createElement('div');
+    d.innerHTML = '<span class="t">' + new Date().toTimeString().slice(0, 8) + '</span> <span class="' + cls + '">' + s + '</span>';
+    el.appendChild(d);
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function verdict(kind, html) {
+    var v = A.$('w8-pipe-verdict');
+    v.className = 'verdict ' + kind;
+    v.innerHTML = html;
+  }
+
+  function run() {
+    if (busy) return;
+    busy = true; runs++;
+    state = ['idle', 'idle', 'idle', 'idle', 'idle', 'idle'];
+    A.$('w8-pipe-runs').textContent = String(runs);
+    A.$('w8-pipe-badge').className = 'badge warn';
+    A.$('w8-pipe-badge').textContent = 'running';
+    logln('b', '── push ' + Math.random().toString(16).slice(2, 9) + ' → CI run #' + runs + ' ──');
+    draw();
+
+    var i = 0;
+    function step() {
+      if (i >= STAGES.length) {
+        busy = false;
+        A.$('w8-pipe-badge').className = 'badge ok';
+        A.$('w8-pipe-badge').textContent = 'green · merge allowed';
+        logln('g', 'all checks passed in 53s — deployed');
+        verdict('ok', '<b>Green.</b> Six stages, 53 seconds, no human involved. That is the whole promise of CI: the ' +
+          'suite you wrote is now the contract for what is allowed into <code>main</code>, enforced on a machine that ' +
+          'is not yours and has none of your local state.');
+        draw();
+        return;
+      }
+      state[i] = 'run'; draw();
+      timers.push(setTimeout(function () {
+        var f = null, k;
+        for (k = 0; k < TOG.length; k++) {
+          if (!TOG[k].on || TOG[k].stage !== i) continue;
+          if (TOG[k].id === 'flaky') { if (Math.random() < 0.25) { f = TOG[k]; } }
+          else { f = TOG[k]; break; }
+        }
+        if (f) {
+          state[i] = 'fail';
+          for (k = i + 1; k < STAGES.length; k++) state[k] = 'skip';
+          red++;
+          A.$('w8-pipe-red').textContent = String(red);
+          logln('r', f.log);
+          if (f.id === 'flaky') {
+            flakes++;
+            A.$('w8-pipe-flake').textContent = String(flakes);
+            logln('y', 'note: the code did not change since the last green run');
+            verdict('bad', '<b>Red — and nothing changed.</b> This is a flaky failure: the same commit passed a moment ' +
+              'ago. Push again and it may well go green, which is exactly the disease. ' + f.fix);
+          } else {
+            verdict('bad', '<b>Blocked at "' + STAGES[i] + '".</b> Everything after it is skipped, so a bad build can ' +
+              'never reach deploy. <b>Fix:</b> ' + f.fix);
+          }
+          A.$('w8-pipe-badge').className = 'badge bad';
+          A.$('w8-pipe-badge').textContent = 'merge blocked';
+          busy = false; draw();
+          return;
+        }
+        state[i] = 'pass';
+        logln('g', ({
+          0: 'checkout actions/checkout@v4 · python 3.11, 3.12',
+          1: 'ruff: 0 issues',
+          2: 'pytest -q tests/unit — 60 passed in 1.2s',
+          3: 'pytest -q tests/integration — 8 passed in 6.0s (no network)',
+          4: 'docker build: 6 layers, pip layer cached',
+          5: 'deploy: systemd restarted team-trader.service'
+        })[i]);
+        i++;
+        step();
+      }, 430));
+    }
+    step();
+  }
+
+  function reset() {
+    timers.forEach(clearTimeout); timers = [];
+    busy = false;
+    state = ['idle', 'idle', 'idle', 'idle', 'idle', 'idle'];
+    A.clear(A.$('w8-pipe-log'));
+    A.$('w8-pipe-badge').className = 'badge idle';
+    A.$('w8-pipe-badge').textContent = 'no run yet';
+    verdict('', 'Push a commit to run the pipeline.');
+    draw();
+  }
+
+  function init() {
+    if (!A.$('w8-pipe')) return;
+    var box = A.$('w8-pipe-toggles');
+    TOG.forEach(function (t) {
+      var lab = document.createElement('label');
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.setAttribute('aria-label', 'inject ' + t.nm);
+      cb.addEventListener('change', function () { t.on = cb.checked; });
+      var sp = document.createElement('span');
+      sp.innerHTML = t.nm + '<span class="fd">' + t.dsc + ' · fails at <b>' + STAGES[t.stage] + '</b></span>';
+      lab.appendChild(cb); lab.appendChild(sp); box.appendChild(lab);
+    });
+    A.$('w8-pipe-run').addEventListener('click', run);
+    A.$('w8-pipe-reset').addEventListener('click', reset);
+    reset();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   WEEK 8 · Widget 3 — determinism: seeded vs unseeded
+   ══════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  var A = window.ARENA, C = A.C, N = 40, TARGET = 412;
+  var seeded = [], unseeded = [];
+
+  function pathFrom(r, fix) {
+    var p = [0], i;
+    for (i = 1; i <= N; i++) p.push(p[i - 1] + (r() - 0.42) * 46);
+    if (fix) {
+      var adj = (TARGET - p[N]) / N;
+      for (i = 1; i <= N; i++) p[i] += adj * i;
+    }
+    return p;
+  }
+
+  function drawPane(id, runs, col) {
+    var svg = A.$(id); A.clear(svg);
+    var x0 = 34, x1 = 332, y0 = 12, y1 = 116, mn = -180, mx = 620;
+    var X = function (i) { return x0 + (x1 - x0) * i / N; };
+    var Y = function (v) { return y1 - (v - mn) / (mx - mn) * (y1 - y0); };
+    A.add(svg, 'line', { x1: x0, y1: Y(0), x2: x1, y2: Y(0), stroke: C.border });
+    A.add(svg, 'line', { x1: x0, y1: Y(TARGET), x2: x1, y2: Y(TARGET), stroke: C.ink, 'stroke-dasharray': '3 3', opacity: 0.5 });
+    A.T(svg, x0 + 2, Y(TARGET) - 4, 'expected 412', { fill: C.muted, size: 8.5 });
+    A.T(svg, 2, Y(0) + 3, '0', { fill: C.dim, size: 8.5 });
+    runs.forEach(function (p, k) {
+      var pts = p.map(function (v, i) { return [X(i), Y(v)]; });
+      A.path(svg, pts, { stroke: col, 'stroke-width': k === runs.length - 1 ? 1.9 : 1.2,
+        opacity: k === runs.length - 1 ? 0.95 : 0.4 });
+      A.add(svg, 'circle', { cx: X(N), cy: Y(p[N]), r: 2.6, fill: col, opacity: 0.9 });
+    });
+    if (!runs.length) A.T(svg, (x0 + x1) / 2, (y0 + y1) / 2, 'no runs yet', { fill: C.dim, size: 10, anchor: 'middle' });
+    A.T(svg, x1, y1 + 14, 'tick', { fill: C.dim, size: 8.5, anchor: 'end' });
+    A.T(svg, x0, y1 + 14, 'session P&L', { fill: C.dim, size: 8.5 });
+  }
+
+  function distinct(runs) {
+    var s = {}, n = 0, i;
+    for (i = 0; i < runs.length; i++) {
+      var k = Math.round(runs[i][N]);
+      if (!s[k]) { s[k] = 1; n++; }
+    }
+    return n;
+  }
+  function passes(runs) {
+    var n = 0, i;
+    for (i = 0; i < runs.length; i++) if (Math.round(runs[i][N]) === TARGET) n++;
+    return n;
+  }
+
+  function render() {
+    drawPane('w8-det-seed', seeded, C.ok);
+    drawPane('w8-det-rand', unseeded, C.bad);
+    A.$('w8-det-seed-n').textContent = seeded.length + ' run' + (seeded.length === 1 ? '' : 's');
+    A.$('w8-det-rand-n').textContent = unseeded.length + ' run' + (unseeded.length === 1 ? '' : 's');
+    A.$('w8-det-seed-sub').textContent = seeded.length
+      ? 'distinct results: ' + distinct(seeded) + ' · assertion passed ' + passes(seeded) + '/' + seeded.length
+      : 'distinct results: —';
+    A.$('w8-det-rand-sub').textContent = unseeded.length
+      ? 'distinct results: ' + distinct(unseeded) + ' · assertion passed ' + passes(unseeded) + '/' + unseeded.length
+      : 'distinct results: —';
+    var v = A.$('w8-det-verdict');
+    if (!seeded.length) {
+      v.className = 'verdict';
+      v.innerHTML = 'Run the test a few times in each mode.';
+    } else if (unseeded.length < 2) {
+      v.className = 'verdict warn';
+      v.innerHTML = 'Run it a few more times — the difference only becomes obvious once the paths overlay.';
+    } else {
+      v.className = 'verdict bad';
+      v.innerHTML = '<b>' + seeded.length + ' seeded runs, ' + distinct(seeded) + ' distinct result. ' +
+        unseeded.length + ' unseeded runs, ' + distinct(unseeded) + ' distinct results.</b> The left pane is a test: ' +
+        'the same input produced the same number, so <code>assert final_pnl == 412</code> holds every time and a red ' +
+        'run means something changed. The right pane is a coin flip wearing a test\'s name — it passed ' +
+        passes(unseeded) + ' of ' + unseeded.length + ' times, and you cannot debug a failure you cannot reproduce.';
+    }
+  }
+
+  function once() {
+    seeded.push(pathFrom(A.rng(0), true));
+    unseeded.push(pathFrom(Math.random, false));
+    if (seeded.length > 8) { seeded.shift(); unseeded.shift(); }
+    render();
+  }
+
+  function init() {
+    if (!A.$('w8-det-seed')) return;
+    A.$('w8-det-1').addEventListener('click', once);
+    A.$('w8-det-5').addEventListener('click', function () { var i; for (i = 0; i < 5; i++) once(); });
+    A.$('w8-det-reset').addEventListener('click', function () { seeded = []; unseeded = []; render(); });
+    render();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   WEEK 8 · Widget 4 — mini live dashboard (pause / step)
+   ══════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  var A = window.ARENA, C = A.C;
+  var SYMS = [{ s: 'AAPL', px: 228.40 }, { s: 'NVDA', px: 121.80 }];
+  var INC_AT = 6, LIMIT = 500;
+  var st, timer = null, inc = 'none', r = A.rng(8081);
+
+  function fresh() {
+    return {
+      tick: 0, px: [228.40, 121.80], mark: [228.40, 121.80], qty: [0, 0], avg: [0, 0],
+      cash: 100000, realized: 0, hist: [100000], age: 0, ws: 'CLOSED', msgs: 0, lat: 0, rej: 0, frozen: false
+    };
+  }
+
+  function step() {
+    var s = st, i;
+    s.tick++;
+    s.ws = 'OPEN';
+    s.msgs = 18 + Math.round(r() * 10);
+    s.lat = 4 + r() * 4;
+    var live = !(inc === 'stale' && s.tick >= INC_AT);
+    for (i = 0; i < 2; i++) {
+      if (live) s.px[i] = s.px[i] * (1 + (r() - 0.5) * 0.0042);
+      s.mark[i] = live ? s.px[i] : s.mark[i];
+    }
+    s.age = live ? 1 + Math.round(r() * 3) : (s.tick - INC_AT + 1) * 3;
+    s.frozen = !live;
+
+    /* the bot keeps trading */
+    var target = inc === 'limit' && s.tick >= INC_AT ? 640 : Math.min(360, 40 * s.tick);
+    for (i = 0; i < 2; i++) {
+      var want = Math.round(target / 2);
+      if (want > s.qty[i]) {
+        var add = Math.min(want - s.qty[i], 60);
+        s.avg[i] = (s.avg[i] * s.qty[i] + s.mark[i] * add) / (s.qty[i] + add);
+        s.qty[i] += add;
+        s.cash -= add * s.mark[i];
+      }
+    }
+    if (inc === 'drop' && s.tick >= INC_AT && s.tick < INC_AT + 3) {
+      s.ws = 'RECONNECTING · backoff ' + Math.pow(2, s.tick - INC_AT) + 's';
+      s.msgs = 0;
+    } else if (inc === 'drop' && s.tick === INC_AT + 3) {
+      s.ws = 'OPEN · re-synced';
+    }
+    if (inc === 'throttle' && s.tick >= INC_AT) {
+      s.rej += 4 + Math.round(r() * 3);
+      s.msgs = 120 + Math.round(r() * 40);
+      s.lat = 18 + r() * 10;
+    }
+    var nw = s.cash;
+    for (i = 0; i < 2; i++) nw += s.qty[i] * s.mark[i];
+    s.hist.push(nw);
+    if (s.hist.length > 60) s.hist.shift();
+    render();
+  }
+
+  function drawPnl() {
+    var svg = A.$('w8-dash-pnl'); A.clear(svg);
+    var h = st.hist, x0 = 6, x1 = 334, y0 = 8, y1 = 104, i;
+    var mn = Math.min.apply(null, h), mx = Math.max.apply(null, h);
+    var pad = Math.max(60, (mx - mn) * 0.2); mn -= pad; mx += pad;
+    var X = function (i) { return x0 + (x1 - x0) * i / Math.max(1, h.length - 1); };
+    var Y = function (v) { return y1 - (v - mn) / (mx - mn) * (y1 - y0); };
+    A.add(svg, 'line', { x1: x0, y1: Y(100000), x2: x1, y2: Y(100000), stroke: C.border, 'stroke-dasharray': '3 3' });
+    A.T(svg, x0 + 2, Y(100000) - 4, 'start 100k', { fill: C.dim, size: 8.5 });
+    var pts = [];
+    for (i = 0; i < h.length; i++) pts.push([X(i), Y(h[i])]);
+    var up = h[h.length - 1] >= 100000;
+    A.path(svg, pts, { stroke: up ? C.ok : C.bad, 'stroke-width': 1.8 });
+    A.add(svg, 'circle', { cx: X(h.length - 1), cy: Y(h[h.length - 1]), r: 3, fill: up ? C.ok : C.bad });
+    if (st.frozen) {
+      A.T(svg, (x0 + x1) / 2, 22, 'marked on a stale price', { fill: C.bad, size: 9.5, anchor: 'middle', weight: 700 });
+    }
+  }
+
+  function drawRisk() {
+    var svg = A.$('w8-dash-risk'); A.clear(svg);
+    var tot = st.qty[0] + st.qty[1];
+    var notion = st.qty[0] * st.mark[0] + st.qty[1] * st.mark[1];
+    var rows = [
+      ['position vs limit', tot / LIMIT],
+      ['notional vs buying power', notion / 200000],
+      ['reject rate', Math.min(1, st.rej / 40)]
+    ];
+    rows.forEach(function (rw, i) {
+      var y = 12 + i * 32, u = A.clamp(rw[1], 0, 1.25);
+      var col = u > 1 ? C.bad : u > 0.75 ? C.warn : C.ok;
+      A.T(svg, 4, y + 8, rw[0], { fill: C.muted, size: 9.5 });
+      A.add(svg, 'rect', { x: 4, y: y + 12, width: 260, height: 8, rx: 4, fill: C.border, opacity: 0.6 });
+      A.add(svg, 'rect', { x: 4, y: y + 12, width: Math.max(1, Math.min(260, 260 * u)), height: 8, rx: 4, fill: col });
+      A.add(svg, 'line', { x1: 4 + 260 * 0.8, y1: y + 9, x2: 4 + 260 * 0.8, y2: y + 23, stroke: C.warn, opacity: 0.5 });
+      A.T(svg, 334, y + 20, (u * 100).toFixed(0) + '%', { fill: col, size: 10, anchor: 'end', weight: 700 });
+    });
+  }
+
+  function render() {
+    var s = st, i;
+    A.$('w8-dash-tick').textContent = String(s.tick);
+    var tb = A.$('w8-dash-pos'); A.clear(tb);
+    var hr = document.createElement('tr');
+    hr.innerHTML = '<th>sym</th><th>qty</th><th>avg</th><th>mark</th><th>unreal</th>';
+    tb.appendChild(hr);
+    var unreal = 0;
+    for (i = 0; i < 2; i++) {
+      var u = s.qty[i] * (s.mark[i] - s.avg[i]);
+      unreal += u;
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + SYMS[i].s + '</td><td>' + s.qty[i] + '</td><td>' +
+        (s.avg[i] ? s.avg[i].toFixed(2) : '—') + '</td><td>' + s.mark[i].toFixed(2) +
+        '</td><td style="color:' + (u >= 0 ? C.ok : C.bad) + '">' + A.sgn(u, 0) + '</td>';
+      tb.appendChild(tr);
+    }
+    var tot = s.qty[0] + s.qty[1], nw = s.hist[s.hist.length - 1];
+    A.$('w8-dash-real').textContent = '$' + s.realized.toFixed(0);
+    A.$('w8-dash-unreal').textContent = A.sgn(unreal, 0);
+    A.$('w8-dash-unreal').className = unreal >= 0 ? 'ok' : 'bad';
+    A.$('w8-dash-nw').textContent = '$' + nw.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    A.$('w8-dash-ws').textContent = s.ws;
+    A.$('w8-dash-ws').className = s.ws.indexOf('RECONNECTING') === 0 ? 'bad' : (s.tick ? 'ok' : '');
+    A.$('w8-dash-age').textContent = s.tick ? s.age + ' s' : '—';
+    A.$('w8-dash-age').className = s.age > 8 ? 'bad' : s.age > 5 ? 'warn' : 'ok';
+    A.$('w8-dash-msgs').textContent = String(s.msgs);
+    A.$('w8-dash-lat').textContent = s.tick ? s.lat.toFixed(1) + ' ms' : '—';
+    A.$('w8-dash-lat').className = s.lat > 15 ? 'bad' : 'ok';
+    A.$('w8-dash-rej').textContent = String(s.rej);
+    A.$('w8-dash-rej').className = s.rej > 20 ? 'bad' : s.rej > 0 ? 'warn' : 'ok';
+
+    var pb = A.$('w8-dash-pos-badge');
+    pb.className = 'badge ' + (tot > LIMIT ? 'bad' : tot ? 'ok' : 'idle');
+    pb.textContent = tot ? tot + ' / ' + LIMIT + ' lots' : 'flat';
+    var nb = A.$('w8-dash-pnl-badge');
+    nb.className = 'badge ' + (nw >= 100000 ? 'ok' : 'bad');
+    nb.textContent = s.tick ? A.sgn(nw - 100000, 0) : '—';
+    var rb = A.$('w8-dash-risk-badge');
+    rb.className = 'badge ' + (tot > LIMIT || s.rej > 20 ? 'bad' : tot / LIMIT > 0.75 ? 'warn' : 'ok');
+    rb.textContent = tot > LIMIT ? 'limit breached' : tot / LIMIT > 0.75 ? 'near limit' : 'within limits';
+    var cb = A.$('w8-dash-conn-badge');
+    var connBad = s.age > 8 || s.ws.indexOf('RECONNECTING') === 0 || s.rej > 20;
+    cb.className = 'badge ' + (!s.tick ? 'idle' : connBad ? 'bad' : s.age > 5 ? 'warn' : 'ok');
+    cb.textContent = !s.tick ? 'idle' : connBad ? 'degraded' : 'healthy';
+
+    drawPnl(); drawRisk();
+
+    var b = A.$('w8-dash-banner'), bt = A.$('w8-dash-banner-txt'), v = A.$('w8-dash-verdict');
+    var wc = tot * 0.02 * (s.mark[0] + s.mark[1]) / 2;
+    A.$('w8-dash-wc').textContent = '−$' + wc.toFixed(0);
+    if (!s.tick) {
+      b.className = 'banner'; bt.textContent = 'Session idle. Press play.';
+      v.className = 'verdict';
+      v.innerHTML = 'Nothing is wrong yet. Note what healthy looks like <em>before</em> you break it.';
+      return;
+    }
+    if (inc === 'stale' && s.tick >= INC_AT) {
+      b.className = 'banner bad';
+      bt.innerHTML = '<b>Feed age ' + s.age + 's</b> — the Yahoo poll has stalled. Prices are frozen; the socket is fine.';
+      v.className = 'verdict bad';
+      v.innerHTML = '<b>Partial failure.</b> Positions, P&L and risk all look calm because they are computed from a ' +
+        'price that stopped moving at tick ' + INC_AT + '. Only the connectivity pane can tell you. A robust bot ' +
+        'treats staleness as an alarm: stop quoting, widen, or flatten — never keep pricing off a dead feed.';
+    } else if (inc === 'drop' && s.ws.indexOf('RECONNECTING') === 0) {
+      b.className = 'banner warn';
+      bt.innerHTML = '<b>Socket dropped</b> — reconnecting with exponential backoff, orders queued, state re-sync pending.';
+      v.className = 'verdict warn';
+      v.innerHTML = '<b>This is survivable if you wrote it that way.</b> On <code>ConnectionClosed</code>: back off, ' +
+        'reconnect, re-sync positions from the exchange, then resume. A bot that crashes on a blip spends the rest of ' +
+        'the session as a spectator holding ' + tot + ' lots.';
+    } else if (inc === 'limit' && tot > LIMIT) {
+      b.className = 'banner bad';
+      bt.innerHTML = '<b>Position limit breached</b> — ' + tot + ' lots against a ' + LIMIT + ' limit.';
+      v.className = 'verdict bad';
+      v.innerHTML = '<b>The risk pane went red before the P&L did.</b> That is the point of showing limit usage rather ' +
+        'than only money: the loss has not happened yet. <code>RiskManager.check_order()</code> should have vetoed the ' +
+        'order that crossed the line — the dashboard is your evidence that it did not.';
+    } else if (inc === 'throttle' && s.tick >= INC_AT) {
+      b.className = 'banner bad';
+      bt.innerHTML = '<b>Rate limited</b> — ' + s.rej + ' rejects, ' + s.msgs + ' msgs/s, latency ' + s.lat.toFixed(0) + ' ms.';
+      v.className = 'verdict bad';
+      v.innerHTML = '<b>Throttling shows up as rejects, not as an exception.</b> Nothing raised; your orders are simply ' +
+        'refused. From Week 8 the arena enforces rate limits, so a bot that re-sends on every tick spends its budget ' +
+        'on noise and has none left when its signal is right.';
+    } else {
+      b.className = 'banner live';
+      bt.innerHTML = '<b>Healthy</b> — socket open, feed ' + s.age + 's old, ' + s.msgs + ' msgs/s, latency ' + s.lat.toFixed(1) + ' ms.';
+      v.className = 'verdict ok';
+      v.innerHTML = '<b>This is the baseline.</b> Four panes, one glance: what I own, what it is worth, how close I am ' +
+        'to a limit, and whether I am still connected. Write these numbers down now — during the incident you will not ' +
+        'have time to work out what normal was.';
+    }
+  }
+
+  function play() {
+    if (timer) { clearInterval(timer); timer = null; A.$('w8-dash-play').innerHTML = '&#9654; Play'; return; }
+    timer = setInterval(step, 820);
+    A.$('w8-dash-play').innerHTML = '&#10073;&#10073; Pause';
+  }
+
+  function init() {
+    if (!A.$('w8-dash-pnl')) return;
+    st = fresh();
+    A.$('w8-dash-play').addEventListener('click', play);
+    A.$('w8-dash-step').addEventListener('click', function () {
+      if (timer) { clearInterval(timer); timer = null; A.$('w8-dash-play').innerHTML = '&#9654; Play'; }
+      step();
+    });
+    A.$('w8-dash-reset').addEventListener('click', function () {
+      if (timer) { clearInterval(timer); timer = null; A.$('w8-dash-play').innerHTML = '&#9654; Play'; }
+      r = A.rng(8081); st = fresh(); render();
+    });
+    A.$('w8-dash-inc').addEventListener('change', function () {
+      inc = this.value; r = A.rng(8081); st = fresh(); render();
+    });
+    render();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+</script>
+</body>
+</html>

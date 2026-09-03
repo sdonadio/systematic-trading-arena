@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="data:," />
+<title>Week 2 · Concurrency &amp; Async in Python — Systematic Trading Arena</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    /* ── Systematic Trading Arena · shared palette (identical on every page) ── */
+    --accent:       #3b82f6;
+    --accent-2:     #7cb0ff;
+    --accent-3:     #b9d4ff;
+    --accent-rgb:   59,130,246;
+    --accent-2-rgb: 124,176,255;
+    --bg:           #0f1115;
+    --panel:        #181b22;
+    --panel2:       #1e222b;
+    --panel-2:      #13161b;
+    --ink:          #e8e6e3;
+    --ink-dim:      #c6c3bf;
+    --ink-mute:     #6f757f;
+    --muted:        #9aa0a6;
+    --dim:          #5f6673;
+    --line:         #272c36;
+    --line-2:       #333a47;
+    --border:       #272c36;
+    --ok:           #3fb950;
+    --warn:         #d29922;
+    --bad:          #f85149;
+    --info:         #6cb6ff;
+    --sky:          #58a6ff;
+    --violet:       #a78bfa;
+    --teal:         #2dd4bf;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.62;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent-2);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  /* ── nav / footer ─────────────────────────────────────────── */
+  nav.top{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    padding:11px 22px;background:rgba(15,17,21,.94);border-bottom:1px solid var(--line)}
+  nav.top>a:first-child{font-weight:800;letter-spacing:-.2px;color:var(--ink);font-size:14.5px;
+    border-left:3px solid var(--accent);padding-left:10px}
+  nav.top .crumbs{font-size:12px;color:var(--muted)}
+  nav.top .crumbs b{color:var(--ink);font-weight:700}
+  footer{border-top:1px solid var(--line);background:var(--panel);
+    padding:26px 22px 34px;text-align:center;font-size:11.5px;color:var(--dim);letter-spacing:.3px}
+
+  /* ── sections & typography ────────────────────────────────── */
+  section{max-width:1180px;margin:0 auto;padding:36px 22px 42px;border-top:1px solid var(--line)}
+  section#hero{border-top:none}
+  .kicker{font-size:10.5px;font-weight:800;letter-spacing:1.9px;text-transform:uppercase;color:var(--accent-2)}
+  h1{font-size:clamp(26px,4.2vw,40px);font-weight:800;letter-spacing:-.9px;line-height:1.13;margin:10px 0 6px}
+  h2{font-size:21px;font-weight:700;letter-spacing:-.3px;margin:4px 0 4px}
+  h3{font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:11px}
+  h4{font-size:13.5px;font-weight:700;margin-bottom:5px}
+  p{margin:9px 0;max-width:82ch}
+  .lead{color:var(--muted);font-size:15px;max-width:84ch}
+  .sub{color:var(--muted);font-size:12.5px}
+  strong{color:#fff;font-weight:650}
+  em.hi{color:var(--accent-2);font-style:normal;font-weight:600}
+  code,.mono{font-family:var(--mono);font-size:12.5px}
+  code{background:rgba(var(--accent-2-rgb),.13);color:#c7ddff;padding:1px 5px;border-radius:4px}
+  ul.you{list-style:none;margin:16px 0 0;display:grid;gap:8px}
+  ul.you li{position:relative;padding-left:26px;font-size:13.5px;color:var(--ink);max-width:78ch}
+  ul.you li::before{content:"";position:absolute;left:4px;top:8px;width:8px;height:8px;border-radius:2px;
+    background:var(--accent);box-shadow:0 0 0 3px rgba(var(--accent-rgb),.22)}
+  ul.plain{list-style:none;display:grid;gap:7px;font-size:13px;color:var(--muted)}
+  ul.plain li{padding-left:16px;position:relative}
+  ul.plain li::before{content:"\2022";position:absolute;left:2px;color:var(--accent-2)}
+
+  /* ── panels & layout ──────────────────────────────────────── */
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .panel.tight{padding:13px 14px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:start}
+  .split{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px;align-items:start}
+  .split-r{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:18px;align-items:start}
+  .stack{display:grid;gap:14px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+  /* ── controls ─────────────────────────────────────────────── */
+  .btn{font-family:inherit;font-size:12px;font-weight:650;cursor:pointer;color:var(--ink);
+    background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:7px 14px;transition:.15s}
+  .btn:hover:not(:disabled){border-color:var(--accent-2);color:#fff}
+  .btn:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+  .btn:disabled{opacity:.35;cursor:not-allowed}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.primary:hover:not(:disabled){filter:brightness(1.25)}
+  .btn.on{background:rgba(var(--accent-rgb),.28);border-color:var(--accent-2);color:#fff}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+  .tab{font-family:inherit;font-size:12px;font-weight:650;cursor:pointer;color:var(--muted);
+    background:transparent;border:1px solid var(--line);border-radius:20px;padding:6px 14px;transition:.15s}
+  .tab:hover{color:var(--ink)}
+  .tab[aria-selected="true"]{background:rgba(var(--accent-rgb),.3);border-color:var(--accent-2);color:#fff}
+  .tab:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+  .ctl{display:grid;gap:4px;margin-bottom:12px}
+  .ctl label{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);
+    display:flex;justify-content:space-between;gap:10px}
+  .ctl label b{font-family:var(--mono);color:var(--accent-2);font-size:12px;text-transform:none;letter-spacing:0}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:3px;
+    background:#2b313d;outline:none;cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;
+    background:var(--accent-2);border:2px solid var(--bg);cursor:pointer}
+  input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--accent-2);
+    border:2px solid var(--bg);cursor:pointer}
+  input[type=range]:focus-visible{box-shadow:0 0 0 3px rgba(var(--accent-2-rgb),.4)}
+  select,textarea,input[type=text]{font-family:var(--mono);font-size:12.5px;color:var(--ink);
+    background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:7px 9px;width:100%}
+  select:focus-visible,textarea:focus-visible,input:focus-visible{outline:2px solid var(--accent-2);outline-offset:1px}
+  textarea{line-height:1.55;resize:vertical}
+
+  /* ── stats / pills / code ─────────────────────────────────── */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:1px;
+    background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .stat{background:var(--panel);padding:10px 12px}
+  .stat .sl{font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--dim)}
+  .stat .sv{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--ink);margin-top:3px}
+  .stat .sv.ok{color:var(--ok)} .stat .sv.bad{color:var(--bad)} .stat .sv.warn{color:var(--warn)}
+  .stat .sv.acc{color:var(--accent-2)}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;letter-spacing:.5px;
+    padding:3px 9px;border-radius:20px;border:1px solid var(--line);color:var(--muted)}
+  .pill.ok{color:var(--ok);border-color:rgba(63,185,80,.5);background:rgba(63,185,80,.1)}
+  .pill.bad{color:var(--bad);border-color:rgba(248,81,73,.5);background:rgba(248,81,73,.1)}
+  .pill.warn{color:var(--warn);border-color:rgba(210,153,34,.5);background:rgba(210,153,34,.1)}
+  .pill.acc{color:var(--accent-2);border-color:rgba(var(--accent-2-rgb),.5);background:rgba(var(--accent-rgb),.18)}
+  pre.code{font-family:var(--mono);font-size:11.8px;line-height:1.62;background:#0b0e14;color:#dbe3ea;
+    border:1px solid var(--line);border-radius:10px;padding:13px 14px;overflow-x:auto;white-space:pre}
+  pre.code .k{color:#6cb6ff} pre.code .s{color:#8ddb8c} pre.code .c{color:#6b7484;font-style:italic}
+  pre.code .n{color:#e0b070} pre.code .b{color:#c7ddff;font-weight:700}
+  .note{border-left:3px solid var(--accent);background:rgba(var(--accent-rgb),.12);border-radius:0 8px 8px 0;
+    padding:10px 13px;font-size:12.5px;color:var(--muted)}
+  .note b{color:var(--ink)}
+  .log{font-family:var(--mono);font-size:11.5px;max-height:230px;overflow-y:auto;display:grid;gap:5px}
+  .log div{background:var(--panel2);border-left:3px solid var(--line);border-radius:0 6px 6px 0;padding:6px 9px;color:var(--muted)}
+  .log div.hl{border-left-color:var(--accent-2);color:var(--ink);background:rgba(var(--accent-rgb),.15)}
+  .log div.ok{border-left-color:var(--ok)} .log div.bad{border-left-color:var(--bad)}
+  svg{display:block;max-width:100%;height:auto}
+  .svgwrap{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px;overflow-x:auto}
+  table.t{width:100%;border-collapse:collapse;font-size:12px}
+  table.t th{font-size:9.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--dim);
+    text-align:left;padding:0 8px 7px;border-bottom:1px solid var(--line)}
+  table.t td{padding:7px 8px;border-bottom:1px solid rgba(39,44,54,.6);color:var(--muted);font-family:var(--mono);font-size:11.8px}
+  table.t td.n{color:var(--ink);font-weight:600}
+
+  /* ── pitfalls ─────────────────────────────────────────────── */
+  details.pit{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;overflow:hidden}
+  details.pit>summary{cursor:pointer;padding:12px 15px;font-size:13.5px;font-weight:650;color:var(--ink);
+    list-style:none;display:flex;gap:11px;align-items:flex-start}
+  details.pit>summary::-webkit-details-marker{display:none}
+  details.pit>summary::before{content:"\25B8";color:var(--accent-2);font-size:12px;line-height:1.5;transition:.2s}
+  details.pit[open]>summary::before{transform:rotate(90deg)}
+  details.pit>summary:focus-visible{outline:2px solid var(--accent-2);outline-offset:-2px}
+  details.pit .body{padding:0 15px 15px 39px;font-size:13px;color:var(--muted);display:grid;gap:9px}
+  details.pit .body .fix{color:var(--ok);font-weight:600}
+
+  /* ── MCQ ──────────────────────────────────────────────────── */
+  .mcq{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px 17px;margin-bottom:13px}
+  .mcq .q{font-size:13.8px;font-weight:650;color:var(--ink);margin:0 0 11px;max-width:84ch}
+  .mcq .q span{color:var(--accent-2);font-family:var(--mono);margin-right:7px}
+  .opts{display:grid;gap:7px}
+  .opt{text-align:left;font-family:inherit;font-size:13px;cursor:pointer;color:var(--muted);
+    background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 12px;transition:.15s}
+  .opt:hover:not(:disabled){border-color:var(--accent-2);color:var(--ink)}
+  .opt:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+  .opt.right{border-color:var(--ok);background:rgba(63,185,80,.13);color:#bce8c4}
+  .opt.wrong{border-color:var(--bad);background:rgba(248,81,73,.12);color:#f4b6b1}
+  .opt.dim{opacity:.5}
+  .fb{margin-top:11px;font-size:12.5px;line-height:1.6;color:var(--muted);display:none;
+    border-left:3px solid var(--line);padding-left:11px}
+  .fb.show{display:block}
+  .fb.show.good{border-left-color:var(--ok)} .fb.show.poor{border-left-color:var(--bad)}
+  .fb b{color:var(--ink)}
+
+  /* ── next ─────────────────────────────────────────────────── */
+  .nextgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+  .nextcard{display:block;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:15px 17px;transition:.18s;color:inherit}
+  .nextcard:hover{border-color:var(--accent-2);transform:translateY(-2px);text-decoration:none}
+  .nextcard .nl{font-size:10px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--accent-2)}
+  .nextcard .nt{font-size:14.5px;font-weight:700;color:var(--ink);margin-top:5px}
+  .nextcard .nd{font-size:12px;color:var(--muted);margin-top:5px}
+
+  @media (max-width:720px){
+    .grid2,.grid3,.split,.split-r{grid-template-columns:1fr}
+    section{padding:26px 15px 32px}
+    nav.top{padding:10px 15px;gap:8px}
+    nav.top .crumbs{font-size:11px}
+    p,.lead{max-width:none}
+  }
+
+  /* ── week-page shared ─────────────────────────────────────── */
+  #hero{padding:52px 22px 40px;
+    background:radial-gradient(ellipse 820px 340px at 22% -14%,rgba(var(--accent-rgb),.3),transparent 66%)}
+  #hero .wk{font-family:var(--mono);font-size:12px;letter-spacing:2px;color:var(--accent-2);font-weight:700}
+  #hero h1{max-width:24ch}
+  #hero .promise{font-size:16.5px;color:var(--ink);max-width:74ch;margin-top:10px;line-height:1.55}
+  .secnum{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;
+    background:rgba(var(--accent-rgb),.35);border:1px solid var(--accent-2);color:#fff;font-family:var(--mono);
+    font-size:11px;font-weight:700;margin-right:9px;vertical-align:2px}
+  .sw{display:inline-flex;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+  .sw button{font-family:inherit;font-size:11.5px;font-weight:650;cursor:pointer;color:var(--muted);
+    background:var(--panel2);border:none;padding:7px 13px;transition:.15s}
+  .sw button[aria-pressed="true"]{background:rgba(var(--accent-rgb),.32);color:#fff}
+  .sw button:focus-visible{outline:2px solid var(--accent-2);outline-offset:-2px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:10px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+
+  /* ── week-2 specific ──────────────────────────────────────── */
+  .feedwrap{position:relative;border-radius:12px;overflow:hidden}
+  .feedwrap.blocked::after{content:"LOOP BLOCKED — nothing else can run";position:absolute;inset:0;
+    display:flex;align-items:center;justify-content:center;background:rgba(15,17,21,.78);
+    color:var(--bad);font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:1px;
+    border:2px solid var(--bad);border-radius:12px;text-align:center;padding:0 12px}
+  .qslot{transition:fill .12s}
+  .cmp{display:none} .cmp.on{display:grid;gap:12px}
+
+  /* ── mobile guard (identical on every page): single column under 720px,
+        no horizontal overflow. Must stay last in the sheet. ───────────── */
+  @media (max-width:720px){
+    .grid2,.grid3,.grid2.narrow-right,.split,.split-r,.codepair,
+    .nextgrid,.dash,.toggles,.lanes,.weeknav,.weeks,.roles,.stack{
+      grid-template-columns:minmax(0,1fr)}
+    [class*="grid"]>*,.stack>*,.wrap>*,.panel,.panel.tight,.nextcard,.wk,.row>*{min-width:0}
+    pre,pre.code,.svgwrap,svg,canvas,table,select,input,textarea,.mono{max-width:100%}
+    pre,pre.code,.svgwrap,.tablewrap{overflow-x:auto}
+    .ctl,.ctl>*,.controls>*,.row,.legend>*{min-width:0}
+    .ctl{flex-wrap:wrap} .ctl select,.ctl input[type=range]{flex:1 1 100%;width:100%}
+    p,.lead,.sub,.promise{max-width:none}
+  }
+</style>
+</head>
+<body>
+
+<nav class="top"><a href="index.html">Systematic Trading Arena</a><span class="crumbs"><a href="week1.html">← Week 1</a> · <b>Week 2 · Concurrency &amp; Async in Python</b> · <a href="week3.html">Week 3 →</a></span></nav>
+
+<!-- ══════════════ HERO ══════════════ -->
+<section id="hero">
+  <div class="wk">WEEK 2</div>
+  <h1>Concurrency &amp; Async in Python</h1>
+  <p class="promise">A live trading system does a dozen things at once on a single thread — and exactly one
+  blocking call is enough to freeze all of them, mid-session, while the market moves.</p>
+  <ul class="you">
+    <li>Say precisely what concurrency is, how it differs from parallelism, and pick threads, asyncio or processes from the workload alone.</li>
+    <li>Trace a coroutine through the event loop: ready queue, <code>await</code>, suspension, resume.</li>
+    <li>Keep <code>on_tick</code> non-blocking — offload blocking work with <code>run_in_executor</code> and bound your queues so back-pressure works for you.</li>
+  </ul>
+  <div class="row" style="margin-top:22px">
+    <span class="pill bad">Scoring begins this week</span>
+    <span class="pill">Deliverable: async pipeline diagram + non-blocking bot</span>
+    <span class="pill">A bot that blocks its loop misses fills</span>
+  </div>
+</section>
+
+<!-- ══════════════ WHAT ══════════════ -->
+<section id="what">
+  <div class="kicker">Part 1</div>
+  <h2><span class="secnum">1</span>What is concurrency — and what is it not?</h2>
+  <p class="lead"><strong>Concurrency is structure: many tasks in progress, interleaved.</strong>
+  <strong>Parallelism is execution: many tasks running in the same instant.</strong> One chef juggling six
+  pans is concurrent. Six chefs at six stoves are parallel. Python's <code>asyncio</code> gives you the
+  first and never the second — and for a trading bot, the first is almost always what you actually needed.</p>
+
+  <div class="grid2" style="margin-top:16px">
+    <div class="panel">
+      <h4>I/O-bound: the CPU is idle, waiting</h4>
+      <p class="sub">A socket read. A Yahoo poll. Waiting for an <code>OrderAck</code>. The process is
+      parked doing nothing while bytes are in flight. Ninety-five percent of what your bot does all session
+      is this — which is why interleaving wins: while one task waits, another runs, on the same core.</p>
+      <div class="note" style="margin-top:11px"><b>→ asyncio.</b> Thousands of concurrent waits, one thread, no locks.</div>
+    </div>
+    <div class="panel">
+      <h4>CPU-bound: the core is pinned</h4>
+      <p class="sub">Fitting a model over 5 years of ticks. Sweeping 400 parameter combinations. Nobody is
+      waiting on anything — the core is genuinely busy. Interleaving buys you nothing here, because there is
+      no idle time to fill.</p>
+      <div class="note" style="margin-top:11px"><b>→ processes.</b> Real cores, separate memory, no GIL.</div>
+    </div>
+  </div>
+
+  <div class="grid3" style="margin-top:18px">
+    <div class="panel"><h4>Processes</h4><p class="sub">Separate memory, real parallelism, sidesteps the GIL.
+    Best for CPU-bound work. Costs: heavyweight to start, and you need IPC or shared files to move data.
+    <code>multiprocessing</code></p></div>
+    <div class="panel"><h4>Threads</h4><p class="sub">Shared memory, pre-emptively scheduled by the OS. Fine
+    for blocking I/O because the GIL is released during the wait. No speedup at all for CPU-bound Python.
+    Costs: races and locks. <code>threading</code></p></div>
+    <div class="panel"><h4>Async / asyncio</h4><p class="sub">One thread, cooperative scheduling, thousands
+    of tasks. Best for high-volume I/O. Cost: <em class="hi">nothing may block the loop, ever</em>.
+    <code>async</code>/<code>await</code></p></div>
+  </div>
+
+  <div class="split" style="margin-top:18px">
+    <div class="panel">
+      <h4>The GIL, in one paragraph</h4>
+      <p class="sub">CPython holds a Global Interpreter Lock: only one thread executes Python bytecode at a
+      time. Four threads crunching numbers therefore take as long as one thread doing all four jobs — the
+      lock serialises them. But the GIL is <em class="hi">released</em> around blocking calls: a socket read,
+      a disk read, an HTTP request. That is why threads still help for I/O, and why the arena's one
+      remaining thread is the blocking <code>yfinance</code> poller.</p>
+      <pre class="code" style="margin-top:11px"><span class="c"># 4 threads, CPU-bound — NO speedup (the GIL serialises them)</span>
+<span class="k">from</span> threading <span class="k">import</span> Thread
+<span class="k">def</span> crunch(n):
+    <span class="k">while</span> n: n -= <span class="n">1</span>        <span class="c"># pure Python bytecode</span>
+ts = [Thread(target=crunch, args=(<span class="n">10</span>**<span class="n">7</span>,)) <span class="k">for</span> _ <span class="k">in</span> range(<span class="n">4</span>)]
+[t.start() <span class="k">for</span> t <span class="k">in</span> ts]; [t.join() <span class="k">for</span> t <span class="k">in</span> ts]</pre>
+    </div>
+    <div class="panel">
+      <h4>Coroutines: functions that can pause</h4>
+      <p class="sub">An <code>async def</code> function is a coroutine. Calling it does <em class="hi">not</em>
+      run it — you get a coroutine object. Only <code>await</code> (or the loop, via a Task) drives it, and
+      every <code>await</code> is a point where it may hand control back so something else can run.</p>
+      <pre class="code" style="margin-top:11px"><span class="k">async def</span> fetch_quote(symbol):        <span class="c"># a coroutine</span>
+    <span class="k">await</span> asyncio.sleep(<span class="n">0.2</span>)          <span class="c"># pause here; loop runs others</span>
+    <span class="k">return</span> {<span class="s">'sym'</span>: symbol, <span class="s">'px'</span>: <span class="n">185.5</span>}
+
+q = fetch_quote(<span class="s">'AAPL'</span>)  <span class="c"># NOT run — a coroutine object</span>
+q = <span class="k">await</span> fetch_quote(<span class="s">'AAPL'</span>)  <span class="c"># now it runs</span>
+
+<span class="k">await</span> asyncio.gather(              <span class="c"># ~3s total, not 6s</span>
+    worker(<span class="s">'feed'</span>, <span class="n">3</span>), worker(<span class="s">'quote'</span>, <span class="n">2</span>), worker(<span class="s">'order'</span>, <span class="n">1</span>))</pre>
+    </div>
+  </div>
+
+  <h3 style="margin-top:30px">Interactive · the event loop, one step at a time</h3>
+  <p class="sub" style="margin-bottom:12px">Four coroutines from a real trader: a feed reader, your
+  strategy, an order/fill handler and a heartbeat. Press <b>Step</b> to advance the loop by one tick. Watch
+  tasks move <em class="hi">ready → running → waiting</em> and back. Only one box is ever running: that is
+  the whole idea, and the whole danger.</p>
+
+  <div class="split">
+    <div class="stack">
+      <div class="svgwrap">
+        <svg id="elSvg" viewBox="0 0 640 400" role="img" aria-label="Event loop showing the ready queue, the running task, tasks waiting on I O, and a timeline of which task ran when">
+          <g font-family="monospace">
+            <text x="14" y="18" font-size="10" fill="#5f6673">READY QUEUE</text>
+            <text x="224" y="18" font-size="10" fill="#5f6673">RUNNING (one, always)</text>
+            <text x="474" y="18" font-size="10" fill="#5f6673">WAITING ON I/O</text>
+            <rect x="14" y="26" width="180" height="190" rx="8" fill="#181b22" stroke="#272c36"/>
+            <rect x="224" y="26" width="230" height="190" rx="8" fill="#181b22" stroke="#272c36"/>
+            <rect x="474" y="26" width="152" height="190" rx="8" fill="#181b22" stroke="#272c36"/>
+            <text x="14" y="248" font-size="10" fill="#5f6673">LOOP TIMELINE &#8212; who held the thread</text>
+          </g>
+          <g id="elReady"></g>
+          <g id="elRun"></g>
+          <g id="elWait"></g>
+          <g id="elTimeline"></g>
+        </svg>
+      </div>
+      <div class="row">
+        <button class="btn primary" id="elStep" type="button" aria-label="Advance the event loop one tick">Step &#8594;</button>
+        <button class="btn" id="elPlay" type="button" aria-label="Run the event loop continuously">&#9654; Play</button>
+        <button class="btn" id="elReset" type="button" aria-label="Reset the event loop">&#8634; Reset</button>
+        <span class="pill acc" id="elClock">t = 0</span>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="stats">
+        <div class="stat"><div class="sl">loop ticks</div><div class="sv" id="elT">0</div></div>
+        <div class="stat"><div class="sl">thread busy</div><div class="sv acc" id="elBusy">0%</div></div>
+        <div class="stat"><div class="sl">ticks handled</div><div class="sv ok" id="elDone">0</div></div>
+      </div>
+      <div class="panel tight">
+        <h3>What just happened</h3>
+        <div class="log" id="elLog"></div>
+      </div>
+      <div class="note">Every green <code>await</code> is a decision to give up the thread. A coroutine that
+      never awaits is a coroutine that has taken the whole system hostage.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ HOW ══════════════ -->
+<section id="how">
+  <div class="kicker">Part 2</div>
+  <h2><span class="secnum">2</span>How do you choose? Run the workload and see</h2>
+  <p class="lead">The decision is not a matter of taste — it falls out of two numbers: how much time each
+  unit of work spends <em class="hi">computing</em>, and how much it spends <em class="hi">waiting</em>.
+  Set those two sliders and the four models below stop being an argument and become a bar chart.</p>
+
+  <div class="split">
+    <div class="stack">
+      <div class="svgwrap">
+        <svg id="wcSvg" viewBox="0 0 640 300" role="img" aria-label="Wall-clock time bars for sequential, threaded, asyncio and multiprocessing execution">
+          <g id="wcBars"></g>
+        </svg>
+      </div>
+      <div class="row">
+        <span class="sub">Presets:</span>
+        <button class="btn" id="wcP1" type="button">Poll 200 symbols (I/O-bound)</button>
+        <button class="btn" id="wcP2" type="button">Sweep 8 backtests (CPU-bound)</button>
+        <button class="btn" id="wcP3" type="button">A live arena trader (mixed)</button>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="panel tight">
+        <h3>Workload</h3>
+        <div class="ctl"><label for="wcN">units of work<b id="vwN">200</b></label>
+          <input type="range" id="wcN" min="1" max="400" step="1" value="200" aria-label="Number of units of work"/></div>
+        <div class="ctl"><label for="wcCpu">CPU per unit (ms)<b id="vwCpu">1</b></label>
+          <input type="range" id="wcCpu" min="0" max="120" step="1" value="1" aria-label="CPU milliseconds per unit"/></div>
+        <div class="ctl"><label for="wcIo">waiting per unit (ms)<b id="vwIo">180</b></label>
+          <input type="range" id="wcIo" min="0" max="400" step="5" value="180" aria-label="Waiting milliseconds per unit"/></div>
+        <div class="ctl" style="margin-bottom:0"><label for="wcCores">CPU cores available<b id="vwCores">8</b></label>
+          <input type="range" id="wcCores" min="1" max="16" step="1" value="8" aria-label="Number of CPU cores"/></div>
+      </div>
+      <div class="panel tight">
+        <h3>Verdict</h3>
+        <p class="sub" id="wcVerdict">&#8212;</p>
+        <div class="stats" style="margin-top:10px">
+          <div class="stat"><div class="sl">profile</div><div class="sv acc" id="wcProfile">I/O-bound</div></div>
+          <div class="stat"><div class="sl">best speedup</div><div class="sv ok" id="wcSpeed">1&#215;</div></div>
+        </div>
+      </div>
+      <div class="note">The model is deliberately crude: CPU work is serialised by the GIL for threads and
+      asyncio, waits overlap, and processes pay a real spawn cost (~15&#8239;ms each). Crude is enough — the
+      shape of the answer never changes.</div>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:24px">
+    <div class="panel">
+      <h4>AlgoArena is async all the way down</h4>
+      <ul class="plain">
+        <li><strong>Every process is an asyncio program.</strong> Exchange, brokers, traders — all networking is async over WebSockets, no blocking calls on the loop.</li>
+        <li><strong><code>on_tick</code> is a loop callback.</strong> The engine reads the socket, decodes the message and calls your hook. Return fast.</li>
+        <li><strong><code>gather</code>, not threads.</strong> Concurrent tasks are coroutines the loop interleaves: feed, orders, housekeeping.</li>
+        <li><strong>Catch <code>ConnectionClosed</code>.</strong> Sockets drop. Your bot must reconnect, not crash — this is graded.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h4>The one thread we keep, and why</h4>
+      <p class="sub"><code>yfinance</code> is blocking HTTP with no async API. Put it on the loop and every
+      quote, order and fill in the process stops for the duration of the request. So the broker runs it on
+      its own thread and hands prices to the async side through shared state.</p>
+      <pre class="code" style="margin-top:10px"><span class="c"># broker/broker.py — yfinance is blocking HTTP</span>
+<span class="k">import</span> threading, yfinance <span class="k">as</span> yf
+
+<span class="k">def</span> poll_yahoo(symbols, out):      <span class="c"># runs on its OWN thread</span>
+    <span class="k">while</span> <span class="k">True</span>:
+        px = yf.download(symbols)  <span class="c"># BLOCKING — cannot be on the loop</span>
+        out.update(px)             <span class="c"># hand to the async side</span>
+
+threading.Thread(target=poll_yahoo, daemon=<span class="k">True</span>).start()
+<span class="c"># the async quoting logic reads 'out'; the loop never blocks</span></pre>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:18px">
+    <h4>The pipeline you will diagram this week</h4>
+    <pre class="code">   [ yfinance thread ]        &#9552;&#9552;&#9552;&#9552;&#9552;&#9552; ONE asyncio event loop &#9552;&#9552;&#9552;&#9552;&#9552;&#9552;
+    (blocking HTTP)
+          &#9474;  prices        &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;   asyncio.Queue   &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;
+          &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9660; &#9474;   feed    &#9474; &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9658;  &#9474; strategy  &#9474;
+                             &#9474;  (async)  &#9474;      ticks        &#9474; on_tick() &#9474;
+  WebSocket in &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9658; &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;                   &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9516;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;
+                                                                 &#9474; Signal
+  WebSocket out &#9664;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;  orders / acks / fills  &#9664;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;</pre>
+    <p class="sub" style="margin-top:10px">One loop, many tasks: the feed, the strategy and the socket I/O
+    are concurrent coroutines. The only thread in the picture is the blocking <code>yfinance</code> poller.</p>
+  </div>
+</section>
+
+<!-- ══════════════ WHY ══════════════ -->
+<section id="why">
+  <div class="kicker">Part 3</div>
+  <h2><span class="secnum">3</span>Why does this matter in trading?</h2>
+  <p class="lead">Because a frozen loop is not a slow bot — it is a <em class="hi">blind</em> bot. While your
+  coroutine sits inside <code>time.sleep()</code> or <code>requests.get()</code>, nothing reads the socket.
+  Book updates queue up in the kernel, your view of the market goes stale, your resting orders get picked
+  off at prices you would never have quoted, and the fills you do get land on decisions made a second ago.
+  Scoring starts this week; this is where the points go.</p>
+
+  <h3 style="margin-top:26px">Interactive · one blocking call, live</h3>
+  <p class="sub" style="margin-bottom:12px">The tape below is a market feed pushing a tick every 100&#8239;ms.
+  Both buttons "take 1.5 seconds to compute a signal". One of them awaits. Try the other one.</p>
+
+  <div class="split">
+    <div class="stack">
+      <div class="feedwrap svgwrap" id="feedWrap">
+        <svg id="feedSvg" viewBox="0 0 640 220" role="img" aria-label="A live market tape and price line that freezes when the loop is blocked">
+          <g id="feedTape"></g>
+          <g id="feedLine"></g>
+          <g font-family="monospace">
+            <text x="14" y="16" font-size="10" fill="#5f6673">AAPL &#183; incoming ticks (one every 100 ms)</text>
+          </g>
+        </svg>
+      </div>
+      <div class="row">
+        <button class="btn" id="fbAwait" type="button">await asyncio.sleep(1.5)</button>
+        <button class="btn primary" id="fbBlock" type="button">time.sleep(1.5) &nbsp;&#9888;</button>
+        <button class="btn" id="fbReset" type="button">&#8634; Reset counters</button>
+      </div>
+      <div class="ctl" style="max-width:320px;margin-top:4px">
+        <label for="fbDur">how long the call takes (s)<b id="vfbDur">1.5</b></label>
+        <input type="range" id="fbDur" min="0.2" max="3" step="0.1" value="1.5" aria-label="Duration of the blocking or awaiting call in seconds"/>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="stats">
+        <div class="stat"><div class="sl">ticks received</div><div class="sv ok" id="fbGot">0</div></div>
+        <div class="stat"><div class="sl">ticks missed</div><div class="sv bad" id="fbMiss">0</div></div>
+        <div class="stat"><div class="sl">worst staleness</div><div class="sv warn" id="fbStale">0 ms</div></div>
+      </div>
+      <div class="panel tight">
+        <h3>State</h3>
+        <p class="sub" id="fbState">Loop is running. Both tasks are alive.</p>
+        <div class="log" id="fbLog" style="max-height:150px"></div>
+      </div>
+      <pre class="code" style="font-size:11px"><span class="c"># WRONG — freezes EVERY task on the loop</span>
+<span class="k">async def</span> on_tick(...):
+    time.sleep(<span class="n">1.5</span>)                 <span class="c"># blocks all tasks</span>
+    r = requests.get(url)         <span class="c"># blocking HTTP</span>
+
+<span class="c"># RIGHT — yield, or offload to a thread</span>
+<span class="k">async def</span> on_tick(...):
+    <span class="k">await</span> asyncio.sleep(<span class="n">1.5</span>)        <span class="c"># non-blocking</span>
+    loop = asyncio.get_running_loop()
+    r = <span class="k">await</span> loop.run_in_executor(<span class="k">None</span>, requests.get, url)</pre>
+    </div>
+  </div>
+
+  <h3 style="margin-top:34px">Interactive · back-pressure, or how a queue saves you</h3>
+  <p class="sub" style="margin-bottom:12px">In a fast market the feed produces faster than your strategy
+  consumes. What happens next is a design decision, and all three answers below are used in production
+  systems. Set the rates, then switch the policy.</p>
+
+  <div class="split">
+    <div class="stack">
+      <div class="svgwrap">
+        <svg id="bpSvg" viewBox="0 0 640 260" role="img" aria-label="A queue filling and draining, with a latency history chart">
+          <g font-family="monospace">
+            <text x="14" y="16" font-size="10" fill="#5f6673">PRODUCER</text>
+            <text x="266" y="16" font-size="10" fill="#5f6673">asyncio.Queue</text>
+            <text x="556" y="16" font-size="10" fill="#5f6673">CONSUMER</text>
+            <text x="14" y="176" font-size="10" fill="#5f6673">QUEUEING DELAY (what your strategy sees as "the market")</text>
+          </g>
+          <g id="bpSlots"></g>
+          <g id="bpEnds"></g>
+          <g id="bpChart"></g>
+        </svg>
+      </div>
+      <div class="row">
+        <span class="sub">Policy:</span>
+        <span class="sw">
+          <button id="bpAwait" type="button" aria-pressed="true">await q.put() &#183; bounded</button>
+          <button id="bpUnb" type="button" aria-pressed="false">q.put_nowait() &#183; unbounded</button>
+          <button id="bpDrop" type="button" aria-pressed="false">coalesce &#183; drop stale</button>
+        </span>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="panel tight">
+        <div class="ctl"><label for="bpProd">producer (ticks/s)<b id="vbpProd">40</b></label>
+          <input type="range" id="bpProd" min="1" max="80" step="1" value="40" aria-label="Producer rate in ticks per second"/></div>
+        <div class="ctl"><label for="bpCons">consumer (ticks/s)<b id="vbpCons">14</b></label>
+          <input type="range" id="bpCons" min="1" max="80" step="1" value="14" aria-label="Consumer rate in ticks per second"/></div>
+        <div class="ctl" style="margin-bottom:0"><label for="bpMax">maxsize<b id="vbpMax">20</b></label>
+          <input type="range" id="bpMax" min="1" max="40" step="1" value="20" aria-label="Queue maximum size"/></div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="sl">depth</div><div class="sv" id="bpDepth">0</div></div>
+        <div class="stat"><div class="sl">delay</div><div class="sv warn" id="bpLat">0 ms</div></div>
+        <div class="stat"><div class="sl">stalls / drops</div><div class="sv" id="bpLost">0</div></div>
+      </div>
+      <div class="note" id="bpNote">&#8212;</div>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:24px">
+    <div class="panel">
+      <h4>Races: why async is safer, and where it still is not</h4>
+      <p class="sub">On one loop, one task runs at a time and only yields at an <code>await</code> — so a
+      plain read-modify-write <em class="hi">between</em> awaits is atomic, and most of the classic
+      thread-race bugs simply cannot happen. What can still happen: state changing <em class="hi">across</em>
+      an await. If you read a position, await a send, then write the position back, something else ran in
+      between and you have just clobbered it.</p>
+      <ul class="plain" style="margin-top:10px">
+        <li><code>asyncio.Lock</code> — guard a critical section that spans awaits.</li>
+        <li><code>threading.Lock</code> — required for genuinely shared data across real threads.</li>
+        <li><strong>Better:</strong> do not share mutable state at all. Hand data between tasks through an <code>asyncio.Queue</code>.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h4>This week's code: offload, do not block</h4>
+      <pre class="code"><span class="k">import</span> asyncio
+<span class="k">from</span> arena <span class="k">import</span> Trader, Signal
+
+<span class="k">class</span> <span class="b">MyBot</span>(Trader):
+    <span class="k">async def</span> on_tick(<span class="k">self</span>, market, portfolio):
+        ask = market.best_ask(<span class="s">'AAPL'</span>)
+        <span class="k">if</span> ask <span class="k">is</span> <span class="k">None</span>:
+            <span class="k">return</span> <span class="k">None</span>
+        loop = asyncio.get_running_loop()
+        <span class="c"># offload a blocking signal calc — never block the loop</span>
+        score = <span class="k">await</span> loop.run_in_executor(<span class="k">None</span>, heavy_calc, ask)
+        <span class="k">if</span> score &gt; <span class="n">0</span>:
+            <span class="k">return</span> Signal(<span class="s">'AAPL'</span>, <span class="s">'buy'</span>, <span class="n">1</span>, ask)
+        <span class="k">return</span> <span class="k">None</span></pre>
+      <p class="sub" style="margin-top:10px">Verify it by watching fills keep arriving <em class="hi">while</em>
+      <code>heavy_calc</code> runs. If they stop, you did not offload — you moved the freeze.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ PITFALLS ══════════════ -->
+<section id="pitfalls">
+  <div class="kicker">Part 4</div>
+  <h2><span class="secnum">4</span>Five ways this goes wrong</h2>
+  <p class="lead">Four of these five will cost you fills in a live session. Open them.</p>
+
+  <details class="pit"><summary><code>time.sleep()</code> or <code>requests.get()</code> inside a coroutine</summary>
+    <div class="body">
+      <p>The canonical mistake, and it is silent: no exception, no warning, just a bot that is inexplicably
+      worse than it was in the backtest. Any blocking call inside <code>async def</code> stops the entire
+      loop — feed, orders, heartbeat, everything.</p>
+      <p>It hides in innocent places: a <code>pandas.read_csv</code> on a big file, a <code>print()</code>
+      to a slow terminal, a synchronous <code>yfinance</code> call you added "just to check something".</p>
+      <p class="fix">Fix: <code>await asyncio.sleep()</code> for delays, an async HTTP client for requests,
+      and <code>await loop.run_in_executor(None, fn, *args)</code> for anything blocking you cannot replace.</p>
+    </div></details>
+
+  <details class="pit"><summary>Forgetting to <code>await</code>, and getting a coroutine object</summary>
+    <div class="body">
+      <p><code>result = self.compute_signal()</code> where <code>compute_signal</code> is
+      <code>async def</code> gives you a coroutine object, not a number. It is truthy, so
+      <code>if result:</code> is always true, and Python only mutters
+      "<code>RuntimeWarning: coroutine was never awaited</code>" if you happen to be watching stderr.</p>
+      <p>The mirror-image bug: <code>asyncio.create_task(coro)</code> and then dropping the reference. The
+      task can be garbage-collected mid-flight and its exception disappears with it.</p>
+      <p class="fix">Fix: await it, or keep the task in a set. Run with
+      <code>PYTHONASYNCIODEBUG=1</code> during development and treat the warnings as errors.</p>
+    </div></details>
+
+  <details class="pit"><summary>An unbounded queue as a memory leak with extra steps</summary>
+    <div class="body">
+      <p><code>asyncio.Queue()</code> with no <code>maxsize</code> never applies back-pressure. A fast feed
+      and a slow strategy means the queue grows until the process dies — and long before it dies, your
+      strategy is acting on ticks that are ten seconds old.</p>
+      <p>Stale is worse than missing. A book snapshot from 8 seconds ago is not "some information"; it is
+      actively wrong information you are about to send an order against.</p>
+      <p class="fix">Fix: bound it (<code>maxsize=100</code>) so <code>put()</code> waits, or coalesce —
+      keep only the newest snapshot per symbol and throw the rest away.</p>
+    </div></details>
+
+  <details class="pit"><summary>Reaching for threads to make CPU-bound work faster</summary>
+    <div class="body">
+      <p>Four threads fitting four models is exactly as slow as one thread fitting four models, because the
+      GIL lets only one of them execute bytecode at a time. You paid for locks, races and debugging and got
+      nothing.</p>
+      <p>The exception that confuses everyone: NumPy, pandas and scikit-learn release the GIL inside their
+      C loops, so threads sometimes <em class="hi">do</em> help. That is a property of the library, not of
+      your code — do not plan around it.</p>
+      <p class="fix">Fix: CPU-bound → <code>multiprocessing</code> or
+      <code>ProcessPoolExecutor</code>. Threads are for blocking I/O with no async API.</p>
+    </div></details>
+
+  <details class="pit"><summary>Letting <code>ConnectionClosed</code> kill the bot</summary>
+    <div class="body">
+      <p>Networks blink. Wi-Fi hiccups, the exchange restarts, a laptop lid closes. An uncaught
+      <code>websockets.exceptions.ConnectionClosed</code> ends your session and your score stops
+      accumulating at whatever it was — often with a position still open.</p>
+      <p>Reconnecting badly is its own trap: a tight retry loop hammers a recovering server, and resuming
+      without re-syncing means your book is a fiction.</p>
+      <p class="fix">Fix: catch it, reconnect with exponential backoff, re-handshake, and request a fresh
+      snapshot rather than assuming continuity. Then flatten or re-assert your risk state.</p>
+    </div></details>
+</section>
+
+<!-- ══════════════ CHECK ══════════════ -->
+<section id="check">
+  <div class="kicker">Part 5</div>
+  <h2><span class="secnum">5</span>Check yourself</h2>
+  <p class="lead">Three questions, instant feedback, nothing recorded.</p>
+
+  <div class="mcq" data-a="2" data-exp="<b>Every task on the loop stops for 800 ms.</b> asyncio is cooperative: the loop can only switch tasks when the running coroutine reaches an await. A blocking call never reaches one, so the feed reader, the order handler and the heartbeat are all frozen — and the ticks that arrive during those 800 ms sit unread in the kernel buffer. Offload it with loop.run_in_executor(None, fn) and the loop keeps turning.">
+    <p class="q"><span>Q1</span>Your <code>on_tick</code> calls a library function that blocks for 800&#8239;ms. What happens to the feed-reader coroutine on the same loop?</p>
+    <div class="opts">
+      <button class="opt" type="button">Nothing — the loop pre-empts your task and keeps reading the socket</button>
+      <button class="opt" type="button">It runs on another core, because asyncio uses a thread pool</button>
+      <button class="opt" type="button">It is frozen for the full 800&#8239;ms, along with every other task</button>
+      <button class="opt" type="button">It keeps running but its ticks are queued and delivered late</button>
+    </div>
+    <div class="fb" role="status"></div>
+  </div>
+
+  <div class="mcq" data-a="1" data-exp="<b>Processes.</b> The work is CPU-bound, so there is no idle time for concurrency to fill — you need real cores, and the GIL means threads and asyncio will serialise the bytecode. multiprocessing (or ProcessPoolExecutor) gives each fit its own interpreter. Note the trade: separate memory, so the price paths have to be shipped to the workers or read from disk by each one.">
+    <p class="q"><span>Q2</span>You need to fit the same model on 40 different parameter sets. Each fit is 3 seconds of pure NumPy-free Python arithmetic. Which model?</p>
+    <div class="opts">
+      <button class="opt" type="button">40 threads — they will share the price data with no copying</button>
+      <button class="opt" type="button">A process pool sized to the core count</button>
+      <button class="opt" type="button"><code>asyncio.gather</code> over 40 coroutines</button>
+      <button class="opt" type="button">One coroutine that awaits between fits, to stay responsive</button>
+    </div>
+    <div class="fb" role="status"></div>
+  </div>
+
+  <div class="mcq" data-a="0" data-exp="<b>A bounded queue.</b> With maxsize set, await q.put() suspends the producer when the queue is full — the back-pressure propagates upstream instead of turning into unbounded memory and unbounded staleness. The alternative that is also correct in a market-data context is coalescing: keep only the newest snapshot per symbol, because an old book is not partial information, it is wrong information.">
+    <p class="q"><span>Q3</span>Your feed produces 400 ticks/s; your strategy consumes 90/s. Which change keeps the bot both alive and useful?</p>
+    <div class="opts">
+      <button class="opt" type="button">Bound the queue (<code>maxsize</code>) so <code>put()</code> waits, or coalesce to the newest snapshot</button>
+      <button class="opt" type="button">Use <code>put_nowait()</code> so the producer is never delayed</button>
+      <button class="opt" type="button">Move the consumer onto a second thread to double throughput</button>
+      <button class="opt" type="button">Raise the loop's scheduling priority with <code>loop.set_debug(False)</code></button>
+    </div>
+    <div class="fb" role="status"></div>
+  </div>
+</section>
+
+<!-- ══════════════ NEXT ══════════════ -->
+<section id="next">
+  <div class="kicker">Part 6</div>
+  <h2><span class="secnum">6</span>Do the work</h2>
+  <div class="grid2" style="margin-top:14px">
+    <div class="panel"><h4>In class</h4><ul class="plain">
+      <li>Diagram your async pipeline: feed &#8594; <code>asyncio.Queue</code> &#8594; strategy &#8594; orders.</li>
+      <li>Make <code>on_tick</code> non-blocking — no <code>time.sleep</code>, no <code>requests</code>; offload heavy work.</li>
+      <li>Concurrency and async design sign-off, plus the Phase-2 UML kickoff.</li>
+      <li>Handle <code>websockets.exceptions.ConnectionClosed</code> gracefully.</li>
+      <li>Push the W2 feature branch (pipeline diagram + async bot).</li>
+    </ul></div>
+    <div class="panel"><h4>Before next class</h4><ul class="plain">
+      <li>Read <code>trader/trader.py</code> — the real async loop underneath <code>on_tick</code>.</li>
+      <li>Read <code>broker/broker.py</code> — the <code>yfinance</code> polling thread.</li>
+      <li>Confirm your bot never blocks the loop (try <code>PYTHONASYNCIODEBUG=1</code>).</li>
+      <li>Come ready to defend the pipeline design. <strong>Scoring has begun.</strong></li>
+    </ul></div>
+  </div>
+  <div class="nextgrid" style="margin-top:18px">
+    <a class="nextcard" href="https://github.com/sdonadio/algoarena-team-template"><div class="nl">Code</div>
+      <div class="nt">Get the code</div><div class="nd">Labs and homework live in your course&#8217;s LMS; the starter repo is public. Use it as a template, clone, <code>make install</code>.</div></a>
+    <a class="nextcard" href="week1.html"><div class="nl">Previous</div>
+      <div class="nt">&#8592; Week 1 &#183; UML &amp; OOP</div><div class="nd">The objects you are now making concurrent.</div></a>
+    <a class="nextcard" href="week3.html"><div class="nl">Next</div>
+      <div class="nt">Week 3 &#183; Sockets &amp; Protocols &#8594;</div><div class="nd">What is actually on the wire under that loop: framing, WebSockets and a typed contract.</div></a>
+  </div>
+</section>
+
+<footer>Systematic Trading Arena · an interactive companion for a 9-week systematic-trading course · <a href="https://github.com/sdonadio/systematic-trading-arena">Source</a></footer>
+
+<script>
+"use strict";
+/* ════════════════════════════════════════════════════════════════
+   Week 2 — Concurrency & Async in Python
+   ════════════════════════════════════════════════════════════════ */
+var $ = function (id) { return document.getElementById(id); };
+var SVGNS = document.getElementById("elSvg").namespaceURI;
+function mk(tag, attrs) {
+  var e = document.createElementNS(SVGNS, tag);
+  for (var k in attrs) { if (attrs.hasOwnProperty(k)) e.setAttribute(k, attrs[k]); }
+  return e;
+}
+function txt(x, y, s, size, fill, anchor) {
+  var t = mk("text", { x: x, y: y, "font-size": size || 10, "font-family": "monospace", fill: fill || "#9aa0a6" });
+  if (anchor) t.setAttribute("text-anchor", anchor);
+  t.textContent = s;
+  return t;
+}
+
+/* ── 1. EVENT-LOOP VISUALISER ────────────────────────────────── */
+var TASKS = [
+  { name: "feed", col: "#6cb6ff", prog: [
+      { a: "await", on: "ws.recv()", dur: 3 },
+      { a: "run", label: "parse_message(raw)", dur: 1 },
+      { a: "run", label: "queue.put_nowait(tick)", dur: 1 } ] },
+  { name: "strategy", col: "#7cb0ff", prog: [
+      { a: "await", on: "queue.get()", dur: 2 },
+      { a: "run", label: "on_tick() -> Signal", dur: 2 },
+      { a: "run", label: "ws.send(PlaceOrder)", dur: 1 } ] },
+  { name: "fills", col: "#3fb950", prog: [
+      { a: "await", on: "ws.recv() ack/fill", dur: 5 },
+      { a: "run", label: "on_fill() -> portfolio", dur: 1 } ] },
+  { name: "heartbeat", col: "#d29922", prog: [
+      { a: "await", on: "asyncio.sleep(6)", dur: 6 },
+      { a: "run", label: "ping", dur: 1 } ] }
+];
+var el = {};
+function elReset() {
+  if (el.timer) { clearInterval(el.timer); el.timer = null; $("elPlay").innerHTML = "&#9654; Play"; }
+  el.t = 0; el.busy = 0; el.done = 0; el.log = []; el.tl = [];
+  el.st = TASKS.map(function (T, i) { return { i: i, pc: 0, rem: T.prog[0].dur, state: "wait" }; });
+  el.ready = [];
+  el.running = null;
+  elLog("loop starts &#183; asyncio.run(main()) &#8212; all four tasks await immediately");
+  elDraw();
+}
+function elLog(s, cls) {
+  el.log.unshift({ s: "t=" + el.t + "  " + s, c: cls || "" });
+  if (el.log.length > 40) el.log.pop();
+}
+function elStep() {
+  el.t += 1;
+  /* 1. wake anything whose wait has elapsed */
+  el.st.forEach(function (s) {
+    if (s.state === "wait") {
+      s.rem -= 1;
+      if (s.rem <= 0) {
+        s.state = "ready";
+        s.pc = (s.pc + 1) % TASKS[s.i].prog.length;
+        s.rem = TASKS[s.i].prog[s.pc].dur;
+        el.ready.push(s.i);
+        elLog(TASKS[s.i].name + ": <b>" + TASKS[s.i].prog[(s.pc + TASKS[s.i].prog.length - 1) % TASKS[s.i].prog.length].on +
+          "</b> resolved &#8594; ready queue", "ok");
+      }
+    }
+  });
+  /* 2. if nothing is running, the loop picks the head of the ready queue */
+  if (el.running === null && el.ready.length) {
+    var i = el.ready.shift();
+    el.running = i;
+    el.st[i].state = "run";
+    elLog("loop resumes <b>" + TASKS[i].name + "</b>: " + TASKS[i].prog[el.st[i].pc].label, "hl");
+  }
+  /* 3. run one tick of the running task */
+  if (el.running !== null) {
+    var s2 = el.st[el.running];
+    el.busy += 1;
+    s2.rem -= 1;
+    if (s2.rem <= 0) {
+      var wasStrategy = TASKS[el.running].name === "strategy" && TASKS[el.running].prog[s2.pc].label.indexOf("ws.send") >= 0;
+      if (wasStrategy) el.done += 1;
+      s2.pc = (s2.pc + 1) % TASKS[el.running].prog.length;
+      var nxt = TASKS[el.running].prog[s2.pc];
+      s2.rem = nxt.dur;
+      if (nxt.a === "await") {
+        s2.state = "wait";
+        elLog(TASKS[el.running].name + " hits <b>await " + nxt.on + "</b> &#8594; suspends, thread is free");
+      } else {
+        s2.state = "ready";
+        el.ready.push(el.running);
+      }
+      el.running = null;
+    }
+    el.tl.push(el.running === null ? (s2.state === "run" ? s2.i : -2) : el.running);
+    if (el.tl[el.tl.length - 1] === -2) el.tl[el.tl.length - 1] = s2.i;
+  } else {
+    el.tl.push(-1);
+    elLog("ready queue empty &#8212; the loop sits in <b>select()</b>. This is what a healthy bot looks like.");
+  }
+  if (el.tl.length > 60) el.tl.shift();
+  elDraw();
+}
+function elDraw() {
+  var R = $("elReady"), U = $("elRun"), W = $("elWait"), T = $("elTimeline");
+  R.innerHTML = ""; U.innerHTML = ""; W.innerHTML = ""; T.innerHTML = "";
+
+  if (!el.ready.length) R.appendChild(txt(104, 128, "(empty)", 10, "#3a4150", "middle"));
+  el.ready.forEach(function (i, k) {
+    var y = 40 + k * 34;
+    R.appendChild(mk("rect", { x: 26, y: y, width: 156, height: 26, rx: 6,
+      fill: "rgba(255,255,255,.03)", stroke: TASKS[i].col, "stroke-width": 1.3 }));
+    R.appendChild(txt(36, y + 17, (k + 1) + " " + TASKS[i].name, 10.5, TASKS[i].col));
+  });
+
+  if (el.running === null) {
+    U.appendChild(mk("rect", { x: 240, y: 96, width: 198, height: 50, rx: 8, fill: "#0b0e14", stroke: "#272c36", "stroke-dasharray": "5 4" }));
+    U.appendChild(txt(339, 118, "idle", 12, "#3a4150", "middle"));
+    U.appendChild(txt(339, 134, "waiting in select()", 9, "#3a4150", "middle"));
+  } else {
+    var i2 = el.running, s = el.st[i2], p = TASKS[i2].prog[s.pc];
+    U.appendChild(mk("rect", { x: 240, y: 80, width: 198, height: 82, rx: 8,
+      fill: "rgba(59,130,246,.22)", stroke: TASKS[i2].col, "stroke-width": 1.8 }));
+    U.appendChild(txt(339, 102, TASKS[i2].name, 13, TASKS[i2].col, "middle"));
+    U.appendChild(txt(339, 120, p.label, 9.5, "#e8e6e3", "middle"));
+    U.appendChild(mk("rect", { x: 258, y: 132, width: 162, height: 8, rx: 4, fill: "#181b22", stroke: "#272c36" }));
+    var frac = 1 - s.rem / p.dur;
+    U.appendChild(mk("rect", { x: 258, y: 132, width: Math.max(2, 162 * frac), height: 8, rx: 4, fill: TASKS[i2].col }));
+    U.appendChild(txt(339, 154, s.rem + " tick(s) of work left", 9, "#5f6673", "middle"));
+  }
+
+  var wk = 0;
+  el.st.forEach(function (s2) {
+    if (s2.state !== "wait") return;
+    var y = 40 + wk * 44; wk += 1;
+    W.appendChild(mk("rect", { x: 486, y: y, width: 128, height: 36, rx: 6,
+      fill: "rgba(255,255,255,.02)", stroke: TASKS[s2.i].col, "stroke-width": 1.1, opacity: 0.75 }));
+    W.appendChild(txt(494, y + 14, TASKS[s2.i].name, 10, TASKS[s2.i].col));
+    W.appendChild(txt(494, y + 28, TASKS[s2.i].prog[s2.pc].on, 8.5, "#5f6673"));
+    W.appendChild(txt(606, y + 14, s2.rem, 10, "#d29922", "end"));
+  });
+  if (!wk) W.appendChild(txt(550, 128, "(none)", 10, "#3a4150", "middle"));
+
+  var bw = 9;
+  el.tl.forEach(function (v, k) {
+    T.appendChild(mk("rect", { x: 14 + k * (bw + 1), y: 258, width: bw, height: 28, rx: 2,
+      fill: v < 0 ? "#181b22" : TASKS[v].col, opacity: v < 0 ? 1 : 0.85,
+      stroke: v < 0 ? "#272c36" : "none" }));
+  });
+  T.appendChild(txt(14, 302, "one column = one loop tick &#183; a gap means the thread was free", 9, "#3a4150"));
+  var lg = ["feed", "strategy", "fills", "heartbeat"];
+  lg.forEach(function (n, k) {
+    T.appendChild(mk("rect", { x: 14 + k * 132, y: 318, width: 10, height: 10, rx: 2, fill: TASKS[k].col }));
+    T.appendChild(txt(30 + k * 132, 327, n, 9.5, "#5f6673"));
+  });
+
+  $("elClock").textContent = "t = " + el.t;
+  $("elT").textContent = String(el.t);
+  $("elBusy").textContent = (el.t ? Math.round(100 * el.busy / el.t) : 0) + "%";
+  $("elDone").textContent = String(el.done);
+  var L = $("elLog");
+  L.innerHTML = "";
+  el.log.slice(0, 12).forEach(function (e, k) {
+    var d = document.createElement("div");
+    d.className = k === 0 ? (e.c || "hl") : e.c;
+    d.innerHTML = e.s;
+    L.appendChild(d);
+  });
+}
+$("elStep").addEventListener("click", elStep);
+$("elReset").addEventListener("click", elReset);
+$("elPlay").addEventListener("click", function () {
+  if (el.timer) { clearInterval(el.timer); el.timer = null; this.innerHTML = "&#9654; Play"; return; }
+  this.innerHTML = "&#10073;&#10073; Pause";
+  el.timer = setInterval(elStep, 420);
+});
+elReset();
+
+/* ── 2. THREADS vs ASYNCIO vs PROCESSES ──────────────────────── */
+var SPAWN = 15;      /* ms per process */
+var THOVER = 0.08;   /* ms per thread  */
+var TKOVER = 0.004;  /* ms per asyncio task */
+function wcCalc() {
+  var n = +$("wcN").value, cpu = +$("wcCpu").value, io = +$("wcIo").value, cores = +$("wcCores").value;
+  var seq = n * (cpu + io);
+  var thr = Math.max(n * cpu + io, cpu + io) + n * THOVER;
+  var asy = Math.max(n * cpu + io, cpu + io) + n * TKOVER;
+  var proc = Math.ceil(n / cores) * (cpu + io) + Math.min(n, cores) * SPAWN;
+  return { n: n, cpu: cpu, io: io, cores: cores, seq: seq, thr: thr, asy: asy, proc: proc };
+}
+function wcDraw() {
+  var r = wcCalc();
+  $("vwN").textContent = String(r.n);
+  $("vwCpu").textContent = String(r.cpu);
+  $("vwIo").textContent = String(r.io);
+  $("vwCores").textContent = String(r.cores);
+  var rows = [
+    ["sequential (one at a time)", r.seq, "#5f6673"],
+    ["threading (GIL serialises CPU)", r.thr, "#d29922"],
+    ["asyncio (one thread, cooperative)", r.asy, "#3fb950"],
+    ["multiprocessing (" + r.cores + " cores)", r.proc, "#6cb6ff"]
+  ];
+  var mx = Math.max(r.seq, r.thr, r.asy, r.proc, 1);
+  var G = $("wcBars");
+  G.innerHTML = "";
+  G.appendChild(txt(14, 18, "wall-clock time for " + r.n + " units &#183; " + r.cpu + " ms CPU + " + r.io + " ms waiting each", 10, "#5f6673"));
+  var bx = 250, bw = 320;
+  rows.forEach(function (row, k) {
+    var y = 40 + k * 58;
+    G.appendChild(txt(14, y + 16, row[0], 10.5, row[2]));
+    G.appendChild(mk("rect", { x: bx, y: y, width: bw, height: 24, rx: 5, fill: "#181b22", stroke: "#272c36" }));
+    G.appendChild(mk("rect", { x: bx, y: y, width: Math.max(3, bw * row[1] / mx), height: 24, rx: 5, fill: row[2], opacity: 0.8 }));
+    G.appendChild(txt(bx + bw + 8, y + 17, fmtMs(row[1]), 11, "#e8e6e3"));
+    var sp = r.seq / row[1];
+    if (k > 0) G.appendChild(txt(bx + 8, y + 17, sp.toFixed(1) + "× faster than sequential", 9.5, "#0f1115"));
+  });
+  G.appendChild(txt(14, 282, "asyncio and threading land in the same place because the GIL serialises the CPU part of both.", 9.5, "#3a4150"));
+
+  var ratio = r.io / Math.max(r.cpu, 0.001);
+  var prof = ratio > 4 ? "I/O-bound" : (ratio < 0.25 ? "CPU-bound" : "mixed");
+  $("wcProfile").textContent = prof;
+  var best = Math.min(r.thr, r.asy, r.proc);
+  $("wcSpeed").textContent = (r.seq / best).toFixed(1) + "×";
+  var v;
+  if (prof === "I/O-bound") {
+    v = "Almost all of the time is spent waiting, so overlapping the waits is everything: <b>asyncio wins</b>, " +
+        "and it wins without threads, locks or a single race condition. Processes lose here — you pay " +
+        Math.min(r.n, r.cores) * SPAWN + " ms of spawn cost to parallelise work that was never using the CPU. " +
+        "<b>This is the arena.</b>";
+  } else if (prof === "CPU-bound") {
+    v = "The cores are genuinely busy, so there is no idle time to fill. asyncio and threading both collapse " +
+        "to roughly sequential because the GIL admits one bytecode-executing thread at a time. " +
+        "<b>Processes win</b> — real cores, separate interpreters. This is Week 6's problem.";
+  } else {
+    v = "Mixed: waiting and computing are comparable. Use <b>asyncio for the waiting</b> and push the " +
+        "compute off the loop with <code>run_in_executor</code> (a thread if the library releases the GIL, " +
+        "a process pool if it does not). That hybrid is exactly what a Week-7 ML bot looks like.";
+  }
+  $("wcVerdict").innerHTML = v;
+}
+function fmtMs(ms) {
+  if (ms >= 1000) return (ms / 1000).toFixed(2) + " s";
+  return Math.round(ms) + " ms";
+}
+["wcN", "wcCpu", "wcIo", "wcCores"].forEach(function (id) { $(id).addEventListener("input", wcDraw); });
+function wcPreset(n, cpu, io) {
+  $("wcN").value = n; $("wcCpu").value = cpu; $("wcIo").value = io;
+  wcDraw();
+}
+$("wcP1").addEventListener("click", function () { wcPreset(200, 1, 180); });
+$("wcP2").addEventListener("click", function () { wcPreset(8, 120, 0); });
+$("wcP3").addEventListener("click", function () { wcPreset(60, 4, 40); });
+wcDraw();
+
+/* ── 3. NEVER BLOCK THE LOOP ─────────────────────────────────── */
+var fb = { got: 0, miss: 0, stale: 0, blockedUntil: 0, ticks: [], px: 185.0, log: [], last: Date.now() };
+function fbLog(s, cls) {
+  fb.log.unshift({ s: s, c: cls || "" });
+  if (fb.log.length > 20) fb.log.pop();
+  var L = $("fbLog");
+  L.innerHTML = "";
+  fb.log.slice(0, 6).forEach(function (e) {
+    var d = document.createElement("div"); d.className = e.c; d.innerHTML = e.s; L.appendChild(d);
+  });
+}
+setInterval(function () {
+  var now = Date.now();
+  fb.px = fb.px * (1 + (Math.random() - 0.5) * 0.0009);
+  if (now < fb.blockedUntil) {
+    fb.miss += 1;
+    var st = now - fb.last;
+    if (st > fb.stale) fb.stale = st;
+  } else {
+    fb.got += 1;
+    fb.last = now;
+    fb.ticks.push(fb.px);
+    if (fb.ticks.length > 58) fb.ticks.shift();
+  }
+  fbDraw();
+}, 100);
+function fbDraw() {
+  var now = Date.now(), blocked = now < fb.blockedUntil;
+  $("feedWrap").classList.toggle("blocked", blocked);
+  $("fbGot").textContent = String(fb.got);
+  $("fbMiss").textContent = String(fb.miss);
+  $("fbStale").textContent = fb.stale + " ms";
+  var Tp = $("feedTape"), Ln = $("feedLine");
+  Tp.innerHTML = ""; Ln.innerHTML = "";
+  var n = fb.ticks.length;
+  if (!n) return;
+  var lo = Math.min.apply(null, fb.ticks), hi = Math.max.apply(null, fb.ticks), rg = (hi - lo) || 0.01;
+  var xAt = function (k) { return 20 + 600 * k / Math.max(1, 57); };
+  var yAt = function (v) { return 150 - 108 * (v - lo) / rg; };
+  var d = "";
+  for (var k = 0; k < n; k++) { d += (k ? " L" : "M") + xAt(k).toFixed(1) + " " + yAt(fb.ticks[k]).toFixed(1); }
+  Ln.appendChild(mk("path", { d: d, fill: "none", stroke: blocked ? "#5f6673" : "#3fb950", "stroke-width": 2 }));
+  Ln.appendChild(mk("circle", { cx: xAt(n - 1), cy: yAt(fb.ticks[n - 1]), r: 4, fill: blocked ? "#f85149" : "#3fb950" }));
+  Tp.appendChild(txt(20, 174, fb.ticks[n - 1].toFixed(2), 13, blocked ? "#f85149" : "#e8e6e3"));
+  Tp.appendChild(txt(90, 174, blocked ? "STALE" : "live", 10, blocked ? "#f85149" : "#3fb950"));
+  for (var j = 0; j < Math.min(10, n); j++) {
+    var v = fb.ticks[n - 1 - j];
+    Tp.appendChild(txt(180 + j * 46, 174, v.toFixed(2), 8.5, j === 0 ? "#9aa0a6" : "#3a4150"));
+  }
+  Tp.appendChild(txt(20, 200, "received " + fb.got + "   missed " + fb.miss, 9.5, "#5f6673"));
+}
+$("fbDur").addEventListener("input", function () { $("vfbDur").textContent = (+this.value).toFixed(1); });
+$("fbAwait").addEventListener("click", function () {
+  var d = +$("fbDur").value;
+  $("fbState").innerHTML = "<b>await asyncio.sleep(" + d.toFixed(1) + ")</b> &#8212; your coroutine suspended and the loop " +
+    "moved on. The feed reader kept its turn on the thread.";
+  fbLog("strategy: awaits " + d.toFixed(1) + "s &#8594; suspends. Feed keeps running, 0 ticks missed.", "ok");
+  setTimeout(function () {
+    fbLog("strategy: resumed after " + d.toFixed(1) + "s &#8212; acts on a fresh book.", "ok");
+  }, d * 1000);
+});
+$("fbBlock").addEventListener("click", function () {
+  var d = +$("fbDur").value;
+  fb.blockedUntil = Date.now() + d * 1000;
+  $("fbState").innerHTML = "<b>time.sleep(" + d.toFixed(1) + ")</b> &#8212; the thread is gone. No coroutine on this loop " +
+    "can run: not the feed, not the order handler, not the heartbeat. The tape below is frozen exactly as " +
+    "your bot's view of the market would be.";
+  fbLog("strategy: <b>time.sleep(" + d.toFixed(1) + ")</b> &#8212; LOOP BLOCKED. " +
+    Math.round(d * 10) + " ticks will be missed; acks and fills queue in the kernel.", "bad");
+  setTimeout(function () {
+    fbLog("loop unblocked &#8212; " + Math.round(d * 10) + " ticks of market never reached your strategy.", "bad");
+    fbDraw();
+  }, d * 1000 + 40);
+});
+$("fbReset").addEventListener("click", function () {
+  fb.got = 0; fb.miss = 0; fb.stale = 0; fb.blockedUntil = 0; fb.log = [];
+  $("fbState").textContent = "Loop is running. Both tasks are alive.";
+  fbLog("counters reset");
+});
+fbLog("loop running &#183; feed pushes one tick every 100 ms");
+
+/* ── 4. BACK-PRESSURE QUEUE ──────────────────────────────────── */
+var bp = { mode: "await", depth: 0, lost: 0, credP: 0, credC: 0, hist: [], stalled: false };
+function bpSet(m) {
+  bp.mode = m; bp.depth = 0; bp.lost = 0; bp.hist = []; bp.credP = 0; bp.credC = 0;
+  $("bpAwait").setAttribute("aria-pressed", m === "await" ? "true" : "false");
+  $("bpUnb").setAttribute("aria-pressed", m === "unb" ? "true" : "false");
+  $("bpDrop").setAttribute("aria-pressed", m === "drop" ? "true" : "false");
+}
+$("bpAwait").addEventListener("click", function () { bpSet("await"); });
+$("bpUnb").addEventListener("click", function () { bpSet("unb"); });
+$("bpDrop").addEventListener("click", function () { bpSet("drop"); });
+["bpProd", "bpCons", "bpMax"].forEach(function (id) {
+  $(id).addEventListener("input", function () {
+    $("vbpProd").textContent = $("bpProd").value;
+    $("vbpCons").textContent = $("bpCons").value;
+    $("vbpMax").textContent = $("bpMax").value;
+    bp.depth = Math.min(bp.depth, 400); bp.hist = [];
+  });
+});
+setInterval(function () {
+  var dt = 0.05;
+  var pr = +$("bpProd").value, cr = +$("bpCons").value, mx = +$("bpMax").value;
+  bp.credC += cr * dt;
+  while (bp.credC >= 1) { if (bp.depth > 0) { bp.depth -= 1; } bp.credC -= 1; }
+  bp.credP += pr * dt;
+  bp.stalled = false;
+  while (bp.credP >= 1) {
+    bp.credP -= 1;
+    if (bp.mode === "unb") { bp.depth += 1; }
+    else if (bp.mode === "await") {
+      if (bp.depth < mx) bp.depth += 1;
+      else { bp.lost += 1; bp.stalled = true; }
+    } else {
+      if (bp.depth < mx) bp.depth += 1;
+      else { bp.depth = Math.max(1, Math.min(mx, 1)); bp.lost += 1; }
+    }
+  }
+  if (bp.mode === "drop" && bp.depth > 1) bp.depth = 1;
+  var lat = 1000 * bp.depth / Math.max(1, cr);
+  bp.hist.push(lat);
+  if (bp.hist.length > 120) bp.hist.shift();
+  bpDraw(lat, mx);
+}, 50);
+function bpDraw(lat, mx) {
+  var S = $("bpSlots"), E = $("bpEnds"), C = $("bpChart");
+  S.innerHTML = ""; E.innerHTML = ""; C.innerHTML = "";
+  var shown = Math.min(mx, 40), sw = Math.floor(300 / shown) - 2;
+  if (sw < 3) sw = 3;
+  var x0 = 190;
+  for (var i = 0; i < shown; i++) {
+    var filled = i < Math.min(bp.depth, shown);
+    S.appendChild(mk("rect", { class: "qslot", x: x0 + i * (sw + 2), y: 40, width: sw, height: 46, rx: 3,
+      fill: filled ? (bp.stalled ? "#f85149" : "#7cb0ff") : "#181b22",
+      stroke: "#272c36", "stroke-width": 1 }));
+  }
+  if (bp.mode === "unb" && bp.depth > shown) {
+    S.appendChild(txt(x0, 106, "+" + (bp.depth - shown) + " more, off-screen and growing", 10, "#f85149"));
+  }
+  S.appendChild(txt(x0, 30, "maxsize = " + (bp.mode === "unb" ? "∞ (unbounded)" : mx) +
+    "   depth = " + bp.depth, 10, "#5f6673"));
+
+  E.appendChild(mk("rect", { x: 14, y: 40, width: 150, height: 46, rx: 7,
+    fill: bp.stalled ? "rgba(248,81,73,.18)" : "#1e222b", stroke: bp.stalled ? "#f85149" : "#3a4150", "stroke-width": 1.4 }));
+  E.appendChild(txt(89, 60, "feed", 11, bp.stalled ? "#f85149" : "#e8e6e3", "middle"));
+  E.appendChild(txt(89, 76, bp.stalled ? "await put() — STALLED" : $("bpProd").value + " ticks/s", 9, bp.stalled ? "#f85149" : "#5f6673", "middle"));
+  E.appendChild(mk("rect", { x: 506, y: 40, width: 120, height: 46, rx: 7, fill: "#1e222b", stroke: "#3a4150", "stroke-width": 1.4 }));
+  E.appendChild(txt(566, 60, "on_tick()", 11, "#e8e6e3", "middle"));
+  E.appendChild(txt(566, 76, $("bpCons").value + " ticks/s", 9, "#5f6673", "middle"));
+
+  var cy0 = 186, ch = 58, mxl = Math.max.apply(null, bp.hist.concat([200]));
+  C.appendChild(mk("rect", { x: 14, y: cy0, width: 612, height: ch, rx: 6, fill: "#0b0e14", stroke: "#272c36" }));
+  var d = "";
+  bp.hist.forEach(function (v, k) {
+    var X = 14 + 612 * k / 120, Y = cy0 + ch - (ch - 4) * Math.min(1, v / mxl);
+    d += (k ? " L" : "M") + X.toFixed(1) + " " + Y.toFixed(1);
+  });
+  if (d) C.appendChild(mk("path", { d: d, fill: "none", stroke: lat > 500 ? "#f85149" : (lat > 200 ? "#d29922" : "#3fb950"), "stroke-width": 2 }));
+  C.appendChild(txt(20, cy0 + 14, Math.round(mxl) + " ms", 9, "#3a4150"));
+  C.appendChild(txt(20, cy0 + ch - 5, "0", 9, "#3a4150"));
+
+  $("bpDepth").textContent = String(bp.depth);
+  $("bpLat").textContent = Math.round(lat) + " ms";
+  $("bpLost").textContent = String(bp.lost);
+  var el2 = $("bpLat");
+  el2.className = "sv " + (lat > 500 ? "bad" : (lat > 200 ? "warn" : "ok"));
+  var note;
+  if (bp.mode === "await") {
+    note = "<b>Bounded + await.</b> When the queue is full the producer suspends, so the pressure travels " +
+      "back upstream instead of turning into memory. Delay is capped at maxsize/consumer_rate = " +
+      Math.round(1000 * mx / Math.max(1, +$("bpCons").value)) + " ms. The counter is <b>producer stalls</b>, " +
+      "and a stall is information: it says your strategy is too slow for this market.";
+  } else if (bp.mode === "unb") {
+    note = "<b>Unbounded.</b> <code>put_nowait()</code> never waits, so nothing pushes back. The queue grows " +
+      "without limit and your strategy is now trading a book from " + Math.round(lat) + " ms ago. This ends " +
+      "as an OOM kill, but it is already wrong long before that.";
+  } else {
+    note = "<b>Coalesce.</b> Keep only the newest snapshot and discard the backlog — delay stays flat no " +
+      "matter how fast the feed runs. The counter is <b>dropped ticks</b>, and for market data that is " +
+      "usually the right trade: a stale book is not partial information, it is wrong information.";
+  }
+  $("bpNote").innerHTML = note;
+}
+bpSet("await");
+
+/* ── MCQ engine (shared across week pages) ───────────────────── */
+Array.prototype.forEach.call(document.querySelectorAll(".mcq"), function (q) {
+  var answer = parseInt(q.getAttribute("data-a"), 10);
+  var opts = Array.prototype.slice.call(q.querySelectorAll(".opt"));
+  var fb = q.querySelector(".fb");
+  opts.forEach(function (o, i) {
+    o.addEventListener("click", function () {
+      if (q.dataset.done === "1") return;
+      q.dataset.done = "1";
+      var right = i === answer;
+      opts.forEach(function (b, j) {
+        b.disabled = true;
+        if (j === answer) b.classList.add("right");
+        else if (j === i) b.classList.add("wrong");
+        else b.classList.add("dim");
+      });
+      fb.innerHTML = (right ? "<b>Correct.</b> " : "<b>Not quite.</b> ") + q.getAttribute("data-exp");
+      fb.className = "fb show " + (right ? "good" : "poor");
+    });
+  });
+});
+</script>
+</body>
+</html>

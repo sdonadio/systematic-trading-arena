@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="data:," />
+<title>Week 1 · UML &amp; Object-Oriented Programming — Systematic Trading Arena</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    /* ── Systematic Trading Arena · shared palette (identical on every page) ── */
+    --accent:       #3b82f6;
+    --accent-2:     #7cb0ff;
+    --accent-3:     #b9d4ff;
+    --accent-rgb:   59,130,246;
+    --accent-2-rgb: 124,176,255;
+    --bg:           #0f1115;
+    --panel:        #181b22;
+    --panel2:       #1e222b;
+    --panel-2:      #13161b;
+    --ink:          #e8e6e3;
+    --ink-dim:      #c6c3bf;
+    --ink-mute:     #6f757f;
+    --muted:        #9aa0a6;
+    --dim:          #5f6673;
+    --line:         #272c36;
+    --line-2:       #333a47;
+    --border:       #272c36;
+    --ok:           #3fb950;
+    --warn:         #d29922;
+    --bad:          #f85149;
+    --info:         #6cb6ff;
+    --sky:          #58a6ff;
+    --violet:       #a78bfa;
+    --teal:         #2dd4bf;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.62;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent-2);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  /* ── nav / footer ─────────────────────────────────────────── */
+  nav.top{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    padding:11px 22px;background:rgba(15,17,21,.94);border-bottom:1px solid var(--line)}
+  nav.top>a:first-child{font-weight:800;letter-spacing:-.2px;color:var(--ink);font-size:14.5px;
+    border-left:3px solid var(--accent);padding-left:10px}
+  nav.top .crumbs{font-size:12px;color:var(--muted)}
+  nav.top .crumbs b{color:var(--ink);font-weight:700}
+  footer{border-top:1px solid var(--line);background:var(--panel);
+    padding:26px 22px 34px;text-align:center;font-size:11.5px;color:var(--dim);letter-spacing:.3px}
+
+  /* ── sections & typography ────────────────────────────────── */
+  section{max-width:1180px;margin:0 auto;padding:36px 22px 42px;border-top:1px solid var(--line)}
+  section#hero{border-top:none}
+  .kicker{font-size:10.5px;font-weight:800;letter-spacing:1.9px;text-transform:uppercase;color:var(--accent-2)}
+  h1{font-size:clamp(26px,4.2vw,40px);font-weight:800;letter-spacing:-.9px;line-height:1.13;margin:10px 0 6px}
+  h2{font-size:21px;font-weight:700;letter-spacing:-.3px;margin:4px 0 4px}
+  h3{font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:11px}
+  h4{font-size:13.5px;font-weight:700;margin-bottom:5px}
+  p{margin:9px 0;max-width:82ch}
+  .lead{color:var(--muted);font-size:15px;max-width:84ch}
+  .sub{color:var(--muted);font-size:12.5px}
+  strong{color:#fff;font-weight:650}
+  em.hi{color:var(--accent-2);font-style:normal;font-weight:600}
+  code,.mono{font-family:var(--mono);font-size:12.5px}
+  code{background:rgba(var(--accent-2-rgb),.13);color:#c7ddff;padding:1px 5px;border-radius:4px}
+  ul.you{list-style:none;margin:16px 0 0;display:grid;gap:8px}
+  ul.you li{position:relative;padding-left:26px;font-size:13.5px;color:var(--ink);max-width:78ch}
+  ul.you li::before{content:"";position:absolute;left:4px;top:8px;width:8px;height:8px;border-radius:2px;
+    background:var(--accent);box-shadow:0 0 0 3px rgba(var(--accent-rgb),.22)}
+  ul.plain{list-style:none;display:grid;gap:7px;font-size:13px;color:var(--muted)}
+  ul.plain li{padding-left:16px;position:relative}
+  ul.plain li::before{content:"\2022";position:absolute;left:2px;color:var(--accent-2)}
+
+  /* ── panels & layout ──────────────────────────────────────── */
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .panel.tight{padding:13px 14px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:start}
+  .split{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px;align-items:start}
+  .split-r{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:18px;align-items:start}
+  .stack{display:grid;gap:14px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+  /* ── controls ─────────────────────────────────────────────── */
+  .btn{font-family:inherit;font-size:12px;font-weight:650;cursor:pointer;color:var(--ink);
+    background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:7px 14px;transition:.15s}
+  .btn:hover:not(:disabled){border-color:var(--accent-2);color:#fff}
+  .btn:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+  .btn:disabled{opacity:.35;cursor:not-allowed}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.primary:hover:not(:disabled){filter:brightness(1.25)}
+  .btn.on{background:rgba(var(--accent-rgb),.28);border-color:var(--accent-2);color:#fff}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+  .tab{font-family:inherit;font-size:12px;font-weight:650;cursor:pointer;color:var(--muted);
+    background:transparent;border:1px solid var(--line);border-radius:20px;padding:6px 14px;transition:.15s}
+  .tab:hover{color:var(--ink)}
+  .tab[aria-selected="true"]{background:rgba(var(--accent-rgb),.3);border-color:var(--accent-2);color:#fff}
+  .tab:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+  .ctl{display:grid;gap:4px;margin-bottom:12px}
+  .ctl label{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);
+    display:flex;justify-content:space-between;gap:10px}
+  .ctl label b{font-family:var(--mono);color:var(--accent-2);font-size:12px;text-transform:none;letter-spacing:0}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:3px;
+    background:#2b313d;outline:none;cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;
+    background:var(--accent-2);border:2px solid var(--bg);cursor:pointer}
+  input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--accent-2);
+    border:2px solid var(--bg);cursor:pointer}
+  input[type=range]:focus-visible{box-shadow:0 0 0 3px rgba(var(--accent-2-rgb),.4)}
+  select,textarea,input[type=text]{font-family:var(--mono);font-size:12.5px;color:var(--ink);
+    background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:7px 9px;width:100%}
+  select:focus-visible,textarea:focus-visible,input:focus-visible{outline:2px solid var(--accent-2);outline-offset:1px}
+  textarea{line-height:1.55;resize:vertical}
+
+  /* ── stats / pills / code ─────────────────────────────────── */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:1px;
+    background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .stat{background:var(--panel);padding:10px 12px}
+  .stat .sl{font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--dim)}
+  .stat .sv{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--ink);margin-top:3px}
+  .stat .sv.ok{color:var(--ok)} .stat .sv.bad{color:var(--bad)} .stat .sv.warn{color:var(--warn)}
+  .stat .sv.acc{color:var(--accent-2)}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;letter-spacing:.5px;
+    padding:3px 9px;border-radius:20px;border:1px solid var(--line);color:var(--muted)}
+  .pill.ok{color:var(--ok);border-color:rgba(63,185,80,.5);background:rgba(63,185,80,.1)}
+  .pill.bad{color:var(--bad);border-color:rgba(248,81,73,.5);background:rgba(248,81,73,.1)}
+  .pill.warn{color:var(--warn);border-color:rgba(210,153,34,.5);background:rgba(210,153,34,.1)}
+  .pill.acc{color:var(--accent-2);border-color:rgba(var(--accent-2-rgb),.5);background:rgba(var(--accent-rgb),.18)}
+  pre.code{font-family:var(--mono);font-size:11.8px;line-height:1.62;background:#0b0e14;color:#dbe3ea;
+    border:1px solid var(--line);border-radius:10px;padding:13px 14px;overflow-x:auto;white-space:pre}
+  pre.code .k{color:#6cb6ff} pre.code .s{color:#8ddb8c} pre.code .c{color:#6b7484;font-style:italic}
+  pre.code .n{color:#e0b070} pre.code .b{color:#c7ddff;font-weight:700}
+  .note{border-left:3px solid var(--accent);background:rgba(var(--accent-rgb),.12);border-radius:0 8px 8px 0;
+    padding:10px 13px;font-size:12.5px;color:var(--muted)}
+  .note b{color:var(--ink)}
+  .log{font-family:var(--mono);font-size:11.5px;max-height:230px;overflow-y:auto;display:grid;gap:5px}
+  .log div{background:var(--panel2);border-left:3px solid var(--line);border-radius:0 6px 6px 0;padding:6px 9px;color:var(--muted)}
+  .log div.hl{border-left-color:var(--accent-2);color:var(--ink);background:rgba(var(--accent-rgb),.15)}
+  .log div.ok{border-left-color:var(--ok)} .log div.bad{border-left-color:var(--bad)}
+  svg{display:block;max-width:100%;height:auto}
+  .svgwrap{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px;overflow-x:auto}
+  table.t{width:100%;border-collapse:collapse;font-size:12px}
+  table.t th{font-size:9.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--dim);
+    text-align:left;padding:0 8px 7px;border-bottom:1px solid var(--line)}
+  table.t td{padding:7px 8px;border-bottom:1px solid rgba(39,44,54,.6);color:var(--muted);font-family:var(--mono);font-size:11.8px}
+  table.t td.n{color:var(--ink);font-weight:600}
+
+  /* ── pitfalls ─────────────────────────────────────────────── */
+  details.pit{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;overflow:hidden}
+  details.pit>summary{cursor:pointer;padding:12px 15px;font-size:13.5px;font-weight:650;color:var(--ink);
+    list-style:none;display:flex;gap:11px;align-items:flex-start}
+  details.pit>summary::-webkit-details-marker{display:none}
+  details.pit>summary::before{content:"\25B8";color:var(--accent-2);font-size:12px;line-height:1.5;transition:.2s}
+  details.pit[open]>summary::before{transform:rotate(90deg)}
+  details.pit>summary:focus-visible{outline:2px solid var(--accent-2);outline-offset:-2px}
+  details.pit .body{padding:0 15px 15px 39px;font-size:13px;color:var(--muted);display:grid;gap:9px}
+  details.pit .body .fix{color:var(--ok);font-weight:600}
+
+  /* ── MCQ ──────────────────────────────────────────────────── */
+  .mcq{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px 17px;margin-bottom:13px}
+  .mcq .q{font-size:13.8px;font-weight:650;color:var(--ink);margin:0 0 11px;max-width:84ch}
+  .mcq .q span{color:var(--accent-2);font-family:var(--mono);margin-right:7px}
+  .opts{display:grid;gap:7px}
+  .opt{text-align:left;font-family:inherit;font-size:13px;cursor:pointer;color:var(--muted);
+    background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 12px;transition:.15s}
+  .opt:hover:not(:disabled){border-color:var(--accent-2);color:var(--ink)}
+  .opt:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+  .opt.right{border-color:var(--ok);background:rgba(63,185,80,.13);color:#bce8c4}
+  .opt.wrong{border-color:var(--bad);background:rgba(248,81,73,.12);color:#f4b6b1}
+  .opt.dim{opacity:.5}
+  .fb{margin-top:11px;font-size:12.5px;line-height:1.6;color:var(--muted);display:none;
+    border-left:3px solid var(--line);padding-left:11px}
+  .fb.show{display:block}
+  .fb.show.good{border-left-color:var(--ok)} .fb.show.poor{border-left-color:var(--bad)}
+  .fb b{color:var(--ink)}
+
+  /* ── next ─────────────────────────────────────────────────── */
+  .nextgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+  .nextcard{display:block;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:15px 17px;transition:.18s;color:inherit}
+  .nextcard:hover{border-color:var(--accent-2);transform:translateY(-2px);text-decoration:none}
+  .nextcard .nl{font-size:10px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--accent-2)}
+  .nextcard .nt{font-size:14.5px;font-weight:700;color:var(--ink);margin-top:5px}
+  .nextcard .nd{font-size:12px;color:var(--muted);margin-top:5px}
+
+  @media (max-width:720px){
+    .grid2,.grid3,.split,.split-r{grid-template-columns:1fr}
+    section{padding:26px 15px 32px}
+    nav.top{padding:10px 15px;gap:8px}
+    nav.top .crumbs{font-size:11px}
+    p,.lead{max-width:none}
+  }
+
+  /* ── week-page shared ─────────────────────────────────────── */
+  #hero{padding:52px 22px 40px;
+    background:radial-gradient(ellipse 820px 340px at 22% -14%,rgba(var(--accent-rgb),.3),transparent 66%)}
+  #hero .wk{font-family:var(--mono);font-size:12px;letter-spacing:2px;color:var(--accent-2);font-weight:700}
+  #hero h1{max-width:24ch}
+  #hero .promise{font-size:16.5px;color:var(--ink);max-width:74ch;margin-top:10px;line-height:1.55}
+  .secnum{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;
+    background:rgba(var(--accent-rgb),.35);border:1px solid var(--accent-2);color:#fff;font-family:var(--mono);
+    font-size:11px;font-weight:700;margin-right:9px;vertical-align:2px}
+
+  /* ── week-1 specific ──────────────────────────────────────── */
+  .pillpanel{display:none} .pillpanel.on{display:grid;gap:14px}
+  .palette{display:flex;gap:6px;flex-wrap:wrap}
+  .cbtn{font-family:var(--mono);font-size:11.5px;font-weight:600;cursor:pointer;color:var(--muted);
+    background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:5px 10px;transition:.15s}
+  .cbtn:hover{color:var(--ink);border-color:var(--accent-2)}
+  .cbtn.on{background:rgba(var(--accent-rgb),.3);border-color:var(--accent-2);color:#fff}
+  .cbtn:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+  .cbtn .ab{color:var(--warn);font-size:9px;margin-left:4px}
+  #umlSvg .cls{cursor:pointer}
+  #umlSvg .cls rect.bx{fill:#1e222b;stroke:#3a4150;stroke-width:1.3}
+  #umlSvg .cls.sel rect.bx{stroke:var(--accent-2);stroke-width:2;fill:rgba(var(--accent-rgb),.24)}
+  #umlSvg .cls.abs rect.bx{stroke-dasharray:4 3}
+  .review{display:grid;gap:6px;font-size:12px}
+  .review div{padding:6px 10px;border-radius:6px;border-left:3px solid var(--line);background:var(--panel2);color:var(--muted)}
+  .review div.ok{border-left-color:var(--ok)} .review div.warn{border-left-color:var(--warn)}
+  canvas{display:block;width:100%;height:auto;border-radius:10px;background:#0b0e14;border:1px solid var(--line)}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:10px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .legend i{width:14px;height:3px;border-radius:2px;display:inline-block}
+  .sw{display:inline-flex;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .sw button{font-family:inherit;font-size:11.5px;font-weight:650;cursor:pointer;color:var(--muted);
+    background:var(--panel2);border:none;padding:7px 13px;transition:.15s}
+  .sw button[aria-pressed="true"]{background:rgba(var(--accent-rgb),.32);color:#fff}
+  .sw button:focus-visible{outline:2px solid var(--accent-2);outline-offset:-2px}
+  @media (max-width:720px){ #hero{padding:34px 15px 28px} }
+
+  /* ── mobile guard (identical on every page): single column under 720px,
+        no horizontal overflow. Must stay last in the sheet. ───────────── */
+  @media (max-width:720px){
+    .grid2,.grid3,.grid2.narrow-right,.split,.split-r,.codepair,
+    .nextgrid,.dash,.toggles,.lanes,.weeknav,.weeks,.roles,.stack{
+      grid-template-columns:minmax(0,1fr)}
+    [class*="grid"]>*,.stack>*,.wrap>*,.panel,.panel.tight,.nextcard,.wk,.row>*{min-width:0}
+    pre,pre.code,.svgwrap,svg,canvas,table,select,input,textarea,.mono{max-width:100%}
+    pre,pre.code,.svgwrap,.tablewrap{overflow-x:auto}
+    .ctl,.ctl>*,.controls>*,.row,.legend>*{min-width:0}
+    .ctl{flex-wrap:wrap} .ctl select,.ctl input[type=range]{flex:1 1 100%;width:100%}
+    p,.lead,.sub,.promise{max-width:none}
+  }
+</style>
+</head>
+<body>
+
+<nav class="top"><a href="index.html">Systematic Trading Arena</a><span class="crumbs"><b>Week 1 · UML &amp; Object-Oriented Programming</b> · <a href="week2.html">Week 2 →</a></span></nav>
+
+<!-- ══════════════ HERO ══════════════ -->
+<section id="hero">
+  <div class="wk">WEEK 1</div>
+  <h1>UML &amp; Object-Oriented Programming</h1>
+  <p class="promise">A trading system is a system of objects — so model it on paper before you model it
+  in Python, and the design mistakes cost you minutes instead of weeks.</p>
+  <ul class="you">
+    <li>Name the four pillars of OOP and point at each one inside the AlgoArena codebase.</li>
+    <li>Draw a UML class diagram with correct inheritance, composition, association and dependency arrows.</li>
+    <li>Write a Level-1 bot by subclassing the <code>arena.Trader</code> ABC and implementing one method.</li>
+  </ul>
+  <div class="row" style="margin-top:22px">
+    <span class="pill acc">Paper trading week &#183; nothing is scored yet</span>
+    <span class="pill">Deliverable: Phase-1 UML under <code>docs/uml/</code></span>
+    <span class="pill">Target: Level 1</span>
+  </div>
+</section>
+
+<!-- ══════════════ WHAT ══════════════ -->
+<section id="what">
+  <div class="kicker">Part 1</div>
+  <h2><span class="secnum">1</span>What is object-oriented programming?</h2>
+  <p class="lead">Look at a market and you see nouns. An <em class="hi">order</em> with a side and a price.
+  An <em class="hi">order book</em> that holds orders and matches them. A <em class="hi">portfolio</em> that
+  owns cash and positions. A <em class="hi">strategy</em> that turns prices into intentions. Object-oriented
+  programming is simply the decision to make each of those nouns a thing in your program that keeps its own
+  state and knows how to behave.</p>
+
+  <div class="grid2" style="margin-top:16px">
+    <div class="stack">
+      <p>The alternative — a pile of functions passing dictionaries around — works fine for a hundred lines
+      and collapses at ten thousand. By Week 9 your bot will hold a portfolio, a risk stack, a signal model,
+      a reconnecting socket client and a scoring hook. If those are five objects with clear contracts you can
+      test them separately and swap one without touching the rest. If they are one 900-line
+      <code>main()</code>, every change is a gamble.</p>
+      <p>There are four reasons the arena is built this way, and they are the four reasons the course starts here:</p>
+      <ul class="plain">
+        <li><strong>Model reality.</strong> Code that mirrors the domain is code you can reason about — and argue about with a colleague.</li>
+        <li><strong>Manage complexity.</strong> A trader calls <code>on_tick()</code>; it never touches sockets, auth or matching.</li>
+        <li><strong>Enable extension.</strong> A new security, shock or strategy is a new subclass or plugin, not a rewrite.</li>
+        <li><strong>Make it testable.</strong> Small objects with clear contracts are unit-testable in isolation; the arena ships ~1,280 tests around them.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>The vocabulary, once</h3>
+      <pre class="code"><span class="k">class</span> <span class="b">Order</span>:
+    exchange_fee = <span class="n">0.001</span>          <span class="c"># class attribute (shared)</span>
+
+    <span class="k">def</span> __init__(<span class="k">self</span>, symbol, side, qty, price):
+        <span class="k">self</span>.symbol = symbol      <span class="c"># instance attributes</span>
+        <span class="k">self</span>.side   = side        <span class="c"># (per-object state)</span>
+        <span class="k">self</span>.qty    = qty
+        <span class="k">self</span>.price  = price
+
+    <span class="k">def</span> notional(<span class="k">self</span>):           <span class="c"># a method (behaviour)</span>
+        <span class="k">return</span> <span class="k">self</span>.qty * <span class="k">self</span>.price
+
+o = Order(<span class="s">'AAPL'</span>, <span class="s">'buy'</span>, <span class="n">5</span>, <span class="n">185.50</span>)  <span class="c"># an instance</span>
+o.notional()   <span class="c"># -&gt; 927.5</span></pre>
+      <p class="sub" style="margin-top:10px">A <strong>class</strong> is the blueprint;
+      an <strong>object</strong> is one instance of it. <code>__init__</code> sets up state,
+      <code>self</code> is this particular object, and a method is behaviour that can see that state.</p>
+    </div>
+  </div>
+
+  <h3 style="margin-top:30px">Interactive · the four pillars, each one live in the arena</h3>
+  <p class="sub" style="margin-bottom:12px">Every OOP concept reduces to these four ideas. Pick one; the
+  diagram and the code change with it.</p>
+  <div class="tabs" role="tablist" aria-label="The four pillars of OOP">
+    <button class="tab" role="tab" id="pt-enc" aria-selected="true" aria-controls="pp-enc">1 · Encapsulation</button>
+    <button class="tab" role="tab" id="pt-abs" aria-selected="false" aria-controls="pp-abs">2 · Abstraction</button>
+    <button class="tab" role="tab" id="pt-inh" aria-selected="false" aria-controls="pp-inh">3 · Inheritance</button>
+    <button class="tab" role="tab" id="pt-pol" aria-selected="false" aria-controls="pp-pol">4 · Polymorphism</button>
+  </div>
+
+  <div class="pillpanel on split" id="pp-enc" role="tabpanel" aria-labelledby="pt-enc">
+    <div class="panel">
+      <h4>Encapsulation — a stable interface over changeable internals</h4>
+      <p class="sub">Bundle state and behaviour together, then hide the internals. Python has no hard access
+      control: <code>name</code> is public API, <code>_name</code> means "internal, hands off", and
+      <code>__name</code> is name-mangled. A <code>@property</code> lets you expose a computed value as if
+      it were an attribute — so <code>net_worth</code> can start as a stored float and become a live
+      mark-to-market calculation without breaking one caller.</p>
+      <div class="note" style="margin-top:11px"><b>In the arena:</b> <code>Portfolio.net_worth</code> is a
+      property. Marking positions changed three times during development; no bot ever noticed.</div>
+    </div>
+    <div class="stack">
+      <div class="svgwrap"><svg viewBox="0 0 320 150" role="img" aria-label="A portfolio object exposing net_worth while hiding its positions dictionary">
+        <rect x="70" y="14" width="180" height="122" rx="10" fill="#1e222b" stroke="var(--accent-2)" stroke-width="1.4"/>
+        <text x="160" y="34" text-anchor="middle" font-size="11.5" font-family="monospace" fill="#e8e6e3">Portfolio</text>
+        <line x1="70" y1="42" x2="250" y2="42" stroke="#3a4150"/>
+        <g font-family="monospace" font-size="10">
+          <text x="82" y="60" fill="#3fb950">+ cash: float</text>
+          <text x="82" y="78" fill="#d29922">- _positions: dict</text>
+          <text x="82" y="96" fill="#f85149">- __ledger: list</text>
+          <line x1="70" y1="106" x2="250" y2="106" stroke="#3a4150"/>
+          <text x="82" y="124" fill="#3fb950">+ net_worth: float</text>
+        </g>
+        <text x="8" y="64" font-size="9.5" fill="#5f6673" font-family="monospace">public</text>
+        <text x="256" y="82" font-size="9.5" fill="#5f6673" font-family="monospace">hidden</text>
+        <path d="M62 60 h6 M252 78 h8 M252 96 h8" stroke="#3a4150"/>
+      </svg></div>
+      <button class="btn" type="button" data-code="c-enc" aria-expanded="true">Hide code</button>
+      <pre class="code" id="c-enc"><span class="k">class</span> <span class="b">Portfolio</span>:
+    <span class="k">def</span> __init__(<span class="k">self</span>, cash):
+        <span class="k">self</span>.cash = cash          <span class="c"># public</span>
+        <span class="k">self</span>._positions = {}      <span class="c"># _protected (convention)</span>
+        <span class="k">self</span>.__ledger = []        <span class="c"># __private (name-mangled)</span>
+
+    <span class="n">@property</span>
+    <span class="k">def</span> net_worth(<span class="k">self</span>):          <span class="c"># computed, read-only</span>
+        <span class="k">return</span> <span class="k">self</span>.cash + <span class="k">self</span>._mark_positions()
+
+p.net_worth        <span class="c"># attribute access, runs the method</span>
+p.net_worth = <span class="n">10</span>   <span class="c"># AttributeError — no setter</span></pre>
+    </div>
+  </div>
+
+  <div class="pillpanel split" id="pp-abs" role="tabpanel" aria-labelledby="pt-abs" hidden>
+    <div class="panel">
+      <h4>Abstraction — say what it does, not how</h4>
+      <p class="sub">An abstraction is a promise about behaviour with the mechanism deleted. Your bot's
+      promise is one line: <em class="hi">given the market and my portfolio, return a Signal or None</em>.
+      Underneath that line sit a WebSocket client, a token handshake, JSON serialisation, reconnection with
+      backoff, a matching engine and a fee model — none of which you import, mention or can break.</p>
+      <div class="note" style="margin-top:11px"><b>In the arena:</b> the <code>arena</code> package is the
+      only thing a student imports. Everything in <code>exchange/</code>, <code>shared/</code> and
+      <code>trader/</code> is behind it.</div>
+    </div>
+    <div class="stack">
+      <div class="svgwrap"><svg viewBox="0 0 320 160" role="img" aria-label="Layers from your bot down to the socket, with a visibility line">
+        <g font-family="monospace" font-size="10">
+          <rect x="24" y="10" width="272" height="26" rx="6" fill="rgba(var(--accent-rgb),.28)" stroke="var(--accent-2)" stroke-width="1.3"/>
+          <text x="160" y="27" text-anchor="middle" fill="#e8e6e3">your MyBot.on_tick()</text>
+          <rect x="24" y="42" width="272" height="26" rx="6" fill="rgba(var(--accent-2-rgb),.14)" stroke="var(--accent-2)" stroke-width="1.2"/>
+          <text x="160" y="59" text-anchor="middle" fill="var(--accent-2)">arena.Trader  (the contract)</text>
+          <line x1="10" y1="76" x2="310" y2="76" stroke="#d29922" stroke-width="1" stroke-dasharray="5 4"/>
+          <text x="160" y="90" text-anchor="middle" fill="#d29922" font-size="9">&#8595; you never touch anything below this line &#8595;</text>
+          <rect x="24" y="96" width="272" height="20" rx="5" fill="#1e222b" stroke="#3a4150"/>
+          <text x="160" y="110" text-anchor="middle" fill="#5f6673">TraderBot &#183; event loop &#183; parse_message()</text>
+          <rect x="24" y="120" width="272" height="20" rx="5" fill="#1e222b" stroke="#3a4150"/>
+          <text x="160" y="134" text-anchor="middle" fill="#5f6673">websockets &#183; auth &#183; JSON frames</text>
+          <rect x="24" y="144" width="272" height="14" rx="4" fill="#181b22" stroke="#272c36"/>
+          <text x="160" y="154" text-anchor="middle" fill="#5f6673" font-size="8.5">TCP :8765</text>
+        </g>
+      </svg></div>
+      <button class="btn" type="button" data-code="c-abs" aria-expanded="true">Hide code</button>
+      <pre class="code" id="c-abs"><span class="c"># what you write — the whole surface area</span>
+<span class="k">from</span> arena <span class="k">import</span> Trader, Signal
+
+<span class="k">class</span> <span class="b">MyBot</span>(Trader):
+    <span class="k">def</span> on_tick(<span class="k">self</span>, market, portfolio):
+        ask = market.best_ask(<span class="s">'AAPL'</span>)
+        <span class="k">return</span> Signal(<span class="s">'AAPL'</span>, <span class="s">'buy'</span>, <span class="n">1</span>, ask) <span class="k">if</span> ask <span class="k">else</span> <span class="k">None</span>
+
+MyBot().run()      <span class="c"># sockets, auth, retries: not your problem</span></pre>
+    </div>
+  </div>
+
+  <div class="pillpanel split" id="pp-inh" role="tabpanel" aria-labelledby="pt-inh" hidden>
+    <div class="panel">
+      <h4>Inheritance — genuine specialisation, and nothing else</h4>
+      <p class="sub">A subclass reuses a base class and specialises it; <code>super()</code> calls back into
+      the parent, and Python resolves which method runs via the MRO. Inheritance is the right tool when the
+      sentence "<em class="hi">a Momentum IS-A Strategy</em>" is true. It is the wrong tool when you only
+      wanted to borrow some code — that is what composition is for, and it is the single most common design
+      error we will see in your Week-1 diagrams.</p>
+      <div class="note" style="margin-top:11px"><b>Rule of thumb:</b> reach for composition first. Use
+      inheritance only when a caller holding the base type could be handed the subclass and never notice.</div>
+    </div>
+    <div class="stack">
+      <div class="svgwrap"><svg viewBox="0 0 320 150" role="img" aria-label="Momentum and MeanReversion inheriting from an abstract Strategy">
+        <rect x="106" y="12" width="108" height="30" rx="6" fill="#1e222b" stroke="var(--accent-2)" stroke-width="1.3" stroke-dasharray="4 3"/>
+        <text x="160" y="26" text-anchor="middle" font-size="10.5" font-family="monospace" fill="#e8e6e3">Strategy</text>
+        <text x="160" y="37" text-anchor="middle" font-size="8" font-family="monospace" fill="#d29922">&#171;abstract&#187;</text>
+        <path d="M160 56 l-6 -10 h12 z" fill="#0f1115" stroke="var(--accent-2)" stroke-width="1.2"/>
+        <path d="M160 56 v18 M56 74 h208 M56 74 v18 M264 74 v18" stroke="#3a4150" stroke-width="1.2" fill="none"/>
+        <rect x="10" y="92" width="92" height="28" rx="5" fill="#1e222b" stroke="#3a4150" stroke-width="1.2"/>
+        <text x="56" y="110" text-anchor="middle" font-size="9.5" font-family="monospace" fill="#9aa0a6">Momentum</text>
+        <rect x="218" y="92" width="92" height="28" rx="5" fill="#1e222b" stroke="#3a4150" stroke-width="1.2"/>
+        <text x="264" y="110" text-anchor="middle" font-size="9.5" font-family="monospace" fill="#9aa0a6">MeanReversion</text>
+        <text x="160" y="136" text-anchor="middle" font-size="9" font-family="monospace" fill="#5f6673">hollow triangle = generalization (IS-A)</text>
+      </svg></div>
+      <button class="btn" type="button" data-code="c-inh" aria-expanded="true">Hide code</button>
+      <pre class="code" id="c-inh"><span class="k">class</span> <span class="b">Strategy</span>:
+    <span class="k">def</span> __init__(<span class="k">self</span>, name):
+        <span class="k">self</span>.name = name
+    <span class="k">def</span> signal(<span class="k">self</span>, prices): ...      <span class="c"># base behaviour</span>
+
+<span class="k">class</span> <span class="b">Momentum</span>(Strategy):              <span class="c"># Momentum IS-A Strategy</span>
+    <span class="k">def</span> __init__(<span class="k">self</span>, name, lookback):
+        <span class="k">super</span>().__init__(name)         <span class="c"># call parent __init__</span>
+        <span class="k">self</span>.lookback = lookback
+    <span class="k">def</span> signal(<span class="k">self</span>, prices):          <span class="c"># specialise</span>
+        <span class="k">return</span> prices[-<span class="n">1</span>] - prices[-<span class="k">self</span>.lookback]</pre>
+    </div>
+  </div>
+
+  <div class="pillpanel split" id="pp-pol" role="tabpanel" aria-labelledby="pt-pol" hidden>
+    <div class="panel">
+      <h4>Polymorphism — one call site, many behaviours</h4>
+      <p class="sub">The engine holds a list of bots. It calls <code>on_tick()</code> on each of them and
+      has no idea which class it is talking to. That is polymorphism: one interface, many implementations,
+      chosen at runtime. Python does not even require a shared base type — if it has
+      <code>on_tick()</code>, it is a trader. Duck typing is powerful and it is a contract you must honour
+      by hand, which is exactly why the arena pins it down with an ABC.</p>
+      <div class="note" style="margin-top:11px"><b>Why you care:</b> this is what lets the season add a new
+      house bot, a new shock, or a new security without the engine changing a line. Open for extension,
+      closed for modification.</div>
+    </div>
+    <div class="stack">
+      <div class="svgwrap"><svg viewBox="0 0 320 150" role="img" aria-label="One on_tick call dispatched to three different bot classes">
+        <rect x="94" y="10" width="132" height="26" rx="6" fill="rgba(var(--accent-rgb),.28)" stroke="var(--accent-2)" stroke-width="1.3"/>
+        <text x="160" y="27" text-anchor="middle" font-size="10" font-family="monospace" fill="#e8e6e3">bot.on_tick(mkt, pf)</text>
+        <path d="M160 36 L52 66 M160 36 L160 66 M160 36 L268 66" stroke="#3a4150" stroke-width="1.1" fill="none"/>
+        <g font-family="monospace" font-size="9">
+          <rect x="10" y="66" width="84" height="26" rx="5" fill="#1e222b" stroke="#3a4150"/><text x="52" y="83" text-anchor="middle" fill="#9aa0a6">Momentum</text>
+          <rect x="118" y="66" width="84" height="26" rx="5" fill="#1e222b" stroke="#3a4150"/><text x="160" y="83" text-anchor="middle" fill="#9aa0a6">MeanRev</text>
+          <rect x="226" y="66" width="84" height="26" rx="5" fill="#1e222b" stroke="#3a4150"/><text x="268" y="83" text-anchor="middle" fill="#9aa0a6">MLBot</text>
+          <text x="52" y="110" text-anchor="middle" fill="#3fb950">buy 5</text>
+          <text x="160" y="110" text-anchor="middle" fill="#f85149">sell 3</text>
+          <text x="268" y="110" text-anchor="middle" fill="#5f6673">None</text>
+        </g>
+        <text x="160" y="136" text-anchor="middle" font-size="9" font-family="monospace" fill="#5f6673">same call &#183; three answers</text>
+      </svg></div>
+      <button class="btn" type="button" data-code="c-pol" aria-expanded="true">Hide code</button>
+      <pre class="code" id="c-pol"><span class="k">def</span> run_all(bots, market, portfolio):
+    <span class="k">for</span> bot <span class="k">in</span> bots:                    <span class="c"># each bot is a different class...</span>
+        sig = bot.on_tick(market, portfolio)   <span class="c"># ...same call, different logic</span>
+        <span class="k">if</span> sig: submit(sig)
+
+run_all([Momentum(...), MeanReversion(...), MLBot(...)], mkt, pf)
+
+<span class="c"># pinned down by a contract:</span>
+<span class="k">from</span> abc <span class="k">import</span> ABC, abstractmethod
+<span class="k">class</span> <span class="b">Trader</span>(ABC):
+    <span class="n">@abstractmethod</span>
+    <span class="k">def</span> on_tick(<span class="k">self</span>, market, portfolio): ...
+Trader()      <span class="c"># TypeError: can't instantiate abstract class</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ HOW ══════════════ -->
+<section id="how">
+  <div class="kicker">Part 2</div>
+  <h2><span class="secnum">2</span>How does UML work? Build the diagram yourself</h2>
+  <p class="lead">A UML class box is three compartments: <strong>name</strong>, <strong>attributes</strong>,
+  <strong>methods</strong>. <code>+</code> is public, <code>-</code> is private, <code>#</code> is protected,
+  and a dashed border marks an abstract class. The arrows are where the design actually lives — they say
+  how objects know about, use, and own one another.</p>
+
+  <div class="grid2" style="margin-top:14px">
+    <div class="panel">
+      <h3>The five links you need this week</h3>
+      <table class="t">
+        <thead><tr><th>Glyph</th><th>Name</th><th>Means</th></tr></thead>
+        <tbody>
+          <tr><td class="n">&#9655;&#8212;&#8212;</td><td class="n">Generalization</td><td>IS-A. <span class="mono">Momentum</span> is a <span class="mono">Strategy</span>.</td></tr>
+          <tr><td class="n">&#9670;&#8212;&#8212;</td><td class="n">Composition</td><td>OWNS, shared fate. A <span class="mono">Bot</span> owns its <span class="mono">Portfolio</span>.</td></tr>
+          <tr><td class="n">&#9671;&#8212;&#8212;</td><td class="n">Aggregation</td><td>HAS-A, separate lifetime. A venue has bots that outlive it.</td></tr>
+          <tr><td class="n">&#8212;&#8212;</td><td class="n">Association</td><td>Uses. A <span class="mono">Trader</span> uses <span class="mono">MarketData</span>.</td></tr>
+          <tr><td class="n">- - &#8250;</td><td class="n">Dependency</td><td>Transient use. A method returns a <span class="mono">Signal</span>.</td></tr>
+        </tbody>
+      </table>
+      <p class="sub" style="margin-top:10px">Multiplicity goes on the ends: <code>1</code>, <code>0..1</code>,
+      <code>*</code>. An <code>OrderBook</code> holds <code>*</code> <code>Order</code>s.</p>
+    </div>
+    <div class="panel">
+      <h3>Why bother drawing it</h3>
+      <ul class="plain">
+        <li><strong>It aligns humans.</strong> A picture settles an argument that three paragraphs of prose cannot.</li>
+        <li><strong>It aligns your AI.</strong> Paste the diagram into Claude and the generated code lands in the right shape; describe it in prose and it invents its own.</li>
+        <li><strong>It is cheap to be wrong.</strong> Moving an arrow costs a minute. Moving an inheritance relationship out of 2,000 lines costs a week.</li>
+        <li><strong>It is a living artifact.</strong> You will extend this same diagram every week: async pipeline (W2), wire messages (W3), backtester (W4).</li>
+      </ul>
+      <div class="note" style="margin-top:12px"><b>This week's deliverable</b> is exactly the diagram you are
+      about to build, committed under <code>docs/uml/</code> on your W1 feature branch.</div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:30px">Interactive · UML class-diagram builder</h3>
+  <p class="sub" style="margin-bottom:12px">Add classes from the palette, pick a link type, then click two
+  boxes in the diagram (source first, target second) — or use the two dropdowns if you prefer the keyboard.
+  The diagram, the generated Python skeleton and the design review all redraw as you go.</p>
+
+  <div class="split" style="align-items:start">
+    <div class="stack">
+      <div class="panel tight">
+        <h3>1 · Classes <span class="sub" style="text-transform:none;letter-spacing:0">(click to add or remove)</span></h3>
+        <div class="palette" id="palette"></div>
+      </div>
+      <div class="panel tight">
+        <h3>2 · Link type</h3>
+        <div class="tabs" id="relTabs" role="tablist" aria-label="Relationship type" style="margin-bottom:10px"></div>
+        <div class="grid2" style="gap:9px">
+          <div class="ctl"><label for="relFrom">source</label><select id="relFrom" aria-label="Relationship source class"></select></div>
+          <div class="ctl"><label for="relTo">target</label><select id="relTo" aria-label="Relationship target class"></select></div>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="relAdd" type="button">Add link</button>
+          <button class="btn" id="relUndo" type="button">Undo link</button>
+          <button class="btn" id="umlExample" type="button">Load the AlgoArena example</button>
+          <button class="btn" id="umlClear" type="button">Clear all</button>
+        </div>
+        <p class="sub" id="umlHint" style="margin-top:9px">Nothing selected. Click a box in the diagram to start a link.</p>
+      </div>
+      <div class="svgwrap">
+        <svg id="umlSvg" viewBox="0 0 640 604" role="img" aria-label="The UML class diagram you are building">
+          <defs>
+            <marker id="mGen" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" orient="auto">
+              <path d="M0 0 L12 6 L0 12 z" fill="#0f1115" stroke="var(--accent-2)" stroke-width="1.2"/></marker>
+            <marker id="mComp" viewBox="0 0 14 12" refX="1" refY="6" markerWidth="12" markerHeight="12" orient="auto">
+              <path d="M0 6 L7 1 L14 6 L7 11 z" fill="var(--accent-2)" stroke="var(--accent-2)" stroke-width="1"/></marker>
+            <marker id="mAggr" viewBox="0 0 14 12" refX="1" refY="6" markerWidth="12" markerHeight="12" orient="auto">
+              <path d="M0 6 L7 1 L14 6 L7 11 z" fill="#0f1115" stroke="var(--accent-2)" stroke-width="1.2"/></marker>
+            <marker id="mDep" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="10" markerHeight="10" orient="auto">
+              <path d="M0 0 L12 6 L0 12" fill="none" stroke="#9aa0a6" stroke-width="1.4"/></marker>
+          </defs>
+          <g id="umlLinks"></g>
+          <g id="umlNodes"></g>
+          <text id="umlEmpty" x="320" y="300" text-anchor="middle" font-size="12" fill="#5f6673" font-family="monospace">add a class from the palette &#8594;</text>
+        </svg>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="panel tight">
+        <h3>Generated skeleton</h3>
+        <pre class="code" id="umlCode" style="max-height:340px;overflow:auto"># add classes to see the code</pre>
+      </div>
+      <div class="panel tight">
+        <h3>Design review</h3>
+        <div class="review" id="umlReview"><div>Empty diagram.</div></div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="sl">classes</div><div class="sv" id="umlNC">0</div></div>
+        <div class="stat"><div class="sl">links</div><div class="sv" id="umlNL">0</div></div>
+        <div class="stat"><div class="sl">is-a</div><div class="sv acc" id="umlNG">0</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:22px">
+    <div class="panel">
+      <h4>The contract underneath it all: an ABC</h4>
+      <p class="sub">An abstract base class turns "we agreed on the shape" into something Python enforces.
+      <code>arena.Trader</code> has exactly one <code>@abstractmethod</code>. You cannot instantiate it until
+      you implement that method — which is why a Level-1 bot cannot silently do nothing wrong.</p>
+      <pre class="code" style="margin-top:10px"><span class="k">from</span> abc <span class="k">import</span> ABC, abstractmethod
+
+<span class="k">class</span> <span class="b">Trader</span>(ABC):
+    <span class="n">@abstractmethod</span>
+    <span class="k">def</span> on_tick(<span class="k">self</span>, market, portfolio):
+        ...            <span class="c"># every subclass MUST implement this</span>
+
+<span class="k">class</span> <span class="b">MyBot</span>(Trader):
+    <span class="k">def</span> on_tick(<span class="k">self</span>, market, portfolio):
+        <span class="k">return</span> Signal(<span class="s">'AAPL'</span>, <span class="s">'buy'</span>, <span class="n">5</span>, market.best_ask(<span class="s">'AAPL'</span>))
+
+Trader()      <span class="c"># TypeError: can't instantiate abstract class</span>
+MyBot()       <span class="c"># OK — the contract is satisfied</span></pre>
+    </div>
+    <div class="panel">
+      <h4>Value objects: dataclasses, and where pydantic takes over</h4>
+      <p class="sub">A <code>@dataclass</code> writes <code>__init__</code>, <code>__repr__</code> and
+      <code>__eq__</code> for you, and the type hints double as the schema. Use them for data-holding objects
+      you create inside your own process. The moment an object goes <em class="hi">on the wire</em>, it needs
+      validation as well as structure — that is why <code>shared/messages.py</code> uses pydantic v2 models
+      instead (Week 3).</p>
+      <pre class="code" style="margin-top:10px"><span class="k">from</span> dataclasses <span class="k">import</span> dataclass
+
+<span class="n">@dataclass</span>
+<span class="k">class</span> <span class="b">Trade</span>:
+    symbol: str
+    price: float
+    quantity: int
+    aggressor: str
+
+t = Trade(<span class="s">'AAPL'</span>, <span class="n">185.5</span>, <span class="n">5</span>, <span class="s">'buy'</span>)   <span class="c"># __init__ free</span>
+print(t)   <span class="c"># Trade(symbol='AAPL', price=185.5, ...)</span></pre>
+      <div class="note" style="margin-top:11px"><b>SOLID, one line each:</b> <b>S</b>ingle responsibility ·
+      <b>O</b>pen/closed (this is the plugin registry) · <b>L</b>iskov substitution ·
+      <b>I</b>nterface segregation · <b>D</b>ependency inversion.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ WHY ══════════════ -->
+<section id="why">
+  <div class="kicker">Part 3</div>
+  <h2><span class="secnum">3</span>Why does this matter in trading?</h2>
+  <p class="lead">Because the interface is the thing you keep and the strategy is the thing you throw away.
+  Over nine weeks you will write and delete a dozen signals. If every one of them is a
+  <code>Strategy</code> behind the same <code>signal()</code> call, swapping them is a one-line change and
+  you can run them side by side on the same price path. If each one is welded into your socket loop, you
+  get one shot per week.</p>
+
+  <h3 style="margin-top:26px">Interactive · four strategies, one interface, one price path</h3>
+  <p class="sub" style="margin-bottom:12px">All four bots below implement the identical
+  <code>signal(prices) -&gt; float</code> contract, so the runner code is a single loop that does not know
+  which class it is holding. Press play and watch the P&amp;L diverge — same market, same plumbing, different
+  edge. Each position change pays the half-spread plus the 0.0015 taker fee, so churn is not free.</p>
+
+  <div class="split">
+    <div class="stack">
+      <canvas id="polCv" width="1440" height="660" aria-label="Price path on top and four cumulative P and L curves below"></canvas>
+      <div class="legend">
+        <span><i style="background:#e8e6e3"></i>AAPL mid</span>
+        <span><i style="background:var(--accent-2)"></i>Momentum</span>
+        <span><i style="background:#3fb950"></i>MeanReversion</span>
+        <span><i style="background:#d29922"></i>BuyHold</span>
+        <span><i style="background:#6cb6ff"></i>CoinFlip</span>
+      </div>
+      <div class="row">
+        <button class="btn primary" id="polPlay" type="button">&#9654; Play</button>
+        <button class="btn" id="polStep" type="button">Step 20 ticks</button>
+        <button class="btn" id="polReset" type="button">&#8634; Reset</button>
+        <span class="pill acc" id="polTick">tick 0 / 240</span>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="panel tight">
+        <h3>Market</h3>
+        <div class="ctl"><label for="polSeed">price path (seed)<b id="vSeed">3</b></label>
+          <input type="range" id="polSeed" min="1" max="12" step="1" value="3" aria-label="Price path seed"/></div>
+        <div class="ctl"><label for="polVol">volatility (bp / tick)<b id="vVol">18</b></label>
+          <input type="range" id="polVol" min="4" max="60" step="2" value="18" aria-label="Volatility in basis points per tick"/></div>
+        <div class="ctl"><label for="polTrend">drift (bp / tick)<b id="vTrend">+2</b></label>
+          <input type="range" id="polTrend" min="-8" max="8" step="1" value="2" aria-label="Drift in basis points per tick"/></div>
+        <div class="ctl" style="margin-bottom:0"><label for="polLb">Momentum lookback<b id="vLb">12</b></label>
+          <input type="range" id="polLb" min="3" max="40" step="1" value="12" aria-label="Momentum lookback in ticks"/></div>
+      </div>
+      <div class="panel tight">
+        <h3>Final P&amp;L per strategy</h3>
+        <table class="t" id="polTable"><thead><tr><th>bot</th><th>P&amp;L</th><th>trades</th><th>fees</th></tr></thead><tbody></tbody></table>
+        <p class="sub" id="polVerdict" style="margin-top:9px">Press play.</p>
+      </div>
+      <pre class="code" style="font-size:11px"><span class="c"># the runner — polymorphic, and it never changes</span>
+<span class="k">for</span> t <span class="k">in</span> range(<span class="n">240</span>):
+    <span class="k">for</span> bot <span class="k">in</span> bots:            <span class="c"># 4 different classes</span>
+        target = bot.signal(px[:t+<span class="n">1</span>])
+        trade_to(bot, target)   <span class="c"># pays spread + fee</span></pre>
+    </div>
+  </div>
+
+  <h3 style="margin-top:34px">Interactive · coupling versus the cost of change</h3>
+  <p class="sub" style="margin-bottom:12px">This is the same argument in money. Suppose your bot reaches
+  directly into <em class="hi">n</em> pieces of plumbing — the socket, the parser, the fee table, the
+  book. Every pair of those things can now break each other, so the wiring you have to reason about grows
+  as <code>n(n+1)/2</code>. Route the same access through one interface and it grows as <code>n</code>.
+  Drag the slider.</p>
+
+  <div class="split-r">
+    <div class="stack">
+      <div class="panel tight">
+        <div class="ctl"><label for="cpN">modules your strategy touches<b id="vN">5</b></label>
+          <input type="range" id="cpN" min="2" max="9" step="1" value="5" aria-label="Number of modules the strategy touches"/></div>
+        <div class="row" style="margin-top:4px">
+          <span class="sub">Design:</span>
+          <span class="sw"><button id="cpDirect" type="button" aria-pressed="true">direct calls</button><button id="cpIface" type="button" aria-pressed="false">one interface</button></span>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="sl">wires to reason about</div><div class="sv" id="cpEdges">15</div></div>
+        <div class="stat"><div class="sl">hours to add a feature</div><div class="sv warn" id="cpHours">7.5</div></div>
+        <div class="stat"><div class="sl">blast radius</div><div class="sv" id="cpBlast">5 modules</div></div>
+      </div>
+      <div class="note" id="cpNote">Every direct call is a promise you cannot change later without asking
+      permission from the other side.</div>
+    </div>
+    <div class="svgwrap">
+      <svg id="cpSvg" viewBox="0 0 620 300" role="img" aria-label="Module wiring graph and a bar chart of change cost">
+        <g id="cpGraph"></g>
+        <g id="cpBars"></g>
+      </svg>
+    </div>
+  </div>
+
+  <div class="note" style="margin-top:22px"><b>The Week-9 version of this argument:</b> the teams that
+  finish the season are the ones whose Week-1 objects survived. A bot whose signal is one swappable object
+  can absorb an ML model in Week 7. A bot whose signal is spread across its socket handler cannot, and its
+  authors spend the finale rewriting instead of competing.</div>
+</section>
+
+<!-- ══════════════ PITFALLS ══════════════ -->
+<section id="pitfalls">
+  <div class="kicker">Part 4</div>
+  <h2><span class="secnum">4</span>Five ways this goes wrong</h2>
+  <p class="lead">Every one of these has been marked down in a real Week-1 deliverable. Open them.</p>
+
+  <details class="pit"><summary>Using inheritance where you meant composition</summary>
+    <div class="body">
+      <p>The classic: <code>class Bot(Portfolio)</code>, because the bot needs cash and positions and
+      inheriting them is fewer keystrokes. Now <code>bot.apply_fill()</code> is public API, your bot
+      <em>is</em> a portfolio to every caller, and the day you want two portfolios (live and shadow) the
+      design has no room for the second one.</p>
+      <p>Read the arrow out loud. "A Bot IS-A Portfolio" is false. "A Bot HAS-A Portfolio" is true.</p>
+      <p class="fix">Fix: <code>self.portfolio = Portfolio(cash)</code> — composition, one line, and now
+      swappable and mockable in tests.</p>
+    </div></details>
+
+  <details class="pit"><summary>A god object called <code>Bot</code></summary>
+    <div class="body">
+      <p>One class that polls the feed, computes the signal, sizes the position, checks risk, formats the
+      order, manages the socket and prints the dashboard. It always starts innocently as 60 lines.</p>
+      <p>The symptom is that you cannot unit-test the signal without a network connection, so you stop
+      testing the signal. By Week 5 you cannot profile it either, because everything is one function.</p>
+      <p class="fix">Fix: single responsibility. <code>Signal</code> generation, <code>RiskManager</code>
+      sizing, and the transport are three objects. The arena SDK already owns the third one for you.</p>
+    </div></details>
+
+  <details class="pit"><summary>Believing <code>_private</code> is enforced</summary>
+    <div class="body">
+      <p>Python will happily let anyone touch <code>bot._positions</code>. The underscore is a message to
+      humans, not a lock — and <code>__name</code> is only name-mangled, not sealed.</p>
+      <p>The real failure is the inverse: exposing mutable internals by accident. Returning
+      <code>self._positions</code> from a "getter" hands the caller your live dictionary, and a bug three
+      files away silently rewrites your book.</p>
+      <p class="fix">Fix: return copies or read-only views, and put computed state behind
+      <code>@property</code> so you can change the implementation later.</p>
+    </div></details>
+
+  <details class="pit"><summary>A UML diagram with arrows but no meaning</summary>
+    <div class="body">
+      <p>Ten boxes joined by ten identical plain lines. It looks like a design and communicates nothing:
+      the marker is what distinguishes "owns" from "inherits from" from "happens to call once".</p>
+      <p>Second version of the same mistake: arrows that point the wrong way. Generalization points from the
+      subclass <em>up</em> to the base. Composition's filled diamond sits at the <em>owner</em> end.</p>
+      <p class="fix">Fix: every link gets a glyph and, where it helps, a multiplicity and a verb —
+      <code>Bot ◆&#8212; 1 Portfolio</code>, <code>OrderBook ◆&#8212; * Order</code>.</p>
+    </div></details>
+
+  <details class="pit"><summary>Letting the AI own the design</summary>
+    <div class="body">
+      <p>"Write me a trading bot" produces a plausible 200-line file with a class hierarchy you did not
+      choose and cannot defend in a design review — which is a graded part of this course.</p>
+      <p>Claude is excellent at the inverse task: give it your diagram and ask it to find the relationship
+      that is wrong, generate the dataclass, or explain what <code>arena.Trader</code>'s contract obliges
+      you to implement.</p>
+      <p class="fix">Fix: you draw the boxes and arrows; the AI fills in bodies. If you cannot explain why a
+      class exists, delete it.</p>
+    </div></details>
+</section>
+
+<!-- ══════════════ CHECK ══════════════ -->
+<section id="check">
+  <div class="kicker">Part 5</div>
+  <h2><span class="secnum">5</span>Check yourself</h2>
+  <p class="lead">Three questions, instant feedback, nothing recorded.</p>
+
+  <div class="mcq" data-a="1" data-exp="<b>Composition.</b> A bot is not a kind of portfolio — a caller holding a Portfolio could not be handed a Bot and behave sensibly, which is exactly the Liskov test. The bot HAS-A portfolio, so it holds one as an attribute (filled diamond in UML). Inheritance here leaks apply_fill() into your public API and blocks you from ever holding two portfolios.">
+    <p class="q"><span>Q1</span>Your bot needs cash and positions. Which relationship do you draw between <code>Bot</code> and <code>Portfolio</code>?</p>
+    <div class="opts">
+      <button class="opt" type="button">Generalization — <code>class Bot(Portfolio)</code>, so it inherits the state</button>
+      <button class="opt" type="button">Composition — <code>Bot</code> owns a <code>Portfolio</code> instance</button>
+      <button class="opt" type="button">Dependency — a dashed arrow, since the bot only reads it</button>
+      <button class="opt" type="button">No relationship — put cash and positions directly on <code>Bot</code></button>
+    </div>
+    <div class="fb" role="status"></div>
+  </div>
+
+  <div class="mcq" data-a="2" data-exp="<b>A TypeError, at construction time.</b> An ABC with an unimplemented @abstractmethod cannot be instantiated at all — Python raises &lsquo;Can&rsquo;t instantiate abstract class MyBot with abstract method on_tick&rsquo; the moment you call MyBot(). That is the entire point of a contract: it fails immediately and loudly, not silently at 09:31 when the first tick arrives.">
+    <p class="q"><span>Q2</span><code>arena.Trader</code> is an ABC whose only <code>@abstractmethod</code> is <code>on_tick</code>. You write <code>class MyBot(Trader)</code> and forget to define <code>on_tick</code>. What happens?</p>
+    <div class="opts">
+      <button class="opt" type="button">It runs; <code>on_tick</code> silently returns <code>None</code> every tick</button>
+      <button class="opt" type="button">It runs but raises <code>NotImplementedError</code> on the first tick</button>
+      <button class="opt" type="button"><code>MyBot()</code> raises <code>TypeError</code> — you cannot even build the object</button>
+      <button class="opt" type="button">Nothing — abstract methods are only a hint to type checkers</button>
+    </div>
+    <div class="fb" role="status"></div>
+  </div>
+
+  <div class="mcq" data-a="0" data-exp="<b>The engine needs no changes at all.</b> That is polymorphism paying rent: the runner calls on_tick() on whatever it is holding, so a brand-new subclass drops in without the call site knowing it exists. This is the open/closed principle, and it is why the arena&rsquo;s plugin registry can accept unlimited securities, shocks and strategies.">
+    <p class="q"><span>Q3</span>The engine holds <code>bots: list</code> and calls <code>bot.on_tick(...)</code> on each. You add a brand-new <code>MLBot</code> subclass. How much of the engine has to change?</p>
+    <div class="opts">
+      <button class="opt" type="button">Nothing — the call site does not know or care which subclass it holds</button>
+      <button class="opt" type="button">One <code>if isinstance(bot, MLBot)</code> branch in the runner loop</button>
+      <button class="opt" type="button">The runner must be rewritten to accept the new signature</button>
+      <button class="opt" type="button">Every bot class must be updated so they all stay in sync</button>
+    </div>
+    <div class="fb" role="status"></div>
+  </div>
+</section>
+
+<!-- ══════════════ NEXT ══════════════ -->
+<section id="next">
+  <div class="kicker">Part 6</div>
+  <h2><span class="secnum">6</span>Do the work</h2>
+  <div class="grid2" style="margin-top:14px">
+    <div class="panel"><h4>In class</h4><ul class="plain">
+      <li>Declare your team and your role: Exchange, Broker or Trader.</li>
+      <li>Scaffold the repo: "Use this template" &#8594; clone &#8594; <code>make install</code>.</li>
+      <li>Sketch the Phase-1 UML class diagram of the AlgoArena hierarchy.</li>
+      <li>Commit it under <code>docs/uml/</code> on a W1 feature branch.</li>
+      <li>Reach Level 1 — your bot connects, places one order, appears in the dashboard.</li>
+    </ul></div>
+    <div class="panel"><h4>Before next class</h4><ul class="plain">
+      <li>Push the W1 feature branch (UML plus bot skeleton).</li>
+      <li>Read <code>arena/trader.py</code> and <code>shared/messages.py</code> in full.</li>
+      <li>Read <code>trader/trader.py</code> — the async loop underneath <code>on_tick</code>. That is Week 2.</li>
+      <li>Come ready to defend your role choice.</li>
+    </ul></div>
+  </div>
+  <div class="nextgrid" style="margin-top:18px">
+    <a class="nextcard" href="https://github.com/sdonadio/algoarena-team-template"><div class="nl">Code</div>
+      <div class="nt">Get the code</div><div class="nd">Labs and homework live in your course&#8217;s LMS; the starter repo is public. Use it as a template, clone, <code>make install</code>.</div></a>
+    <a class="nextcard" href="index.html"><div class="nl">Map</div>
+      <div class="nt">Course home</div><div class="nd">The nine-week map and the order-lifecycle walkthrough.</div></a>
+    <a class="nextcard" href="week2.html"><div class="nl">Next</div>
+      <div class="nt">Week 2 &#183; Concurrency &amp; Async &#8594;</div><div class="nd">The event loop that actually calls your <code>on_tick</code> — and how to never block it.</div></a>
+  </div>
+</section>
+
+<footer>Systematic Trading Arena · an interactive companion for a 9-week systematic-trading course · <a href="https://github.com/sdonadio/systematic-trading-arena">Source</a></footer>
+
+<script>
+"use strict";
+/* ════════════════════════════════════════════════════════════════
+   Week 1 — UML & Object-Oriented Programming
+   ════════════════════════════════════════════════════════════════ */
+var $ = function (id) { return document.getElementById(id); };
+/* namespace taken from the document so no absolute URL appears in this file */
+var SVGNS = document.getElementById("umlSvg").namespaceURI;
+function mk(tag, attrs) {
+  var e = document.createElementNS(SVGNS, tag);
+  for (var k in attrs) { if (attrs.hasOwnProperty(k)) e.setAttribute(k, attrs[k]); }
+  return e;
+}
+
+/* ── 1. FOUR-PILLARS EXPLORER ────────────────────────────────── */
+var PILLARS = ["enc", "abs", "inh", "pol"];
+PILLARS.forEach(function (p) {
+  $("pt-" + p).addEventListener("click", function () { pickPillar(p); });
+  $("pt-" + p).addEventListener("keydown", function (e) {
+    var i = PILLARS.indexOf(p), j = -1;
+    if (e.key === "ArrowRight") j = (i + 1) % 4;
+    if (e.key === "ArrowLeft") j = (i + 3) % 4;
+    if (j >= 0) { pickPillar(PILLARS[j]); $("pt-" + PILLARS[j]).focus(); e.preventDefault(); }
+  });
+});
+function pickPillar(p) {
+  PILLARS.forEach(function (k) {
+    $("pt-" + k).setAttribute("aria-selected", k === p ? "true" : "false");
+    var pan = $("pp-" + k);
+    if (k === p) { pan.classList.add("on"); pan.removeAttribute("hidden"); }
+    else { pan.classList.remove("on"); pan.setAttribute("hidden", ""); }
+  });
+}
+Array.prototype.forEach.call(document.querySelectorAll("[data-code]"), function (btn) {
+  btn.addEventListener("click", function () {
+    var pre = $(btn.getAttribute("data-code"));
+    var shown = pre.style.display !== "none";
+    pre.style.display = shown ? "none" : "block";
+    btn.textContent = shown ? "Show code" : "Hide code";
+    btn.setAttribute("aria-expanded", shown ? "false" : "true");
+  });
+});
+
+/* ── 2. UML CLASS-DIAGRAM BUILDER ────────────────────────────── */
+var CAT = [
+  { id: "Strategy", abs: true, kind: "base", attrs: ["+ name: str"], meth: ["+ signal(prices): float"] },
+  { id: "Momentum", kind: "concrete", attrs: ["+ lookback: int"], meth: ["+ signal(prices): float"] },
+  { id: "MeanReversion", kind: "concrete", attrs: ["+ window: int"], meth: ["+ signal(prices): float"] },
+  { id: "Trader", abs: true, kind: "base", attrs: [], meth: ["+ on_tick(mkt, pf): Signal", "+ on_fill(side, qty, px)"] },
+  { id: "MyBot", kind: "concrete", attrs: ["- _placed: bool"], meth: ["+ on_tick(mkt, pf): Signal"] },
+  { id: "Portfolio", kind: "concrete", attrs: ["+ cash: float", "- _positions: dict"], meth: ["+ net_worth(): float", "+ apply_fill(t: Trade)"] },
+  { id: "MarketData", kind: "concrete", attrs: ["+ mid: float"], meth: ["+ best_bid(sym): float", "+ best_ask(sym): float"] },
+  { id: "OrderBook", kind: "concrete", attrs: ["- _bids: list", "- _asks: list"], meth: ["+ add(o: Order)", "+ match(o: Order): list"] },
+  { id: "Order", kind: "value", attrs: ["+ symbol: str", "+ side: str", "+ qty: int", "+ price: float"], meth: ["+ notional(): float"] },
+  { id: "Signal", kind: "value", attrs: ["+ symbol: str", "+ side: str", "+ qty: int"], meth: [] }
+];
+var CATBY = {};
+CAT.forEach(function (c) { CATBY[c.id] = c; });
+
+var RELS = [
+  { id: "gen", glyph: "▷", label: "Generalization (IS-A)", verb: "" },
+  { id: "comp", glyph: "◆", label: "Composition (owns)", verb: "owns" },
+  { id: "aggr", glyph: "◇", label: "Aggregation (has-a)", verb: "0..*" },
+  { id: "assoc", glyph: "—", label: "Association (uses)", verb: "" },
+  { id: "dep", glyph: "⇢", label: "Dependency (transient)", verb: "uses" }
+];
+var relKind = "gen";
+var placed = [];   /* class ids, in placement order */
+var links = [];    /* {kind, a, b} */
+var selFrom = null;
+
+var COLS = [16, 226, 436], ROWS = [14, 162, 310, 458], BW = 188;
+
+function boxGeom(id, slot) {
+  var c = CATBY[id];
+  var head = c.abs ? 34 : 24;
+  var ah = c.attrs.length * 13 + 8;
+  var mh = c.meth.length * 13 + 8;
+  return { x: COLS[slot % 3], y: ROWS[Math.floor(slot / 3)], w: BW, h: head + ah + mh, head: head, ah: ah, c: c };
+}
+function geomOf(id) { return boxGeom(id, placed.indexOf(id)); }
+
+function buildPalette() {
+  var pal = $("palette");
+  pal.innerHTML = "";
+  CAT.forEach(function (c) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "cbtn" + (placed.indexOf(c.id) >= 0 ? " on" : "");
+    b.innerHTML = c.id + (c.abs ? '<span class="ab">abs</span>' : "");
+    b.setAttribute("aria-pressed", placed.indexOf(c.id) >= 0 ? "true" : "false");
+    b.setAttribute("aria-label", (placed.indexOf(c.id) >= 0 ? "Remove " : "Add ") + c.id);
+    b.addEventListener("click", function () { toggleClass(c.id); });
+    pal.appendChild(b);
+  });
+}
+function buildRelTabs() {
+  var t = $("relTabs");
+  t.innerHTML = "";
+  RELS.forEach(function (r) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "tab"; b.setAttribute("role", "tab");
+    b.setAttribute("aria-selected", r.id === relKind ? "true" : "false");
+    b.textContent = r.glyph + "  " + r.label;
+    b.addEventListener("click", function () {
+      relKind = r.id;
+      Array.prototype.forEach.call(t.children, function (c, i) {
+        c.setAttribute("aria-selected", RELS[i].id === relKind ? "true" : "false");
+      });
+      hint("Link type: " + r.label + ". Now click the source box, then the target box.");
+    });
+    t.appendChild(b);
+  });
+}
+function toggleClass(id) {
+  var i = placed.indexOf(id);
+  if (i >= 0) {
+    placed.splice(i, 1);
+    links = links.filter(function (l) { return l.a !== id && l.b !== id; });
+    if (selFrom === id) selFrom = null;
+  } else {
+    if (placed.length >= 12) { hint("The diagram is full — remove a class first."); return; }
+    placed.push(id);
+  }
+  redraw();
+}
+function hint(t) { $("umlHint").textContent = t; }
+
+function borderPoint(g, tx, ty) {
+  var cx = g.x + g.w / 2, cy = g.y + g.h / 2;
+  var dx = tx - cx, dy = ty - cy;
+  if (dx === 0 && dy === 0) return { x: cx, y: cy };
+  var sx = Math.abs(dx) < 1e-6 ? Infinity : (g.w / 2) / Math.abs(dx);
+  var sy = Math.abs(dy) < 1e-6 ? Infinity : (g.h / 2) / Math.abs(dy);
+  var s = Math.min(sx, sy);
+  return { x: cx + dx * s, y: cy + dy * s };
+}
+
+function redraw() {
+  var nodes = $("umlNodes"), edges = $("umlLinks");
+  nodes.innerHTML = ""; edges.innerHTML = "";
+  $("umlEmpty").setAttribute("opacity", placed.length ? "0" : "1");
+
+  /* links first so boxes sit on top */
+  links.forEach(function (l) {
+    var ga = geomOf(l.a), gb = geomOf(l.b);
+    var ca = { x: ga.x + ga.w / 2, y: ga.y + ga.h / 2 }, cb = { x: gb.x + gb.w / 2, y: gb.y + gb.h / 2 };
+    var pa = borderPoint(ga, cb.x, cb.y), pb = borderPoint(gb, ca.x, ca.y);
+    var attrs = { x1: pa.x, y1: pa.y, x2: pb.x, y2: pb.y, stroke: "#7cb0ff", "stroke-width": 1.5 };
+    if (l.kind === "gen") { attrs["marker-end"] = "url(#mGen)"; }
+    if (l.kind === "comp") { attrs["marker-start"] = "url(#mComp)"; }
+    if (l.kind === "aggr") { attrs["marker-start"] = "url(#mAggr)"; }
+    if (l.kind === "assoc") { attrs.stroke = "#9aa0a6"; }
+    if (l.kind === "dep") { attrs.stroke = "#9aa0a6"; attrs["stroke-dasharray"] = "6 4"; attrs["marker-end"] = "url(#mDep)"; }
+    edges.appendChild(mk("line", attrs));
+    var rel = RELS.filter(function (r) { return r.id === l.kind; })[0];
+    if (rel.verb) {
+      var mx = (pa.x + pb.x) / 2, my = (pa.y + pb.y) / 2;
+      var t = mk("text", { x: mx + 6, y: my - 5, "font-size": 9.5, "font-family": "monospace", fill: "#5f6673" });
+      t.textContent = rel.verb;
+      edges.appendChild(t);
+    }
+  });
+
+  placed.forEach(function (id) {
+    var g = geomOf(id), c = g.c;
+    var grp = mk("g", { class: "cls" + (selFrom === id ? " sel" : "") + (c.abs ? " abs" : "") });
+    grp.appendChild(mk("rect", { class: "bx", x: g.x, y: g.y, width: g.w, height: g.h, rx: 6 }));
+    var nm = mk("text", { x: g.x + g.w / 2, y: g.y + 16, "text-anchor": "middle", "font-size": 11.5,
+      "font-family": "monospace", fill: "#e8e6e3", "font-weight": "700" });
+    nm.textContent = c.id;
+    grp.appendChild(nm);
+    if (c.abs) {
+      var st = mk("text", { x: g.x + g.w / 2, y: g.y + 28, "text-anchor": "middle", "font-size": 8.5,
+        "font-family": "monospace", fill: "#d29922" });
+      st.textContent = "«abstract»";
+      grp.appendChild(st);
+    }
+    grp.appendChild(mk("line", { x1: g.x, y1: g.y + g.head, x2: g.x + g.w, y2: g.y + g.head, stroke: "#3a4150" }));
+    c.attrs.forEach(function (a, i) {
+      var t = mk("text", { x: g.x + 8, y: g.y + g.head + 13 + i * 13, "font-size": 9.5,
+        "font-family": "monospace", fill: a.charAt(0) === "+" ? "#3fb950" : "#d29922" });
+      t.textContent = a;
+      grp.appendChild(t);
+    });
+    grp.appendChild(mk("line", { x1: g.x, y1: g.y + g.head + g.ah, x2: g.x + g.w, y2: g.y + g.head + g.ah, stroke: "#3a4150" }));
+    c.meth.forEach(function (m, i) {
+      var t = mk("text", { x: g.x + 8, y: g.y + g.head + g.ah + 13 + i * 13, "font-size": 9.5,
+        "font-family": "monospace", fill: "#9aa0a6" });
+      t.textContent = m;
+      grp.appendChild(t);
+    });
+    grp.addEventListener("click", function () { clickBox(id); });
+    nodes.appendChild(grp);
+  });
+
+  /* dropdowns */
+  [["relFrom", 0], ["relTo", 1]].forEach(function (pair) {
+    var sel = $(pair[0]), keep = sel.value;
+    sel.innerHTML = "";
+    placed.forEach(function (id) {
+      var o = document.createElement("option"); o.value = id; o.textContent = id; sel.appendChild(o);
+    });
+    if (placed.indexOf(keep) >= 0) sel.value = keep;
+    else if (placed.length > pair[1]) sel.value = placed[pair[1]];
+  });
+
+  buildPalette();
+  $("umlNC").textContent = String(placed.length);
+  $("umlNL").textContent = String(links.length);
+  $("umlNG").textContent = String(links.filter(function (l) { return l.kind === "gen"; }).length);
+  genCode();
+  review();
+}
+
+function clickBox(id) {
+  if (selFrom === null) { selFrom = id; hint("Source: " + id + ". Now click the target box (or press Escape to cancel)."); }
+  else if (selFrom === id) { selFrom = null; hint("Selection cleared."); }
+  else { addLink(selFrom, id); selFrom = null; }
+  redraw();
+}
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape" && selFrom) { selFrom = null; hint("Selection cleared."); redraw(); }
+});
+function addLink(a, b) {
+  if (a === b) { hint("A class cannot link to itself here."); return; }
+  var dup = links.some(function (l) { return l.a === a && l.b === b && l.kind === relKind; });
+  if (dup) { hint("That link already exists."); return; }
+  links.push({ kind: relKind, a: a, b: b });
+  var rel = RELS.filter(function (r) { return r.id === relKind; })[0];
+  hint("Added: " + a + " " + rel.glyph + " " + b + " (" + rel.label + ").");
+}
+$("relAdd").addEventListener("click", function () {
+  if (placed.length < 2) { hint("Add at least two classes first."); return; }
+  addLink($("relFrom").value, $("relTo").value);
+  redraw();
+});
+$("relUndo").addEventListener("click", function () {
+  if (!links.length) { hint("No links to undo."); return; }
+  var l = links.pop();
+  hint("Removed the " + l.kind + " link " + l.a + " → " + l.b + ".");
+  redraw();
+});
+$("umlClear").addEventListener("click", function () {
+  placed = []; links = []; selFrom = null;
+  hint("Cleared. Add a class from the palette.");
+  redraw();
+});
+$("umlExample").addEventListener("click", function () {
+  placed = ["Trader", "MyBot", "Strategy", "Momentum", "Portfolio", "MarketData", "Signal"];
+  links = [
+    { kind: "gen", a: "MyBot", b: "Trader" },
+    { kind: "gen", a: "Momentum", b: "Strategy" },
+    { kind: "comp", a: "MyBot", b: "Portfolio" },
+    { kind: "assoc", a: "MyBot", b: "MarketData" },
+    { kind: "dep", a: "MyBot", b: "Signal" }
+  ];
+  selFrom = null;
+  hint("Loaded the shape of the real arena SDK. MyBot inherits the Trader contract, owns a Portfolio, uses MarketData, and emits a Signal.");
+  redraw();
+});
+
+function pyName(a) { return a.replace(/^[+\-#]\s*/, ""); }
+function genCode() {
+  if (!placed.length) { $("umlCode").textContent = "# add classes to see the code"; return; }
+  var out = [];
+  var anyAbs = placed.some(function (id) { return CATBY[id].abs; });
+  if (anyAbs) out.push("from abc import ABC, abstractmethod", "");
+  placed.forEach(function (id) {
+    var c = CATBY[id];
+    var bases = links.filter(function (l) { return l.kind === "gen" && l.a === id; }).map(function (l) { return l.b; });
+    if (c.abs && !bases.length) bases = ["ABC"];
+    out.push("class " + id + (bases.length ? "(" + bases.join(", ") + ")" : "") + ":");
+    var owns = links.filter(function (l) { return (l.kind === "comp" || l.kind === "aggr") && l.a === id; });
+    var body = 0;
+    c.attrs.forEach(function (a) { out.push("    " + pyName(a)); body += 1; });
+    if (owns.length) {
+      if (body) out.push("");
+      out.push("    def __init__(self):");
+      owns.forEach(function (l) {
+        out.push("        self." + l.b.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toLowerCase() + " = " +
+          (CATBY[l.b].abs ? "None    # inject an implementation" : l.b + "()"));
+      });
+      body += 1;
+    }
+    c.meth.forEach(function (m) {
+      if (body) out.push("");
+      if (c.abs) out.push("    @abstractmethod");
+      out.push("    def " + pyName(m).replace(/\)\s*:\s*[A-Za-z]+$/, ")").replace(/^([a-z_]+)\(/, "$1(self" + (m.indexOf("()") >= 0 ? "" : ", ") + "") + ": ...");
+      body += 1;
+    });
+    var deps = links.filter(function (l) { return l.kind === "dep" && l.a === id; });
+    if (deps.length) {
+      if (body) out.push("");
+      out.push("    # emits / uses: " + deps.map(function (l) { return l.b; }).join(", "));
+      body += 1;
+    }
+    if (!body) out.push("    pass");
+    out.push("");
+  });
+  $("umlCode").textContent = out.join("\n");
+}
+
+function review() {
+  var box = $("umlReview");
+  box.innerHTML = "";
+  var msgs = [];
+  if (!placed.length) { msgs.push(["", "Empty diagram."]); }
+  links.forEach(function (l) {
+    var A = CATBY[l.a], B = CATBY[l.b];
+    if (l.kind === "gen") {
+      if (B.abs || B.kind === "base") msgs.push(["ok", l.a + " ▷ " + l.b + " — inheriting a contract. Genuine IS-A."]);
+      else if (B.kind === "value") msgs.push(["warn", l.a + " ▷ " + l.b + " — " + l.b + " is a value object. Own one (◆), do not inherit from it."]);
+      else msgs.push(["warn", l.a + " ▷ " + l.b + " — say “a " + l.a + " IS-A " + l.b + "” out loud. If it sounds wrong, use composition."]);
+    } else if (l.kind === "comp") {
+      if (B.abs) msgs.push(["warn", l.a + " ◆ " + l.b + " — you cannot instantiate an abstract class. Own the interface, inject the implementation."]);
+      else msgs.push(["ok", l.a + " ◆ " + l.b + " — ownership with shared fate. Swappable and mockable in tests."]);
+    } else if (l.kind === "aggr") {
+      msgs.push(["ok", l.a + " ◇ " + l.b + " — has-a with independent lifetimes. Right choice when " + l.b + " outlives " + l.a + "."]);
+    } else if (l.kind === "assoc") {
+      msgs.push(["ok", l.a + " — " + l.b + " — plain use. Cheapest possible coupling; prefer it when you only read."]);
+    } else {
+      msgs.push(["ok", l.a + " ⇢ " + l.b + " — transient. " + l.b + " appears in a signature and nowhere else."]);
+    }
+  });
+  placed.forEach(function (id) {
+    var c = CATBY[id];
+    if (c.abs && !links.some(function (l) { return l.kind === "gen" && l.b === id; })) {
+      msgs.push(["warn", id + " is abstract with no subclass — nothing in this diagram can be instantiated from it."]);
+    }
+  });
+  if (placed.length > 1 && !links.length) {
+    msgs.push(["warn", "Boxes with no arrows are not a design. The relationships are the deliverable."]);
+  }
+  msgs.forEach(function (m) {
+    var d = document.createElement("div");
+    if (m[0]) d.className = m[0];
+    d.textContent = m[1];
+    box.appendChild(d);
+  });
+}
+
+buildRelTabs();
+redraw();
+
+/* ── 3. POLYMORPHISM SIMULATOR ───────────────────────────────── */
+var N = 240, SHARES = 100, HALFSPREAD = 0.02, TAKERFEE = 0.0015;
+var BOTS = [
+  { name: "Momentum", col: "#7cb0ff" },
+  { name: "MeanReversion", col: "#3fb950" },
+  { name: "BuyHold", col: "#d29922" },
+  { name: "CoinFlip", col: "#6cb6ff" }
+];
+var px = [], series = [], polT = 0, polTimer = null;
+
+function lcg(seed) {
+  var s = seed % 2147483647;
+  if (s <= 0) s += 2147483646;
+  return function () { s = (s * 16807) % 2147483647; return s / 2147483647; };
+}
+function buildPath() {
+  var seed = +$("polSeed").value, vol = +$("polVol").value, drift = +$("polTrend").value;
+  var r = lcg(seed * 7919 + 13);
+  var p = 185.00;
+  px = [p];
+  for (var i = 0; i < N; i++) {
+    var u1 = r(), u2 = r();
+    var z = Math.sqrt(-2 * Math.log(u1 + 1e-12)) * Math.cos(2 * Math.PI * u2);
+    p = p * (1 + drift / 10000 + z * vol / 10000);
+    px.push(p);
+  }
+}
+function targetFor(b, t) {
+  var lb = +$("polLb").value;
+  if (b === 0) { if (t < lb) return 0; return px[t] - px[t - lb] > 0 ? 1 : -1; }
+  if (b === 1) {
+    var w = 20;
+    if (t < w) return 0;
+    var m = 0, i;
+    for (i = t - w + 1; i <= t; i++) m += px[i];
+    m /= w;
+    var v = 0;
+    for (i = t - w + 1; i <= t; i++) v += (px[i] - m) * (px[i] - m);
+    var sd = Math.sqrt(v / w);
+    if (sd < 1e-9) return 0;
+    var z = (px[t] - m) / sd;
+    return z > 1 ? -1 : (z < -1 ? 1 : 0);
+  }
+  if (b === 2) return 1;
+  return (Math.floor(t / 8) * 2654435761 % 97) > 48 ? 1 : -1;
+}
+function runAll() {
+  series = BOTS.map(function () { return { eq: [0], pos: 0, trades: 0, fees: 0 }; });
+  for (var t = 1; t <= N; t++) {
+    for (var b = 0; b < BOTS.length; b++) {
+      var s = series[b];
+      var pnl = s.eq[t - 1] + s.pos * SHARES * (px[t] - px[t - 1]);
+      var tgt = targetFor(b, t);
+      if (tgt !== s.pos) {
+        var d = Math.abs(tgt - s.pos);
+        var cost = d * SHARES * (HALFSPREAD + px[t] * TAKERFEE);
+        pnl -= cost;
+        s.fees += cost;
+        s.trades += 1;
+        s.pos = tgt;
+      }
+      s.eq.push(pnl);
+    }
+  }
+}
+function polDraw() {
+  var cv = $("polCv"), g = cv.getContext("2d");
+  var W = cv.width, H = cv.height, L = 92, R = 24, T = 18;
+  var pH = 226, gap = 54, eT = T + pH + gap, eH = H - eT - 44;
+  g.clearRect(0, 0, W, H);
+  g.font = "20px ui-monospace, monospace";
+  g.lineJoin = "round";
+
+  var pmin = Math.min.apply(null, px), pmax = Math.max.apply(null, px), pr = (pmax - pmin) || 1;
+  var xAt = function (t) { return L + (W - L - R) * t / N; };
+  var pyAt = function (v) { return T + pH - (pH - 10) * (v - pmin) / pr; };
+
+  g.strokeStyle = "#20252e"; g.lineWidth = 1;
+  g.strokeRect(L, T, W - L - R, pH);
+  g.fillStyle = "#5f6673";
+  g.fillText(pmax.toFixed(2), 12, T + 16);
+  g.fillText(pmin.toFixed(2), 12, T + pH);
+  g.fillText("AAPL mid", L + 10, T + 20);
+
+  g.strokeStyle = "#e8e6e3"; g.lineWidth = 2.4;
+  g.beginPath();
+  for (var t = 0; t <= polT; t++) { var X = xAt(t), Y = pyAt(px[t]); if (t === 0) g.moveTo(X, Y); else g.lineTo(X, Y); }
+  g.stroke();
+
+  var lo = 0, hi = 0;
+  series.forEach(function (s) {
+    for (var i = 0; i <= N; i++) { if (s.eq[i] < lo) lo = s.eq[i]; if (s.eq[i] > hi) hi = s.eq[i]; }
+  });
+  var pad = (hi - lo) * 0.08 + 1;
+  lo -= pad; hi += pad;
+  var eyAt = function (v) { return eT + eH - eH * (v - lo) / (hi - lo); };
+
+  g.strokeStyle = "#20252e"; g.lineWidth = 1;
+  g.strokeRect(L, eT, W - L - R, eH);
+  g.setLineDash([6, 6]); g.strokeStyle = "#3a4150";
+  g.beginPath(); g.moveTo(L, eyAt(0)); g.lineTo(W - R, eyAt(0)); g.stroke();
+  g.setLineDash([]);
+  g.fillStyle = "#5f6673";
+  g.fillText("$" + Math.round(hi), 12, eT + 16);
+  g.fillText("$0", 12, eyAt(0) + 6);
+  g.fillText("$" + Math.round(lo), 12, eT + eH);
+  g.fillText("cumulative P&L, net of fees", L + 10, eT + 20);
+  g.fillText("tick " + polT + " / " + N, W - R - 150, H - 14);
+
+  BOTS.forEach(function (b, i) {
+    if (!series[i]) return;
+    g.strokeStyle = b.col; g.lineWidth = 2.6;
+    g.beginPath();
+    for (var t2 = 0; t2 <= polT; t2++) {
+      var X2 = xAt(t2), Y2 = eyAt(series[i].eq[t2]);
+      if (t2 === 0) g.moveTo(X2, Y2); else g.lineTo(X2, Y2);
+    }
+    g.stroke();
+    if (polT > 0) {
+      g.fillStyle = b.col;
+      g.beginPath(); g.arc(xAt(polT), eyAt(series[i].eq[polT]), 5, 0, 6.284); g.fill();
+    }
+  });
+
+  var tb = $("polTable").querySelector("tbody");
+  tb.innerHTML = "";
+  var best = -1, bestv = -Infinity;
+  BOTS.forEach(function (b, i) {
+    var s = series[i], v = s.eq[polT];
+    if (v > bestv) { bestv = v; best = i; }
+    var tr = document.createElement("tr");
+    tr.innerHTML = '<td class="n" style="color:' + b.col + '">' + b.name + "</td><td>" +
+      (v >= 0 ? "+" : "") + v.toFixed(0) + "</td><td>" + tradesTo(i, polT) + "</td><td>-" + feesTo(i, polT).toFixed(0) + "</td>";
+    tb.appendChild(tr);
+  });
+  $("polTick").textContent = "tick " + polT + " / " + N;
+  if (polT >= N) {
+    $("polVerdict").innerHTML = "<b>" + BOTS[best].name + "</b> wins this path with " + bestv.toFixed(0) +
+      ". Change the seed and it will very often lose — which is the real lesson: one price path proves nothing. " +
+      "What the interface bought you is the ability to run all four and find out.";
+  } else if (polT > 0) {
+    $("polVerdict").textContent = "Leading: " + BOTS[best].name + " at " + bestv.toFixed(0) + ".";
+  }
+}
+function tradesTo(i, t) {
+  var n = 0, pos = 0;
+  for (var k = 1; k <= t; k++) { var tg = targetFor(i, k); if (tg !== pos) { n += 1; pos = tg; } }
+  return n;
+}
+function feesTo(i, t) {
+  var f = 0, pos = 0;
+  for (var k = 1; k <= t; k++) {
+    var tg = targetFor(i, k);
+    if (tg !== pos) { f += Math.abs(tg - pos) * SHARES * (HALFSPREAD + px[k] * TAKERFEE); pos = tg; }
+  }
+  return f;
+}
+function polReset() {
+  if (polTimer) { clearInterval(polTimer); polTimer = null; $("polPlay").innerHTML = "&#9654; Play"; }
+  polT = 0;
+  buildPath(); runAll(); polDraw();
+  $("polVerdict").textContent = "Press play.";
+}
+["polSeed", "polVol", "polTrend", "polLb"].forEach(function (id) {
+  $(id).addEventListener("input", function () {
+    $("vSeed").textContent = $("polSeed").value;
+    $("vVol").textContent = $("polVol").value;
+    var d = +$("polTrend").value;
+    $("vTrend").textContent = (d > 0 ? "+" : "") + d;
+    $("vLb").textContent = $("polLb").value;
+    polReset();
+  });
+});
+$("polStep").addEventListener("click", function () { polT = Math.min(N, polT + 20); polDraw(); });
+$("polReset").addEventListener("click", polReset);
+$("polPlay").addEventListener("click", function () {
+  if (polTimer) { clearInterval(polTimer); polTimer = null; this.innerHTML = "&#9654; Play"; return; }
+  if (polT >= N) { polT = 0; }
+  this.innerHTML = "&#10073;&#10073; Pause";
+  var btn = this;
+  polTimer = setInterval(function () {
+    polT = Math.min(N, polT + 3);
+    polDraw();
+    if (polT >= N) { clearInterval(polTimer); polTimer = null; btn.innerHTML = "&#9654; Play"; }
+  }, 40);
+});
+polReset();
+
+/* ── 4. COUPLING vs CHANGE-COST ──────────────────────────────── */
+var cpMode = "direct";
+var MODNAMES = ["socket", "parser", "fee table", "book", "risk", "clock", "logger", "config", "scoring"];
+function cpDraw() {
+  var n = +$("cpN").value;
+  var eDirect = n * (n + 1) / 2, eIface = n + 1;
+  var edges = cpMode === "direct" ? eDirect : eIface;
+  $("vN").textContent = String(n);
+  $("cpEdges").textContent = String(edges);
+  $("cpHours").textContent = (edges * 0.5).toFixed(1);
+  $("cpBlast").textContent = cpMode === "direct" ? n + " modules" : "1 module";
+  $("cpDirect").setAttribute("aria-pressed", cpMode === "direct" ? "true" : "false");
+  $("cpIface").setAttribute("aria-pressed", cpMode === "iface" ? "true" : "false");
+  $("cpNote").innerHTML = cpMode === "direct"
+    ? "Every direct call is a promise you cannot change later without asking permission from the other side. At n=" +
+      n + " that is <b>" + eDirect + "</b> promises, and a change to any one module can reach <b>" + n + "</b> others."
+    : "One interface collapses the wiring to <b>" + eIface + "</b> edges — linear, not quadratic. This is exactly what <code>arena.Trader</code> is: your strategy talks to one contract, and the plumbing behind it was rewritten three times during the season without a single bot noticing.";
+
+  var G = $("cpGraph"), B = $("cpBars");
+  G.innerHTML = ""; B.innerHTML = "";
+  var cx = 150, cy = 150, R = 96;
+  var pts = [], i;
+  var total = n + 1;
+  for (i = 0; i < total; i++) {
+    var a = -Math.PI / 2 + i * 2 * Math.PI / total;
+    pts.push({ x: cx + R * Math.cos(a), y: cy + R * Math.sin(a), name: i === 0 ? "strategy" : MODNAMES[i - 1] });
+  }
+  if (cpMode === "direct") {
+    for (i = 0; i < total; i++) {
+      for (var j = i + 1; j < total; j++) {
+        G.appendChild(mk("line", { x1: pts[i].x, y1: pts[i].y, x2: pts[j].x, y2: pts[j].y,
+          stroke: "#f85149", "stroke-width": 1, opacity: 0.4 }));
+      }
+    }
+  } else {
+    G.appendChild(mk("circle", { cx: cx, cy: cy, r: 26, fill: "rgba(59,130,246,.34)", stroke: "#7cb0ff", "stroke-width": 1.4 }));
+    var it = mk("text", { x: cx, y: cy + 4, "text-anchor": "middle", "font-size": 9, "font-family": "monospace", fill: "#fff" });
+    it.textContent = "interface";
+    G.appendChild(it);
+    for (i = 0; i < total; i++) {
+      G.appendChild(mk("line", { x1: cx, y1: cy, x2: pts[i].x, y2: pts[i].y, stroke: "#3fb950", "stroke-width": 1.3, opacity: 0.7 }));
+    }
+  }
+  pts.forEach(function (p, k) {
+    G.appendChild(mk("circle", { cx: p.x, cy: p.y, r: k === 0 ? 15 : 11,
+      fill: k === 0 ? "rgba(59,130,246,.55)" : "#1e222b", stroke: k === 0 ? "#7cb0ff" : "#3a4150", "stroke-width": 1.4 }));
+    var t = mk("text", { x: p.x, y: p.y - (k === 0 ? 21 : 17), "text-anchor": "middle", "font-size": 9,
+      "font-family": "monospace", fill: k === 0 ? "#7cb0ff" : "#5f6673" });
+    t.textContent = p.name;
+    G.appendChild(t);
+  });
+
+  var bx = 330, bw = 250, hrsD = eDirect * 0.5, hrsI = eIface * 0.5, mx = Math.max(hrsD, 1);
+  var rows = [["direct calls", hrsD, "#f85149"], ["one interface", hrsI, "#3fb950"]];
+  var lbl = mk("text", { x: bx, y: 40, "font-size": 10, "font-family": "monospace", fill: "#9aa0a6" });
+  lbl.textContent = "hours to add one feature";
+  B.appendChild(lbl);
+  rows.forEach(function (r, k) {
+    var y = 62 + k * 62;
+    var t1 = mk("text", { x: bx, y: y - 6, "font-size": 10, "font-family": "monospace", fill: r[2] });
+    t1.textContent = r[0];
+    B.appendChild(t1);
+    B.appendChild(mk("rect", { x: bx, y: y, width: bw, height: 20, rx: 5, fill: "#181b22", stroke: "#272c36" }));
+    B.appendChild(mk("rect", { x: bx, y: y, width: Math.max(3, bw * r[1] / mx), height: 20, rx: 5, fill: r[2], opacity: 0.75 }));
+    var t2 = mk("text", { x: bx + bw + 8, y: y + 15, "font-size": 11, "font-family": "monospace", fill: "#e8e6e3" });
+    t2.textContent = r[1].toFixed(1) + "h";
+    B.appendChild(t2);
+  });
+  var ratio = hrsD / hrsI;
+  var t3 = mk("text", { x: bx, y: 208, "font-size": 11, "font-family": "monospace", fill: "#d29922" });
+  t3.textContent = ratio.toFixed(1) + "× more expensive";
+  B.appendChild(t3);
+  var t4 = mk("text", { x: bx, y: 228, "font-size": 9.5, "font-family": "monospace", fill: "#5f6673" });
+  t4.textContent = "n(n+1)/2 = " + eDirect + "   vs   n+1 = " + eIface;
+  B.appendChild(t4);
+}
+$("cpN").addEventListener("input", cpDraw);
+$("cpDirect").addEventListener("click", function () { cpMode = "direct"; cpDraw(); });
+$("cpIface").addEventListener("click", function () { cpMode = "iface"; cpDraw(); });
+cpDraw();
+
+/* ── MCQ engine (shared across week pages) ───────────────────── */
+Array.prototype.forEach.call(document.querySelectorAll(".mcq"), function (q) {
+  var answer = parseInt(q.getAttribute("data-a"), 10);
+  var opts = Array.prototype.slice.call(q.querySelectorAll(".opt"));
+  var fb = q.querySelector(".fb");
+  opts.forEach(function (o, i) {
+    o.addEventListener("click", function () {
+      if (q.dataset.done === "1") return;
+      q.dataset.done = "1";
+      var right = i === answer;
+      opts.forEach(function (b, j) {
+        b.disabled = true;
+        if (j === answer) b.classList.add("right");
+        else if (j === i) b.classList.add("wrong");
+        else b.classList.add("dim");
+      });
+      fb.innerHTML = (right ? "<b>Correct.</b> " : "<b>Not quite.</b> ") + q.getAttribute("data-exp");
+      fb.className = "fb show " + (right ? "good" : "poor");
+    });
+  });
+});
+</script>
+</body>
+</html>

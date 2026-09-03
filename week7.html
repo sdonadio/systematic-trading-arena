@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="data:," />
+<title>Week 7 · Machine Learning Signals &amp; Model Ops — Systematic Trading Arena</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root{
+    /* ── Systematic Trading Arena · shared palette (identical on every page) ── */
+    --accent:       #3b82f6;
+    --accent-2:     #7cb0ff;
+    --accent-3:     #b9d4ff;
+    --accent-rgb:   59,130,246;
+    --accent-2-rgb: 124,176,255;
+    --bg:           #0f1115;
+    --panel:        #181b22;
+    --panel2:       #1e222b;
+    --panel-2:      #13161b;
+    --ink:          #e8e6e3;
+    --ink-dim:      #c6c3bf;
+    --ink-mute:     #6f757f;
+    --muted:        #9aa0a6;
+    --dim:          #5f6673;
+    --line:         #272c36;
+    --line-2:       #333a47;
+    --border:       #272c36;
+    --ok:           #3fb950;
+    --warn:         #d29922;
+    --bad:          #f85149;
+    --info:         #6cb6ff;
+    --sky:          #58a6ff;
+    --violet:       #a78bfa;
+    --teal:         #2dd4bf;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14.5px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── nav / footer (series components) ───────────────────────── */
+  nav.top {
+    position: sticky; top: 0; z-index: 60;
+    display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+    padding: 11px 22px;
+    background: rgba(15,17,21,0.93);
+    backdrop-filter: blur(9px);
+    border-bottom: 1px solid var(--border);
+  }
+  nav.top > a {
+    color: var(--ink); font-weight: 700; font-size: 13.5px;
+    text-decoration: none; letter-spacing: -0.2px;
+    border-left: 3px solid var(--accent); padding-left: 10px;
+  }
+  nav.top > a:hover { color: var(--accent-2); }
+  nav.top .crumbs { font-size: 12px; color: var(--muted); }
+  nav.top .crumbs a { color: var(--muted); text-decoration: none; }
+  nav.top .crumbs a:hover { color: var(--ink); text-decoration: underline; }
+  nav.top .crumbs b { color: var(--ink); font-weight: 600; }
+
+  footer {
+    margin-top: 40px; border-top: 1px solid var(--border);
+    padding: 26px 22px 40px; text-align: center;
+    font-size: 11.5px; color: var(--muted); background: var(--panel-2);
+  }
+  footer a { color: var(--accent-2); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* ── layout ─────────────────────────────────────────────────── */
+  main { max-width: 1180px; margin: 0 auto; padding: 0 22px; }
+  section { padding: 34px 0; border-top: 1px solid var(--border); }
+  section:first-of-type { border-top: none; }
+
+  h1, h2, h3, h4 { letter-spacing: -0.4px; line-height: 1.24; }
+  h2 { font-size: 22px; font-weight: 700; }
+  h3 { font-size: 15px; font-weight: 700; }
+  p { margin-bottom: 11px; max-width: 78ch; }
+  p:last-child { margin-bottom: 0; }
+  a { color: var(--accent-2); }
+
+  .kicker {
+    display: inline-block; font-size: 9.5px; font-weight: 800;
+    letter-spacing: 1.6px; text-transform: uppercase;
+    color: var(--accent-2); padding: 3px 9px; border-radius: 4px;
+    background: rgba(var(--accent-rgb),0.16); border: 1px solid rgba(var(--accent-2-rgb),0.32);
+    margin-bottom: 10px;
+  }
+  .sec-head { margin-bottom: 14px; }
+  .sec-head p.lead { color: var(--muted); font-size: 13.5px; margin-top: 6px; }
+
+  code, .mono { font-family: var(--mono); }
+  p code, li code, td code {
+    font-size: 12px; color: var(--accent-2);
+    background: rgba(var(--accent-rgb),0.15); border: 1px solid rgba(var(--accent-2-rgb),0.2);
+    padding: 1px 5px; border-radius: 3px;
+  }
+  pre.code {
+    font-family: var(--mono); font-size: 11.5px; line-height: 1.62;
+    background: #0b0e13; border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 14px; overflow-x: auto; color: #cfd6dd;
+    white-space: pre; margin: 10px 0 0;
+  }
+  pre.code b { color: var(--accent-2); font-weight: 600; }
+  pre.code i { color: #6e7681; font-style: normal; }
+  pre.code u { color: var(--ok); text-decoration: none; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+  .grid2.narrow-right { grid-template-columns: 1.35fr 1fr; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+
+  /* ── widget shell ───────────────────────────────────────────── */
+  .widget {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 18px 18px; margin-top: 16px;
+  }
+  .widget.flat { background: var(--panel-2); }
+  .w-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .w-head h3 { color: var(--ink); }
+  .w-tag {
+    font-size: 9px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--muted); border: 1px solid var(--border); border-radius: 10px; padding: 2px 8px;
+  }
+  .w-sub { font-size: 12.5px; color: var(--muted); margin: 6px 0 12px; max-width: 88ch; }
+  .w-note { font-size: 11.5px; color: var(--muted); margin-top: 11px; line-height: 1.6; }
+  .w-note b { color: var(--ink); font-weight: 600; }
+
+  .controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 4px 0 12px; }
+  .ctl { display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--muted); }
+  .ctl output, .ctl .val { font-family: var(--mono); font-size: 11.5px; color: var(--ink); min-width: 46px; }
+
+  button {
+    font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer;
+    color: var(--ink); background: transparent;
+    border: 1px solid var(--border); border-radius: 7px; padding: 6px 13px;
+    transition: border-color .18s, color .18s, background .18s;
+  }
+  button:hover:not(:disabled) { border-color: var(--accent-2); color: #fff; }
+  button:focus-visible, [tabindex]:focus-visible, input:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--accent-2); outline-offset: 2px;
+  }
+  button:disabled { opacity: .38; cursor: not-allowed; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.primary:hover:not(:disabled) { background: #2563eb; border-color: var(--accent-2); }
+  button.on { background: rgba(var(--accent-rgb),0.28); border-color: var(--accent-2); color: #fff; }
+  button.seg { border-radius: 0; margin-left: -1px; }
+  button.seg:first-of-type { border-radius: 7px 0 0 7px; margin-left: 0; }
+  button.seg:last-of-type { border-radius: 0 7px 7px 0; }
+
+  input[type=range] { accent-color: var(--accent-2); width: 130px; height: 18px; cursor: pointer; }
+  input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
+  select {
+    font-family: inherit; font-size: 12px; color: var(--ink); background: var(--panel-2);
+    border: 1px solid var(--border); border-radius: 7px; padding: 5px 8px; cursor: pointer;
+  }
+
+  svg.stage { width: 100%; height: auto; display: block; }
+  .svg-wrap {
+    background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 9px; padding: 10px; overflow: hidden;
+  }
+
+  /* ── readouts, stats, logs, tables ──────────────────────────── */
+  .stats { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+  .stat {
+    flex: 1 1 120px; background: var(--panel-2); border: 1px solid var(--border);
+    border-left: 2px solid var(--c, var(--muted)); border-radius: 7px; padding: 8px 11px;
+  }
+  .stat .lbl { font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+  .stat .num { font-family: var(--mono); font-size: 17px; font-weight: 600; color: var(--c, var(--ink)); margin-top: 2px; }
+  .stat .sub { font-size: 10.5px; color: var(--muted); margin-top: 1px; }
+
+  .verdict {
+    margin-top: 12px; border-radius: 8px; padding: 10px 13px;
+    font-size: 12.5px; line-height: 1.62;
+    background: rgba(var(--accent-rgb),0.12); border: 1px solid rgba(var(--accent-2-rgb),0.3);
+  }
+  .verdict b { color: #fff; }
+  .verdict.ok   { background: rgba(63,185,80,0.10);  border-color: rgba(63,185,80,0.34); }
+  .verdict.warn { background: rgba(210,153,34,0.10); border-color: rgba(210,153,34,0.34); }
+  .verdict.bad  { background: rgba(248,81,73,0.10);  border-color: rgba(248,81,73,0.34); }
+
+  .log {
+    font-family: var(--mono); font-size: 11px; line-height: 1.75;
+    background: #0b0e13; border: 1px solid var(--border); border-radius: 8px;
+    padding: 9px 11px; height: 148px; overflow-y: auto; color: #b9c1c9;
+  }
+  .log div { white-space: pre-wrap; }
+  .log .t { color: #57606a; }
+  .log .g { color: var(--ok); }
+  .log .y { color: var(--warn); }
+  .log .r { color: var(--bad); }
+  .log .b { color: var(--sky); }
+
+  table.tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.tbl th {
+    text-align: left; font-size: 9px; font-weight: 800; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--muted);
+    padding: 6px 8px; border-bottom: 1px solid var(--border);
+  }
+  table.tbl td {
+    padding: 6px 8px; border-bottom: 1px solid rgba(39,44,54,0.6);
+    font-family: var(--mono); font-size: 11.5px; color: var(--ink);
+  }
+  table.tbl td.name { font-family: inherit; }
+  table.tbl tr.hl td { background: rgba(var(--accent-rgb),0.16); }
+  table.tbl tr.bad td { background: rgba(248,81,73,0.10); }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 9.5px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 10px; border: 1px solid currentColor; white-space: nowrap;
+  }
+  .badge.ok { color: var(--ok); background: rgba(63,185,80,0.12); }
+  .badge.warn { color: var(--warn); background: rgba(210,153,34,0.12); }
+  .badge.bad { color: var(--bad); background: rgba(248,81,73,0.12); }
+  .badge.idle { color: var(--muted); background: rgba(154,160,166,0.1); }
+
+  /* ── hero ───────────────────────────────────────────────────── */
+  #hero { padding: 46px 0 34px; }
+  #hero .wk { font-family: var(--mono); font-size: 12px; letter-spacing: 3px; color: var(--accent-2); }
+  #hero h1 { font-size: clamp(27px, 4.4vw, 41px); font-weight: 800; margin-top: 8px; }
+  #hero h1 em { font-style: normal; color: var(--accent-2); }
+  #hero .promise { font-size: 15.5px; color: var(--ink); margin-top: 13px; max-width: 76ch; }
+  #hero ul.able { list-style: none; margin-top: 18px; display: grid; gap: 8px; grid-template-columns: repeat(3, 1fr); }
+  #hero ul.able li {
+    background: var(--panel); border: 1px solid var(--border); border-top: 2px solid var(--accent);
+    border-radius: 9px; padding: 11px 13px; font-size: 12.5px; color: var(--muted); line-height: 1.55;
+  }
+  #hero ul.able li b { display: block; color: var(--ink); font-size: 12px; margin-bottom: 3px; }
+
+  /* ── pitfalls ───────────────────────────────────────────────── */
+  details.pit {
+    background: var(--panel); border: 1px solid var(--border);
+    border-left: 3px solid var(--bad); border-radius: 9px;
+    padding: 10px 14px; margin-bottom: 9px;
+  }
+  details.pit summary {
+    cursor: pointer; font-size: 13.5px; font-weight: 600; color: var(--ink);
+    list-style: none; display: flex; align-items: baseline; gap: 9px;
+  }
+  details.pit summary::-webkit-details-marker { display: none; }
+  details.pit summary::before {
+    content: '+'; font-family: var(--mono); color: var(--bad); font-weight: 700; flex-shrink: 0;
+  }
+  details.pit[open] summary::before { content: '\2212'; }
+  details.pit .body { font-size: 12.5px; color: var(--muted); margin-top: 9px; padding-left: 18px; }
+  details.pit .body b { color: var(--ink); }
+  details.pit .fix { margin-top: 8px; color: var(--ok); }
+
+  /* ── quiz ───────────────────────────────────────────────────── */
+  .q { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+  .q .qn { font-size: 9.5px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; color: var(--accent-2); }
+  .q .qt { font-size: 13.5px; font-weight: 600; margin-top: 5px; }
+  .q .opts { display: grid; gap: 7px; margin-top: 11px; }
+  .q button.opt {
+    text-align: left; padding: 8px 12px; font-weight: 500; font-size: 12.5px;
+    background: var(--panel-2); border-radius: 7px; line-height: 1.5;
+  }
+  .q button.opt .k { font-family: var(--mono); color: var(--muted); margin-right: 8px; }
+  .q button.opt.right { border-color: var(--ok); color: #fff; background: rgba(63,185,80,0.13); }
+  .q button.opt.right .k { color: var(--ok); }
+  .q button.opt.wrong { border-color: var(--bad); color: #fff; background: rgba(248,81,73,0.12); }
+  .q button.opt.wrong .k { color: var(--bad); }
+  .q .fb { font-size: 12.5px; margin-top: 10px; display: none; line-height: 1.62; color: var(--muted); }
+  .q .fb.show { display: block; }
+  .q .fb b { color: var(--ink); }
+
+  /* ── next ───────────────────────────────────────────────────── */
+  .nextgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+  a.nextcard {
+    display: block; text-decoration: none; color: inherit;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; transition: border-color .18s, transform .18s;
+  }
+  a.nextcard:hover { border-color: var(--accent-2); transform: translateY(-2px); }
+  a.nextcard .lbl { font-size: 9.5px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; color: var(--accent-2); }
+  a.nextcard .ttl { font-size: 14px; font-weight: 700; margin-top: 4px; }
+  a.nextcard .dsc { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .weeknav { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+  .weeknav a {
+    font-size: 12px; text-decoration: none; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 20px; padding: 5px 14px;
+  }
+  .weeknav a:hover { border-color: var(--accent-2); color: var(--ink); }
+
+  /* ── responsive ─────────────────────────────────────────────── */
+  @media (max-width: 720px) {
+    body { font-size: 14px; }
+    main { padding: 0 14px; }
+    .grid2, .grid2.narrow-right, .grid3, .nextgrid, #hero ul.able { grid-template-columns: minmax(0, 1fr); }
+    .stat { flex: 1 1 100%; }
+    nav.top { padding: 10px 14px; gap: 8px; }
+    input[type=range] { width: 100%; min-width: 120px; }
+    .ctl { flex: 1 1 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .001s !important; transition-duration: .001s !important; }
+  }
+
+  /* ── Week-7 specifics ───────────────────────────────────────── */
+  .feat-list { display: grid; gap: 6px; }
+  .feat-list label {
+    display: flex; align-items: flex-start; gap: 9px; cursor: pointer;
+    background: var(--panel-2); border: 1px solid var(--border); border-radius: 7px;
+    padding: 7px 10px; font-size: 12px; line-height: 1.45;
+  }
+  .feat-list label:hover { border-color: var(--accent-2); }
+  .feat-list label input { margin-top: 3px; flex-shrink: 0; }
+  .feat-list label .fn { font-family: var(--mono); font-size: 11.5px; color: var(--accent-2); }
+  .feat-list label .fd { color: var(--muted); font-size: 11px; display: block; }
+  .feat-list label.off { opacity: .62; }
+
+  .lifecycle { display: flex; gap: 0; flex-wrap: wrap; margin: 4px 0 12px; }
+  .lc-node {
+    flex: 1 1 130px; text-align: left; border-radius: 0; padding: 9px 11px;
+    border: 1px solid var(--border); margin-left: -1px; background: var(--panel-2);
+  }
+  .lc-node:first-child { border-radius: 8px 0 0 8px; margin-left: 0; }
+  .lc-node:last-child { border-radius: 0 8px 8px 0; }
+  .lc-node .st { font-family: var(--mono); font-size: 9.5px; color: var(--muted); }
+  .lc-node .nm { font-size: 12.5px; font-weight: 700; margin-top: 2px; }
+  .lc-node.on { background: rgba(var(--accent-rgb),0.26); border-color: var(--accent-2); }
+  .lc-node.on .st { color: var(--accent-2); }
+  @media (max-width: 720px) {
+    .lc-node { flex: 1 1 100%; margin-left: 0; border-radius: 8px !important; margin-bottom: 4px; }
+  }
+  .lc-detail { background: var(--panel-2); border: 1px solid var(--border); border-radius: 9px; padding: 12px 14px; }
+  .lc-detail h4 { font-size: 13.5px; }
+  .lc-detail .role { font-size: 11px; color: var(--accent-2); font-family: var(--mono); }
+  .lc-detail p { font-size: 12.5px; color: var(--muted); margin-top: 7px; }
+  .lc-detail .fail { font-size: 12px; color: var(--warn); margin-top: 7px; }
+
+  /* ── mobile guard (identical on every page): single column under 720px,
+        no horizontal overflow. Must stay last in the sheet. ───────────── */
+  @media (max-width:720px){
+    .grid2,.grid3,.grid2.narrow-right,.split,.split-r,.codepair,
+    .nextgrid,.dash,.toggles,.lanes,.weeknav,.weeks,.roles,.stack{
+      grid-template-columns:minmax(0,1fr)}
+    [class*="grid"]>*,.stack>*,.wrap>*,.panel,.panel.tight,.nextcard,.wk,.row>*{min-width:0}
+    pre,pre.code,.svgwrap,svg,canvas,table,select,input,textarea,.mono{max-width:100%}
+    pre,pre.code,.svgwrap,.tablewrap{overflow-x:auto}
+    .ctl,.ctl>*,.controls>*,.row,.legend>*{min-width:0}
+    .ctl{flex-wrap:wrap} .ctl select,.ctl input[type=range]{flex:1 1 100%;width:100%}
+    p,.lead,.sub,.promise{max-width:none}
+  }
+</style>
+</head>
+<body>
+
+<nav class="top"><a href="index.html">Systematic Trading Arena</a><span class="crumbs"><a href="week6.html">&larr; Week 6</a> &middot; <b>Week 7 &middot; Machine Learning Signals &amp; Model Ops</b> &middot; <a href="week8.html">Week 8 &rarr;</a></span></nav>
+
+<main>
+
+<!-- ══ HERO ══════════════════════════════════════════════════ -->
+<section id="hero">
+  <div class="wk">WEEK 7</div>
+  <h1>Machine Learning Signals &amp; <em>Model Ops</em></h1>
+  <p class="promise">A model is just another signal &mdash; a number your bot still has to size, risk-manage and route.
+  This week you learn to earn that number honestly: features known at time <code>t</code>, splits that respect time,
+  and a validated artifact that predicts inside your per-tick budget.</p>
+  <ul class="able">
+    <li><b>Build a feature matrix</b> from prices and the order book without leaking the future into a single column.</li>
+    <li><b>Validate walk-forward</b> and recognise the exact moment a backtest score stops being a measurement.</li>
+    <li><b>Operate a model</b>: persist it, load it once, predict in <code>on_tick</code>, and watch it drift.</li>
+  </ul>
+</section>
+
+<!-- ══ WHAT ══════════════════════════════════════════════════ -->
+<section id="what">
+  <div class="sec-head">
+    <span class="kicker">What is it?</span>
+    <h2>Supervised learning, pointed at the future</h2>
+    <p class="lead">Learn a mapping <code>f(X) &rarr; y</code> from historical examples. In trading, <code>X</code> is
+    everything you know <em>now</em>; <code>y</code> is the piece of the future you are predicting.</p>
+  </div>
+
+  <div class="grid2 narrow-right">
+    <div>
+      <p>Every row of your dataset is one point in time. The features in that row must be computable from data that had
+      already printed at that instant &mdash; the last mid, the rolling volatility over the previous twenty ticks, the
+      current book imbalance. The label belongs to the future: the return from <code>t</code> to <code>t+h</code>, or
+      merely its sign.</p>
+      <p>Two label choices, two different jobs. <b>Classification</b> predicts direction and is robust &mdash; you can
+      size by the predicted probability. <b>Regression</b> predicts magnitude, is more informative, and is noisier and
+      harder. Either way the horizon <code>h</code> must match how long you actually intend to hold: a label about the
+      next 30 seconds cannot justify a position you keep for an hour.</p>
+      <p>The golden rule has one clause. <b>Every feature in <code>X</code> must be knowable at <code>t</code>.</b>
+      Anything else is leakage, and leakage does not look like a bug &mdash; it looks like a great model.</p>
+      <pre class="code"><i># one row per point-in-time observation</i>
+X = features known <b>AT</b> time t     <i># no future data!</i>
+y = label about t+h              <i># the horizon</i>
+
+<i># classification  -&gt; sign of the next return</i>
+y = 1 <b>if</b> ret(t, t+h) &gt; 0 <b>else</b> 0
+<i># regression      -&gt; magnitude of the next return</i>
+y = ret(t, t+h)
+
+model.fit(X_train, y_train)
+y_hat = model.predict(X_now)     <i># -&gt; a signal</i></pre>
+    </div>
+    <div>
+      <div class="widget" style="margin-top:0">
+        <div class="w-head"><h3>Why it is dangerous here</h3><span class="w-tag">low SNR</span></div>
+        <p class="w-sub">Three properties of market data that make ML in finance different from ML on images.</p>
+        <div class="stats" style="flex-direction:column">
+          <div class="stat" style="--c:var(--bad)">
+            <div class="lbl">Signal-to-noise</div>
+            <div class="num">~52%</div>
+            <div class="sub">Returns are mostly noise. A model at 52% out-of-sample can be excellent &mdash; or pure overfit. You cannot tell by looking at it.</div>
+          </div>
+          <div class="stat" style="--c:var(--warn)">
+            <div class="lbl">Non-stationarity</div>
+            <div class="num">drift</div>
+            <div class="sub">The data-generating process changes. Yesterday's edge decays and a model trained on it rots silently, still returning confident numbers.</div>
+          </div>
+          <div class="stat" style="--c:var(--violet)">
+            <div class="lbl">Feedback &amp; scarcity</div>
+            <div class="num">n&nbsp;small</div>
+            <div class="sub">Little independent data, and your own orders move the price. Backtests flatter; the live session collects.</div>
+          </div>
+        </div>
+        <div class="w-note"><b>Simple first.</b> Every W3&ndash;W6 signal is a baseline. ML has to beat it
+        <em>out-of-sample, after costs</em> to earn its place in your bot.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WIDGET 1 -->
+  <div class="widget">
+    <div class="w-head"><span class="w-tag">Widget 1</span><h3>Feature-engineering playground</h3></div>
+    <p class="w-sub">A synthetic tick series for one symbol. Pick features, set the label horizon, and watch the design
+    matrix assemble. Click a row in the matrix to see which instant it was cut from.</p>
+
+    <div class="grid2">
+      <div>
+        <div class="controls">
+          <div class="ctl"><label for="w7-h">horizon h</label>
+            <input type="range" id="w7-h" min="1" max="12" step="1" value="5" aria-label="Label horizon in ticks" />
+            <output id="w7-h-out">5 ticks</output></div>
+          <div class="ctl">
+            <button id="w7-lbl-cls" class="seg on" aria-pressed="true">y = sign</button><button id="w7-lbl-reg" class="seg" aria-pressed="false">y = return</button>
+          </div>
+          <button id="w7-reseed">&#8635; New series</button>
+        </div>
+        <div class="svg-wrap">
+          <svg class="stage" id="w7-px" viewBox="0 0 720 250" role="img"
+               aria-label="Synthetic price series with the feature window and the label horizon highlighted"></svg>
+        </div>
+        <div class="w-note" id="w7-fx-note"></div>
+      </div>
+      <div>
+        <div class="feat-list" id="w7-feats"></div>
+        <div class="stats">
+          <div class="stat" style="--c:var(--sky)"><div class="lbl">Matrix shape</div><div class="num" id="w7-shape">&mdash;</div><div class="sub" id="w7-shape-sub">usable rows &times; features</div></div>
+          <div class="stat" style="--c:var(--accent-2)"><div class="lbl">Rows per feature</div><div class="num" id="w7-dof">&mdash;</div><div class="sub">degrees of freedom you are spending</div></div>
+        </div>
+        <div style="overflow-x:auto;margin-top:12px">
+          <table class="tbl" id="w7-mat"></table>
+        </div>
+        <div class="verdict" id="w7-verdict"></div>
+      </div>
+    </div>
+    <div class="w-note"><b>Read the warm-up.</b> <code>vol_20</code> needs twenty prior returns and the label needs
+    <code>h</code> future ticks, so the first rows and the last <code>h</code> rows are unusable. Dropping them is
+    correct; quietly filling them is leakage. Features are cheap &mdash; labels are precious.</div>
+  </div>
+</section>
+
+<!-- ══ HOW ═══════════════════════════════════════════════════ -->
+<section id="how">
+  <div class="sec-head">
+    <span class="kicker">How does it work?</span>
+    <h2>Splitting in time is the whole discipline</h2>
+    <p class="lead">Fitting the model is one line. Everything that decides whether the number means anything happens in
+    how you cut the data &mdash; and in how many times you look.</p>
+  </div>
+
+  <p>Random shuffling is the default in every tutorial and it is catastrophic on a time series. Shuffle, and a row from
+  next Tuesday sits in your training set while its neighbour &mdash; nearly the same market state &mdash; sits in the
+  test set. The model does not learn structure; it learns to recognise its neighbours. Your test score becomes a
+  measurement of how similar adjacent ticks are, which is close to 100% and completely useless.</p>
+
+  <!-- WIDGET 2 -->
+  <div class="widget">
+    <div class="w-head"><span class="w-tag">Widget 2</span><h3>Leakage detector</h3></div>
+    <p class="w-sub">The same data, the same model, three ways of cutting it. Watch the <em>reported</em> test accuracy
+    move while the <em>live</em> accuracy does not.</p>
+
+    <div class="controls">
+      <div class="ctl">
+        <button id="w7-sp-rand" class="seg" aria-pressed="false">Random split</button><button id="w7-sp-time" class="seg on" aria-pressed="true">Split in time</button><button id="w7-sp-emb" class="seg" aria-pressed="false">Embargo + purge</button>
+      </div>
+      <div class="ctl"><label for="w7-train">train share</label>
+        <input type="range" id="w7-train" min="50" max="90" step="5" value="70" aria-label="Training share of the sample" />
+        <output id="w7-train-out">70%</output></div>
+      <div class="ctl"><label for="w7-emb">embargo</label>
+        <input type="range" id="w7-emb" min="0" max="12" step="1" value="5" aria-label="Embargo width in ticks" />
+        <output id="w7-emb-out">5 ticks</output></div>
+    </div>
+
+    <div class="svg-wrap">
+      <svg class="stage" id="w7-split" viewBox="0 0 720 150" role="img"
+           aria-label="Time axis showing how the sample is divided into training and test blocks"></svg>
+    </div>
+
+    <div class="grid2" style="margin-top:12px">
+      <div>
+        <div class="stats" style="margin-top:0">
+          <div class="stat" style="--c:var(--muted)"><div class="lbl">In-sample</div><div class="num" id="w7-acc-in">&mdash;</div><div class="sub">accuracy on the training block</div></div>
+          <div class="stat" style="--c:var(--warn)"><div class="lbl">Reported test</div><div class="num" id="w7-acc-test">&mdash;</div><div class="sub">the number you would put in your report</div></div>
+          <div class="stat" style="--c:var(--ok)"><div class="lbl">Live</div><div class="num" id="w7-acc-live">&mdash;</div><div class="sub">what the arena actually pays you for</div></div>
+        </div>
+        <div class="svg-wrap" style="margin-top:12px">
+          <svg class="stage" id="w7-gap" viewBox="0 0 720 118" role="img"
+               aria-label="Bar chart comparing reported test accuracy with live accuracy"></svg>
+        </div>
+      </div>
+      <div>
+        <pre class="code" id="w7-split-code"></pre>
+        <div class="verdict" id="w7-split-verdict"></div>
+      </div>
+    </div>
+    <div class="w-note"><b>Why the embargo.</b> A label at time <code>t</code> looks <code>h</code> ticks ahead, so rows
+    within <code>h</code> of the boundary see across the wall even under a clean chronological split. Purging those rows
+    costs you a handful of samples and buys you a number you can trust.</div>
+  </div>
+
+  <p>Once the wall is in the right place, one split is still not an evaluation &mdash; it is a single sample. Walk-forward
+  (rolling-origin) validation trains on the past, tests on the next unseen block, rolls forward and repeats. Every test
+  block is out-of-sample, which is exactly the situation your bot is in at every tick of the live session: it only ever
+  knows the past.</p>
+
+  <!-- WIDGET 3 -->
+  <div class="widget">
+    <div class="w-head"><span class="w-tag">Widget 3</span><h3>Walk-forward validation animator</h3></div>
+    <p class="w-sub">Step the folds forward and collect the out-of-sample score of each test block. Then flip on a regime
+    shift and watch the expanding window &mdash; which never forgets &mdash; lose to the rolling one.</p>
+
+    <div class="controls">
+      <div class="ctl">
+        <button id="w7-wf-exp" class="seg on" aria-pressed="true">Expanding window</button><button id="w7-wf-roll" class="seg" aria-pressed="false">Rolling window</button>
+      </div>
+      <div class="ctl"><label for="w7-folds">folds</label>
+        <input type="range" id="w7-folds" min="3" max="8" step="1" value="5" aria-label="Number of walk-forward folds" />
+        <output id="w7-folds-out">5</output></div>
+      <label class="ctl"><input type="checkbox" id="w7-drift" /> regime shift at fold 3</label>
+      <button id="w7-wf-step">Step &rarr;</button>
+      <button id="w7-wf-play" class="primary">&#9654; Roll forward</button>
+      <button id="w7-wf-reset">&#8634; Reset</button>
+    </div>
+
+    <div class="grid2 narrow-right">
+      <div class="svg-wrap">
+        <svg class="stage" id="w7-wf" viewBox="0 0 720 260" role="img"
+             aria-label="Walk-forward folds: training blocks followed by out-of-sample test blocks"></svg>
+      </div>
+      <div>
+        <div class="stats" style="margin-top:0;flex-direction:column">
+          <div class="stat" style="--c:var(--accent-2)"><div class="lbl">Mean OOS score</div><div class="num" id="w7-wf-mean">&mdash;</div><div class="sub">the only score worth reporting</div></div>
+          <div class="stat" style="--c:var(--warn)"><div class="lbl">Dispersion across folds</div><div class="num" id="w7-wf-sd">&mdash;</div><div class="sub">a good mean with huge spread is not an edge</div></div>
+        </div>
+        <div class="svg-wrap" style="margin-top:12px">
+          <svg class="stage" id="w7-wf-bars" viewBox="0 0 340 130" role="img" aria-label="Per-fold out-of-sample scores"></svg>
+        </div>
+        <div class="verdict" id="w7-wf-verdict">Roll the folds forward to collect out-of-sample scores.</div>
+      </div>
+    </div>
+    <div class="w-note"><b>In AlgoArena.</b> <code>tests/sim_session.py</code> runs the whole arena in one process with
+    no network, so a fold is one call: fit on <code>history[:train_end]</code>, then run the bot over the test block only
+    and read the out-of-sample P&amp;L. Same bot object you will ship &mdash; validate it honestly, then do not touch it.</div>
+  </div>
+
+  <!-- WIDGET 4 -->
+  <div class="widget">
+    <div class="w-head"><span class="w-tag">Widget 4</span><h3>Model-ops lifecycle</h3></div>
+    <p class="w-sub">Training is roughly 10% of the job. Click a stage to see what it owns, how it fails, and which line
+    of your bot it corresponds to.</p>
+
+    <div class="lifecycle" id="w7-lc" role="group" aria-label="Model lifecycle stages"></div>
+    <div class="grid2 narrow-right">
+      <div class="lc-detail" id="w7-lc-detail"></div>
+      <div>
+        <div class="controls" style="margin-top:0">
+          <div class="ctl"><label for="w7-age">weeks since training</label>
+            <input type="range" id="w7-age" min="0" max="12" step="1" value="0" aria-label="Weeks since the model was trained" />
+            <output id="w7-age-out">0</output></div>
+        </div>
+        <div class="svg-wrap">
+          <svg class="stage" id="w7-drift-svg" viewBox="0 0 340 150" role="img"
+               aria-label="Live accuracy decaying away from the backtest baseline as the model ages"></svg>
+        </div>
+        <div class="verdict" id="w7-drift-verdict"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ WHY ═══════════════════════════════════════════════════ -->
+<section id="why">
+  <div class="sec-head">
+    <span class="kicker">Why does it matter in trading?</span>
+    <h2>Accuracy is a vanity metric. Net, risk-adjusted P&amp;L is the score.</h2>
+    <p class="lead">A 55% classifier that flips every tick pays the spread endlessly and finishes the season below idle
+    cash. A 52% classifier that trades forty times pays for itself.</p>
+  </div>
+
+  <p>The arena settles this argument with numbers. Every fill pays a taker fee or earns a maker rebate, every crossing of
+  the spread costs half of it, and the season leaderboard ranks risk-adjusted return &mdash; not raw P&amp;L. So the
+  question a model has to answer is never "is it accurate?" but "does its edge per trade survive the cost of the trades
+  it wants to make?"</p>
+
+  <!-- WIDGET 5 -->
+  <div class="widget">
+    <div class="w-head"><span class="w-tag">Widget 5</span><h3>Does the edge survive the costs?</h3></div>
+    <p class="w-sub">Your model's statistical edge on the left; the arena's toll booth on the right. The equity curve is
+    the same signal, before and after costs.</p>
+
+    <div class="controls">
+      <div class="ctl"><label for="w7-hit">hit rate</label>
+        <input type="range" id="w7-hit" min="46" max="60" step="0.5" value="53" aria-label="Model hit rate in percent" />
+        <output id="w7-hit-out">53.0%</output></div>
+      <div class="ctl"><label for="w7-payoff">avg win / avg loss</label>
+        <input type="range" id="w7-payoff" min="70" max="160" step="5" value="100" aria-label="Payoff ratio" />
+        <output id="w7-payoff-out">1.00</output></div>
+      <div class="ctl"><label for="w7-trades">trades / session</label>
+        <input type="range" id="w7-trades" min="10" max="400" step="10" value="60" aria-label="Trades per session" />
+        <output id="w7-trades-out">60</output></div>
+      <div class="ctl"><label for="w7-cost">cost / trade</label>
+        <input type="range" id="w7-cost" min="0" max="10" step="0.5" value="3" aria-label="Round-trip cost per trade in basis points" />
+        <output id="w7-cost-out">3.0 bp</output></div>
+    </div>
+
+    <div class="grid2 narrow-right">
+      <div class="svg-wrap">
+        <svg class="stage" id="w7-eq" viewBox="0 0 720 260" role="img"
+             aria-label="Equity curves for the model signal gross and net of costs, against the momentum baseline"></svg>
+      </div>
+      <div>
+        <div class="stats" style="margin-top:0">
+          <div class="stat" style="--c:var(--sky)"><div class="lbl">Gross edge / trade</div><div class="num" id="w7-e-gross">&mdash;</div><div class="sub">expectancy before fees</div></div>
+          <div class="stat" style="--c:var(--bad)"><div class="lbl">Cost drag</div><div class="num" id="w7-e-cost">&mdash;</div><div class="sub">trades &times; cost, per session</div></div>
+        </div>
+        <div class="stats">
+          <div class="stat" style="--c:var(--ok)"><div class="lbl">Net session P&amp;L</div><div class="num" id="w7-e-net">&mdash;</div><div class="sub">what the ledger records</div></div>
+          <div class="stat" style="--c:var(--accent-2)"><div class="lbl">Sharpe-like</div><div class="num" id="w7-e-shp">&mdash;</div><div class="sub">mean / stdev of trade returns</div></div>
+        </div>
+        <div class="verdict" id="w7-e-verdict"></div>
+      </div>
+    </div>
+    <div class="w-note"><b>Turnover is a design parameter, not an accident.</b> Raise the confidence threshold in
+    <code>on_tick</code> and you trade less, pay less, and keep more of a smaller edge. Slower, surer signals win seasons
+    in this arena because the score divides by volatility.</div>
+  </div>
+
+  <div class="grid2">
+    <div class="widget">
+      <div class="w-head"><h3>Train offline &middot; load once &middot; predict in <code>on_tick</code></h3></div>
+      <p class="w-sub">The split that keeps you inside the latency budget: heavy work outside the loop, only
+      <code>predict()</code> inside it.</p>
+      <pre class="code"><i># team/trader.py</i>
+<b>import</b> joblib
+<b>from</b> arena <b>import</b> Trader, Signal
+
+<b>class</b> MLTrader(Trader):
+    <b>def</b> __init__(self):
+        self.model = joblib.load('model.pkl')   <u># load ONCE</u>
+
+    <b>def</b> on_tick(self, market, portfolio):
+        <b>for</b> sym <b>in</b> market.symbols():
+            px = market.prices(sym)
+            <b>if</b> len(px) &lt; 21: <b>continue</b>
+            X = features(px, market, sym)        <u># same fn as offline</u>
+            p = self.model.predict_proba([X])[0][1]
+            <b>if</b> p &gt; 0.60 <b>and</b> portfolio.can_buy(sym, 5, market.mid_price(sym)):
+                <b>return</b> Signal(symbol=sym, side='buy', quantity=5,
+                              price=market.best_ask(sym), confidence=p)
+        <b>return</b> None</pre>
+    </div>
+    <div class="widget">
+      <div class="w-head"><h3>The model replaces the signal, not the system</h3></div>
+      <p class="w-sub">Everything you built in W4&ndash;W6 stays exactly where it is.</p>
+      <table class="tbl">
+        <tr><th>Layer</th><th>W6 bot</th><th>W7 bot</th></tr>
+        <tr><td class="name">Signal</td><td>momentum rule</td><td style="color:var(--accent-2)">model.predict_proba</td></tr>
+        <tr><td class="name">Sizing</td><td>fixed 5 lots</td><td>scaled by confidence</td></tr>
+        <tr><td class="name">Risk</td><td>check_order()</td><td>unchanged</td></tr>
+        <tr><td class="name">Routing</td><td>best_ask()</td><td>unchanged</td></tr>
+        <tr><td class="name">Portfolio</td><td>cash + positions</td><td>unchanged</td></tr>
+      </table>
+      <div class="w-note"><b>Two equivalent seams.</b> Register a <code>signal_fn</code> in the plugin registry, or
+      subclass <code>arena.Trader</code> and implement <code>on_tick</code>. The engine calls whichever you registered.
+      This week also fires the season's second IPO &mdash; handle it in <code>on_ipo</code>.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PITFALLS ══════════════════════════════════════════════ -->
+<section id="pitfalls">
+  <div class="sec-head">
+    <span class="kicker">Common mistakes</span>
+    <h2>Five ways to produce a beautiful, worthless model</h2>
+    <p class="lead">Every one of these has shipped in a real fund. Each expands.</p>
+  </div>
+
+  <details class="pit">
+    <summary><span><code>train_test_split(shuffle=True)</code> on a time series</span></summary>
+    <div class="body">The tutorial default. Adjacent ticks are nearly identical, so a shuffled split puts a row's
+      near-twin on the other side of the wall. The model memorises neighbours and reports accuracy in the 70s and 80s.
+      <b>The tell:</b> a test score far above anything the literature reports for return prediction.
+      <div class="fix">Fix: cut by index, never by permutation &mdash; <code>X[:cut]</code> / <code>X[cut:]</code> &mdash;
+      and purge the <code>h</code> rows that straddle the boundary.</div></div>
+  </details>
+
+  <details class="pit">
+    <summary><span>A feature that quietly contains its own label</span></summary>
+    <div class="body">A rolling calculation centred instead of trailing, a column derived from the close of the bar you
+      are predicting, a "current session VWAP" that includes the future. Silent and fatal: the model looks brilliant
+      offline and random live. <b>The tell:</b> one feature dominates the importance ranking and the edge collapses the
+      instant you go live.
+      <div class="fix">Fix: for each feature ask "at exactly which timestamp could I have computed this?" Then compute
+      features with the same function offline and inside <code>on_tick</code> &mdash; one function, two callers.</div></div>
+  </details>
+
+  <details class="pit">
+    <summary><span>Tuning on the test block (data snooping)</span></summary>
+    <div class="body">Try a hundred configurations, keep the best test score, report it. You have now fitted the test set;
+      its score is a maximum over noise, not a measurement. The published number is inflated by roughly the spread of
+      your hundred attempts. <b>The tell:</b> your best configuration is nowhere near your second best.
+      <div class="fix">Fix: tune on a validation block, look at the test block <em>once</em>, log every experiment you
+      ran, and deflate your Sharpe for the number of trials.</div></div>
+  </details>
+
+  <details class="pit">
+    <summary><span>Feature mismatch between training and <code>on_tick</code></span></summary>
+    <div class="body">Offline you standardised with the full-sample mean and standard deviation; live you standardise with
+      a rolling one. Offline the imbalance used total depth; live it uses top-of-book. The model receives inputs it has
+      never seen and outputs confident nonsense. <b>The tell:</b> live predictions cluster at one extreme.
+      <div class="fix">Fix: persist the scaler and the feature list <em>with</em> the model, and assert the live feature
+      vector's length and order on the first tick.</div></div>
+  </details>
+
+  <details class="pit">
+    <summary><span>A model you cannot run inside a tick</span></summary>
+    <div class="body">A gradient-boosted forest of 2,000 trees, re-fitted every tick "to stay fresh", loading the pickle
+      inside <code>on_tick</code>. Your bot misses the market it correctly predicted, and W8's rate limits throttle the
+      backlog. <b>The tell:</b> your fills print at prices two ticks behind your signals.
+      <div class="fix">Fix: load once in <code>__init__</code>, time <code>predict()</code> against the per-tick budget
+      from W5, and prefer a small model you can actually run. A model you can't run live scores nothing.</div></div>
+  </details>
+</section>
+
+<!-- ══ CHECK ═════════════════════════════════════════════════ -->
+<section id="check">
+  <div class="sec-head">
+    <span class="kicker">Check yourself</span>
+    <h2>Three questions</h2>
+    <p class="lead">Instant feedback, no grading. Pick the answer you would defend in a demo.</p>
+  </div>
+
+  <div class="q" data-a="2">
+    <div class="qn">Question 1</div>
+    <div class="qt">Your classifier reports 84% out-of-sample accuracy on next-tick direction for AAPL. What is the
+      single most likely explanation?</div>
+    <div class="opts">
+      <button class="opt"><span class="k">A</span>The feature set is unusually strong &mdash; ship it.</button>
+      <button class="opt"><span class="k">B</span>The model is under-regularised and needs a shallower tree.</button>
+      <button class="opt"><span class="k">C</span>The future leaked in &mdash; through a shuffled split or a feature computed with information from after <code>t</code>.</button>
+      <button class="opt"><span class="k">D</span>The horizon is too long for the label.</button>
+    </div>
+    <div class="fb"><b>C.</b> Next-tick direction on a liquid name is close to a coin flip; the honest range is roughly
+      50&ndash;55%. An 84% is not a good model, it is a diagnostic: something on the other side of the wall got into
+      training. Check the split first, then hunt the feature.</div>
+  </div>
+
+  <div class="q" data-a="1">
+    <div class="qn">Question 2</div>
+    <div class="qt">You label with a horizon of <code>h = 10</code> ticks and split chronologically at 70%. Why is an
+      embargo still needed?</div>
+    <div class="opts">
+      <button class="opt"><span class="k">A</span>It isn't &mdash; a chronological split is already leak-free.</button>
+      <button class="opt"><span class="k">B</span>The last training rows have labels that reach 10 ticks into the test block, so they already contain test-period information.</button>
+      <button class="opt"><span class="k">C</span>It balances the class distribution across the two blocks.</button>
+      <button class="opt"><span class="k">D</span>It compensates for the transaction costs the backtest ignores.</button>
+    </div>
+    <div class="fb"><b>B.</b> The wall stops features, not labels. A label is <em>about</em> the future, so rows within
+      <code>h</code> of the cut straddle it. Purge those <code>h</code> rows and the boundary is genuinely sealed &mdash;
+      the cost is a handful of samples.</div>
+  </div>
+
+  <div class="q" data-a="3">
+    <div class="qn">Question 3</div>
+    <div class="qt">Two bots, same walk-forward hit rate of 53%. Bot A trades 30 times a session, bot B trades 350 times.
+      Round-trip cost is 3 bp. Who ranks higher on the season leaderboard, and why?</div>
+    <div class="opts">
+      <button class="opt"><span class="k">A</span>Bot B &mdash; more trades means more chances for the edge to compound.</button>
+      <button class="opt"><span class="k">B</span>They tie: the same hit rate implies the same expectancy.</button>
+      <button class="opt"><span class="k">C</span>Bot B, because higher turnover lowers the volatility of its equity curve.</button>
+      <button class="opt"><span class="k">D</span>Bot A &mdash; a thin per-trade edge is consumed by 350 round trips of cost, and the leaderboard divides by volatility.</button>
+    </div>
+    <div class="fb"><b>D.</b> Expectancy is per trade and small; costs are per trade and certain. Multiply both by 350 and
+      the certain term wins. On top of that, <code>exchange/scoring.py</code> ranks return per unit of volatility with a
+      drawdown penalty, so the churn is punished twice.</div>
+  </div>
+</section>
+
+<!-- ══ NEXT ══════════════════════════════════════════════════ -->
+<section id="next">
+  <div class="sec-head">
+    <span class="kicker">Do the work</span>
+    <h2>This week's work</h2>
+    <p class="lead">Deliverable: a model integration plan plus the walk-forward evaluation checklist &mdash; features,
+    label, horizon, folds, one test look, measured <code>predict()</code> latency.</p>
+  </div>
+  <div class="nextgrid">
+    <a class="nextcard" href="https://github.com/sdonadio/algoarena-team-template">
+      <div class="lbl">Code</div>
+      <div class="ttl">Get the code</div>
+      <div class="dsc">Labs and homework live in your course&#8217;s LMS; the starter repo is public. Use it as a template, clone, <code>make install</code>.</div>
+    </a>
+  </div>
+  <div class="weeknav">
+    <a href="week6.html">&larr; Week 6 &middot; Big Data &amp; Distributed Computing</a>
+    <a href="index.html">All weeks</a>
+    <a href="week8.html">Week 8 &middot; CI/CD, Testing &amp; UI &rarr;</a>
+  </div>
+</section>
+
+</main>
+
+<footer>Systematic Trading Arena · an interactive companion for a 9-week systematic-trading course · <a href="https://github.com/sdonadio/systematic-trading-arena">Source</a></footer>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   Systematic Trading Arena — shared page helpers
+   No dependencies, no network. Everything is drawn from data.
+   ══════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  var C = {
+    accent: '#3b82f6', accent2: '#7cb0ff', ink: '#e8e6e3', muted: '#9aa0a6',
+    dim: '#6e7681', ok: '#3fb950', warn: '#d29922', bad: '#f85149',
+    sky: '#58a6ff', violet: '#a78bfa', teal: '#2dd4bf',
+    border: '#272c36', panel: '#181b22', panel2: '#13161b'
+  };
+  var MONO = 'ui-monospace, Menlo, Consolas, monospace';
+  var SANS = 'system-ui, -apple-system, Segoe UI, sans-serif';
+
+  /* deterministic PRNG (mulberry32) — same seed, same picture */
+  function rng(seed) {
+    var s = seed >>> 0;
+    return function () {
+      s = (s + 0x6D2B79F5) >>> 0;
+      var t = s;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function gauss(r) {
+    var u = 0, v = 0;
+    while (u === 0) u = r();
+    while (v === 0) v = r();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+
+  function $(id) { return document.getElementById(id); }
+  function clear(el) { while (el && el.firstChild) el.removeChild(el.firstChild); }
+
+  /* add an SVG child: add(parent,'rect',{x:..}).
+     The namespace is inherited from the parent <svg>, so no URI literal is needed. */
+  function add(parent, tag, attrs, text) {
+    var e = document.createElementNS(parent.namespaceURI, tag), k;
+    if (attrs) for (k in attrs) { if (attrs[k] !== null && attrs[k] !== undefined) e.setAttribute(k, attrs[k]); }
+    if (text !== null && text !== undefined) e.textContent = text;
+    parent.appendChild(e);
+    return e;
+  }
+  /* label text: T(svg,x,y,'txt',{fill,size,anchor,mono,weight}) */
+  function T(parent, x, y, s, o) {
+    o = o || {};
+    return add(parent, 'text', {
+      x: x, y: y, fill: o.fill || C.muted,
+      'font-size': o.size || 9.5,
+      'font-family': o.mono === false ? SANS : MONO,
+      'font-weight': o.weight || 400,
+      'text-anchor': o.anchor || 'start',
+      opacity: o.opacity
+    }, s);
+  }
+  function path(parent, pts, attrs) {
+    var d = '', i;
+    for (i = 0; i < pts.length; i++) d += (i ? 'L' : 'M') + pts[i][0].toFixed(2) + ' ' + pts[i][1].toFixed(2);
+    var a = { d: d, fill: 'none', 'stroke-width': 1.6, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' };
+    for (var k in attrs) a[k] = attrs[k];
+    return add(parent, 'path', a);
+  }
+  function stdev(a) {
+    if (a.length < 2) return 0;
+    var m = 0, i;
+    for (i = 0; i < a.length; i++) m += a[i];
+    m /= a.length;
+    var v = 0;
+    for (i = 0; i < a.length; i++) v += (a[i] - m) * (a[i] - m);
+    return Math.sqrt(v / a.length);
+  }
+  function mean(a) { var m = 0, i; for (i = 0; i < a.length; i++) m += a[i]; return a.length ? m / a.length : 0; }
+  function pct(x, d) { return (x * 100).toFixed(d === undefined ? 1 : d) + '%'; }
+  function sgn(x, d) { return (x >= 0 ? '+' : '−') + Math.abs(x).toFixed(d === undefined ? 2 : d); }
+  function clampv(x, a, b) { return x < a ? a : (x > b ? b : x); }
+
+  /* segmented button groups: setSeg([btnA,btnB], idx) */
+  function setSeg(btns, idx) {
+    for (var i = 0; i < btns.length; i++) {
+      var on = i === idx;
+      btns[i].classList.toggle('on', on);
+      btns[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+  }
+
+  /* ── MCQs: instant feedback, no grading ─────────────────────── */
+  function wireQuiz() {
+    var qs = document.querySelectorAll('.q');
+    Array.prototype.forEach.call(qs, function (q) {
+      var ans = parseInt(q.getAttribute('data-a'), 10);
+      var opts = q.querySelectorAll('button.opt');
+      var fb = q.querySelector('.fb');
+      Array.prototype.forEach.call(opts, function (b, i) {
+        b.addEventListener('click', function () {
+          if (q.getAttribute('data-done')) return;
+          q.setAttribute('data-done', '1');
+          opts[ans].classList.add('right');
+          if (i !== ans) b.classList.add('wrong');
+          if (fb) fb.classList.add('show');
+          Array.prototype.forEach.call(opts, function (o) { o.setAttribute('aria-disabled', 'true'); });
+        });
+      });
+    });
+  }
+
+  window.ARENA = {
+    C: C, MONO: MONO, SANS: SANS, rng: rng, gauss: gauss, $: $, clear: clear,
+    add: add, T: T, path: path, stdev: stdev, mean: mean, pct: pct, sgn: sgn,
+    clamp: clampv, setSeg: setSeg, wireQuiz: wireQuiz
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wireQuiz);
+  else wireQuiz();
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   WEEK 7 · Widget 1 — feature-engineering playground
+   ══════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  var A = window.ARENA, C = A.C, N = 140;
+  var seed = 20250907, sel = 96, h = 5, cls = true, data = null;
+
+  function gen(sd) {
+    var r = A.rng(sd), px = [185], sp = [], bq = [], aq = [], i;
+    for (i = 1; i < N; i++) px.push(px[i - 1] * (1 + 0.00006 * Math.sin(i / 15) + 0.0019 * A.gauss(r)));
+    for (i = 0; i < N; i++) {
+      sp.push(0.015 + 0.05 * r());
+      bq.push(80 + Math.round(880 * r()));
+      aq.push(80 + Math.round(880 * r()));
+    }
+    return { px: px, sp: sp, bq: bq, aq: aq };
+  }
+  function rets(px, i, n) { var o = [], k; for (k = i - n + 1; k <= i; k++) o.push(px[k] / px[k - 1] - 1); return o; }
+
+  var FEATS = [
+    { nm: 'ret_1', dsc: 'return over the last tick', warm: 2, on: true,
+      f: function (d, i) { return d.px[i] / d.px[i - 1] - 1; },
+      fmt: function (v) { return A.sgn(v * 100, 3); } },
+    { nm: 'mom_10', dsc: 'momentum: price now vs 10 ticks ago', warm: 11, on: true,
+      f: function (d, i) { return d.px[i] / d.px[i - 10] - 1; },
+      fmt: function (v) { return A.sgn(v * 100, 3); } },
+    { nm: 'vol_20', dsc: 'volatility: stdev of the last 20 returns', warm: 21, on: true,
+      f: function (d, i) { return A.stdev(rets(d.px, i, 20)); },
+      fmt: function (v) { return (v * 100).toFixed(3); } },
+    { nm: 'spread_bp', dsc: '(ask − bid) / mid, in basis points', warm: 1, on: false,
+      f: function (d, i) { return d.sp[i] / d.px[i] * 10000; },
+      fmt: function (v) { return v.toFixed(1); } },
+    { nm: 'imbalance', dsc: '(bidQ − askQ) / (bidQ + askQ) — book pressure', warm: 1, on: true,
+      f: function (d, i) { return (d.bq[i] - d.aq[i]) / (d.bq[i] + d.aq[i]); },
+      fmt: function (v) { return A.sgn(v, 3); } }
+  ];
+
+  function onFeats() { return FEATS.filter(function (f) { return f.on; }); }
+  function warmMax() { var w = 2, o = onFeats(), i; for (i = 0; i < o.length; i++) w = Math.max(w, o[i].warm); return w; }
+  function lo() { return warmMax() - 1; }
+  function hi() { return N - 1 - h; }
+
+  function buildFeatList() {
+    var box = A.$('w7-feats');
+    A.clear(box);
+    FEATS.forEach(function (ft, i) {
+      var lab = document.createElement('label');
+      lab.className = ft.on ? '' : 'off';
+      var cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.checked = ft.on;
+      cb.setAttribute('aria-label', 'include feature ' + ft.nm);
+      cb.addEventListener('change', function () {
+        ft.on = cb.checked; lab.className = ft.on ? '' : 'off'; render();
+      });
+      var sp = document.createElement('span');
+      sp.innerHTML = '<span class="fn">' + ft.nm + '</span><span class="fd">' + ft.dsc +
+        ' · needs ' + ft.warm + ' prior tick' + (ft.warm === 1 ? '' : 's') + '</span>';
+      lab.appendChild(cb); lab.appendChild(sp); box.appendChild(lab);
+    });
+  }
+
+  function drawChart() {
+    var svg = A.$('w7-px'); A.clear(svg);
+    var x0 = 40, x1 = 706, mn = Infinity, mx = -Infinity, i;
+    for (i = 0; i < N; i++) { if (data.px[i] < mn) mn = data.px[i]; if (data.px[i] > mx) mx = data.px[i]; }
+    var pad = (mx - mn) * 0.12; mn -= pad; mx += pad;
+    var X = function (i) { return x0 + (x1 - x0) * i / (N - 1); };
+    var Y = function (p) { return 152 - (p - mn) / (mx - mn) * 128; };
+
+    A.add(svg, 'line', { x1: x0, y1: 152, x2: x1, y2: 152, stroke: C.border });
+    var w = warmMax();
+    A.add(svg, 'rect', { x: X(Math.max(0, sel - w + 1)), y: 22, width: X(sel) - X(Math.max(0, sel - w + 1)),
+      height: 130, fill: C.sky, opacity: 0.10 });
+    A.add(svg, 'rect', { x: X(sel), y: 22, width: X(Math.min(N - 1, sel + h)) - X(sel), height: 130,
+      fill: C.warn, opacity: 0.13 });
+    A.T(svg, X(Math.max(0, sel - w + 1)) + 4, 34, 'feature window · ' + w + ' ticks', { fill: C.sky, size: 9 });
+    A.T(svg, X(sel) + 4, 148, 'label horizon h=' + h, { fill: C.warn, size: 9 });
+
+    var pts = [], k;
+    for (k = 0; k < N; k++) pts.push([X(k), Y(data.px[k])]);
+    A.path(svg, pts, { stroke: C.accent2, 'stroke-width': 1.5 });
+    A.add(svg, 'line', { x1: X(sel), y1: 22, x2: X(sel), y2: 152, stroke: C.ink, 'stroke-dasharray': '3 3', opacity: 0.75 });
+    A.add(svg, 'circle', { cx: X(sel), cy: Y(data.px[sel]), r: 3.6, fill: C.ink });
+    A.T(svg, X(sel), 18, 't = ' + sel, { fill: C.ink, size: 9.5, anchor: 'middle' });
+
+    var j = Math.min(N - 1, sel + h), fut = data.px[j] / data.px[sel] - 1;
+    A.add(svg, 'circle', { cx: X(j), cy: Y(data.px[j]), r: 3.2, fill: fut >= 0 ? C.ok : C.bad });
+    A.add(svg, 'line', { x1: X(sel), y1: Y(data.px[sel]), x2: X(j), y2: Y(data.px[j]),
+      stroke: fut >= 0 ? C.ok : C.bad, 'stroke-width': 1.4, 'stroke-dasharray': '2 2' });
+    A.T(svg, X(j) + 5, Y(data.px[j]) - 5, (cls ? 'y=' + (fut > 0 ? 1 : 0) : 'y=' + A.sgn(fut * 100, 3) + '%'),
+      { fill: fut >= 0 ? C.ok : C.bad, size: 10, weight: 700 });
+    A.T(svg, x0, 166, 'mid price', { fill: C.dim, size: 9 });
+
+    /* order-book imbalance strip */
+    A.add(svg, 'line', { x1: x0, y1: 212, x2: x1, y2: 212, stroke: C.border });
+    A.T(svg, x0, 190, 'order-book imbalance  (bidQ − askQ) / (bidQ + askQ)', { fill: C.dim, size: 9 });
+    for (k = 0; k < N; k++) {
+      var v = (data.bq[k] - data.aq[k]) / (data.bq[k] + data.aq[k]);
+      var hh = Math.abs(v) * 26;
+      A.add(svg, 'rect', { x: X(k) - 1.6, y: v >= 0 ? 212 - hh : 212, width: 3.2, height: Math.max(0.7, hh),
+        fill: v >= 0 ? C.sky : C.accent2, opacity: k === sel ? 1 : 0.42 });
+    }
+    A.T(svg, x1, 242, 'tick index', { fill: C.dim, size: 9, anchor: 'end' });
+  }
+
+  function drawMatrix() {
+    var tb = A.$('w7-mat'); A.clear(tb);
+    var on = onFeats(), i, k;
+    var hr = document.createElement('tr');
+    hr.innerHTML = '<th>t</th>' + on.map(function (f) { return '<th>' + f.nm + '</th>'; }).join('') + '<th>y</th>';
+    tb.appendChild(hr);
+    if (!on.length) {
+      var er = document.createElement('tr');
+      er.innerHTML = '<td colspan="2" style="color:var(--warn)">no features selected</td>';
+      tb.appendChild(er);
+      return;
+    }
+    var start = A.clamp(sel - 2, lo(), Math.max(lo(), hi() - 5));
+    for (i = start; i < Math.min(hi() + 1, start + 6); i++) {
+      var tr = document.createElement('tr');
+      if (i === sel) tr.className = 'hl';
+      var html = '<td>' + i + '</td>';
+      for (k = 0; k < on.length; k++) html += '<td>' + on[k].fmt(on[k].f(data, i)) + '</td>';
+      var fr = data.px[Math.min(N - 1, i + h)] / data.px[i] - 1;
+      html += '<td style="color:' + (fr >= 0 ? C.ok : C.bad) + '">' +
+        (cls ? (fr > 0 ? '1' : '0') : A.sgn(fr * 100, 3)) + '</td>';
+      tr.innerHTML = html;
+      tr.setAttribute('tabindex', '0');
+      tr.setAttribute('role', 'button');
+      tr.setAttribute('aria-label', 'inspect row at tick ' + i);
+      (function (ix) {
+        tr.addEventListener('click', function () { sel = ix; render(); });
+        tr.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sel = ix; render(); }
+        });
+      })(i);
+      tb.appendChild(tr);
+    }
+  }
+
+  function render() {
+    var on = onFeats();
+    sel = A.clamp(sel, lo(), Math.max(lo(), hi()));
+    A.$('w7-h-out').textContent = h + ' tick' + (h === 1 ? '' : 's');
+    drawChart(); drawMatrix();
+
+    var rows = Math.max(0, hi() - lo() + 1), cols = on.length;
+    A.$('w7-shape').textContent = cols ? rows + ' × ' + cols : '—';
+    A.$('w7-shape-sub').textContent = cols
+      ? 'dropped: ' + (warmMax() - 1) + ' warm-up + ' + h + ' horizon'
+      : 'usable rows × features';
+    var dof = cols ? rows / cols : 0;
+    A.$('w7-dof').textContent = cols ? dof.toFixed(0) : '—';
+
+    var v = A.$('w7-verdict');
+    if (!cols) {
+      v.className = 'verdict warn';
+      v.innerHTML = '<b>No features, no model.</b> Tick at least one box — and notice that every box you add shortens the usable history and spends degrees of freedom.';
+    } else if (dof >= 40) {
+      v.className = 'verdict ok';
+      v.innerHTML = '<b>' + dof.toFixed(0) + ' rows per feature.</b> Comfortable. A linear or regularised-linear model has enough evidence per coefficient to mean something.';
+    } else if (dof >= 15) {
+      v.className = 'verdict warn';
+      v.innerHTML = '<b>' + dof.toFixed(0) + ' rows per feature.</b> Thin. Regularise hard (ridge / lasso, shallow trees) and expect the fold-to-fold dispersion to be wide.';
+    } else {
+      v.className = 'verdict bad';
+      v.innerHTML = '<b>' + dof.toFixed(0) + ' rows per feature.</b> You are fitting noise. In low signal-to-noise data, adding a feature is a cost you must earn back out-of-sample.';
+    }
+
+    var note = A.$('w7-fx-note');
+    if (cols) {
+      var fr = data.px[Math.min(N - 1, sel + h)] / data.px[sel] - 1;
+      note.innerHTML = '<b>Row t = ' + sel + '.</b> ' +
+        on.map(function (f) { return f.nm + ' = ' + f.fmt(f.f(data, sel)); }).join(' · ') +
+        ' → y = <b>' + (cls ? (fr > 0 ? '1' : '0') : A.sgn(fr * 100, 3) + '%') + '</b>' +
+        ' (return over the next ' + h + ' ticks: ' + A.sgn(fr * 100, 3) + '%). ' +
+        'Every number on the left of the arrow was printed at or before t; the number on the right is the future you are trying to buy.';
+    } else {
+      note.textContent = '';
+    }
+  }
+
+  function init() {
+    if (!A.$('w7-px')) return;
+    data = gen(seed);
+    buildFeatList();
+    A.$('w7-h').addEventListener('input', function () { h = +this.value; render(); });
+    A.$('w7-reseed').addEventListener('click', function () { seed = (seed * 31 + 17) % 2147483647; data = gen(seed); render(); });
+    var bc = A.$('w7-lbl-cls'), br = A.$('w7-lbl-reg');
+    bc.addEventListener('click', function () { cls = true; A.setSeg([bc, br], 0); render(); });
+    br.addEventListener('click', function () { cls = false; A.setSeg([bc, br], 1); render(); });
+    render();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   WEEK 7 · Widget 2 — leakage detector
+   ══════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  var A = window.ARENA, C = A.C;
+  var mode = 'time', share = 0.70, emb = 5, NB = 58, HZ = 10;
+
+  function accs() {
+    var honest = 0.505 + 0.020 * (share - 0.5) / 0.4;
+    var insample = 0.79 - 0.11 * (share - 0.5) / 0.4;
+    var reported;
+    if (mode === 'rand') reported = honest + 0.285 - 0.03 * (share - 0.5) / 0.4;
+    else if (mode === 'time') reported = honest + 0.021;
+    else reported = honest + 0.021 * Math.max(0, 1 - emb / HZ);
+    return { honest: honest, insample: insample, reported: reported };
+  }
+
+  function drawSplit() {
+    var svg = A.$('w7-split'); A.clear(svg);
+    var x0 = 12, x1 = 708, bw = (x1 - x0) / NB, y = 44, hgt = 40;
+    var trainN = Math.round(NB * share);
+    var embB = mode === 'emb' ? Math.min(trainN, Math.ceil(emb / HZ * 4)) : 0;
+    var r = A.rng(4242), i, kind, fill;
+
+    A.T(svg, x0, 20, 'time  ────────────────────────────────────────────────────────▶', { fill: C.dim, size: 10 });
+    for (i = 0; i < NB; i++) {
+      if (mode === 'rand') kind = r() < share ? 'tr' : 'te';
+      else if (i < trainN - embB) kind = 'tr';
+      else if (i < trainN) kind = 'pu';
+      else kind = 'te';
+      fill = kind === 'tr' ? C.accent : (kind === 'te' ? C.sky : C.warn);
+      A.add(svg, 'rect', { x: x0 + i * bw + 0.6, y: y, width: bw - 1.2, height: hgt, rx: 1.5,
+        fill: fill, opacity: kind === 'pu' ? 0.5 : 0.82 });
+    }
+    A.add(svg, 'rect', { x: x0, y: y, width: x1 - x0, height: hgt, fill: 'none', stroke: C.border, rx: 2 });
+
+    if (mode === 'rand') {
+      for (i = 3; i < NB - 3; i += 7) {
+        var cx = x0 + (i + 0.5) * bw;
+        A.path(svg, [[cx, y - 3], [cx + bw * 0.5, y - 14], [cx + bw, y - 3]],
+          { stroke: C.bad, 'stroke-width': 1.3, 'stroke-dasharray': '2 2' });
+      }
+      A.T(svg, x0 + 4, y - 20, 'every test block has a near-identical neighbour inside the training set',
+        { fill: C.bad, size: 10, weight: 700 });
+      A.T(svg, x1, y + hgt + 18, 'the model recognises neighbours, it does not predict', { fill: C.bad, size: 9.5, anchor: 'end' });
+    } else {
+      var wx = x0 + (trainN - embB) * bw;
+      A.add(svg, 'line', { x1: wx, y1: y - 12, x2: wx, y2: y + hgt + 10, stroke: C.ink, 'stroke-width': 1.4 });
+      A.T(svg, wx - 6, y - 16, 'the wall', { fill: C.ink, size: 10, anchor: 'end', weight: 700 });
+      if (embB > 0) {
+        A.T(svg, wx + 4, y - 16, 'purged: ' + emb + ' ticks of label horizon', { fill: C.warn, size: 10, weight: 700 });
+      } else if (mode === 'emb') {
+        A.T(svg, wx + 4, y - 16, 'embargo 0 — labels still reach across', { fill: C.bad, size: 10, weight: 700 });
+      } else {
+        A.T(svg, wx + 4, y - 16, 'labels with horizon h reach ' + HZ + ' ticks past the wall', { fill: C.warn, size: 10 });
+      }
+      A.T(svg, x0 + 4, y + hgt + 18, 'train: fit here only', { fill: C.accent2, size: 9.5 });
+      A.T(svg, x1, y + hgt + 18, 'test: look ONCE', { fill: C.sky, size: 9.5, anchor: 'end' });
+    }
+    var lg = [['train', C.accent], ['test', C.sky], ['purged', C.warn]];
+    for (i = 0; i < lg.length; i++) {
+      A.add(svg, 'rect', { x: x0 + i * 90, y: 128, width: 9, height: 9, rx: 2, fill: lg[i][1], opacity: 0.85 });
+      A.T(svg, x0 + i * 90 + 14, 136, lg[i][0], { fill: C.muted, size: 9.5 });
+    }
+  }
+
+  function drawGap() {
+    var svg = A.$('w7-gap'); A.clear(svg);
+    var a = accs(), x0 = 96, x1 = 640, s = function (v) { return x0 + (x1 - x0) * (v - 0.45) / 0.45; };
+    var rows = [['reported', a.reported, C.warn, 26], ['live', a.honest, C.ok, 62]];
+    A.add(svg, 'line', { x1: x0, y1: 12, x2: x0, y2: 92, stroke: C.border });
+    rows.forEach(function (rw) {
+      A.T(svg, x0 - 10, rw[3] + 12, rw[0], { fill: C.muted, size: 10, anchor: 'end' });
+      A.add(svg, 'rect', { x: x0, y: rw[3], width: Math.max(2, s(rw[1]) - x0), height: 17, rx: 2, fill: rw[2], opacity: 0.8 });
+      A.T(svg, s(rw[1]) + 7, rw[3] + 13, (rw[1] * 100).toFixed(1) + '%', { fill: rw[2], size: 11, weight: 700 });
+    });
+    var d = a.reported - a.honest;
+    if (d > 0.01) {
+      A.add(svg, 'line', { x1: s(a.honest), y1: 22, x2: s(a.honest), y2: 84, stroke: C.bad, 'stroke-dasharray': '3 3' });
+      A.add(svg, 'rect', { x: s(a.honest), y: 24, width: s(a.reported) - s(a.honest), height: 19, fill: C.bad, opacity: 0.16 });
+      A.T(svg, (s(a.honest) + s(a.reported)) / 2, 108, 'self-deception: ' + (d * 100).toFixed(1) + ' points',
+        { fill: C.bad, size: 10, anchor: 'middle', weight: 700 });
+    } else {
+      A.T(svg, x0, 108, 'reported ≈ live — the number is a measurement, not a hope', { fill: C.ok, size: 10 });
+    }
+    A.T(svg, x1 + 6, 92, '90%', { fill: C.dim, size: 9 });
+  }
+
+  var CODE = {
+    rand: '<i># WRONG — shuffles the future into the past</i>\ntrain, test = train_test_split(\n    X, y, shuffle=<b>True</b>, test_size=SHARE)\n\n<i># adjacent ticks are near-duplicates, so every</i>\n<i># test row has a twin in train</i>',
+    time: '<i># RIGHT — a hard wall in time</i>\ncut = int(len(X) * SHARE)\nX_train, y_train = X[:cut], y[:cut]\nX_test,  y_test  = X[cut:], y[cut:]\n\n<i># labels still look h ticks past the cut</i>',
+    emb: '<i># RIGHT + purged boundary</i>\ncut = int(len(X) * SHARE)\nX_train, y_train = X[:cut-EMB], y[:cut-EMB]\nX_test,  y_test  = X[cut:], y[cut:]\n\n<u># EMB rows straddling the wall are dropped</u>'
+  };
+
+  function render() {
+    var a = accs();
+    A.$('w7-train-out').textContent = (share * 100).toFixed(0) + '%';
+    A.$('w7-emb-out').textContent = emb + ' ticks';
+    A.$('w7-emb').disabled = mode !== 'emb';
+    A.$('w7-acc-in').textContent = (a.insample * 100).toFixed(1) + '%';
+    A.$('w7-acc-test').textContent = (a.reported * 100).toFixed(1) + '%';
+    A.$('w7-acc-live').textContent = (a.honest * 100).toFixed(1) + '%';
+    A.$('w7-split-code').innerHTML = CODE[mode]
+      .replace('SHARE', share.toFixed(2)).replace('SHARE', share.toFixed(2)).replace(/EMB/g, emb);
+    drawSplit(); drawGap();
+
+    var v = A.$('w7-split-verdict');
+    if (mode === 'rand') {
+      v.className = 'verdict bad';
+      v.innerHTML = '<b>Leaking.</b> The reported ' + (a.reported * 100).toFixed(1) + '% is a measurement of how similar ' +
+        'neighbouring ticks are — not of any edge. Live, the same model prints ' + (a.honest * 100).toFixed(1) +
+        '%. Nothing about the model changed; only the honesty of the split did.';
+    } else if (mode === 'time') {
+      v.className = 'verdict warn';
+      v.innerHTML = '<b>Almost clean.</b> The wall stops features but not labels: the last training rows carry a ' +
+        HZ + '-tick label that reaches into the test block, worth about 2 points of fake accuracy. Switch on the embargo.';
+    } else if (emb >= HZ) {
+      v.className = 'verdict ok';
+      v.innerHTML = '<b>Honest.</b> Embargo ≥ horizon, so no training label can see across the wall. ' +
+        (a.reported * 100).toFixed(1) + '% is what you should expect live — unglamorous, and yours to trade.';
+    } else {
+      v.className = 'verdict warn';
+      v.innerHTML = '<b>Partly purged.</b> ' + emb + ' ticks of embargo against a ' + HZ + '-tick horizon still lets ' +
+        'the tail of the training labels peek. Push the embargo to ' + HZ + '.';
+    }
+  }
+
+  function init() {
+    if (!A.$('w7-split')) return;
+    var b = [A.$('w7-sp-rand'), A.$('w7-sp-time'), A.$('w7-sp-emb')], ms = ['rand', 'time', 'emb'];
+    b.forEach(function (btn, i) {
+      btn.addEventListener('click', function () { mode = ms[i]; A.setSeg(b, i); render(); });
+    });
+    A.$('w7-train').addEventListener('input', function () { share = +this.value / 100; render(); });
+    A.$('w7-emb').addEventListener('input', function () { emb = +this.value; render(); });
+    render();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   WEEK 7 · Widget 3 — walk-forward validation animator
+   ══════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  var A = window.ARENA, C = A.C;
+  var n = 5, mode = 'exp', drift = false, shown = 0, timer = null;
+
+  function scores() {
+    var r = A.rng(99), out = [], k, base;
+    for (k = 0; k < n; k++) {
+      base = 0.62 + 0.30 * (r() - 0.5);
+      if (drift && k >= 2) base -= (mode === 'exp') ? Math.min(1.45, 0.27 * (k - 1)) : (k === 2 ? 0.44 : 0.11);
+      out.push(base);
+    }
+    return out;
+  }
+
+  function draw() {
+    var svg = A.$('w7-wf'); A.clear(svg);
+    var x0 = 64, x1 = 700, X = function (u) { return x0 + (x1 - x0) * u; };
+    var laneH = Math.min(26, 196 / n), sc = scores(), k;
+    A.T(svg, x0, 18, 'time  ──────────────────────────────────────────────▶', { fill: C.dim, size: 10 });
+
+    if (drift) {
+      var rx = X(3 / (n + 1));
+      A.add(svg, 'rect', { x: rx, y: 24, width: x1 - rx, height: 12 + n * laneH, fill: C.bad, opacity: 0.06 });
+      A.add(svg, 'line', { x1: rx, y1: 24, x2: rx, y2: 30 + n * laneH, stroke: C.bad, 'stroke-dasharray': '4 3' });
+      A.T(svg, rx + 5, 34, 'regime shift', { fill: C.bad, size: 9.5, weight: 700 });
+    }
+
+    for (k = 0; k < n; k++) {
+      var y = 40 + k * laneH, on = k < shown, op = on ? 1 : 0.22;
+      var ts = (k + 1) / (n + 1), te = (k + 2) / (n + 1);
+      var trs = mode === 'exp' ? 0 : Math.max(0, ts - 2 / (n + 1));
+      A.T(svg, 8, y + laneH * 0.62, 'fold ' + (k + 1), { fill: on ? C.ink : C.dim, size: 9.5 });
+      A.add(svg, 'rect', { x: X(trs), y: y, width: X(ts) - X(trs), height: laneH - 7, rx: 2,
+        fill: C.accent, opacity: 0.78 * op });
+      A.add(svg, 'rect', { x: X(ts), y: y, width: X(te) - X(ts), height: laneH - 7, rx: 2,
+        fill: C.sky, opacity: 0.85 * op });
+      if (k === 0) {
+        A.T(svg, X(trs) + 6, y + laneH * 0.55, 'train', { fill: '#fff', size: 9, opacity: op });
+        A.T(svg, X(ts) + 5, y + laneH * 0.55, 'test', { fill: '#05121f', size: 9, opacity: op, weight: 700 });
+      }
+      if (on) {
+        A.T(svg, X(te) + 8, y + laneH * 0.58, A.sgn(sc[k], 2),
+          { fill: sc[k] >= 0 ? C.ok : C.bad, size: 10.5, weight: 700 });
+      }
+    }
+    A.T(svg, x0, 42 + n * laneH + 16, mode === 'exp'
+      ? 'expanding window — every fold keeps all history, including regimes that are gone'
+      : 'rolling window — each fold forgets the distant past and re-learns the present',
+      { fill: C.muted, size: 10 });
+    A.T(svg, x0, 42 + n * laneH + 32, 'score of a fold = out-of-sample metric on its test block only',
+      { fill: C.dim, size: 9.5 });
+  }
+
+  function drawBars() {
+    var svg = A.$('w7-wf-bars'); A.clear(svg);
+    var sc = scores(), x0 = 30, x1 = 322, zy = 74, k;
+    var bw = (x1 - x0) / n;
+    A.add(svg, 'line', { x1: x0 - 6, y1: zy, x2: x1, y2: zy, stroke: C.border });
+    A.T(svg, 4, zy + 3, '0', { fill: C.dim, size: 9 });
+    A.T(svg, 4, 20, '+1.4', { fill: C.dim, size: 9 });
+    A.T(svg, 4, 118, '−1.0', { fill: C.dim, size: 9 });
+    for (k = 0; k < n; k++) {
+      var v = k < shown ? sc[k] : 0;
+      var hh = Math.abs(v) / 1.4 * 54;
+      A.add(svg, 'rect', { x: x0 + k * bw + 3, y: v >= 0 ? zy - hh : zy, width: bw - 6,
+        height: Math.max(k < shown ? 1.5 : 0, hh), rx: 1.5,
+        fill: v >= 0 ? C.ok : C.bad, opacity: k < shown ? 0.85 : 0.12 });
+      A.T(svg, x0 + k * bw + bw / 2, 128, String(k + 1), { fill: C.dim, size: 9, anchor: 'middle' });
+    }
+    A.T(svg, x1, 12, 'per-fold OOS score', { fill: C.dim, size: 9, anchor: 'end' });
+  }
+
+  function render() {
+    A.$('w7-folds-out').textContent = String(n);
+    draw(); drawBars();
+    var sc = scores().slice(0, shown);
+    var m = A.mean(sc), sd = A.stdev(sc);
+    A.$('w7-wf-mean').textContent = shown ? A.sgn(m, 2) : '—';
+    A.$('w7-wf-sd').textContent = shown > 1 ? '±' + sd.toFixed(2) : '—';
+    var v = A.$('w7-wf-verdict');
+    if (!shown) {
+      v.className = 'verdict';
+      v.innerHTML = 'Step or roll the folds forward to collect out-of-sample scores.';
+    } else if (drift && mode === 'exp' && shown >= 3) {
+      v.className = 'verdict bad';
+      v.innerHTML = '<b>The expanding window is drowning.</b> It keeps averaging in a regime that no longer exists, so ' +
+        'each new fold scores worse than the last. A declining fold series is the signature of drift — not of bad luck.';
+    } else if (drift && mode === 'roll' && shown >= 3) {
+      v.className = 'verdict ok';
+      v.innerHTML = '<b>The rolling window absorbs the shock.</b> One bad fold at the break, then it re-learns the new ' +
+        'regime. That is the trade-off: less history, faster adaptation. Under drift, forgetting is a feature.';
+    } else if (shown > 1 && sd > 0.55 * Math.abs(m)) {
+      v.className = 'verdict warn';
+      v.innerHTML = '<b>Mean ' + A.sgn(m, 2) + ', dispersion ±' + sd.toFixed(2) + '.</b> A decent average with this much ' +
+        'spread is not an edge you can size — it is a coin flip with a good mood. Report both numbers, always.';
+    } else {
+      v.className = 'verdict ok';
+      v.innerHTML = '<b>Mean ' + A.sgn(m, 2) + ' across ' + shown + ' out-of-sample block' + (shown === 1 ? '' : 's') +
+        '.</b> Tight dispersion, no trend in the folds: this is the one number you may put in your report.';
+    }
+    A.$('w7-wf-step').disabled = shown >= n;
+    A.$('w7-wf-play').textContent = timer ? '❙❙ Pause' : '▶ Roll forward';
+  }
+
+  function stop() { if (timer) { clearInterval(timer); timer = null; } }
+
+  function init() {
+    if (!A.$('w7-wf')) return;
+    var be = A.$('w7-wf-exp'), br = A.$('w7-wf-roll');
+    be.addEventListener('click', function () { mode = 'exp'; A.setSeg([be, br], 0); render(); });
+    br.addEventListener('click', function () { mode = 'roll'; A.setSeg([be, br], 1); render(); });
+    A.$('w7-folds').addEventListener('input', function () {
+      n = +this.value; shown = Math.min(shown, n); stop(); render();
+    });
+    A.$('w7-drift').addEventListener('change', function () { drift = this.checked; render(); });
+    A.$('w7-wf-step').addEventListener('click', function () { stop(); if (shown < n) shown++; render(); });
+    A.$('w7-wf-reset').addEventListener('click', function () { stop(); shown = 0; render(); });
+    A.$('w7-wf-play').addEventListener('click', function () {
+      if (timer) { stop(); render(); return; }
+      if (shown >= n) shown = 0;
+      timer = setInterval(function () {
+        shown++;
+        if (shown >= n) { shown = n; stop(); }
+        render();
+      }, 620);
+      render();
+    });
+    render();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   WEEK 7 · Widget 4 — model-ops lifecycle + drift monitor
+   ══════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  var A = window.ARENA, C = A.C;
+  var age = 0, cur = 0;
+
+  var STAGES = [
+    { st: '01', nm: 'Train', code: 'model.fit(X_train, y_train)',
+      what: 'Offline, on your machine, on the training slice only. Heavy, slow, and never in the hot path. Fit the scaler here too — it is part of the model.',
+      fail: 'Failure mode: re-fitting inside on_tick "to stay fresh". You blow the per-tick budget and every tick trains on a different dataset.' },
+    { st: '02', nm: 'Validate', code: 'walk_forward(folds=5) → mean OOS',
+      what: 'Walk-forward folds, then exactly one look at the held-out test block. Report the mean and the dispersion, and log every configuration you tried.',
+      fail: 'Failure mode: tuning against the test block. After the second look it is a training set wearing a test set\'s name.' },
+    { st: '03', nm: 'Persist', code: "joblib.dump(model, 'model.pkl')",
+      what: 'Serialise the fitted model together with its feature list, its scaler and a version string. The artifact must be enough to reproduce a prediction byte for byte.',
+      fail: 'Failure mode: pickling the model but not the scaler or the column order. Live features arrive in a different order and the model answers confidently anyway.' },
+    { st: '04', nm: 'Serve', code: 'load in __init__ · predict in on_tick',
+      what: 'Load once when the bot starts; inside on_tick build features with the same function you used offline and call predict. Measure that call against the W5 latency budget.',
+      fail: 'Failure mode: loading the pickle per tick. Your bot is right about the market and late to it — the fill prints two ticks away.' },
+    { st: '05', nm: 'Monitor drift', code: 'live acc vs backtest · P&L vs sim',
+      what: 'Watch live hit rate, the distribution of each feature, and live P&L against the backtest. Decide the retraining trigger before the season starts, and version every model so you can roll back.',
+      fail: 'Failure mode: no baseline. If you never wrote down what healthy looks like, you cannot recognise the week it stopped working.' }
+  ];
+
+  function drawDrift() {
+    var svg = A.$('w7-drift-svg'); A.clear(svg);
+    var x0 = 34, x1 = 328, y0 = 18, y1 = 112;
+    var Y = function (a) { return y1 - (a - 0.44) / 0.12 * (y1 - y0); };
+    var X = function (w) { return x0 + (x1 - x0) * w / 12; };
+    var live = function (w) { return 0.548 - 0.0081 * w; };
+
+    A.add(svg, 'line', { x1: x0, y1: y1, x2: x1, y2: y1, stroke: C.border });
+    A.add(svg, 'line', { x1: x0, y1: y0, x2: x0, y2: y1, stroke: C.border });
+    A.add(svg, 'line', { x1: x0, y1: Y(0.548), x2: x1, y2: Y(0.548), stroke: C.sky, 'stroke-dasharray': '4 3', opacity: 0.8 });
+    A.T(svg, x0 + 4, Y(0.548) - 5, 'backtest 54.8%', { fill: C.sky, size: 9 });
+    A.add(svg, 'rect', { x: x0, y: Y(0.51), width: x1 - x0, height: y1 - Y(0.51), fill: C.bad, opacity: 0.08 });
+    A.add(svg, 'line', { x1: x0, y1: Y(0.51), x2: x1, y2: Y(0.51), stroke: C.bad, 'stroke-dasharray': '3 3' });
+    A.T(svg, x1, Y(0.51) + 11, 'retrain trigger 51%', { fill: C.bad, size: 9, anchor: 'end' });
+
+    var pts = [], w;
+    for (w = 0; w <= age; w += 0.25) pts.push([X(w), Y(live(w))]);
+    if (pts.length < 2) pts.push([X(0) + 0.6, Y(live(0))]);
+    A.path(svg, pts, { stroke: C.accent2, 'stroke-width': 1.8 });
+    A.add(svg, 'circle', { cx: X(age), cy: Y(live(age)), r: 3.4, fill: live(age) < 0.51 ? C.bad : C.ok });
+    A.T(svg, 4, Y(0.548) + 3, '55%', { fill: C.dim, size: 8.5 });
+    A.T(svg, 4, y1 + 3, '44%', { fill: C.dim, size: 8.5 });
+    A.T(svg, x1, y1 + 14, 'weeks since training', { fill: C.dim, size: 9, anchor: 'end' });
+    A.T(svg, x0, y1 + 14, 'live hit rate', { fill: C.accent2, size: 9 });
+  }
+
+  function render() {
+    var box = A.$('w7-lc');
+    A.clear(box);
+    STAGES.forEach(function (s, i) {
+      var b = document.createElement('button');
+      b.className = 'lc-node' + (i === cur ? ' on' : '');
+      b.setAttribute('aria-pressed', i === cur ? 'true' : 'false');
+      b.innerHTML = '<div class="st">' + s.st + (i < STAGES.length - 1 ? ' ▸' : ' ⟲') + '</div><div class="nm">' + s.nm + '</div>';
+      b.addEventListener('click', function () { cur = i; render(); });
+      box.appendChild(b);
+    });
+    var s = STAGES[cur];
+    A.$('w7-lc-detail').innerHTML =
+      '<h4>' + s.st + ' · ' + s.nm + '</h4>' +
+      '<div class="role">' + s.code + '</div>' +
+      '<p>' + s.what + '</p>' +
+      '<div class="fail">' + s.fail + '</div>';
+
+    A.$('w7-age-out').textContent = String(age);
+    drawDrift();
+    var acc = 0.548 - 0.0081 * age, v = A.$('w7-drift-verdict');
+    if (acc < 0.51) {
+      v.className = 'verdict bad';
+      v.innerHTML = '<b>Drift detected at week ' + age + '.</b> Live hit rate ' + (acc * 100).toFixed(1) +
+        '% has crossed the trigger. Retrain on recent data, or fall back to the W6 rule-based signal — do not keep sizing on a dead model.';
+    } else if (acc < 0.525) {
+      v.className = 'verdict warn';
+      v.innerHTML = '<b>Decaying.</b> ' + (acc * 100).toFixed(1) + '% live against a 54.8% backtest. Still profitable, ' +
+        'but the gap is the alarm: check whether the feature distributions moved before you blame the market.';
+    } else {
+      v.className = 'verdict ok';
+      v.innerHTML = '<b>Healthy.</b> ' + (acc * 100).toFixed(1) + '% live, in line with the backtest. This is what you ' +
+        'must write down <em>now</em> — the baseline you will compare against during the incident.';
+    }
+  }
+
+  function init() {
+    if (!A.$('w7-lc')) return;
+    A.$('w7-age').addEventListener('input', function () { age = +this.value; render(); });
+    render();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   WEEK 7 · Widget 5 — does the edge survive the costs?
+   ══════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  var A = window.ARENA, C = A.C;
+  var p = 0.53, payoff = 1.0, T = 60, cost = 3.0, L = 10;
+
+  function metrics() {
+    var W = L * payoff;
+    var edge = p * W - (1 - p) * L;
+    var win = W - cost, loss = -L - cost;
+    var m = p * win + (1 - p) * loss;
+    var vr = p * (win - m) * (win - m) + (1 - p) * (loss - m) * (loss - m);
+    var sd = Math.sqrt(vr);
+    return { W: W, edge: edge, m: m, sd: sd, net: T * m, drag: T * cost,
+      shp: sd > 0 ? m / sd * Math.sqrt(T) : 0, base: 30 * (2.0 - cost) };
+  }
+
+  function draw(mt) {
+    var svg = A.$('w7-eq'); A.clear(svg);
+    var r = A.rng(31337), gross = [0], net = [0], i, o;
+    for (i = 1; i <= T; i++) {
+      o = r() < p ? mt.W : -L;
+      gross.push(gross[i - 1] + o);
+      net.push(net[i - 1] + o - cost);
+    }
+    var mn = 0, mx = 0;
+    for (i = 0; i <= T; i++) {
+      mn = Math.min(mn, net[i], gross[i]); mx = Math.max(mx, net[i], gross[i]);
+    }
+    mn = Math.min(mn, mt.base); mx = Math.max(mx, mt.base);
+    var padv = Math.max(8, (mx - mn) * 0.14); mn -= padv; mx += padv;
+    var x0 = 52, x1 = 700, y0 = 20, y1 = 214;
+    var X = function (i) { return x0 + (x1 - x0) * i / T; };
+    var Y = function (v) { return y1 - (v - mn) / (mx - mn) * (y1 - y0); };
+
+    A.add(svg, 'line', { x1: x0, y1: Y(0), x2: x1, y2: Y(0), stroke: C.border });
+    A.add(svg, 'line', { x1: x0, y1: y0, x2: x0, y2: y1, stroke: C.border });
+    A.T(svg, x0 - 6, Y(0) + 3, '0', { fill: C.dim, size: 9, anchor: 'end' });
+    A.T(svg, x0 - 6, y0 + 8, (mx).toFixed(0) + ' bp', { fill: C.dim, size: 9, anchor: 'end' });
+    A.T(svg, x0 - 6, y1, (mn).toFixed(0) + ' bp', { fill: C.dim, size: 9, anchor: 'end' });
+
+    A.add(svg, 'line', { x1: x0, y1: Y(0), x2: X(30 > T ? T : 30), y2: Y(mt.base * Math.min(1, T / 30)),
+      stroke: C.muted, 'stroke-width': 1.4, 'stroke-dasharray': '5 4' });
+    A.T(svg, X(Math.min(30, T)) + 6, Y(mt.base * Math.min(1, T / 30)) - 4, 'W6 momentum baseline',
+      { fill: C.muted, size: 9 });
+
+    var pg = [], pn = [];
+    for (i = 0; i <= T; i++) { pg.push([X(i), Y(gross[i])]); pn.push([X(i), Y(net[i])]); }
+    A.path(svg, pg, { stroke: C.sky, 'stroke-width': 1.4, 'stroke-dasharray': '4 3', opacity: 0.9 });
+    A.path(svg, pn, { stroke: net[T] >= 0 ? C.ok : C.bad, 'stroke-width': 2 });
+    A.add(svg, 'circle', { cx: X(T), cy: Y(net[T]), r: 3.4, fill: net[T] >= 0 ? C.ok : C.bad });
+    A.T(svg, x1, Y(gross[T]) - 8, 'gross ' + A.sgn(gross[T], 0) + ' bp', { fill: C.sky, size: 10, anchor: 'end' });
+    A.T(svg, x1, Y(net[T]) + (net[T] >= gross[T] ? -8 : 16), 'net ' + A.sgn(net[T], 0) + ' bp',
+      { fill: net[T] >= 0 ? C.ok : C.bad, size: 10.5, anchor: 'end', weight: 700 });
+    A.T(svg, x0, y1 + 22, 'trade number  →  ' + T + ' trades this session', { fill: C.dim, size: 9.5 });
+    A.T(svg, x1, y1 + 22, 'P&L in basis points of capital', { fill: C.dim, size: 9.5, anchor: 'end' });
+  }
+
+  function render() {
+    A.$('w7-hit-out').textContent = (p * 100).toFixed(1) + '%';
+    A.$('w7-payoff-out').textContent = payoff.toFixed(2);
+    A.$('w7-trades-out').textContent = String(T);
+    A.$('w7-cost-out').textContent = cost.toFixed(1) + ' bp';
+    var mt = metrics();
+    draw(mt);
+    A.$('w7-e-gross').textContent = A.sgn(mt.edge, 2) + ' bp';
+    A.$('w7-e-cost').textContent = '−' + mt.drag.toFixed(0) + ' bp';
+    A.$('w7-e-net').textContent = A.sgn(mt.net, 0) + ' bp';
+    A.$('w7-e-shp').textContent = mt.shp.toFixed(2);
+
+    var v = A.$('w7-e-verdict');
+    if (mt.net <= 0) {
+      v.className = 'verdict bad';
+      v.innerHTML = '<b>Pure alpha in the backtest, pure cost live.</b> The gross curve climbs and the net curve sinks: ' +
+        'a ' + A.sgn(mt.edge, 2) + ' bp edge cannot pay a ' + cost.toFixed(1) + ' bp toll. Either find a bigger edge or trade far less often.';
+    } else if (mt.net < mt.base) {
+      v.className = 'verdict warn';
+      v.innerHTML = '<b>Positive, but beaten by the baseline.</b> ' + A.sgn(mt.net, 0) + ' bp against the W6 momentum ' +
+        'rule\'s ' + mt.base.toFixed(0) + ' bp. A model that does not beat the simple signal out-of-sample has not earned its place in the bot.';
+    } else if (mt.shp < 1) {
+      v.className = 'verdict warn';
+      v.innerHTML = '<b>Profitable, thin.</b> ' + A.sgn(mt.net, 0) + ' bp at a Sharpe-like ' + mt.shp.toFixed(2) +
+        '. The season score divides by volatility, so this ranks below a steadier book with the same P&L. Raise the confidence threshold and cut turnover.';
+    } else {
+      v.className = 'verdict ok';
+      v.innerHTML = '<b>The edge survives.</b> ' + A.sgn(mt.net, 0) + ' bp net at a Sharpe-like ' + mt.shp.toFixed(2) +
+        ', past the ' + mt.base.toFixed(0) + ' bp baseline. Note how quickly this dies if you drag turnover up — the toll is per trade, the edge is not.';
+    }
+  }
+
+  function init() {
+    if (!A.$('w7-eq')) return;
+    A.$('w7-hit').addEventListener('input', function () { p = +this.value / 100; render(); });
+    A.$('w7-payoff').addEventListener('input', function () { payoff = +this.value / 100; render(); });
+    A.$('w7-trades').addEventListener('input', function () { T = +this.value; render(); });
+    A.$('w7-cost').addEventListener('input', function () { cost = +this.value; render(); });
+    render();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+</script>
+</body>
+</html>

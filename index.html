@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="data:," />
+<title>Systematic Trading Arena — nine weeks, one live market</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    /* ── Systematic Trading Arena · shared palette (identical on every page) ── */
+    --accent:       #3b82f6;
+    --accent-2:     #7cb0ff;
+    --accent-3:     #b9d4ff;
+    --accent-rgb:   59,130,246;
+    --accent-2-rgb: 124,176,255;
+    --bg:           #0f1115;
+    --panel:        #181b22;
+    --panel2:       #1e222b;
+    --panel-2:      #13161b;
+    --ink:          #e8e6e3;
+    --ink-dim:      #c6c3bf;
+    --ink-mute:     #6f757f;
+    --muted:        #9aa0a6;
+    --dim:          #5f6673;
+    --line:         #272c36;
+    --line-2:       #333a47;
+    --border:       #272c36;
+    --ok:           #3fb950;
+    --warn:         #d29922;
+    --bad:          #f85149;
+    --info:         #6cb6ff;
+    --sky:          #58a6ff;
+    --violet:       #a78bfa;
+    --teal:         #2dd4bf;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.62;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent-2);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  /* ── nav / footer ─────────────────────────────────────────── */
+  nav.top{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    padding:11px 22px;background:rgba(15,17,21,.94);border-bottom:1px solid var(--line)}
+  nav.top>a:first-child{font-weight:800;letter-spacing:-.2px;color:var(--ink);font-size:14.5px;
+    border-left:3px solid var(--accent);padding-left:10px}
+  nav.top .crumbs{font-size:12px;color:var(--muted)}
+  nav.top .crumbs b{color:var(--ink);font-weight:700}
+  footer{border-top:1px solid var(--line);background:var(--panel);
+    padding:26px 22px 34px;text-align:center;font-size:11.5px;color:var(--dim);letter-spacing:.3px}
+
+  /* ── sections & typography ────────────────────────────────── */
+  section{max-width:1180px;margin:0 auto;padding:36px 22px 42px;border-top:1px solid var(--line)}
+  section#hero{border-top:none}
+  .kicker{font-size:10.5px;font-weight:800;letter-spacing:1.9px;text-transform:uppercase;color:var(--accent-2)}
+  h1{font-size:clamp(26px,4.2vw,40px);font-weight:800;letter-spacing:-.9px;line-height:1.13;margin:10px 0 6px}
+  h2{font-size:21px;font-weight:700;letter-spacing:-.3px;margin:4px 0 4px}
+  h3{font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:11px}
+  h4{font-size:13.5px;font-weight:700;margin-bottom:5px}
+  p{margin:9px 0;max-width:82ch}
+  .lead{color:var(--muted);font-size:15px;max-width:84ch}
+  .sub{color:var(--muted);font-size:12.5px}
+  strong{color:#fff;font-weight:650}
+  em.hi{color:var(--accent-2);font-style:normal;font-weight:600}
+  code,.mono{font-family:var(--mono);font-size:12.5px}
+  code{background:rgba(var(--accent-2-rgb),.13);color:#c7ddff;padding:1px 5px;border-radius:4px}
+  ul.you{list-style:none;margin:16px 0 0;display:grid;gap:8px}
+  ul.you li{position:relative;padding-left:26px;font-size:13.5px;color:var(--ink);max-width:78ch}
+  ul.you li::before{content:"";position:absolute;left:4px;top:8px;width:8px;height:8px;border-radius:2px;
+    background:var(--accent);box-shadow:0 0 0 3px rgba(var(--accent-rgb),.22)}
+  ul.plain{list-style:none;display:grid;gap:7px;font-size:13px;color:var(--muted)}
+  ul.plain li{padding-left:16px;position:relative}
+  ul.plain li::before{content:"\2022";position:absolute;left:2px;color:var(--accent-2)}
+
+  /* ── panels & layout ──────────────────────────────────────── */
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .panel.tight{padding:13px 14px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:start}
+  .split{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px;align-items:start}
+  .split-r{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:18px;align-items:start}
+  .stack{display:grid;gap:14px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+  /* ── controls ─────────────────────────────────────────────── */
+  .btn{font-family:inherit;font-size:12px;font-weight:650;cursor:pointer;color:var(--ink);
+    background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:7px 14px;transition:.15s}
+  .btn:hover:not(:disabled){border-color:var(--accent-2);color:#fff}
+  .btn:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+  .btn:disabled{opacity:.35;cursor:not-allowed}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.primary:hover:not(:disabled){filter:brightness(1.25)}
+  .btn.on{background:rgba(var(--accent-rgb),.28);border-color:var(--accent-2);color:#fff}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+  .tab{font-family:inherit;font-size:12px;font-weight:650;cursor:pointer;color:var(--muted);
+    background:transparent;border:1px solid var(--line);border-radius:20px;padding:6px 14px;transition:.15s}
+  .tab:hover{color:var(--ink)}
+  .tab[aria-selected="true"]{background:rgba(var(--accent-rgb),.3);border-color:var(--accent-2);color:#fff}
+  .tab:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+  .ctl{display:grid;gap:4px;margin-bottom:12px}
+  .ctl label{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);
+    display:flex;justify-content:space-between;gap:10px}
+  .ctl label b{font-family:var(--mono);color:var(--accent-2);font-size:12px;text-transform:none;letter-spacing:0}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:3px;
+    background:#2b313d;outline:none;cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;
+    background:var(--accent-2);border:2px solid var(--bg);cursor:pointer}
+  input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--accent-2);
+    border:2px solid var(--bg);cursor:pointer}
+  input[type=range]:focus-visible{box-shadow:0 0 0 3px rgba(var(--accent-2-rgb),.4)}
+  select,textarea,input[type=text]{font-family:var(--mono);font-size:12.5px;color:var(--ink);
+    background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:7px 9px;width:100%}
+  select:focus-visible,textarea:focus-visible,input:focus-visible{outline:2px solid var(--accent-2);outline-offset:1px}
+  textarea{line-height:1.55;resize:vertical}
+
+  /* ── stats / pills / code ─────────────────────────────────── */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:1px;
+    background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .stat{background:var(--panel);padding:10px 12px}
+  .stat .sl{font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--dim)}
+  .stat .sv{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--ink);margin-top:3px}
+  .stat .sv.ok{color:var(--ok)} .stat .sv.bad{color:var(--bad)} .stat .sv.warn{color:var(--warn)}
+  .stat .sv.acc{color:var(--accent-2)}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;letter-spacing:.5px;
+    padding:3px 9px;border-radius:20px;border:1px solid var(--line);color:var(--muted)}
+  .pill.ok{color:var(--ok);border-color:rgba(63,185,80,.5);background:rgba(63,185,80,.1)}
+  .pill.bad{color:var(--bad);border-color:rgba(248,81,73,.5);background:rgba(248,81,73,.1)}
+  .pill.warn{color:var(--warn);border-color:rgba(210,153,34,.5);background:rgba(210,153,34,.1)}
+  .pill.acc{color:var(--accent-2);border-color:rgba(var(--accent-2-rgb),.5);background:rgba(var(--accent-rgb),.18)}
+  pre.code{font-family:var(--mono);font-size:11.8px;line-height:1.62;background:#0b0e14;color:#dbe3ea;
+    border:1px solid var(--line);border-radius:10px;padding:13px 14px;overflow-x:auto;white-space:pre}
+  pre.code .k{color:#6cb6ff} pre.code .s{color:#8ddb8c} pre.code .c{color:#6b7484;font-style:italic}
+  pre.code .n{color:#e0b070} pre.code .b{color:#c7ddff;font-weight:700}
+  .note{border-left:3px solid var(--accent);background:rgba(var(--accent-rgb),.12);border-radius:0 8px 8px 0;
+    padding:10px 13px;font-size:12.5px;color:var(--muted)}
+  .note b{color:var(--ink)}
+  .log{font-family:var(--mono);font-size:11.5px;max-height:230px;overflow-y:auto;display:grid;gap:5px}
+  .log div{background:var(--panel2);border-left:3px solid var(--line);border-radius:0 6px 6px 0;padding:6px 9px;color:var(--muted)}
+  .log div.hl{border-left-color:var(--accent-2);color:var(--ink);background:rgba(var(--accent-rgb),.15)}
+  .log div.ok{border-left-color:var(--ok)} .log div.bad{border-left-color:var(--bad)}
+  svg{display:block;max-width:100%;height:auto}
+  .svgwrap{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px;overflow-x:auto}
+  table.t{width:100%;border-collapse:collapse;font-size:12px}
+  table.t th{font-size:9.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--dim);
+    text-align:left;padding:0 8px 7px;border-bottom:1px solid var(--line)}
+  table.t td{padding:7px 8px;border-bottom:1px solid rgba(39,44,54,.6);color:var(--muted);font-family:var(--mono);font-size:11.8px}
+  table.t td.n{color:var(--ink);font-weight:600}
+
+  /* ── pitfalls ─────────────────────────────────────────────── */
+  details.pit{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;overflow:hidden}
+  details.pit>summary{cursor:pointer;padding:12px 15px;font-size:13.5px;font-weight:650;color:var(--ink);
+    list-style:none;display:flex;gap:11px;align-items:flex-start}
+  details.pit>summary::-webkit-details-marker{display:none}
+  details.pit>summary::before{content:"\25B8";color:var(--accent-2);font-size:12px;line-height:1.5;transition:.2s}
+  details.pit[open]>summary::before{transform:rotate(90deg)}
+  details.pit>summary:focus-visible{outline:2px solid var(--accent-2);outline-offset:-2px}
+  details.pit .body{padding:0 15px 15px 39px;font-size:13px;color:var(--muted);display:grid;gap:9px}
+  details.pit .body .fix{color:var(--ok);font-weight:600}
+
+  /* ── MCQ ──────────────────────────────────────────────────── */
+  .mcq{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px 17px;margin-bottom:13px}
+  .mcq .q{font-size:13.8px;font-weight:650;color:var(--ink);margin:0 0 11px;max-width:84ch}
+  .mcq .q span{color:var(--accent-2);font-family:var(--mono);margin-right:7px}
+  .opts{display:grid;gap:7px}
+  .opt{text-align:left;font-family:inherit;font-size:13px;cursor:pointer;color:var(--muted);
+    background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 12px;transition:.15s}
+  .opt:hover:not(:disabled){border-color:var(--accent-2);color:var(--ink)}
+  .opt:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+  .opt.right{border-color:var(--ok);background:rgba(63,185,80,.13);color:#bce8c4}
+  .opt.wrong{border-color:var(--bad);background:rgba(248,81,73,.12);color:#f4b6b1}
+  .opt.dim{opacity:.5}
+  .fb{margin-top:11px;font-size:12.5px;line-height:1.6;color:var(--muted);display:none;
+    border-left:3px solid var(--line);padding-left:11px}
+  .fb.show{display:block}
+  .fb.show.good{border-left-color:var(--ok)} .fb.show.poor{border-left-color:var(--bad)}
+  .fb b{color:var(--ink)}
+
+  /* ── next ─────────────────────────────────────────────────── */
+  .nextgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+  .nextcard{display:block;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:15px 17px;transition:.18s;color:inherit}
+  .nextcard:hover{border-color:var(--accent-2);transform:translateY(-2px);text-decoration:none}
+  .nextcard .nl{font-size:10px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--accent-2)}
+  .nextcard .nt{font-size:14.5px;font-weight:700;color:var(--ink);margin-top:5px}
+  .nextcard .nd{font-size:12px;color:var(--muted);margin-top:5px}
+
+  @media (max-width:720px){
+    .grid2,.grid3,.split,.split-r{grid-template-columns:1fr}
+    section{padding:26px 15px 32px}
+    nav.top{padding:10px 15px;gap:8px}
+    nav.top .crumbs{font-size:11px}
+    p,.lead{max-width:none}
+  }
+
+  /* ── index-only ───────────────────────────────────────────── */
+  #hero{padding:64px 22px 46px;text-align:center;
+    background:radial-gradient(ellipse 900px 380px at 50% -12%,rgba(var(--accent-rgb),.34),transparent 66%),
+               radial-gradient(ellipse 620px 260px at 12% 108%,rgba(var(--accent-2-rgb),.1),transparent 62%)}
+  #hero h1{margin-left:auto;margin-right:auto;max-width:20ch}
+  #hero h1 .g{background:linear-gradient(92deg,var(--accent-2),#a8c8f5,#5b95ea);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  #hero .lead{margin:16px auto 0;max-width:70ch}
+  #hero .cta{margin-top:28px;display:flex;gap:11px;justify-content:center;flex-wrap:wrap}
+  #hero .cta a{font-size:13px;font-weight:700;padding:11px 22px;border-radius:9px;border:1px solid var(--line);color:var(--muted)}
+  #hero .cta a.p{background:var(--accent);border-color:var(--accent);color:#fff}
+  #hero .cta a:hover{text-decoration:none;border-color:var(--accent-2);color:#fff}
+  #hero .cta a.p:hover{filter:brightness(1.25)}
+  .facts{display:flex;gap:0;justify-content:center;flex-wrap:wrap;margin:32px auto 0;max-width:820px;
+    border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden}
+  .fact{flex:1;min-width:135px;padding:13px 16px;border-right:1px solid var(--line)}
+  .fact:last-child{border-right:none}
+  .fact .fv{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--accent-2)}
+  .fact .fl{font-size:10px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--dim);margin-top:3px}
+
+  .weeks{display:grid;grid-template-columns:repeat(auto-fill,minmax(298px,1fr));gap:16px;margin-top:20px}
+  .wk{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);
+    border-radius:13px;overflow:hidden;color:inherit;transition:.2s}
+  .wk:hover{transform:translateY(-4px);border-color:var(--accent-2);box-shadow:0 14px 34px -18px rgba(var(--accent-rgb),.9);text-decoration:none}
+  .wk .art{height:96px;background:linear-gradient(165deg,rgba(255,255,255,.03),transparent 60%),var(--panel2);
+    border-bottom:1px solid var(--line)}
+  .wk .art svg{width:100%;height:96px}
+  .wk .bd{padding:14px 16px 16px;display:flex;flex-direction:column;flex:1}
+  .wk .n{font-size:10px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:var(--accent-2)}
+  .wk h3{font-size:15.5px;font-weight:700;letter-spacing:-.2px;color:var(--ink);text-transform:none;
+    letter-spacing:-.2px;margin:6px 0 0}
+  .wk p{font-size:12.4px;color:var(--muted);margin:7px 0 0;flex:1;max-width:none}
+  .wk .go{margin-top:12px;font-size:11.5px;font-weight:700;color:var(--accent-2)}
+  .wk .go::after{content:" \2192"}
+  .wk .tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}
+  .wk .tags span{font-size:9.5px;font-weight:650;padding:2px 8px;border-radius:11px;border:1px solid var(--line);color:var(--dim)}
+
+  .chk{display:grid;gap:9px}
+  .chk .item{display:flex;gap:11px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;padding:11px 14px;transition:.18s}
+  .chk .item.done{border-color:rgba(63,185,80,.45);background:rgba(63,185,80,.07)}
+  .chk input{margin-top:3px;width:16px;height:16px;accent-color:var(--accent);flex-shrink:0;cursor:pointer}
+  .chk .txt{flex:1;min-width:0}
+  .chk .txt .t{font-size:13px;font-weight:650;color:var(--ink)}
+  .chk .item.done .txt .t{color:var(--ok)}
+  .chk .txt .c{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:4px;
+    word-break:break-word;background:#0b0e14;border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+  .bar{height:6px;border-radius:4px;background:#2b313d;overflow:hidden;margin:12px 0 6px}
+  .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .3s}
+  .smoke{display:flex;align-items:center;gap:11px;font-size:13px;font-weight:700}
+  .smoke .lamp{width:14px;height:14px;border-radius:50%;background:var(--bad);box-shadow:0 0 12px -1px var(--bad)}
+  .smoke.green .lamp{background:var(--ok);box-shadow:0 0 12px -1px var(--ok)}
+
+  .role .rp{display:none} .role .rp.on{display:grid;gap:11px}
+  @media (max-width:720px){ .weeks{grid-template-columns:1fr} #hero{padding:44px 15px 34px} }
+
+  /* ── mobile guard (identical on every page): single column under 720px,
+        no horizontal overflow. Must stay last in the sheet. ───────────── */
+  @media (max-width:720px){
+    .grid2,.grid3,.grid2.narrow-right,.split,.split-r,.codepair,
+    .nextgrid,.dash,.toggles,.lanes,.weeknav,.weeks,.roles,.stack{
+      grid-template-columns:minmax(0,1fr)}
+    [class*="grid"]>*,.stack>*,.wrap>*,.panel,.panel.tight,.nextcard,.wk,.row>*{min-width:0}
+    pre,pre.code,.svgwrap,svg,canvas,table,select,input,textarea,.mono{max-width:100%}
+    pre,pre.code,.svgwrap,.tablewrap{overflow-x:auto}
+    .ctl,.ctl>*,.controls>*,.row,.legend>*{min-width:0}
+    .ctl{flex-wrap:wrap} .ctl select,.ctl input[type=range]{flex:1 1 100%;width:100%}
+    p,.lead,.sub,.promise{max-width:none}
+  }
+</style>
+</head>
+<body>
+
+<nav class="top"><a href="index.html">Systematic Trading Arena</a><span class="crumbs"><b>Course home</b> · <a href="week1.html">Week 1 →</a></span></nav>
+
+<!-- ══════════════ HERO ══════════════ -->
+<section id="hero">
+  <div class="kicker">9 weeks · 3 roles · one live market</div>
+  <h1>Systematic Trading<br/><span class="g">with GenAI</span></h1>
+  <p class="lead">A graduate systems-engineering course disguised as a trading competition. You design
+  the objects, make them concurrent, put a protocol under them, backtest them, speed them up, learn
+  from them — and every week your code connects to <strong>AlgoArena</strong>, a live Python exchange
+  where your bot competes against your classmates on real Yahoo Finance prices.</p>
+  <div class="cta">
+    <a class="p" href="week1.html">Start with Week 1</a>
+    <a href="#map">See the 9-week map</a>
+    <a href="#season">How the season works</a>
+  </div>
+  <div class="facts">
+    <div class="fact"><div class="fv">3</div><div class="fl">Roles: exchange · broker · trader</div></div>
+    <div class="fact"><div class="fv">6</div><div class="fl">Unlock levels per role</div></div>
+    <div class="fact"><div class="fv">9</div><div class="fl">Live weekly sessions</div></div>
+    <div class="fact"><div class="fv">8765</div><div class="fl">The WebSocket port</div></div>
+  </div>
+</section>
+
+<!-- ══════════════ 9-WEEK MAP ══════════════ -->
+<section id="map">
+  <div class="kicker">The learning path</div>
+  <h2>Nine weeks, one system</h2>
+  <p class="lead">Each week is a concept, a piece of code, and a live market session. Nothing is thrown
+  away: the class hierarchy you draw in Week 1 is the thing you make concurrent in Week 2, protocol-ise
+  in Week 3, backtest in Week 4, optimise in Week 5 and defend in Week 9.</p>
+
+  <div class="weeks">
+
+    <a class="wk" href="week1.html"><div class="art"><svg viewBox="0 0 300 96" role="img" aria-label="Class boxes joined by an inheritance arrow">
+      <rect x="112" y="8" width="76" height="26" rx="4" fill="rgba(var(--accent-rgb),.18)" stroke="var(--accent-2)" stroke-width="1.3"/>
+      <text x="150" y="25" text-anchor="middle" font-size="10" fill="var(--accent-2)" font-family="monospace">Strategy</text>
+      <path d="M150 34 L150 48 M62 48 L238 48 M62 48 L62 60 M238 48 L238 60" stroke="#3a4150" stroke-width="1.2" fill="none"/>
+      <path d="M150 34 l-5 -8 h10 z" fill="none" stroke="var(--accent-2)" stroke-width="1.2"/>
+      <rect x="24" y="60" width="76" height="26" rx="4" fill="none" stroke="#3a4150" stroke-width="1.3"/>
+      <text x="62" y="77" text-anchor="middle" font-size="9.5" fill="#9aa0a6" font-family="monospace">Momentum</text>
+      <rect x="200" y="60" width="76" height="26" rx="4" fill="none" stroke="#3a4150" stroke-width="1.3"/>
+      <text x="238" y="77" text-anchor="middle" font-size="9.5" fill="#9aa0a6" font-family="monospace">MeanRev</text>
+    </svg></div><div class="bd">
+      <div class="n">Week 1</div><h3>UML &amp; Object-Oriented Programming</h3>
+      <p>Model the arena as objects, then sketch it in UML before you write a line of code.</p>
+      <div class="tags"><span>4 pillars</span><span>ABCs</span><span>class diagrams</span></div>
+      <div class="go">Open week 1</div></div></a>
+
+    <a class="wk" href="week2.html"><div class="art"><svg viewBox="0 0 300 96" role="img" aria-label="An event loop with three tasks">
+      <circle cx="150" cy="48" r="30" fill="none" stroke="var(--accent-2)" stroke-width="1.4" stroke-dasharray="5 4"/>
+      <text x="150" y="52" text-anchor="middle" font-size="9" fill="var(--accent-2)" font-family="monospace">loop</text>
+      <circle cx="150" cy="18" r="5" fill="var(--accent)"/><circle cx="180" cy="48" r="5" fill="var(--accent-2)"/>
+      <circle cx="150" cy="78" r="5" fill="#d29922"/><circle cx="120" cy="48" r="5" fill="#3fb950"/>
+      <rect x="8" y="22" width="60" height="16" rx="3" fill="none" stroke="#3a4150"/><text x="38" y="34" text-anchor="middle" font-size="8" fill="#9aa0a6" font-family="monospace">feed</text>
+      <rect x="8" y="42" width="60" height="16" rx="3" fill="none" stroke="#3a4150"/><text x="38" y="54" text-anchor="middle" font-size="8" fill="#9aa0a6" font-family="monospace">strategy</text>
+      <rect x="8" y="62" width="60" height="16" rx="3" fill="none" stroke="#3a4150"/><text x="38" y="74" text-anchor="middle" font-size="8" fill="#9aa0a6" font-family="monospace">orders</text>
+      <path d="M70 30 L114 44 M70 50 L118 48 M70 70 L114 54" stroke="#3a4150" stroke-width="1" fill="none"/>
+    </svg></div><div class="bd">
+      <div class="n">Week 2</div><h3>Concurrency &amp; Async in Python</h3>
+      <p>One event loop, many tasks — juggle a feed, orders and fills without ever blocking.</p>
+      <div class="tags"><span>GIL</span><span>asyncio</span><span>queues</span></div>
+      <div class="go">Open week 2</div></div></a>
+
+    <a class="wk" href="week3.html"><div class="art"><svg viewBox="0 0 300 96" role="img" aria-label="Framed messages travelling over a socket">
+      <rect x="10" y="34" width="52" height="28" rx="4" fill="rgba(var(--accent-rgb),.18)" stroke="var(--accent-2)" stroke-width="1.3"/>
+      <text x="36" y="52" text-anchor="middle" font-size="8.5" fill="var(--accent-2)" font-family="monospace">client</text>
+      <rect x="238" y="34" width="52" height="28" rx="4" fill="rgba(var(--accent-rgb),.18)" stroke="var(--accent-2)" stroke-width="1.3"/>
+      <text x="264" y="52" text-anchor="middle" font-size="8.5" fill="var(--accent-2)" font-family="monospace">venue</text>
+      <line x1="62" y1="48" x2="238" y2="48" stroke="#3a4150" stroke-width="1.2"/>
+      <g font-family="monospace" font-size="7.5" fill="#9aa0a6">
+        <rect x="80" y="40" width="34" height="16" rx="3" fill="#1e222b" stroke="#3fb950"/><text x="97" y="51" text-anchor="middle">len</text>
+        <rect x="122" y="40" width="42" height="16" rx="3" fill="#1e222b" stroke="#3fb950"/><text x="143" y="51" text-anchor="middle">json</text>
+        <rect x="172" y="40" width="34" height="16" rx="3" fill="#1e222b" stroke="#d29922"/><text x="189" y="51" text-anchor="middle">len</text>
+      </g>
+      <text x="150" y="80" text-anchor="middle" font-size="8" fill="#5f6673" font-family="monospace">TCP gives you bytes, not messages</text>
+    </svg></div><div class="bd">
+      <div class="n">Week 3</div><h3>Socket Streaming &amp; Protocols</h3>
+      <p>Turn bytes into typed messages: framing, WebSockets and a validated wire contract.</p>
+      <div class="tags"><span>TCP/UDP</span><span>WebSocket</span><span>pydantic</span></div>
+      <div class="go">Open week 3</div></div></a>
+
+    <a class="wk" href="week4.html"><div class="art"><svg viewBox="0 0 300 96" role="img" aria-label="An equity curve replayed from historical ticks">
+      <path d="M14 82 L52 74 L90 78 L128 58 L166 62 L204 40 L242 46 L286 20" fill="none" stroke="var(--accent-2)" stroke-width="1.8"/>
+      <path d="M14 82 L52 74 L90 78 L128 58 L166 62 L204 40 L242 46 L286 20 L286 90 L14 90 Z" fill="rgba(var(--accent-2-rgb),.1)" stroke="none"/>
+      <line x1="14" y1="90" x2="286" y2="90" stroke="#3a4150"/>
+      <g fill="#5f6673" font-family="monospace" font-size="7.5">
+        <text x="18" y="20">replay: 2019 &#8594; 2024</text></g>
+      <circle cx="204" cy="40" r="3" fill="#3fb950"/><circle cx="128" cy="58" r="3" fill="#3fb950"/>
+    </svg></div><div class="bd">
+      <div class="n">Week 4</div><h3>Backtester Architecture</h3>
+      <p>Run the same bot offline that you run live — event-driven replay, fills and honest metrics.</p>
+      <div class="tags"><span>look-ahead</span><span>fill sim</span><span>tearsheet</span></div>
+      <div class="go">Open week 4</div></div></a>
+
+    <a class="wk" href="week5.html"><div class="art"><svg viewBox="0 0 300 96" role="img" aria-label="Complexity curves O(1), O(log n) and O(n squared)">
+      <line x1="20" y1="86" x2="286" y2="86" stroke="#3a4150"/><line x1="20" y1="10" x2="20" y2="86" stroke="#3a4150"/>
+      <path d="M20 82 L286 78" fill="none" stroke="#3fb950" stroke-width="1.8"/>
+      <path d="M20 82 Q120 58 286 48" fill="none" stroke="#d29922" stroke-width="1.8"/>
+      <path d="M20 84 Q190 84 262 12" fill="none" stroke="#f85149" stroke-width="1.8"/>
+      <g font-family="monospace" font-size="8">
+        <text x="240" y="72" fill="#3fb950">O(1)</text><text x="240" y="42" fill="#d29922">O(log n)</text>
+        <text x="196" y="22" fill="#f85149">O(n&#178;)</text></g>
+    </svg></div><div class="bd">
+      <div class="n">Week 5</div><h3>Algorithmic Complexity &amp; Data Structures</h3>
+      <p>Pick the right structure, know its cost, and profile the hot path inside the order book.</p>
+      <div class="tags"><span>big-O</span><span>heaps</span><span>profiling</span></div>
+      <div class="go">Open week 5</div></div></a>
+
+    <a class="wk" href="week6.html"><div class="art"><svg viewBox="0 0 300 96" role="img" aria-label="A task fanned out to four worker processes">
+      <rect x="122" y="8" width="56" height="20" rx="4" fill="rgba(var(--accent-rgb),.2)" stroke="var(--accent-2)" stroke-width="1.3"/>
+      <text x="150" y="22" text-anchor="middle" font-size="8.5" fill="var(--accent-2)" font-family="monospace">driver</text>
+      <path d="M150 28 L44 56 M150 28 L114 56 M150 28 L186 56 M150 28 L256 56" stroke="#3a4150" stroke-width="1"/>
+      <g font-family="monospace" font-size="7.5" fill="#9aa0a6">
+        <rect x="16" y="56" width="56" height="24" rx="4" fill="#1e222b" stroke="#3a4150"/><text x="44" y="71" text-anchor="middle">worker 0</text>
+        <rect x="86" y="56" width="56" height="24" rx="4" fill="#1e222b" stroke="#3a4150"/><text x="114" y="71" text-anchor="middle">worker 1</text>
+        <rect x="158" y="56" width="56" height="24" rx="4" fill="#1e222b" stroke="#3a4150"/><text x="186" y="71" text-anchor="middle">worker 2</text>
+        <rect x="228" y="56" width="56" height="24" rx="4" fill="#1e222b" stroke="#3a4150"/><text x="256" y="71" text-anchor="middle">worker 3</text></g>
+    </svg></div><div class="bd">
+      <div class="n">Week 6</div><h3>Big Data &amp; Distributed Computing</h3>
+      <p>Think in columns and processes — parallelise a strategy search, not one lonely config.</p>
+      <div class="tags"><span>columnar</span><span>parquet</span><span>multiprocessing</span></div>
+      <div class="go">Open week 6</div></div></a>
+
+    <a class="wk" href="week7.html"><div class="art"><svg viewBox="0 0 300 96" role="img" aria-label="Walk-forward train and test folds">
+      <g font-family="monospace" font-size="7">
+        <rect x="20" y="16" width="90" height="14" rx="3" fill="rgba(var(--accent-2-rgb),.3)" stroke="var(--accent-2)"/>
+        <rect x="112" y="16" width="34" height="14" rx="3" fill="rgba(63,185,80,.25)" stroke="#3fb950"/>
+        <rect x="20" y="38" width="126" height="14" rx="3" fill="rgba(var(--accent-2-rgb),.3)" stroke="var(--accent-2)"/>
+        <rect x="148" y="38" width="34" height="14" rx="3" fill="rgba(63,185,80,.25)" stroke="#3fb950"/>
+        <rect x="20" y="60" width="162" height="14" rx="3" fill="rgba(var(--accent-2-rgb),.3)" stroke="var(--accent-2)"/>
+        <rect x="184" y="60" width="34" height="14" rx="3" fill="rgba(63,185,80,.25)" stroke="#3fb950"/>
+        <text x="232" y="27" fill="var(--accent-2)">train</text><text x="232" y="49" fill="#3fb950">test</text>
+        <text x="232" y="71" fill="#5f6673">roll &#8594;</text></g>
+    </svg></div><div class="bd">
+      <div class="n">Week 7</div><h3>Machine Learning Signals &amp; Model Ops</h3>
+      <p>Train offline, validate walk-forward, predict inside <code>on_tick</code> — without fooling yourself.</p>
+      <div class="tags"><span>features</span><span>leakage</span><span>model ops</span></div>
+      <div class="go">Open week 7</div></div></a>
+
+    <a class="wk" href="week8.html"><div class="art"><svg viewBox="0 0 300 96" role="img" aria-label="A CI pipeline with four green stages">
+      <g font-family="monospace" font-size="7.5" fill="#9aa0a6">
+        <circle cx="40" cy="48" r="13" fill="rgba(63,185,80,.16)" stroke="#3fb950"/><text x="40" y="51" text-anchor="middle">lint</text>
+        <circle cx="110" cy="48" r="13" fill="rgba(63,185,80,.16)" stroke="#3fb950"/><text x="110" y="51" text-anchor="middle">test</text>
+        <circle cx="180" cy="48" r="13" fill="rgba(63,185,80,.16)" stroke="#3fb950"/><text x="180" y="51" text-anchor="middle">build</text>
+        <circle cx="252" cy="48" r="13" fill="rgba(210,153,34,.16)" stroke="#d29922"/><text x="252" y="51" text-anchor="middle">ship</text>
+        <path d="M53 48 h44 M123 48 h44 M193 48 h46" stroke="#3a4150" stroke-width="1.2"/></g>
+      <text x="150" y="82" text-anchor="middle" font-size="8" fill="#5f6673" font-family="monospace">green on every push</text>
+    </svg></div><div class="bd">
+      <div class="n">Week 8</div><h3>CI/CD, Testing &amp; UI</h3>
+      <p>Make the bot tested, reproducible and observable so it runs the same everywhere.</p>
+      <div class="tags"><span>pytest</span><span>Docker</span><span>dashboard</span></div>
+      <div class="go">Open week 8</div></div></a>
+
+    <a class="wk" href="week9.html"><div class="art"><svg viewBox="0 0 300 96" role="img" aria-label="A locked season leaderboard">
+      <g font-family="monospace" font-size="8" fill="#9aa0a6">
+        <rect x="60" y="14" width="180" height="16" rx="3" fill="rgba(210,153,34,.18)" stroke="#d29922"/><text x="70" y="26">1 &#183; team alpha</text>
+        <rect x="60" y="36" width="180" height="16" rx="3" fill="#1e222b" stroke="#3a4150"/><text x="70" y="48">2 &#183; team beta</text>
+        <rect x="60" y="58" width="180" height="16" rx="3" fill="#1e222b" stroke="#3a4150"/><text x="70" y="70">3 &#183; team gamma</text></g>
+      <path d="M28 46 v-6 a8 8 0 0 1 16 0 v6" fill="none" stroke="var(--accent-2)" stroke-width="1.4"/>
+      <rect x="25" y="46" width="22" height="16" rx="3" fill="rgba(var(--accent-rgb),.3)" stroke="var(--accent-2)" stroke-width="1.2"/>
+    </svg></div><div class="bd">
+      <div class="n">Week 9</div><h3>Integration &amp; Demo — Season Finale</h3>
+      <p>Prove it end to end, measure it with a real tearsheet, and defend it. The leaderboard locks.</p>
+      <div class="tags"><span>integration</span><span>tearsheet</span><span>demo</span></div>
+      <div class="go">Open week 9</div></div></a>
+
+  </div>
+</section>
+
+<!-- ══════════════ HOW THE SEASON WORKS ══════════════ -->
+<section id="season">
+  <div class="kicker">Interactive</div>
+  <h2>How the season works — follow one order all the way to P&amp;L</h2>
+  <p class="lead">Three student-built roles share one WebSocket. The <em class="hi">Broker</em> turns Yahoo
+  Finance prices into resting quotes, the <em class="hi">Exchange</em> matches, the <em class="hi">Trader</em>
+  aggresses. Step through the lifecycle and watch the money move: every number below is computed from the
+  arena's real fee model (taker 0.0015, maker rebate 0.0010).</p>
+
+  <div class="split" style="margin-top:18px">
+    <div class="stack">
+      <div class="svgwrap">
+        <svg id="lifeSvg" viewBox="0 0 640 300" role="img" aria-label="Message flow between Yahoo Finance, broker, exchange and trader">
+          <defs>
+            <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="#3a4150"/></marker>
+          </defs>
+          <g id="lifeEdges" stroke="#2a303b" stroke-width="1.4" fill="none" marker-end="url(#ar)">
+            <line x1="96" y1="52" x2="96" y2="104"/>
+            <line x1="150" y1="130" x2="266" y2="130"/>
+            <line x1="266" y1="176" x2="150" y2="176"/>
+            <line x1="424" y1="130" x2="540" y2="130"/>
+            <line x1="540" y1="176" x2="424" y2="176"/>
+          </g>
+          <g font-family="monospace">
+            <g id="nYahoo"><rect x="30" y="16" width="132" height="36" rx="7" fill="#1e222b" stroke="#3a4150" stroke-width="1.4"/>
+              <text x="96" y="39" text-anchor="middle" font-size="11.5" fill="#9aa0a6">Yahoo Finance</text></g>
+            <g id="nBroker"><rect x="30" y="104" width="120" height="72" rx="8" fill="#1e222b" stroke="#3a4150" stroke-width="1.6"/>
+              <text x="90" y="132" text-anchor="middle" font-size="12.5" fill="#e8e6e3" font-weight="700">BROKER</text>
+              <text x="90" y="150" text-anchor="middle" font-size="9.5" fill="#5f6673">market maker</text>
+              <text x="90" y="164" text-anchor="middle" font-size="9.5" fill="#5f6673">earns the spread</text></g>
+            <g id="nExch"><rect x="266" y="92" width="158" height="96" rx="8" fill="#1e222b" stroke="#3a4150" stroke-width="1.6"/>
+              <text x="345" y="120" text-anchor="middle" font-size="12.5" fill="#e8e6e3" font-weight="700">EXCHANGE</text>
+              <text x="345" y="138" text-anchor="middle" font-size="9.5" fill="#5f6673">CLOB &#183; price-time</text>
+              <text x="345" y="152" text-anchor="middle" font-size="9.5" fill="#5f6673">earns the fees</text>
+              <text x="345" y="174" text-anchor="middle" font-size="9.5" fill="var(--accent-2)">ws://&#8230;:8765</text></g>
+            <g id="nTrader"><rect x="540" y="104" width="118" height="72" rx="8" fill="#1e222b" stroke="#3a4150" stroke-width="1.6"/>
+              <text x="599" y="132" text-anchor="middle" font-size="12.5" fill="#e8e6e3" font-weight="700">TRADER</text>
+              <text x="599" y="150" text-anchor="middle" font-size="9.5" fill="#5f6673">your bot</text>
+              <text x="599" y="164" text-anchor="middle" font-size="9.5" fill="#5f6673">earns the edge</text></g>
+          </g>
+          <g id="book" font-family="monospace" font-size="10">
+            <text x="266" y="222" font-size="9" fill="#5f6673">ORDER BOOK &#183; AAPL</text>
+            <rect x="266" y="230" width="158" height="20" rx="4" fill="#181b22" stroke="#272c36"/>
+            <text id="bkAsk" x="274" y="244" fill="#f85149">ask   &#8212;</text>
+            <rect x="266" y="254" width="158" height="20" rx="4" fill="#181b22" stroke="#272c36"/>
+            <text id="bkBid" x="274" y="268" fill="#3fb950">bid   &#8212;</text>
+          </g>
+          <g id="packet" opacity="0">
+            <rect x="-34" y="-11" width="68" height="22" rx="6" fill="var(--accent)" stroke="var(--accent-2)" stroke-width="1.3"/>
+            <text id="packetT" x="0" y="4" text-anchor="middle" font-size="9" fill="#fff" font-family="monospace">msg</text>
+          </g>
+        </svg>
+      </div>
+      <div class="row">
+        <button class="btn primary" id="lifeStep" type="button" aria-label="Advance the order lifecycle one step">Step &#8594;</button>
+        <button class="btn" id="lifePlay" type="button" aria-label="Play the whole order lifecycle">&#9654; Play</button>
+        <button class="btn" id="lifeReset" type="button" aria-label="Reset the order lifecycle">&#8634; Reset</button>
+        <span class="pill acc" id="lifeCount">step 0 / 7</span>
+      </div>
+      <div class="panel tight">
+        <h3 id="lifeTitle">Press Step to begin</h3>
+        <pre class="code" id="lifeMsg" style="font-size:11px">Handshake(team_id="T07", role="trader", level=1)</pre>
+        <p class="sub" id="lifeNote" style="margin-top:9px">Every message on the wire is a pydantic model from <code>shared/messages.py</code> — never a raw dict.</p>
+      </div>
+    </div>
+
+    <div class="stack">
+      <div class="panel tight">
+        <h3>Trader &#183; team T07</h3>
+        <div class="stats">
+          <div class="stat"><div class="sl">cash</div><div class="sv" id="tCash">100000.00</div></div>
+          <div class="stat"><div class="sl">position</div><div class="sv" id="tPos">0</div></div>
+          <div class="stat"><div class="sl">net worth &#916;</div><div class="sv acc" id="tPnl">0.00</div></div>
+        </div>
+      </div>
+      <div class="panel tight">
+        <h3>Broker &#183; team BRK</h3>
+        <div class="stats">
+          <div class="stat"><div class="sl">inventory</div><div class="sv" id="bInv">0</div></div>
+          <div class="stat"><div class="sl">quoted spread</div><div class="sv" id="bSpr">&#8212;</div></div>
+          <div class="stat"><div class="sl">net worth &#916;</div><div class="sv acc" id="bPnl">0.00</div></div>
+        </div>
+      </div>
+      <div class="panel tight">
+        <h3>Exchange &#183; venue</h3>
+        <div class="stats">
+          <div class="stat"><div class="sl">taker fee</div><div class="sv" id="xTake">0.00</div></div>
+          <div class="stat"><div class="sl">maker rebate</div><div class="sv" id="xMake">0.00</div></div>
+          <div class="stat"><div class="sl">net revenue</div><div class="sv acc" id="xNet">0.00</div></div>
+        </div>
+      </div>
+      <div class="note" id="lifeSum">The three P&amp;Ls always sum to zero — nobody creates value, they
+      transfer it. That is the whole competition: decide which side of the transfer you want to be on.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ ROLES ══════════════ -->
+<section id="roles">
+  <div class="kicker">Pick a side</div>
+  <h2>Three roles, three business models</h2>
+  <p class="lead">In Week 1 you declare a role. It decides what you build, how you earn, and which unlock
+  ladder you climb for the rest of the season.</p>
+  <div class="tabs role" role="tablist" aria-label="Choose a role">
+    <button class="tab" role="tab" id="rt-exchange" aria-selected="true" aria-controls="rp-exchange">Exchange</button>
+    <button class="tab" role="tab" id="rt-broker" aria-selected="false" aria-controls="rp-broker">Broker</button>
+    <button class="tab" role="tab" id="rt-trader" aria-selected="false" aria-controls="rp-trader">Trader</button>
+  </div>
+  <div class="role">
+    <div class="rp on grid3" id="rp-exchange" role="tabpanel" aria-labelledby="rt-exchange">
+      <div class="panel"><h4>What you build</h4><p class="sub">A WebSocket server with a central limit
+      order book. Price-time priority matching, order acks, book snapshots, portfolio updates — the venue
+      everyone else connects to.</p></div>
+      <div class="panel"><h4>How you earn</h4><p class="sub">Transaction fees. Under the maker/taker model
+      you collect 0.0015 from the aggressor and pay 0.0010 back to the resting order; the difference is
+      yours. Set fees too high and flow leaves for another venue.</p></div>
+      <div class="panel"><h4>Your ladder</h4><ul class="plain">
+        <li>L1 basic CLOB, flat fee</li><li>L2 portfolios &amp; leaderboard</li><li>L3 maker/taker fees</li>
+        <li>L4 circuit breakers (LULD)</li><li>L5 rate limits &amp; order types</li><li>L6 full analytics dashboard</li></ul></div>
+    </div>
+    <div class="rp grid3" id="rp-broker" role="tabpanel" aria-labelledby="rt-broker" hidden>
+      <div class="panel"><h4>What you build</h4><p class="sub">A market maker. Poll Yahoo Finance on a
+      background thread, derive a fair value, and continuously post two-sided quotes on the exchange —
+      requoting whenever the reference price moves.</p></div>
+      <div class="panel"><h4>How you earn</h4><p class="sub">The spread: <code>(ask_fill - bid_fill) &#215; qty / 2</code>,
+      plus the maker rebate. Your enemy is inventory risk — a one-sided market leaves you holding the position
+      while the price runs against you.</p></div>
+      <div class="panel"><h4>Your ladder</h4><ul class="plain">
+        <li>L1 static spread quotes</li><li>L2 requote on price move</li><li>L3 vol-adjusted spread</li>
+        <li>L4 inventory skew</li><li>L5 toxic-flow detection</li><li>L6 multi-venue routing</li></ul></div>
+    </div>
+    <div class="rp grid3" id="rp-trader" role="tabpanel" aria-labelledby="rt-trader" hidden>
+      <div class="panel"><h4>What you build</h4><p class="sub">An algorithmic bot. Subclass
+      <code>arena.Trader</code>, implement <code>on_tick(market, portfolio)</code>, return a
+      <code>Signal</code> — or <code>None</code>. The SDK handles sockets, auth and reconnection.</p></div>
+      <div class="panel"><h4>How you earn</h4><p class="sub">Realised P&amp;L on closed positions plus the
+      mark-to-market on open ones, net of fees. Every crossing trade pays the spread and the taker fee, so
+      an edge has to beat both before it is an edge.</p></div>
+      <div class="panel"><h4>Your ladder</h4><ul class="plain">
+        <li>L1 connect &amp; place orders</li><li>L2 live portfolio tracking</li><li>L3 a real signal</li>
+        <li>L4 risk management</li><li>L5 execution optimisation</li><li>L6 ML strategies</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ START HERE ══════════════ -->
+<section id="start">
+  <div class="kicker">Week 0 &#183; before anything else</div>
+  <h2>Start here — six steps to a green smoke test</h2>
+  <p class="lead">Week 1 assumes Week 0 is green. Tick each step as you finish it; the lamp turns green
+  when your environment is ready to connect to the arena. (Your ticks are kept only in this browser tab.)</p>
+
+  <div class="split" style="margin-top:18px">
+    <div>
+      <div class="chk" id="chkList">
+        <label class="item"><input type="checkbox" data-i="0" aria-label="Step 1: create a Python 3.11 environment"/>
+          <span class="txt"><span class="t">1 &#183; Python 3.11 environment</span>
+          <span class="c">uv venv .venv --python 3.11 &amp;&amp; source .venv/bin/activate</span></span></label>
+        <label class="item"><input type="checkbox" data-i="1" aria-label="Step 2: clone the repo and install"/>
+          <span class="txt"><span class="t">2 &#183; Clone your team repo &amp; install</span>
+          <span class="c">git clone &lt;your-repo&gt; &amp;&amp; make install</span></span></label>
+        <label class="item"><input type="checkbox" data-i="2" aria-label="Step 3: export your Anthropic API key"/>
+          <span class="txt"><span class="t">3 &#183; Anthropic API key (Claude responds)</span>
+          <span class="c">export ANTHROPIC_API_KEY="sk-ant-..."</span></span></label>
+        <label class="item"><input type="checkbox" data-i="3" aria-label="Step 4: verify the yfinance price feed"/>
+          <span class="txt"><span class="t">4 &#183; yfinance price feed works</span>
+          <span class="c">python -c "import yfinance as yf; print(yf.Ticker('AAPL').fast_info)"</span></span></label>
+        <label class="item"><input type="checkbox" data-i="4" aria-label="Step 5: run the arena smoke test suite"/>
+          <span class="txt"><span class="t">5 &#183; Arena smoke test suite passes</span>
+          <span class="c">python -m pytest tests/test_smoke.py -v</span></span></label>
+        <label class="item"><input type="checkbox" data-i="5" aria-label="Step 6: connect your bot to the arena"/>
+          <span class="txt"><span class="t">6 &#183; Your bot appears in the dashboard</span>
+          <span class="c">TEAM_ID=&lt;id&gt; python -m team.trader</span></span></label>
+      </div>
+      <div class="bar"><i id="chkBar"></i></div>
+      <div class="smoke" id="smokeBadge"><span class="lamp"></span><span id="smokeTxt">Smoke test: RED &#183; 0 of 6 steps</span></div>
+    </div>
+
+    <div class="stack">
+      <div class="panel tight"><h3>If something is red</h3>
+        <details class="pit"><summary>ConnectionRefused when the bot connects</summary>
+          <div class="body"><p>The exchange server is not running yet — the instructor starts it first.</p>
+          <p class="fix">Check <code>EXCHANGE_HOST</code> and <code>EXCHANGE_PORT</code> in your <code>.env</code>.</p></div></details>
+        <details class="pit"><summary>pydantic import error</summary>
+          <div class="body"><p>The arena requires pydantic v2 and will not run against v1.</p>
+          <p class="fix">Re-run <code>make install</code> in a clean 3.11 venv; never mix v1 and v2.</p></div></details>
+        <details class="pit"><summary>API key not found on Windows</summary>
+          <div class="body"><p><code>export</code> is not persistent on Windows shells.</p>
+          <p class="fix">Copy <code>.env.example</code> to <code>.env</code> and load it with python-dotenv. Never commit <code>.env</code>.</p></div></details>
+        <details class="pit"><summary>yfinance rate-limited</summary>
+          <div class="body"><p>Yahoo throttles aggressive polling; a tight <code>yf.download()</code> loop will get you blocked.</p>
+          <p class="fix">Respect <code>YAHOO_POLL_INTERVAL</code> (5s default); the broker SDK already backs off.</p></div></details>
+        <details class="pit"><summary>Bot missing from the teacher dashboard</summary>
+          <div class="body"><p>The handshake was accepted but under a team the instructor does not know.</p>
+          <p class="fix">Your <code>TEAM_ID</code> (and <code>ARENA_TOKEN</code>) must match the registered roster exactly.</p></div></details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ ELSEWHERE ══════════════ -->
+<section id="next">
+  <div class="kicker">Where to go next</div>
+  <h2>Start here, get the code, see the prequel</h2>
+  <div class="nextgrid" style="margin-top:16px">
+    <a class="nextcard" href="week1.html"><div class="nl">Begin</div><div class="nt">Week 1 &#183; UML &amp; OOP</div>
+      <div class="nd">Model the arena as objects, then draw it before you build it.</div></a>
+    <a class="nextcard" href="https://github.com/sdonadio/algoarena-team-template"><div class="nl">Code</div>
+      <div class="nt">Get the code</div><div class="nd">Labs and homework live in your course&#8217;s LMS; the starter repo is public. Use it as a template, clone, <code>make install</code>.</div></a>
+    <a class="nextcard" href="https://sdonadio.github.io/computer-architecture-arena/"><div class="nl">Prequel</div>
+      <div class="nt">Computer Architecture Arena</div><div class="nd">Nine interactive dashboards on the machine your Python actually runs on — from the Turing machine to tick-to-trade.</div></a>
+  </div>
+</section>
+
+<footer>Systematic Trading Arena · an interactive companion for a 9-week systematic-trading course · <a href="https://github.com/sdonadio/systematic-trading-arena">Source</a></footer>
+
+<script>
+"use strict";
+/* ════════════════════════════════════════════════════════════════
+   Systematic Trading Arena — course home
+   ════════════════════════════════════════════════════════════════ */
+var $ = function (id) { return document.getElementById(id); };
+var f2 = function (n) { return (n < 0 ? "-" : "") + Math.abs(n).toFixed(2); };
+
+/* ── 1. ORDER-LIFECYCLE WIDGET ───────────────────────────────── */
+var NODE = {
+  yahoo:   { x: 96,  y: 34,  el: "nYahoo" },
+  broker:  { x: 90,  y: 140, el: "nBroker" },
+  exchange:{ x: 345, y: 140, el: "nExch" },
+  trader:  { x: 599, y: 140, el: "nTrader" }
+};
+
+var MID = 185.50, BID = 185.45, ASK = 185.55, QTY = 5, TPX = 185.55;
+var NOTIONAL = QTY * TPX;                 /* 927.75 */
+var TAKER = NOTIONAL * 0.0015;            /* 1.391625 */
+var REBATE = NOTIONAL * 0.0010;           /* 0.92775  */
+
+var STEPS = [
+  { from: "yahoo", to: "broker", tag: "px",
+    title: "1 · The broker polls Yahoo Finance",
+    msg: "# broker/broker.py — on a BACKGROUND THREAD\nyf.Ticker('AAPL').fast_info['last_price']  ->  185.50",
+    note: "yfinance is blocking HTTP, so it is the one thread in the whole system. Everything else is asyncio.",
+    apply: function (s) { s.ref = MID; } },
+
+  { from: "broker", to: "exchange", tag: "PlaceOrder",
+    title: "2 · The broker posts a two-sided quote",
+    msg: "PlaceOrder(team_id='BRK', symbol='AAPL', side='buy',\n           order_type='limit', price=185.45, quantity=100)\nPlaceOrder(team_id='BRK', symbol='AAPL', side='sell',\n           order_type='limit', price=185.55, quantity=100)",
+    note: "Both orders rest in the book — they are passive, so they are makers. The broker is now short volatility and long inventory risk.",
+    apply: function (s) { s.bid = BID; s.ask = ASK; } },
+
+  { from: "exchange", to: "trader", tag: "BookSnapshot",
+    title: "3 · The exchange streams the book",
+    msg: "BookSnapshot(symbol='AAPL',\n  bids=[[185.45, 100]], asks=[[185.55, 100]],\n  mid=185.50, microprice=185.50)",
+    note: "Pushed the instant the book changes over one persistent WebSocket. No polling, no re-handshake — this is what your on_tick() sees as market.",
+    apply: function (s) { s.sawBook = true; } },
+
+  { from: "trader", to: "exchange", tag: "PlaceOrder",
+    title: "4 · Your bot decides and sends",
+    msg: "# your code\ndef on_tick(self, market, portfolio):\n    return Signal('AAPL', 'buy', 5, market.best_ask('AAPL'))\n\n-> PlaceOrder(team_id='T07', symbol='AAPL', side='buy',\n              order_type='limit', price=185.55, quantity=5)",
+    note: "The SDK serialises your Signal with model_dump_json(). Because it crosses the resting ask, it will be the taker.",
+    apply: function (s) { s.pending = QTY; } },
+
+  { from: "exchange", to: "exchange", tag: "match",
+    title: "5 · The matching engine crosses it",
+    msg: "scan asks sorted by price, then time:\n  185.55 x100  (BRK, resting)  <- best\nprices cross -> trade 5 @ 185.55\n(the RESTING order's price wins — not the aggressor's)",
+    note: "Price-time priority. The taker never improves on its own limit: it pays the resting price. That half-spread is the broker's revenue.",
+    apply: function (s) { s.pending = 0; s.filled = QTY; s.last = TPX; s.ask = ASK; s.askQty = 95; } },
+
+  { from: "exchange", to: "trader", tag: "TradeExec",
+    title: "6 · Fills go back to both sides",
+    msg: "TradeExecution(symbol='AAPL', price=185.55, quantity=5,\n  aggressor='buy', fee=1.39,     team_id='T07')   # taker\nTradeExecution(symbol='AAPL', price=185.55, quantity=5,\n  aggressor='buy', fee=-0.93,    team_id='BRK')  # maker rebate",
+    note: "One trade, two fills, opposite signs. Your on_fill() hook fires here — this is the only place a position is truly created.",
+    apply: function (s) {
+      s.tCash = 100000 - NOTIONAL - TAKER; s.tPos = QTY;
+      s.bInv = -QTY; s.bCash = NOTIONAL + REBATE;
+      s.xTake = TAKER; s.xMake = REBATE;
+    } },
+
+  { from: "exchange", to: "trader", tag: "Portfolio",
+    title: "7 · Portfolio update, then mark to market",
+    msg: "PortfolioUpdate(team_id='T07', cash=99070.86,\n  positions={'AAPL': 5}, net_worth=99998.36,\n  realized_pnl=0.0, unrealized_pnl=-0.25)",
+    note: "Marked at the 185.50 mid you paid 185.55 for. You are down the half-spread (0.25) plus the taker fee (1.39) before your idea has had a single tick to work.",
+    apply: function (s) { s.marked = true; } }
+];
+
+var lifeState, lifeIdx = 0, lifeTimer = null;
+
+function lifeReset() {
+  lifeIdx = 0;
+  lifeState = { ref: null, bid: null, ask: null, askQty: 100, last: null, pending: 0, filled: 0,
+    tCash: 100000, tPos: 0, bInv: 0, bCash: 0, xTake: 0, xMake: 0, marked: false, sawBook: false };
+  if (lifeTimer) { clearInterval(lifeTimer); lifeTimer = null; $("lifePlay").innerHTML = "&#9654; Play"; }
+  $("packet").setAttribute("opacity", "0");
+  $("lifeTitle").textContent = "Press Step to begin";
+  $("lifeMsg").textContent = "Handshake(team_id='T07', role='trader', level=1)";
+  $("lifeNote").innerHTML = "Every message on the wire is a pydantic model from <code>shared/messages.py</code> — never a raw dict.";
+  $("lifeSum").innerHTML = "The three P&amp;Ls always sum to zero — nobody creates value, they transfer it. " +
+    "That is the whole competition: decide which side of the transfer you want to be on.";
+  Object.keys(NODE).forEach(function (k) { hiNode(k, false); });
+  lifeDraw();
+}
+
+function hiNode(key, on) {
+  var g = $(NODE[key].el); if (!g) return;
+  var r = g.querySelector("rect");
+  r.setAttribute("stroke", on ? "#7cb0ff" : "#3a4150");
+  r.setAttribute("fill", on ? "rgba(59,130,246,.28)" : "#1e222b");
+}
+
+function lifeDraw() {
+  var s = lifeState;
+  $("bkAsk").textContent = s.ask ? "ask   185.55 x " + s.askQty : "ask   —";
+  $("bkBid").textContent = s.bid ? "bid   185.45 x 100" : "bid   —";
+  $("tCash").textContent = f2(s.tCash);
+  $("tPos").textContent = String(s.tPos);
+  var tNet = s.tCash + s.tPos * MID - 100000;
+  var bNet = s.bCash + s.bInv * MID;
+  var xNet = s.xTake - s.xMake;
+  setSv("tPnl", tNet); setSv("bPnl", bNet); setSv("xNet", xNet);
+  $("bInv").textContent = String(s.bInv);
+  $("bSpr").textContent = s.ask ? "0.10" : "—";
+  $("xTake").textContent = f2(s.xTake);
+  $("xMake").textContent = f2(s.xMake);
+  $("lifeCount").textContent = "step " + lifeIdx + " / " + STEPS.length;
+  $("lifeStep").disabled = lifeIdx >= STEPS.length;
+  if (lifeIdx >= STEPS.length) {
+    $("lifeSum").innerHTML = "Trader <b>" + f2(tNet) + "</b> &nbsp;+&nbsp; Broker <b>" + f2(bNet) +
+      "</b> &nbsp;+&nbsp; Exchange <b>" + f2(xNet) + "</b> &nbsp;=&nbsp; <b>0.00</b>. " +
+      "Zero-sum, to the cent. The broker earned the half-spread plus the maker rebate; the venue kept the " +
+      "difference between the taker fee and that rebate; the trader paid for immediacy. Your edge has to be " +
+      "bigger than that bill before it is an edge at all.";
+  }
+}
+
+function setSv(id, v) {
+  var el = $(id);
+  el.textContent = f2(v);
+  el.className = "sv " + (Math.abs(v) < 0.005 ? "acc" : (v > 0 ? "ok" : "bad"));
+}
+
+function lifeStep() {
+  if (lifeIdx >= STEPS.length) return;
+  var st = STEPS[lifeIdx];
+  lifeIdx += 1;
+  st.apply(lifeState);
+  $("lifeTitle").textContent = st.title;
+  $("lifeMsg").textContent = st.msg;
+  $("lifeNote").textContent = st.note;
+  Object.keys(NODE).forEach(function (k) { hiNode(k, k === st.from || k === st.to); });
+  flyPacket(st);
+  lifeDraw();
+}
+
+function flyPacket(st) {
+  var p = $("packet"), t = $("packetT"), a = NODE[st.from], b = NODE[st.to];
+  t.textContent = st.tag;
+  p.style.transition = "none";
+  p.setAttribute("transform", "translate(" + a.x + "," + a.y + ")");
+  p.setAttribute("opacity", "1");
+  /* force a reflow so the browser keeps the start position, then animate */
+  void p.getBoundingClientRect();
+  p.style.transition = "transform .55s cubic-bezier(.4,0,.2,1)";
+  var tx = b.x, ty = b.y;
+  if (st.from === st.to) { tx = b.x; ty = b.y - 34; }
+  p.setAttribute("transform", "translate(" + tx + "," + ty + ")");
+}
+
+$("lifeStep").addEventListener("click", lifeStep);
+$("lifeReset").addEventListener("click", lifeReset);
+$("lifePlay").addEventListener("click", function () {
+  if (lifeTimer) { clearInterval(lifeTimer); lifeTimer = null; this.innerHTML = "&#9654; Play"; return; }
+  if (lifeIdx >= STEPS.length) lifeReset();
+  this.innerHTML = "&#10073;&#10073; Pause";
+  var btn = this;
+  lifeTimer = setInterval(function () {
+    lifeStep();
+    if (lifeIdx >= STEPS.length) { clearInterval(lifeTimer); lifeTimer = null; btn.innerHTML = "&#9654; Play"; }
+  }, 1500);
+});
+
+/* ── 2. ROLE TABS ────────────────────────────────────────────── */
+var ROLES = ["exchange", "broker", "trader"];
+ROLES.forEach(function (r) {
+  $("rt-" + r).addEventListener("click", function () { pickRole(r); });
+  $("rt-" + r).addEventListener("keydown", function (e) {
+    var i = ROLES.indexOf(r);
+    if (e.key === "ArrowRight") { pickRole(ROLES[(i + 1) % 3]); $("rt-" + ROLES[(i + 1) % 3]).focus(); }
+    if (e.key === "ArrowLeft") { pickRole(ROLES[(i + 2) % 3]); $("rt-" + ROLES[(i + 2) % 3]).focus(); }
+  });
+});
+function pickRole(r) {
+  ROLES.forEach(function (k) {
+    $("rt-" + k).setAttribute("aria-selected", k === r ? "true" : "false");
+    var p = $("rp-" + k);
+    if (k === r) { p.classList.add("on"); p.removeAttribute("hidden"); }
+    else { p.classList.remove("on"); p.setAttribute("hidden", ""); }
+  });
+}
+
+/* ── 3. WEEK-0 SMOKE-TEST CHECKLIST ──────────────────────────── */
+var KEY = "sta-w0";
+var boxes = Array.prototype.slice.call(document.querySelectorAll("#chkList input"));
+function loadChk() {
+  var saved = "";
+  try { saved = window.sessionStorage.getItem(KEY) || ""; } catch (e) { saved = ""; }
+  boxes.forEach(function (b, i) { b.checked = saved.charAt(i) === "1"; });
+}
+function saveChk() {
+  try { window.sessionStorage.setItem(KEY, boxes.map(function (b) { return b.checked ? "1" : "0"; }).join("")); }
+  catch (e) { /* private mode — ticks simply are not persisted */ }
+}
+function drawChk() {
+  var n = 0;
+  boxes.forEach(function (b) {
+    b.parentNode.classList.toggle("done", b.checked);
+    if (b.checked) n += 1;
+  });
+  $("chkBar").style.width = (100 * n / boxes.length) + "%";
+  var green = n === boxes.length;
+  $("smokeBadge").classList.toggle("green", green);
+  $("smokeTxt").textContent = green
+    ? "Smoke test: GREEN · 6 of 6 — you are ready for Week 1"
+    : "Smoke test: RED · " + n + " of 6 steps";
+}
+boxes.forEach(function (b) { b.addEventListener("change", function () { saveChk(); drawChk(); }); });
+
+/* ── boot ────────────────────────────────────────────────────── */
+lifeReset();
+loadChk();
+drawChk();
+</script>
+</body>
+</html>

@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="data:," />
+<title>Week 3 · Socket Streaming &amp; Protocols — Systematic Trading Arena</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    /* ── Systematic Trading Arena · shared palette (identical on every page) ── */
+    --accent:       #3b82f6;
+    --accent-2:     #7cb0ff;
+    --accent-3:     #b9d4ff;
+    --accent-rgb:   59,130,246;
+    --accent-2-rgb: 124,176,255;
+    --bg:           #0f1115;
+    --panel:        #181b22;
+    --panel2:       #1e222b;
+    --panel-2:      #13161b;
+    --ink:          #e8e6e3;
+    --ink-dim:      #c6c3bf;
+    --ink-mute:     #6f757f;
+    --muted:        #9aa0a6;
+    --dim:          #5f6673;
+    --line:         #272c36;
+    --line-2:       #333a47;
+    --border:       #272c36;
+    --ok:           #3fb950;
+    --warn:         #d29922;
+    --bad:          #f85149;
+    --info:         #6cb6ff;
+    --sky:          #58a6ff;
+    --violet:       #a78bfa;
+    --teal:         #2dd4bf;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.62;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent-2);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  /* ── nav / footer ─────────────────────────────────────────── */
+  nav.top{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    padding:11px 22px;background:rgba(15,17,21,.94);border-bottom:1px solid var(--line)}
+  nav.top>a:first-child{font-weight:800;letter-spacing:-.2px;color:var(--ink);font-size:14.5px;
+    border-left:3px solid var(--accent);padding-left:10px}
+  nav.top .crumbs{font-size:12px;color:var(--muted)}
+  nav.top .crumbs b{color:var(--ink);font-weight:700}
+  footer{border-top:1px solid var(--line);background:var(--panel);
+    padding:26px 22px 34px;text-align:center;font-size:11.5px;color:var(--dim);letter-spacing:.3px}
+
+  /* ── sections & typography ────────────────────────────────── */
+  section{max-width:1180px;margin:0 auto;padding:36px 22px 42px;border-top:1px solid var(--line)}
+  section#hero{border-top:none}
+  .kicker{font-size:10.5px;font-weight:800;letter-spacing:1.9px;text-transform:uppercase;color:var(--accent-2)}
+  h1{font-size:clamp(26px,4.2vw,40px);font-weight:800;letter-spacing:-.9px;line-height:1.13;margin:10px 0 6px}
+  h2{font-size:21px;font-weight:700;letter-spacing:-.3px;margin:4px 0 4px}
+  h3{font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:11px}
+  h4{font-size:13.5px;font-weight:700;margin-bottom:5px}
+  p{margin:9px 0;max-width:82ch}
+  .lead{color:var(--muted);font-size:15px;max-width:84ch}
+  .sub{color:var(--muted);font-size:12.5px}
+  strong{color:#fff;font-weight:650}
+  em.hi{color:var(--accent-2);font-style:normal;font-weight:600}
+  code,.mono{font-family:var(--mono);font-size:12.5px}
+  code{background:rgba(var(--accent-2-rgb),.13);color:#c7ddff;padding:1px 5px;border-radius:4px}
+  ul.you{list-style:none;margin:16px 0 0;display:grid;gap:8px}
+  ul.you li{position:relative;padding-left:26px;font-size:13.5px;color:var(--ink);max-width:78ch}
+  ul.you li::before{content:"";position:absolute;left:4px;top:8px;width:8px;height:8px;border-radius:2px;
+    background:var(--accent);box-shadow:0 0 0 3px rgba(var(--accent-rgb),.22)}
+  ul.plain{list-style:none;display:grid;gap:7px;font-size:13px;color:var(--muted)}
+  ul.plain li{padding-left:16px;position:relative}
+  ul.plain li::before{content:"\2022";position:absolute;left:2px;color:var(--accent-2)}
+
+  /* ── panels & layout ──────────────────────────────────────── */
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .panel.tight{padding:13px 14px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:start}
+  .split{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px;align-items:start}
+  .split-r{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:18px;align-items:start}
+  .stack{display:grid;gap:14px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+  /* ── controls ─────────────────────────────────────────────── */
+  .btn{font-family:inherit;font-size:12px;font-weight:650;cursor:pointer;color:var(--ink);
+    background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:7px 14px;transition:.15s}
+  .btn:hover:not(:disabled){border-color:var(--accent-2);color:#fff}
+  .btn:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+  .btn:disabled{opacity:.35;cursor:not-allowed}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.primary:hover:not(:disabled){filter:brightness(1.25)}
+  .btn.on{background:rgba(var(--accent-rgb),.28);border-color:var(--accent-2);color:#fff}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+  .tab{font-family:inherit;font-size:12px;font-weight:650;cursor:pointer;color:var(--muted);
+    background:transparent;border:1px solid var(--line);border-radius:20px;padding:6px 14px;transition:.15s}
+  .tab:hover{color:var(--ink)}
+  .tab[aria-selected="true"]{background:rgba(var(--accent-rgb),.3);border-color:var(--accent-2);color:#fff}
+  .tab:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+  .ctl{display:grid;gap:4px;margin-bottom:12px}
+  .ctl label{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);
+    display:flex;justify-content:space-between;gap:10px}
+  .ctl label b{font-family:var(--mono);color:var(--accent-2);font-size:12px;text-transform:none;letter-spacing:0}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:3px;
+    background:#2b313d;outline:none;cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;
+    background:var(--accent-2);border:2px solid var(--bg);cursor:pointer}
+  input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--accent-2);
+    border:2px solid var(--bg);cursor:pointer}
+  input[type=range]:focus-visible{box-shadow:0 0 0 3px rgba(var(--accent-2-rgb),.4)}
+  select,textarea,input[type=text]{font-family:var(--mono);font-size:12.5px;color:var(--ink);
+    background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:7px 9px;width:100%}
+  select:focus-visible,textarea:focus-visible,input:focus-visible{outline:2px solid var(--accent-2);outline-offset:1px}
+  textarea{line-height:1.55;resize:vertical}
+
+  /* ── stats / pills / code ─────────────────────────────────── */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:1px;
+    background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .stat{background:var(--panel);padding:10px 12px}
+  .stat .sl{font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--dim)}
+  .stat .sv{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--ink);margin-top:3px}
+  .stat .sv.ok{color:var(--ok)} .stat .sv.bad{color:var(--bad)} .stat .sv.warn{color:var(--warn)}
+  .stat .sv.acc{color:var(--accent-2)}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;letter-spacing:.5px;
+    padding:3px 9px;border-radius:20px;border:1px solid var(--line);color:var(--muted)}
+  .pill.ok{color:var(--ok);border-color:rgba(63,185,80,.5);background:rgba(63,185,80,.1)}
+  .pill.bad{color:var(--bad);border-color:rgba(248,81,73,.5);background:rgba(248,81,73,.1)}
+  .pill.warn{color:var(--warn);border-color:rgba(210,153,34,.5);background:rgba(210,153,34,.1)}
+  .pill.acc{color:var(--accent-2);border-color:rgba(var(--accent-2-rgb),.5);background:rgba(var(--accent-rgb),.18)}
+  pre.code{font-family:var(--mono);font-size:11.8px;line-height:1.62;background:#0b0e14;color:#dbe3ea;
+    border:1px solid var(--line);border-radius:10px;padding:13px 14px;overflow-x:auto;white-space:pre}
+  pre.code .k{color:#6cb6ff} pre.code .s{color:#8ddb8c} pre.code .c{color:#6b7484;font-style:italic}
+  pre.code .n{color:#e0b070} pre.code .b{color:#c7ddff;font-weight:700}
+  .note{border-left:3px solid var(--accent);background:rgba(var(--accent-rgb),.12);border-radius:0 8px 8px 0;
+    padding:10px 13px;font-size:12.5px;color:var(--muted)}
+  .note b{color:var(--ink)}
+  .log{font-family:var(--mono);font-size:11.5px;max-height:230px;overflow-y:auto;display:grid;gap:5px}
+  .log div{background:var(--panel2);border-left:3px solid var(--line);border-radius:0 6px 6px 0;padding:6px 9px;color:var(--muted)}
+  .log div.hl{border-left-color:var(--accent-2);color:var(--ink);background:rgba(var(--accent-rgb),.15)}
+  .log div.ok{border-left-color:var(--ok)} .log div.bad{border-left-color:var(--bad)}
+  svg{display:block;max-width:100%;height:auto}
+  .svgwrap{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px;overflow-x:auto}
+  table.t{width:100%;border-collapse:collapse;font-size:12px}
+  table.t th{font-size:9.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--dim);
+    text-align:left;padding:0 8px 7px;border-bottom:1px solid var(--line)}
+  table.t td{padding:7px 8px;border-bottom:1px solid rgba(39,44,54,.6);color:var(--muted);font-family:var(--mono);font-size:11.8px}
+  table.t td.n{color:var(--ink);font-weight:600}
+
+  /* ── pitfalls ─────────────────────────────────────────────── */
+  details.pit{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;overflow:hidden}
+  details.pit>summary{cursor:pointer;padding:12px 15px;font-size:13.5px;font-weight:650;color:var(--ink);
+    list-style:none;display:flex;gap:11px;align-items:flex-start}
+  details.pit>summary::-webkit-details-marker{display:none}
+  details.pit>summary::before{content:"\25B8";color:var(--accent-2);font-size:12px;line-height:1.5;transition:.2s}
+  details.pit[open]>summary::before{transform:rotate(90deg)}
+  details.pit>summary:focus-visible{outline:2px solid var(--accent-2);outline-offset:-2px}
+  details.pit .body{padding:0 15px 15px 39px;font-size:13px;color:var(--muted);display:grid;gap:9px}
+  details.pit .body .fix{color:var(--ok);font-weight:600}
+
+  /* ── MCQ ──────────────────────────────────────────────────── */
+  .mcq{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px 17px;margin-bottom:13px}
+  .mcq .q{font-size:13.8px;font-weight:650;color:var(--ink);margin:0 0 11px;max-width:84ch}
+  .mcq .q span{color:var(--accent-2);font-family:var(--mono);margin-right:7px}
+  .opts{display:grid;gap:7px}
+  .opt{text-align:left;font-family:inherit;font-size:13px;cursor:pointer;color:var(--muted);
+    background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 12px;transition:.15s}
+  .opt:hover:not(:disabled){border-color:var(--accent-2);color:var(--ink)}
+  .opt:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+  .opt.right{border-color:var(--ok);background:rgba(63,185,80,.13);color:#bce8c4}
+  .opt.wrong{border-color:var(--bad);background:rgba(248,81,73,.12);color:#f4b6b1}
+  .opt.dim{opacity:.5}
+  .fb{margin-top:11px;font-size:12.5px;line-height:1.6;color:var(--muted);display:none;
+    border-left:3px solid var(--line);padding-left:11px}
+  .fb.show{display:block}
+  .fb.show.good{border-left-color:var(--ok)} .fb.show.poor{border-left-color:var(--bad)}
+  .fb b{color:var(--ink)}
+
+  /* ── next ─────────────────────────────────────────────────── */
+  .nextgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+  .nextcard{display:block;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:15px 17px;transition:.18s;color:inherit}
+  .nextcard:hover{border-color:var(--accent-2);transform:translateY(-2px);text-decoration:none}
+  .nextcard .nl{font-size:10px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--accent-2)}
+  .nextcard .nt{font-size:14.5px;font-weight:700;color:var(--ink);margin-top:5px}
+  .nextcard .nd{font-size:12px;color:var(--muted);margin-top:5px}
+
+  @media (max-width:720px){
+    .grid2,.grid3,.split,.split-r{grid-template-columns:1fr}
+    section{padding:26px 15px 32px}
+    nav.top{padding:10px 15px;gap:8px}
+    nav.top .crumbs{font-size:11px}
+    p,.lead{max-width:none}
+  }
+
+  /* ── week-page shared ─────────────────────────────────────── */
+  #hero{padding:52px 22px 40px;
+    background:radial-gradient(ellipse 820px 340px at 22% -14%,rgba(var(--accent-rgb),.3),transparent 66%)}
+  #hero .wk{font-family:var(--mono);font-size:12px;letter-spacing:2px;color:var(--accent-2);font-weight:700}
+  #hero h1{max-width:24ch}
+  #hero .promise{font-size:16.5px;color:var(--ink);max-width:74ch;margin-top:10px;line-height:1.55}
+  .secnum{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;
+    background:rgba(var(--accent-rgb),.35);border:1px solid var(--accent-2);color:#fff;font-family:var(--mono);
+    font-size:11px;font-weight:700;margin-right:9px;vertical-align:2px}
+  .sw{display:inline-flex;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+  .sw button{font-family:inherit;font-size:11.5px;font-weight:650;cursor:pointer;color:var(--muted);
+    background:var(--panel2);border:none;padding:7px 13px;transition:.15s}
+  .sw button[aria-pressed="true"]{background:rgba(var(--accent-rgb),.32);color:#fff}
+  .sw button:focus-visible{outline:2px solid var(--accent-2);outline-offset:-2px}
+
+  /* ── week-3 specific ──────────────────────────────────────── */
+  .msgs{display:grid;gap:6px;font-family:var(--mono);font-size:11px;max-height:190px;overflow-y:auto}
+  .msgs div{padding:6px 9px;border-radius:6px;border-left:3px solid var(--line);background:var(--panel2);
+    color:var(--muted);word-break:break-all}
+  .msgs div.ok{border-left-color:var(--ok);color:#bce8c4;background:rgba(63,185,80,.08)}
+  .msgs div.bad{border-left-color:var(--bad);color:#f4b6b1;background:rgba(248,81,73,.08)}
+  .msgs div.part{border-left-color:var(--warn);color:#e8cf9a;background:rgba(210,153,34,.07)}
+  .verr{display:grid;gap:7px}
+  .verr .row1{font-family:var(--mono);font-size:11.5px;padding:8px 10px;border-radius:7px;
+    border-left:3px solid var(--bad);background:rgba(248,81,73,.09);color:#f4b6b1}
+  .verr .row1 b{color:#fff;display:block;margin-bottom:2px}
+  .verr .row1 i{color:var(--muted);font-style:normal}
+  .verr .good{border-left-color:var(--ok);background:rgba(63,185,80,.09);color:#bce8c4}
+  .matrix td{text-align:center;font-family:var(--mono);font-size:11px;padding:9px 6px;border:1px solid var(--line)}
+  .matrix th{font-size:9.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);padding:6px;text-align:center}
+  .matrix td.pass{background:rgba(63,185,80,.14);color:#bce8c4}
+  .matrix td.fail{background:rgba(248,81,73,.14);color:#f4b6b1}
+
+  /* ── mobile guard (identical on every page): single column under 720px,
+        no horizontal overflow. Must stay last in the sheet. ───────────── */
+  @media (max-width:720px){
+    .grid2,.grid3,.grid2.narrow-right,.split,.split-r,.codepair,
+    .nextgrid,.dash,.toggles,.lanes,.weeknav,.weeks,.roles,.stack{
+      grid-template-columns:minmax(0,1fr)}
+    [class*="grid"]>*,.stack>*,.wrap>*,.panel,.panel.tight,.nextcard,.wk,.row>*{min-width:0}
+    pre,pre.code,.svgwrap,svg,canvas,table,select,input,textarea,.mono{max-width:100%}
+    pre,pre.code,.svgwrap,.tablewrap{overflow-x:auto}
+    .ctl,.ctl>*,.controls>*,.row,.legend>*{min-width:0}
+    .ctl{flex-wrap:wrap} .ctl select,.ctl input[type=range]{flex:1 1 100%;width:100%}
+    p,.lead,.sub,.promise{max-width:none}
+  }
+</style>
+</head>
+<body>
+
+<nav class="top"><a href="index.html">Systematic Trading Arena</a><span class="crumbs"><a href="week2.html">← Week 2</a> · <b>Week 3 · Socket Streaming &amp; Protocols</b> · <a href="week4.html">Week 4 →</a></span></nav>
+
+<!-- ══════════════ HERO ══════════════ -->
+<section id="hero">
+  <div class="wk">WEEK 3</div>
+  <h1>Socket Streaming &amp; Protocols</h1>
+  <p class="promise">TCP hands you bytes, not messages. A trading system is only as reliable as the contract
+  that turns one into the other — and that contract is a thing you design, not a thing you find.</p>
+  <ul class="you">
+    <li>Explain why a TCP stream has no message boundaries, and frame one with a length prefix, a delimiter or WebSocket frames.</li>
+    <li>Read the WebSocket upgrade and the arena's message sequence, and say exactly who sends what, in what order.</li>
+    <li>Validate every inbound message at the boundary with a typed model — and add a field without breaking last week's bots.</li>
+  </ul>
+  <div class="row" style="margin-top:22px">
+    <span class="pill acc">Live session &#183; real broker quotes on Yahoo prices</span>
+    <span class="pill">Deliverable: protocol contract review + message-flow diagram</span>
+    <span class="pill">Read <code>shared/messages.py</code> in full</span>
+  </div>
+</section>
+
+<!-- ══════════════ WHAT ══════════════ -->
+<section id="what">
+  <div class="kicker">Part 1</div>
+  <h2><span class="secnum">1</span>What is a protocol? Start with what TCP does not give you</h2>
+  <p class="lead">Week 2 gave you one process doing many things at once. Now there are many processes — the
+  exchange, every broker, every trader, often on different machines — and the only thing they can do is send
+  each other bytes. A stream of bytes means nothing until both sides agree on which messages exist, what
+  fields they carry, and what a valid reply looks like. <strong>That agreement is the protocol</strong>,
+  and it is the most load-bearing design decision in the system.</p>
+
+  <div class="grid2" style="margin-top:16px">
+    <div class="panel">
+      <h4>Four layers you actually care about</h4>
+      <ul class="plain">
+        <li><strong>Link / physical</strong> — wires, Wi-Fi, MAC addresses. Not your problem.</li>
+        <li><strong>Internet (IP)</strong> — routes packets between hosts. Best-effort, no guarantees.</li>
+        <li><strong>Transport (TCP/UDP)</strong> — process-to-process delivery via ports. Where reliability is, or is not.</li>
+        <li><strong>Application</strong> — HTTP, WebSocket, <em class="hi">your</em> protocol. What the messages mean.</li>
+      </ul>
+      <p class="sub" style="margin-top:10px">An address is <code>host:port</code>. The arena exchange is
+      <code>localhost:8765</code> — an IP plus a TCP port a process is listening on. Your JSON rides inside a
+      TCP segment, inside an IP packet, inside a frame; each layer wraps the one above.</p>
+    </div>
+    <div class="panel">
+      <h4>TCP vs UDP, and why we chose TCP</h4>
+      <table class="t">
+        <thead><tr><th></th><th>TCP</th><th>UDP</th></tr></thead>
+        <tbody>
+          <tr><td class="n">shape</td><td>byte stream</td><td>datagrams</td></tr>
+          <tr><td class="n">ordering</td><td>guaranteed</td><td>none</td></tr>
+          <tr><td class="n">loss</td><td>retransmitted</td><td>gone</td></tr>
+          <tr><td class="n">boundaries</td><td><span style="color:#f85149">none</span></td><td>one per packet</td></tr>
+        </tbody>
+      </table>
+      <p class="sub" style="margin-top:10px">We need every order and every fill, exactly once, in order:
+      correctness beats microseconds in this course, so WebSocket over TCP is the right default. Real venues
+      also multicast market data over UDP, where a lost packet is better than a late one — but they pay for
+      that with sequence numbers and gap-fill machinery you do not want in week three.</p>
+      <div class="note" style="margin-top:11px"><b>The catch:</b> TCP is a <em>stream</em>. Two
+      <code>send()</code>s can arrive as one <code>recv()</code>, and one <code>send()</code> can arrive
+      split across three. There is no "message" until you make one.</div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:30px">Interactive · TCP has no framing. Pick a scheme and find out.</h3>
+  <p class="sub" style="margin-bottom:12px">Three orders are being sent. The kernel will hand them to you in
+  arbitrary chunks, exactly as it does in production. Choose how the receiver finds message boundaries, then
+  deliver the chunks one at a time and watch what the parser can and cannot do.</p>
+
+  <div class="split">
+    <div class="stack">
+      <div class="row" style="margin-bottom:2px">
+        <span class="sub">Framing scheme:</span>
+        <span class="sw">
+          <button id="frNone" type="button" aria-pressed="true">none &#183; json.loads(chunk)</button>
+          <button id="frDelim" type="button" aria-pressed="false">newline delimiter</button>
+          <button id="frLen" type="button" aria-pressed="false">length prefix</button>
+          <button id="frWs" type="button" aria-pressed="false">WebSocket frames</button>
+        </span>
+      </div>
+      <div class="svgwrap">
+        <svg id="frSvg" viewBox="0 0 640 250" role="img" aria-label="The byte stream on the wire, the receive buffer, and the chunk boundaries">
+          <g id="frWire"></g>
+          <g id="frBuf"></g>
+        </svg>
+      </div>
+      <div class="row">
+        <button class="btn primary" id="frStep" type="button" aria-label="Receive the next chunk of bytes">recv() next chunk</button>
+        <button class="btn" id="frAll" type="button" aria-label="Receive all remaining chunks">recv() everything</button>
+        <button class="btn" id="frReset" type="button" aria-label="Reset the framing demo">&#8634; Reset</button>
+        <span class="pill acc" id="frPos">0 / 0 bytes</span>
+      </div>
+      <div class="ctl" style="max-width:340px;margin-top:4px">
+        <label for="frChunk">bytes the kernel gives you per recv()<b id="vfrChunk">28</b></label>
+        <input type="range" id="frChunk" min="6" max="120" step="2" value="28" aria-label="Average bytes per recv call"/>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="stats">
+        <div class="stat"><div class="sl">chunks</div><div class="sv" id="frNC">0</div></div>
+        <div class="stat"><div class="sl">parsed ok</div><div class="sv ok" id="frOK">0</div></div>
+        <div class="stat"><div class="sl">errors</div><div class="sv bad" id="frER">0</div></div>
+      </div>
+      <div class="panel tight">
+        <h3>Parser output</h3>
+        <div class="msgs" id="frOut"><div>Nothing received yet.</div></div>
+      </div>
+      <div class="note" id="frNote">&#8212;</div>
+    </div>
+  </div>
+
+  <div class="grid3" style="margin-top:22px">
+    <div class="panel"><h4>Request / response</h4><p class="sub">Client asks, server answers, done. HTTP and
+    REST. Simple — but the client has to keep asking to learn what changed, and it still misses everything
+    that happened between two polls. Useless for a book that moves every 50&#8239;ms.</p></div>
+    <div class="panel"><h4>Streaming</h4><p class="sub">One connection stays open and the server pushes
+    updates as they happen. No re-asking, no per-message HTTP header tax, no gap between polls. This is how
+    you receive market data.</p></div>
+    <div class="panel"><h4>Publish / subscribe</h4><p class="sub">Publishers emit to topics; subscribers get
+    what they asked for. Decouples senders from receivers, so one book update fans out to every trader
+    without the exchange knowing who they are.</p></div>
+  </div>
+  <div class="note" style="margin-top:14px"><b>The arena blends all three</b> over one persistent WebSocket:
+  streamed pushes (<code>BookSnapshot</code>, <code>TradeExecution</code>) and request/response pairs
+  (<code>PlaceOrder</code> &#8594; <code>OrderAck</code>) on the same connection, in both directions,
+  simultaneously.</div>
+</section>
+
+<!-- ══════════════ HOW ══════════════ -->
+<section id="how">
+  <div class="kicker">Part 2</div>
+  <h2><span class="secnum">2</span>How does it work? The handshake, then the conversation</h2>
+  <p class="lead">A WebSocket is born as an HTTP request and then stops being one. The client asks to
+  upgrade; the server answers <code>101 Switching Protocols</code>; from that moment the same TCP connection
+  is full-duplex and framed, and every <code>await ws.recv()</code> returns exactly one whole message. Step
+  through the entire life of a connection below — the HTTP upgrade, then the eight arena messages that carry
+  a session.</p>
+
+  <div class="split">
+    <div class="stack">
+      <div class="svgwrap">
+        <svg id="sqSvg" viewBox="0 0 640 480" role="img" aria-label="Sequence diagram of the WebSocket handshake followed by the arena message flow">
+          <g font-family="monospace">
+            <rect x="46" y="14" width="140" height="28" rx="6" fill="rgba(var(--accent-rgb),.26)" stroke="var(--accent-2)" stroke-width="1.4"/>
+            <text x="116" y="32" text-anchor="middle" font-size="11" fill="#e8e6e3">your bot</text>
+            <rect x="452" y="14" width="150" height="28" rx="6" fill="rgba(var(--accent-rgb),.26)" stroke="var(--accent-2)" stroke-width="1.4"/>
+            <text x="527" y="32" text-anchor="middle" font-size="11" fill="#e8e6e3">exchange :8765</text>
+            <line x1="116" y1="42" x2="116" y2="470" stroke="#2a303b" stroke-width="1.4" stroke-dasharray="4 4"/>
+            <line x1="527" y1="42" x2="527" y2="470" stroke="#2a303b" stroke-width="1.4" stroke-dasharray="4 4"/>
+          </g>
+          <g id="sqPhase"></g>
+          <g id="sqArrows"></g>
+        </svg>
+      </div>
+      <div class="row">
+        <button class="btn primary" id="sqStep" type="button" aria-label="Show the next message in the sequence">Next message &#8594;</button>
+        <button class="btn" id="sqPlay" type="button" aria-label="Play the whole sequence">&#9654; Play</button>
+        <button class="btn" id="sqReset" type="button" aria-label="Reset the sequence diagram">&#8634; Reset</button>
+        <span class="pill acc" id="sqCount">0 / 12</span>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="panel tight">
+        <h3 id="sqTitle">Press Next to open a connection</h3>
+        <pre class="code" id="sqFrame" style="font-size:11px;max-height:230px;overflow:auto">$ TEAM_ID=T07 python -m team.trader</pre>
+        <p class="sub" id="sqNote" style="margin-top:9px">Everything below the SDK is the
+        <code>websockets</code> library plus <code>shared/messages.py</code>. You will read both this week.</p>
+      </div>
+      <div class="panel tight">
+        <h3>Phase</h3>
+        <div class="row">
+          <span class="pill" id="sqP1">TCP</span>
+          <span class="pill" id="sqP2">HTTP upgrade</span>
+          <span class="pill" id="sqP3">WebSocket frames</span>
+          <span class="pill" id="sqP4">arena protocol</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:24px">
+    <div class="panel">
+      <h4>Why not HTTP polling?</h4>
+      <ul class="plain">
+        <li><strong>Polling</strong> sends a fresh request every N ms: new headers, often a new connection, and you still miss everything between two polls.</li>
+        <li><strong>Long-polling / SSE</strong> help, but SSE is half-duplex — server to client only. A trader has to send orders too.</li>
+        <li><strong>WebSocket</strong> upgrades once, then both sides push frames whenever they like with a few bytes of header.</li>
+      </ul>
+      <p class="sub" style="margin-top:10px">And crucially: <em class="hi">framed</em>. The protocol delimits
+      messages for you, so the entire first widget on this page becomes somebody else's problem.</p>
+    </div>
+    <div class="panel">
+      <h4>Keeping a long-lived connection healthy</h4>
+      <ul class="plain">
+        <li><strong>Back-pressure.</strong> Bound your queues, coalesce stale book updates, and let asyncio await the drain. (Week 2's widget, in production.)</li>
+        <li><strong>Heartbeats.</strong> A dead TCP connection can look alive for minutes. Periodic ping/pong finds a silent peer fast and stops NATs closing an idle pipe.</li>
+        <li><strong>Reconnection.</strong> Exponential backoff, re-handshake, then request a fresh snapshot — never assume continuity.</li>
+        <li><strong>Idempotency.</strong> A retried order must not double-execute. Client-side IDs let the server dedupe a repeat.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:18px">
+    <h4>Text or binary?</h4>
+    <div class="grid2" style="gap:16px;margin-top:6px">
+      <p class="sub"><strong>JSON (text).</strong> Readable, debuggable, universal — you can watch a session
+      in a terminal and understand it. Slightly larger on the wire. The arena's choice: clarity over bytes
+      for a teaching platform, and 8765 is not a colo cross-connect.</p>
+      <p class="sub"><strong>protobuf / msgpack (binary).</strong> Compact and fast, but opaque without the
+      schema. What real venues use for market data. <em class="hi">Rule:</em> stay text until profiling
+      proves you need binary — then you will need the schema discipline in Part 3 even more, not less.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ WHY ══════════════ -->
+<section id="why">
+  <div class="kicker">Part 3</div>
+  <h2><span class="secnum">3</span>Why does this matter in trading?</h2>
+  <p class="lead">Because a malformed order is not a nuisance — it is either a rejected trade or, far worse,
+  an <em class="hi">accepted</em> one that corrupts the book. The arena has one sacred rule in both
+  directions: never send a raw dict, and never pull fields out of raw JSON. Every message is a pydantic v2
+  model in <code>shared/messages.py</code>; the class <em class="hi">is</em> the contract, and a bad message
+  dies at the boundary instead of three layers deep inside matching.</p>
+
+  <div class="grid2" style="margin-top:16px">
+    <div class="panel">
+      <h4>The cost of a raw dict</h4>
+      <ul class="plain">
+        <li><code>msg['quatity']</code> — a typo is a <code>KeyError</code> at runtime, in production, mid-session.</li>
+        <li>No autocomplete and no guarantees: you cannot know what fields exist without reading every producer.</li>
+        <li>Silent drift — change a field on one side and the other breaks somewhere far away, with no error at the boundary.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h4>The value of a typed model</h4>
+      <ul class="plain">
+        <li><code>order.quantity</code> — the IDE completes it, the type checker verifies it, the validator guarantees it is an int.</li>
+        <li>Errors surface at parse time with a precise <code>ValidationError</code>, naming the field.</li>
+        <li>The model is the documentation: the class definition is the authoritative spec of the message.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 style="margin-top:28px">Interactive · validate an order at the boundary</h3>
+  <p class="sub" style="margin-bottom:12px">Edit the JSON below — or load one of the broken ones — and watch
+  a pydantic-style validator do what the exchange does the instant your bytes arrive.</p>
+
+  <div class="split">
+    <div class="stack">
+      <div class="panel tight">
+        <h3>Outbound message &#183; edit me</h3>
+        <label class="sub" for="vaIn" style="display:block;margin-bottom:6px">JSON body of a <code>PlaceOrder</code></label>
+        <textarea id="vaIn" rows="11" spellcheck="false" aria-label="JSON body of a PlaceOrder message"></textarea>
+        <div class="row" style="margin-top:10px">
+          <button class="btn primary" id="vaRun" type="button">Validate</button>
+          <button class="btn" id="vaP0" type="button">valid order</button>
+          <button class="btn" id="vaP1" type="button">typo: quatity</button>
+          <button class="btn" id="vaP2" type="button">side = 'BUY'</button>
+          <button class="btn" id="vaP3" type="button">quantity = ''</button>
+          <button class="btn" id="vaP4" type="button">limit with no price</button>
+          <button class="btn" id="vaP5" type="button">not JSON</button>
+        </div>
+      </div>
+      <pre class="code" style="font-size:11px"><span class="k">from</span> pydantic <span class="k">import</span> BaseModel
+<span class="k">from</span> typing <span class="k">import</span> Literal
+
+<span class="k">class</span> <span class="b">PlaceOrder</span>(BaseModel):
+    type: Literal[<span class="s">'place_order'</span>] = <span class="s">'place_order'</span>
+    team_id: str
+    symbol: str
+    side: Literal[<span class="s">'buy'</span>, <span class="s">'sell'</span>]      <span class="c"># bad value rejected</span>
+    order_type: Literal[<span class="s">'limit'</span>, <span class="s">'market'</span>]
+    quantity: int                     <span class="c"># '' fails, 5.5 fails</span>
+    price: float | <span class="k">None</span> = <span class="k">None</span>          <span class="c"># required for a limit</span></pre>
+    </div>
+    <div class="stack">
+      <div class="panel tight">
+        <h3 id="vaHead">Validator</h3>
+        <div class="verr" id="vaOut"></div>
+      </div>
+      <div class="panel tight">
+        <h3>What the exchange does next</h3>
+        <p class="sub" id="vaNext">&#8212;</p>
+      </div>
+      <div class="note">In the arena this is one function call:
+      <code>parse_message(json.loads(raw))</code> looks at the <code>type</code> discriminator, picks the
+      right model out of a union, and calls <code>model_validate</code>. Unknown type &#8594;
+      <code>KeyError</code>; bad shape &#8594; <code>ValidationError</code>. Both are caught at the edge and
+      logged; neither kills the connection.</div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:22px">
+    <h4>Discriminated unions: many message types, one channel</h4>
+    <div class="grid2" style="gap:16px">
+      <pre class="code" style="font-size:11px"><span class="c"># shared/messages.py — keyed on the 'type' field</span>
+AnyClientMessage   = Union[Handshake, PlaceOrder,
+                           CancelOrder, ...]      <span class="c"># client &#8594; exchange</span>
+AnyExchangeMessage = Union[OrderAck, BookSnapshot,
+                           TradeExecution,
+                           PortfolioUpdate,
+                           SessionEvent, ...]     <span class="c"># exchange &#8594; client</span>
+
+<span class="k">def</span> parse_message(raw: dict) -&gt; BaseModel:
+    msg_type = raw.get(<span class="s">'type'</span>)          <span class="c"># the discriminator</span>
+    model_cls = _TYPE_MAP.get(msg_type) <span class="c"># unknown -&gt; KeyError</span>
+    <span class="k">return</span> model_cls.model_validate(raw)  <span class="c"># bad -&gt; ValidationError</span></pre>
+      <div>
+        <p class="sub">One tag field selects the model, so dispatch is O(1) and unambiguous — the parser
+        never has to guess a shape from its keys. The direction is encoded in the union name:
+        <code>AnyClientMessage</code> is what you send, <code>AnyExchangeMessage</code> is what you receive.</p>
+        <p class="sub" style="margin-top:9px"><strong>Three failure modes, three answers.</strong>
+        <em class="hi">Malformed</em> (missing field, bad enum): reject with a clear error, never let it reach
+        business logic. <em class="hi">Unknown type</em> (a newer peer, a bug): log and skip — do not kill a
+        connection over one frame. <em class="hi">Not even JSON</em>: catch the decode error, and consider
+        closing if it repeats.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:32px">Interactive · adding a field without breaking last week's bots</h3>
+  <p class="sub" style="margin-bottom:12px">A live protocol has to evolve while old clients are still
+  connected. The arena really did add <code>queue_ahead</code>, <code>maker_rebate</code> and
+  <code>microprice</code> to <code>OrderAck</code> mid-season. Flip the versions and see why nothing broke —
+  then turn on the breaking change and see what would have.</p>
+
+  <div class="split-r">
+    <div class="stack">
+      <div class="panel tight">
+        <h3>Who is talking</h3>
+        <div class="row" style="margin-bottom:9px"><span class="sub" style="min-width:74px">bot</span>
+          <span class="sw"><button id="vsBotOld" type="button" aria-pressed="true">v1 (week 2)</button><button id="vsBotNew" type="button" aria-pressed="false">v2 (today)</button></span></div>
+        <div class="row" style="margin-bottom:9px"><span class="sub" style="min-width:74px">exchange</span>
+          <span class="sw"><button id="vsExOld" type="button" aria-pressed="true">v1</button><button id="vsExNew" type="button" aria-pressed="false">v2</button></span></div>
+        <div class="row"><span class="sub" style="min-width:74px">change</span>
+          <span class="sw"><button id="vsAdd" type="button" aria-pressed="true">add fields with defaults</button><button id="vsBreak" type="button" aria-pressed="false">rename quantity &#8594; qty</button></span></div>
+      </div>
+      <div class="panel tight">
+        <h3>Compatibility matrix</h3>
+        <table class="t matrix" id="vsMatrix">
+          <thead><tr><th></th><th>exchange v1</th><th>exchange v2</th></tr></thead>
+          <tbody>
+            <tr><th>bot v1</th><td id="vsC11">&#8212;</td><td id="vsC12">&#8212;</td></tr>
+            <tr><th>bot v2</th><td id="vsC21">&#8212;</td><td id="vsC22">&#8212;</td></tr>
+          </tbody>
+        </table>
+        <p class="sub" style="margin-top:9px">Green means the receiving side parses it and keeps trading.</p>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="panel tight">
+        <h3 id="vsHead">On the wire</h3>
+        <pre class="code" id="vsWire" style="font-size:11px"></pre>
+      </div>
+      <div class="panel tight">
+        <h3>What the receiving model sees</h3>
+        <div class="verr" id="vsOut"></div>
+      </div>
+      <div class="note" id="vsNote">&#8212;</div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:22px">
+    <h4>This week's code: send typed, parse typed</h4>
+    <pre class="code"><span class="k">import</span> json
+<span class="k">from</span> shared.messages <span class="k">import</span> PlaceOrder, parse_message, OrderAck, TradeExecution
+
+<span class="c"># send: model -&gt; JSON on the wire (never a raw dict)</span>
+order = PlaceOrder(team_id=TEAM_ID, symbol=<span class="s">'AAPL'</span>,
+    side=<span class="s">'buy'</span>, order_type=<span class="s">'limit'</span>, price=ask, quantity=<span class="n">1</span>)
+<span class="k">await</span> ws.send(order.model_dump_json())
+
+<span class="c"># receive: JSON -&gt; validated model, then dispatch</span>
+raw = <span class="k">await</span> ws.recv()
+msg = parse_message(json.loads(raw))
+<span class="k">if</span> isinstance(msg, OrderAck):
+    print(<span class="s">'resting, queue_ahead ='</span>, msg.queue_ahead)
+<span class="k">elif</span> isinstance(msg, TradeExecution):
+    print(<span class="s">'filled @'</span>, msg.price)</pre>
+    <p class="sub" style="margin-top:10px">Verify it by printing every parsed type for a whole session and
+    confirming an <code>OrderAck</code> follows every <code>PlaceOrder</code>. If one is missing, you have
+    found either a rate limit or a validation failure — and both are in the logs.</p>
+  </div>
+</section>
+
+<!-- ══════════════ PITFALLS ══════════════ -->
+<section id="pitfalls">
+  <div class="kicker">Part 4</div>
+  <h2><span class="secnum">4</span>Five ways this goes wrong</h2>
+  <p class="lead">The first one has cost every cohort at least one session. Open them.</p>
+
+  <details class="pit"><summary>Assuming one <code>recv()</code> equals one message</summary>
+    <div class="body">
+      <p>Over a raw TCP socket, <code>json.loads(sock.recv(4096))</code> works perfectly on your laptop with
+      one small message and fails the moment the market gets busy — because two sends coalesced into one
+      read, or one send arrived in three pieces.</p>
+      <p>The failure is intermittent and load-dependent, which is the worst kind. It shows up in the live
+      session and not in your test.</p>
+      <p class="fix">Fix: frame explicitly (length prefix or delimiter) and keep a buffer across reads — or
+      use WebSockets, which frame for you, which is exactly why the arena does.</p>
+    </div></details>
+
+  <details class="pit"><summary>Sending raw dicts and hand-parsing raw JSON</summary>
+    <div class="body">
+      <p><code>await ws.send(json.dumps({'type': 'place_order', 'quatity': 5}))</code> is accepted by
+      <code>json.dumps</code>, accepted by the socket, and rejected by the exchange — or worse, silently
+      interpreted with a missing field defaulting to something you did not intend.</p>
+      <p>On the receive side, <code>raw['price']</code> against a message that does not have a price is a
+      <code>KeyError</code> deep inside your strategy, mid-session, with a position open.</p>
+      <p class="fix">Fix: <code>model.model_dump_json()</code> to send;
+      <code>parse_message(json.loads(raw))</code> to receive. No exceptions, ever. This is graded.</p>
+    </div></details>
+
+  <details class="pit"><summary>Letting one bad frame kill the connection</summary>
+    <div class="body">
+      <p>An unknown <code>type</code>, a truncated frame, or a field the newer exchange added and your
+      parser was configured to forbid — and an unhandled exception propagates out of your read loop and ends
+      the session.</p>
+      <p>Being strict on the <em class="hi">send</em> path is discipline. Being strict on the
+      <em class="hi">receive</em> path is fragility: you cannot control what a peer sends you.</p>
+      <p class="fix">Fix: <code>try/except (KeyError, ValidationError)</code> around the parse; log and
+      <code>continue</code>. Ignore unknown fields inbound. Only close the connection if the garbage repeats.</p>
+    </div></details>
+
+  <details class="pit"><summary>A "small" breaking change to a live protocol</summary>
+    <div class="body">
+      <p>Renaming <code>quantity</code> to <code>qty</code>, tightening a type, or making an optional field
+      required. Each is a one-line diff and each instantly breaks every peer that has not redeployed —
+      including three teams whose bots are running from last week's branch.</p>
+      <p>The subtler version: keeping the field name but changing its <em class="hi">meaning</em> — price
+      from dollars to cents, quantity from shares to lots. Nothing errors. Everything is wrong.</p>
+      <p class="fix">Fix: add, never change. New fields are optional with defaults; if you truly must
+      replace one, carry both for a version and use an alias.</p>
+    </div></details>
+
+  <details class="pit"><summary>No heartbeat, no backoff, no resync</summary>
+    <div class="body">
+      <p>A half-open TCP connection looks perfectly alive from your side: no error, no data, forever. Your
+      bot sits happily reading nothing while the session runs without it.</p>
+      <p>Then the reconnect makes it worse — a tight retry loop hammers a recovering exchange, and resuming
+      without requesting a fresh snapshot means you are trading against a book you remember rather than the
+      one that exists.</p>
+      <p class="fix">Fix: ping/pong with a timeout, exponential backoff on reconnect, re-handshake, then
+      request a fresh <code>BookSnapshot</code> before sending a single order.</p>
+    </div></details>
+</section>
+
+<!-- ══════════════ CHECK ══════════════ -->
+<section id="check">
+  <div class="kicker">Part 5</div>
+  <h2><span class="secnum">5</span>Check yourself</h2>
+  <p class="lead">Three questions, instant feedback, nothing recorded.</p>
+
+  <div class="mcq" data-a="3" data-exp="<b>TCP is a byte stream with no message boundaries.</b> The kernel is free to coalesce two sends into one recv, or split one send across several — it guarantees order and delivery, not framing. That is why you either length-prefix, delimit, or let WebSocket frames do it for you. Nothing here is a bug in TCP; framing is simply not TCP's job.">
+    <p class="q"><span>Q1</span>You <code>send()</code> two JSON orders back to back over a raw TCP socket. The peer calls <code>recv(4096)</code> once. What can it get?</p>
+    <div class="opts">
+      <button class="opt" type="button">Exactly the first order — TCP preserves send boundaries</button>
+      <button class="opt" type="button">Both orders, but always cleanly separated by a newline</button>
+      <button class="opt" type="button">Nothing until both have been fully acknowledged</button>
+      <button class="opt" type="button">Any prefix of the concatenated bytes: half of the first, both, or one and a bit</button>
+    </div>
+    <div class="fb" role="status"></div>
+  </div>
+
+  <div class="mcq" data-a="1" data-exp="<b>Log it and keep going.</b> You cannot control what a peer sends you, and an unknown type usually means the other side is newer than you — not that anything is broken. Killing a live connection over one frame turns a cosmetic mismatch into a lost session. Be strict about what you SEND and liberal about what you ACCEPT: reject malformed messages at the boundary, but never let one frame take down the socket.">
+    <p class="q"><span>Q2</span>Your bot receives a message whose <code>type</code> your parser does not recognise. The right behaviour is:</p>
+    <div class="opts">
+      <button class="opt" type="button">Raise, so the bug is loud and the session stops</button>
+      <button class="opt" type="button">Log a warning and skip the frame; keep the connection alive</button>
+      <button class="opt" type="button">Close the socket and reconnect immediately</button>
+      <button class="opt" type="button">Parse it as a dict and use whatever fields happen to be there</button>
+    </div>
+    <div class="fb" role="status"></div>
+  </div>
+
+  <div class="mcq" data-a="0" data-exp="<b>Optional with a default.</b> An old bot's model simply ignores the field it has never heard of, and a new bot talking to an old exchange fills in the default — so all four version combinations keep working and nobody has to redeploy in lockstep. Making it required breaks every old sender; renaming an existing field breaks every old receiver. Add, never change.">
+    <p class="q"><span>Q3</span>You want to add <code>queue_ahead</code> to <code>OrderAck</code> mid-season, while other teams' bots are live. How?</p>
+    <div class="opts">
+      <button class="opt" type="button">Add it as optional with a default, and ignore unknown fields inbound</button>
+      <button class="opt" type="button">Add it as required and announce the cut-over time in class</button>
+      <button class="opt" type="button">Reuse the existing <code>quantity</code> field and change what it means</button>
+      <button class="opt" type="button">Ship a second message type and stop sending <code>OrderAck</code></button>
+    </div>
+    <div class="fb" role="status"></div>
+  </div>
+</section>
+
+<!-- ══════════════ NEXT ══════════════ -->
+<section id="next">
+  <div class="kicker">Part 6</div>
+  <h2><span class="secnum">6</span>Do the work</h2>
+  <div class="grid2" style="margin-top:14px">
+    <div class="panel"><h4>In class</h4><ul class="plain">
+      <li>Protocol contract review — read <code>shared/messages.py</code> in full and list every client and exchange message type.</li>
+      <li>Feed client/server design — sketch how your role sends and receives over the WebSocket.</li>
+      <li>Diagram the flow: <code>Handshake</code> &#8594; <code>BookSnapshot</code> &#8594; <code>PlaceOrder</code> &#8594; <code>OrderAck</code>/<code>TradeExecution</code> &#8594; <code>PortfolioUpdate</code>.</li>
+      <li>Phase-3 UML kickoff — extend Week 2's diagram with the wire messages and who sends what.</li>
+    </ul></div>
+    <div class="panel"><h4>Before next class</h4><ul class="plain">
+      <li>Commit the message-flow diagram under <code>docs/uml/</code>.</li>
+      <li>Send one typed <code>PlaceOrder</code> and parse the <code>OrderAck</code> / <code>TradeExecution</code> in your bot.</li>
+      <li>Push the W3 feature branch (design plus parsing code).</li>
+      <li>Confirm no raw dict ever reaches <code>ws.send</code>.</li>
+    </ul></div>
+  </div>
+  <div class="nextgrid" style="margin-top:18px">
+    <a class="nextcard" href="https://github.com/sdonadio/algoarena-team-template"><div class="nl">Code</div>
+      <div class="nt">Get the code</div><div class="nd">Labs and homework live in your course&#8217;s LMS; the starter repo is public. Use it as a template, clone, <code>make install</code>.</div></a>
+    <a class="nextcard" href="week2.html"><div class="nl">Previous</div>
+      <div class="nt">&#8592; Week 2 &#183; Concurrency &amp; Async</div><div class="nd">The loop that reads the socket you just learned to frame.</div></a>
+    <a class="nextcard" href="week4.html"><div class="nl">Next</div>
+      <div class="nt">Week 4 &#183; Backtester Architecture &#8594;</div><div class="nd">The same typed messages, replayed offline — so a strategy runs identically live and in replay.</div></a>
+  </div>
+</section>
+
+<footer>Systematic Trading Arena · an interactive companion for a 9-week systematic-trading course · <a href="https://github.com/sdonadio/systematic-trading-arena">Source</a></footer>
+
+<script>
+"use strict";
+/* ════════════════════════════════════════════════════════════════
+   Week 3 — Socket Streaming & Protocols
+   ════════════════════════════════════════════════════════════════ */
+var $ = function (id) { return document.getElementById(id); };
+var SVGNS = document.getElementById("frSvg").namespaceURI;
+function mk(tag, attrs) {
+  var e = document.createElementNS(SVGNS, tag);
+  for (var k in attrs) { if (attrs.hasOwnProperty(k)) e.setAttribute(k, attrs[k]); }
+  return e;
+}
+function txt(x, y, s, size, fill, anchor) {
+  var t = mk("text", { x: x, y: y, "font-size": size || 10, "font-family": "monospace", fill: fill || "#9aa0a6" });
+  if (anchor) t.setAttribute("text-anchor", anchor);
+  t.textContent = s;
+  return t;
+}
+
+/* ── 1. TCP FRAMING DEMO ─────────────────────────────────────── */
+var M = [
+  '{"type":"place_order","team_id":"T07","symbol":"AAPL","side":"buy","order_type":"limit","quantity":5,"price":185.55}',
+  '{"type":"cancel_order","team_id":"T07","order_id":"a91f"}',
+  '{"type":"place_order","team_id":"T07","symbol":"NVDA","side":"sell","order_type":"market","quantity":2}'
+];
+var MCOL = ["#6cb6ff", "#d29922", "#3fb950"];
+var fr = { scheme: "none" };
+
+function pad4(n) { var s = String(n); while (s.length < 4) s = "0" + s; return s; }
+function frWire() {
+  if (fr.scheme === "delim") return M.map(function (m) { return m + "\n"; }).join("");
+  if (fr.scheme === "len") return M.map(function (m) { return pad4(m.length) + m; }).join("");
+  return M.join("");   /* none, and ws is handled frame-by-frame */
+}
+function frSegments() {
+  var out = [], off = 0;
+  M.forEach(function (m, i) {
+    var pre = fr.scheme === "len" ? 4 : 0;
+    var post = fr.scheme === "delim" ? 1 : 0;
+    out.push({ i: i, start: off, pre: pre, body: m.length, post: post, len: pre + m.length + post });
+    off += pre + m.length + post;
+  });
+  return out;
+}
+function frChunks() {
+  if (fr.scheme === "ws") return M.slice();
+  var w = frWire(), base = +$("frChunk").value, out = [], p = 0, k = 0;
+  while (p < w.length) {
+    var jitter = (k * 37 % 13) - 6;
+    var n = Math.max(3, base + jitter);
+    out.push(w.slice(p, p + n));
+    p += n; k += 1;
+  }
+  return out;
+}
+function frReset() {
+  fr.chunks = frChunks();
+  fr.ci = 0; fr.buf = ""; fr.out = []; fr.ok = 0; fr.er = 0; fr.pos = 0;
+  frDraw();
+}
+function frSetScheme(s) {
+  fr.scheme = s;
+  [["frNone", "none"], ["frDelim", "delim"], ["frLen", "len"], ["frWs", "ws"]].forEach(function (p) {
+    $(p[0]).setAttribute("aria-pressed", p[1] === s ? "true" : "false");
+  });
+  $("frChunk").disabled = (s === "ws");
+  frReset();
+}
+function frPush(kind, text) { fr.out.unshift({ k: kind, t: text }); if (fr.out.length > 30) fr.out.pop(); }
+
+function tryParse(body, label) {
+  try {
+    var o = JSON.parse(body);
+    fr.ok += 1;
+    frPush("ok", "✓ parse_message() → " + (o.type === "place_order" ? "PlaceOrder" : "CancelOrder") +
+      "(" + (o.symbol ? "symbol='" + o.symbol + "', " : "") + (o.quantity !== undefined ? "quantity=" + o.quantity : "order_id='" + o.order_id + "'") + ")");
+    return true;
+  } catch (e) {
+    fr.er += 1;
+    frPush("bad", "✗ " + label + " — " + jsonErr(body));
+    return false;
+  }
+}
+function jsonErr(s) {
+  var t = s.trim();
+  if (t.indexOf("}{") >= 0) {
+    return "json.decoder.JSONDecodeError: Extra data: char " + (t.indexOf("}{") + 1) +
+      "  (two messages arrived in one recv)";
+  }
+  if (t.charAt(0) !== "{") {
+    return "json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)  (this recv is the TAIL of a message)";
+  }
+  return "json.decoder.JSONDecodeError: Unterminated string / Expecting ',' delimiter  (this recv is a FRAGMENT)";
+}
+
+function frStep() {
+  if (fr.ci >= fr.chunks.length) return;
+  var c = fr.chunks[fr.ci];
+  fr.ci += 1;
+  fr.pos += c.length;
+
+  if (fr.scheme === "ws") {
+    frPush("", "await ws.recv() → one complete frame, " + c.length + " bytes");
+    tryParse(c, "frame");
+  } else if (fr.scheme === "none") {
+    frPush("", "recv() → " + c.length + " bytes, handed straight to json.loads()");
+    tryParse(c, "json.loads(chunk)");
+  } else {
+    fr.buf += c;
+    frPush("", "recv() → " + c.length + " bytes appended to the buffer (" + fr.buf.length + " held)");
+    if (fr.scheme === "delim") {
+      var idx;
+      while ((idx = fr.buf.indexOf("\n")) >= 0) {
+        var line = fr.buf.slice(0, idx);
+        fr.buf = fr.buf.slice(idx + 1);
+        if (line.length) tryParse(line, "line");
+      }
+      if (fr.buf.length) frPush("part", "… " + fr.buf.length + " bytes are a partial message, kept for the next recv()");
+    } else {
+      for (;;) {
+        if (fr.buf.length < 4) break;
+        var n = parseInt(fr.buf.slice(0, 4), 10);
+        if (isNaN(n)) { fr.er += 1; frPush("bad", "✗ bad length prefix — the stream is desynchronised"); fr.buf = ""; break; }
+        if (fr.buf.length < 4 + n) {
+          frPush("part", "… header says " + n + " bytes, only " + (fr.buf.length - 4) + " arrived — wait for more");
+          break;
+        }
+        var body = fr.buf.slice(4, 4 + n);
+        fr.buf = fr.buf.slice(4 + n);
+        tryParse(body, "framed body");
+      }
+    }
+  }
+  frDraw();
+}
+
+function frDraw() {
+  var W = $("frWire"), B = $("frBuf");
+  W.innerHTML = ""; B.innerHTML = "";
+  var wire = fr.scheme === "ws" ? M.join("") : frWire();
+  var total = fr.scheme === "ws" ? wire.length : wire.length;
+  var X0 = 14, XW = 612;
+  var at = function (b) { return X0 + XW * b / Math.max(1, total); };
+
+  W.appendChild(txt(14, 16, fr.scheme === "ws"
+    ? "THE WIRE — three WebSocket frames (the library reassembles fragments for you)"
+    : "THE WIRE — " + total + " bytes of one TCP stream", 10, "#5f6673"));
+
+  var segs = frSegments();
+  segs.forEach(function (s) {
+    if (s.pre) {
+      W.appendChild(mk("rect", { x: at(s.start), y: 28, width: Math.max(2, at(s.start + s.pre) - at(s.start)),
+        height: 30, fill: "#7cb0ff", opacity: 0.9 }));
+    }
+    W.appendChild(mk("rect", { x: at(s.start + s.pre), y: 28,
+      width: Math.max(2, at(s.start + s.pre + s.body) - at(s.start + s.pre)), height: 30,
+      fill: MCOL[s.i], opacity: 0.32, stroke: MCOL[s.i], "stroke-width": 1 }));
+    if (s.post) {
+      W.appendChild(mk("rect", { x: at(s.start + s.pre + s.body), y: 28,
+        width: Math.max(2, at(s.start + s.len) - at(s.start + s.pre + s.body)), height: 30, fill: "#d29922" }));
+    }
+    W.appendChild(txt(at(s.start + s.pre) + 4, 48, "msg " + (s.i + 1) + " · " + s.body + "B", 9, MCOL[s.i]));
+  });
+  /* chunk boundaries */
+  var acc = 0;
+  (fr.chunks || []).forEach(function (c, k) {
+    acc += c.length;
+    if (acc >= total) return;
+    W.appendChild(mk("line", { x1: at(acc), y1: 22, x2: at(acc), y2: 64, stroke: "#e8e6e3", "stroke-width": 1.4, opacity: 0.75 }));
+  });
+  /* delivered overlay */
+  if (fr.pos > 0) {
+    W.appendChild(mk("rect", { x: X0, y: 28, width: at(fr.pos) - X0, height: 30, fill: "#0f1115", opacity: 0.55 }));
+    W.appendChild(mk("rect", { x: X0, y: 28, width: at(fr.pos) - X0, height: 30, fill: "none", stroke: "#3fb950", "stroke-width": 1.2 }));
+    W.appendChild(txt(X0 + 4, 22, "delivered", 8.5, "#3fb950"));
+  }
+  W.appendChild(mk("path", { d: "M" + (at(fr.pos) - 5) + " 70 L" + (at(fr.pos) + 5) + " 70 L" + at(fr.pos) + " 62 z", fill: "#e8e6e3" }));
+  W.appendChild(txt(at(fr.pos) + 9, 78, "recv() cursor", 9, "#5f6673"));
+  W.appendChild(txt(14, 96, fr.scheme === "none"
+    ? "white lines = recv() boundaries. Notice they do NOT line up with message boundaries. They never do."
+    : (fr.scheme === "ws" ? "frame boundaries and message boundaries are the same thing — that is the whole point."
+      : "white lines = recv() boundaries. The framing header/delimiter tells the parser where a message really ends."), 9.5, "#3a4150"));
+
+  /* buffer row */
+  B.appendChild(txt(14, 126, fr.scheme === "none"
+    ? "RECEIVE BUFFER — the naive parser keeps none, which is exactly the bug"
+    : "RECEIVE BUFFER — bytes held across reads", 10, "#5f6673"));
+  var bl = fr.scheme === "none" ? 0 : fr.buf.length;
+  B.appendChild(mk("rect", { x: 14, y: 136, width: 612, height: 26, rx: 5, fill: "#0b0e14", stroke: "#272c36" }));
+  if (bl) {
+    B.appendChild(mk("rect", { x: 14, y: 136, width: Math.max(3, 612 * Math.min(1, bl / 200)), height: 26, rx: 5,
+      fill: "#d29922", opacity: 0.55 }));
+  }
+  B.appendChild(txt(20, 153, bl ? bl + " bytes waiting for the rest of their message" : "(empty)", 10,
+    bl ? "#e8cf9a" : "#3a4150"));
+  var prev = (fr.scheme === "none" ? "" : fr.buf).slice(0, 74);
+  B.appendChild(txt(14, 184, prev ? prev.replace(/\n/g, "\\n") : "", 9.5, "#5f6673"));
+  if (prev.length === 74) B.appendChild(txt(14, 198, "…", 9.5, "#5f6673"));
+
+  B.appendChild(txt(14, 226, fr.scheme === "len"
+    ? "blue = 4-byte length header  ·  in production this is 4 big-endian bytes, not ASCII digits"
+    : (fr.scheme === "delim" ? "amber = the \\n delimiter  ·  fails the moment a payload legitimately contains a newline"
+      : (fr.scheme === "ws" ? "the websockets library owns framing, masking and fragmentation — you just await recv()"
+        : "no framing at all: this is the code almost everyone writes first")), 9.5, "#3a4150"));
+
+  $("frNC").textContent = String(fr.ci);
+  $("frOK").textContent = String(fr.ok);
+  $("frER").textContent = String(fr.er);
+  $("frPos").textContent = fr.pos + " / " + total + " bytes";
+  $("frStep").disabled = fr.ci >= fr.chunks.length;
+  $("frAll").disabled = fr.ci >= fr.chunks.length;
+  var O = $("frOut");
+  O.innerHTML = "";
+  if (!fr.out.length) { var d0 = document.createElement("div"); d0.textContent = "Nothing received yet."; O.appendChild(d0); }
+  fr.out.slice(0, 14).forEach(function (e) {
+    var d = document.createElement("div"); d.className = e.k; d.textContent = e.t; O.appendChild(d);
+  });
+
+  var note;
+  if (fr.scheme === "none") {
+    note = "<b>No framing.</b> <code>json.loads(sock.recv(4096))</code> — the code almost everyone writes " +
+      "first. It works on your laptop with one small message and dies under load, because a recv boundary " +
+      "and a message boundary have nothing to do with each other. " +
+      (fr.ci ? "So far: <b>" + fr.ok + " parsed, " + fr.er + " errors</b>." : "");
+  } else if (fr.scheme === "delim") {
+    note = "<b>Newline delimiter.</b> Buffer across reads, split on <code>\\n</code>, parse complete lines, " +
+      "keep the remainder. Simple and debuggable — and it breaks silently the day a payload contains a " +
+      "newline, so you must escape it (JSON already does).";
+  } else if (fr.scheme === "len") {
+    note = "<b>Length prefix.</b> Read a fixed-size header, learn the body length, then wait until you have " +
+      "exactly that many bytes. Payload-agnostic (binary-safe) and the standard choice for real market-data " +
+      "protocols. The cost: desynchronise once and the stream is unrecoverable.";
+  } else {
+    note = "<b>WebSocket frames.</b> The protocol carries the length in its own header, so one " +
+      "<code>await ws.recv()</code> returns exactly one message — always. This is why the arena runs on " +
+      "WebSockets: framing stops being your problem so the contract can be.";
+  }
+  $("frNote").innerHTML = note;
+}
+$("frNone").addEventListener("click", function () { frSetScheme("none"); });
+$("frDelim").addEventListener("click", function () { frSetScheme("delim"); });
+$("frLen").addEventListener("click", function () { frSetScheme("len"); });
+$("frWs").addEventListener("click", function () { frSetScheme("ws"); });
+$("frStep").addEventListener("click", frStep);
+$("frAll").addEventListener("click", function () { while (fr.ci < fr.chunks.length) frStep(); });
+$("frReset").addEventListener("click", frReset);
+$("frChunk").addEventListener("input", function () { $("vfrChunk").textContent = this.value; frReset(); });
+frSetScheme("none");
+
+/* ── 2. HANDSHAKE + SEQUENCE DIAGRAM ─────────────────────────── */
+var SQ = [
+  { dir: ">", phase: "tcp", label: "TCP: SYN → SYN/ACK → ACK",
+    title: "0 · A TCP connection, and nothing more",
+    frame: "$ TEAM_ID=T07 python -m team.trader\nconnecting to ws://localhost:8765 …\n(three packets, zero application bytes)",
+    note: "At this point you have a reliable, ordered byte pipe between two processes. It has no idea what an order is." },
+  { dir: ">", phase: "http", label: "GET / HTTP/1.1  ·  Upgrade: websocket",
+    title: "1 · The client asks to change protocol",
+    frame: "GET /  HTTP/1.1\nHost: localhost:8765\nUpgrade: websocket\nConnection: Upgrade\nSec-WebSocket-Key: dGhlIHNhbXBsZQ==\nSec-WebSocket-Version: 13",
+    note: "A completely ordinary HTTP request — which is why a WebSocket traverses proxies and firewalls that would block a custom protocol." },
+  { dir: "<", phase: "http", label: "HTTP/1.1 101 Switching Protocols",
+    title: "2 · The server agrees",
+    frame: "HTTP/1.1 101 Switching Protocols\nUpgrade: websocket\nConnection: Upgrade\nSec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=",
+    note: "101, not 200. The HTTP conversation is over; the TCP connection survives and changes meaning." },
+  { dir: "x", phase: "ws", label: "same connection · now full-duplex and framed",
+    title: "3 · From here on, frames",
+    frame: "# both sides may now push whenever they like\n# one await ws.recv() == exactly one message\n# header is 2–14 bytes, not a page of HTTP",
+    note: "In practice the websockets library did all of the above for you. You wrote `async with connect(url) as ws:`." },
+  { dir: ">", phase: "arena", label: "Handshake(team_id, role, level)",
+    title: "4 · The arena protocol opens",
+    frame: 'Handshake(type="handshake", team_id="T07", role="trader",\n          level=1, token="…")',
+    note: "The first application message identifies you. With AUTH_REQUIRED=true the token is checked here, and a bad one is closed immediately." },
+  { dir: "<", phase: "arena", label: "SessionEvent(event='session_open')",
+    title: "5 · You are registered",
+    frame: 'SessionEvent(type="session_event", event="session_open",\n             week=3, symbols=["AAPL","MSFT","NVDA", …])',
+    note: "Your bot should do nothing before this arrives. Orders sent into a closed session are rejected." },
+  { dir: "<", phase: "arena", label: "BookSnapshot(...)   [streamed, repeats]",
+    title: "6 · Market data starts pushing",
+    frame: 'BookSnapshot(type="book_snapshot", symbol="AAPL",\n  bids=[[185.45,100],[185.40,250]],\n  asks=[[185.55,100],[185.60,180]],\n  mid=185.50, microprice=185.503)',
+    note: "This is what becomes `market` inside your on_tick(). It arrives whenever the book changes — you never ask for it." },
+  { dir: ">", phase: "arena", label: "PlaceOrder(symbol, side, qty, price)",
+    title: "7 · You send an order",
+    frame: 'PlaceOrder(type="place_order", team_id="T07", symbol="AAPL",\n  side="buy", order_type="limit", price=185.55, quantity=5)\n\nawait ws.send(order.model_dump_json())',
+    note: "A model, serialised. Never a hand-built dict — that is the sacred rule of shared/messages.py." },
+  { dir: "<", phase: "arena", label: "OrderAck(order_id, queue_ahead)",
+    title: "8 · The venue acknowledges",
+    frame: 'OrderAck(type="order_ack", order_id="c7f21a",\n  status="accepted", queue_ahead=3, symbol="AAPL")',
+    note: "Request/response, on the same socket that is streaming the book. queue_ahead tells you how much size is in front of you at your price." },
+  { dir: "<", phase: "arena", label: "TradeExecution(price, qty, fee)",
+    title: "9 · A fill",
+    frame: 'TradeExecution(type="trade_execution", symbol="AAPL",\n  price=185.55, quantity=5, aggressor="buy",\n  fee=1.39, maker_rebate=0.0)',
+    note: "This fires your on_fill() hook. Note the fee: you were the taker, so 0.0015 of notional left your account." },
+  { dir: "<", phase: "arena", label: "PortfolioUpdate(cash, positions, net_worth)",
+    title: "10 · Your books, from the venue's point of view",
+    frame: 'PortfolioUpdate(type="portfolio_update", team_id="T07",\n  cash=99070.86, positions={"AAPL": 5},\n  net_worth=99998.36, realized_pnl=0.0, unrealized_pnl=-0.25)',
+    note: "The exchange is the source of truth, not your local arithmetic. If they disagree, you have a bug — and the leaderboard uses theirs." },
+  { dir: "<", phase: "arena", label: "ping / pong … SessionEvent('session_closed')",
+    title: "11 · Staying alive, then closing",
+    frame: "# heartbeat frames, both directions, every few seconds\nping → pong\n\nSessionEvent(type=\"session_event\", event=\"session_closed\")",
+    note: "Heartbeats detect a half-open connection that still looks alive. On session_closed your bot flattens and the score locks." }
+];
+var PH = { tcp: "#5f6673", http: "#d29922", ws: "#6cb6ff", arena: "#7cb0ff" };
+var sqI = 0, sqTimer = null;
+function sqReset() {
+  if (sqTimer) { clearInterval(sqTimer); sqTimer = null; $("sqPlay").innerHTML = "&#9654; Play"; }
+  sqI = 0;
+  $("sqTitle").textContent = "Press Next to open a connection";
+  $("sqFrame").textContent = "$ TEAM_ID=T07 python -m team.trader";
+  $("sqNote").innerHTML = "Everything below the SDK is the <code>websockets</code> library plus <code>shared/messages.py</code>. You will read both this week.";
+  sqDraw();
+}
+function sqStep() {
+  if (sqI >= SQ.length) return;
+  var s = SQ[sqI];
+  sqI += 1;
+  $("sqTitle").textContent = s.title;
+  $("sqFrame").textContent = s.frame;
+  $("sqNote").textContent = s.note;
+  sqDraw();
+}
+function sqDraw() {
+  var A = $("sqArrows"), P = $("sqPhase");
+  A.innerHTML = ""; P.innerHTML = "";
+  for (var i = 0; i < sqI; i++) {
+    var s = SQ[i], y = 62 + i * 33, col = PH[s.phase];
+    var fresh = i === sqI - 1;
+    var op = fresh ? 1 : 0.42;
+    if (s.dir === "x") {
+      A.appendChild(mk("rect", { x: 116, y: y - 9, width: 411, height: 18, rx: 4,
+        fill: col, opacity: fresh ? 0.28 : 0.12, stroke: col, "stroke-width": 1, "stroke-dasharray": "4 3" }));
+      var t0 = txt(321, y + 4, s.label, 9.5, col, "middle");
+      t0.setAttribute("opacity", op);
+      A.appendChild(t0);
+    } else {
+      var x1 = s.dir === ">" ? 116 : 527, x2 = s.dir === ">" ? 527 : 116;
+      var ln = mk("line", { x1: x1, y1: y, x2: x2, y2: y, stroke: col, "stroke-width": fresh ? 2 : 1.2, opacity: op });
+      A.appendChild(ln);
+      var hx = x2 + (s.dir === ">" ? -1 : 1);
+      var d = s.dir === ">"
+        ? "M" + (hx - 9) + " " + (y - 5) + " L" + hx + " " + y + " L" + (hx - 9) + " " + (y + 5)
+        : "M" + (hx + 9) + " " + (y - 5) + " L" + hx + " " + y + " L" + (hx + 9) + " " + (y + 5);
+      A.appendChild(mk("path", { d: d, fill: "none", stroke: col, "stroke-width": fresh ? 2 : 1.2, opacity: op }));
+      var t1 = txt(321, y - 6, s.label, 9.5, fresh ? "#e8e6e3" : col, "middle");
+      t1.setAttribute("opacity", fresh ? 1 : 0.5);
+      A.appendChild(t1);
+    }
+  }
+  /* phase rail */
+  var bands = [], cur = null;
+  for (var j = 0; j < SQ.length; j++) {
+    if (!cur || cur.p !== SQ[j].phase) { cur = { p: SQ[j].phase, a: j, b: j }; bands.push(cur); }
+    else cur.b = j;
+  }
+  bands.forEach(function (b) {
+    var y1 = 62 + b.a * 33 - 12, y2 = 62 + b.b * 33 + 12;
+    var live = sqI > b.a;
+    P.appendChild(mk("rect", { x: 8, y: y1, width: 4, height: y2 - y1, rx: 2,
+      fill: PH[b.p], opacity: live ? 0.85 : 0.18 }));
+    var t = txt(20, (y1 + y2) / 2 + 3, b.p.toUpperCase(), 8, PH[b.p]);
+    t.setAttribute("opacity", live ? 0.9 : 0.3);
+    t.setAttribute("transform", "rotate(-90 20 " + ((y1 + y2) / 2 + 3) + ")");
+    P.appendChild(t);
+  });
+  $("sqCount").textContent = sqI + " / " + SQ.length;
+  $("sqStep").disabled = sqI >= SQ.length;
+  var ph = sqI ? SQ[sqI - 1].phase : null;
+  [["sqP1", "tcp"], ["sqP2", "http"], ["sqP3", "ws"], ["sqP4", "arena"]].forEach(function (p) {
+    $(p[0]).className = "pill" + (p[1] === ph ? " acc" : "");
+  });
+}
+$("sqStep").addEventListener("click", sqStep);
+$("sqReset").addEventListener("click", sqReset);
+$("sqPlay").addEventListener("click", function () {
+  if (sqTimer) { clearInterval(sqTimer); sqTimer = null; this.innerHTML = "&#9654; Play"; return; }
+  if (sqI >= SQ.length) sqI = 0;
+  this.innerHTML = "&#10073;&#10073; Pause";
+  var btn = this;
+  sqTimer = setInterval(function () {
+    sqStep();
+    if (sqI >= SQ.length) { clearInterval(sqTimer); sqTimer = null; btn.innerHTML = "&#9654; Play"; }
+  }, 1300);
+});
+sqReset();
+
+/* ── 3. SCHEMA VALIDATION ────────────────────────────────────── */
+var PRESETS = {
+  0: '{\n  "type": "place_order",\n  "team_id": "T07",\n  "symbol": "AAPL",\n  "side": "buy",\n  "order_type": "limit",\n  "quantity": 5,\n  "price": 185.55\n}',
+  1: '{\n  "type": "place_order",\n  "team_id": "T07",\n  "symbol": "AAPL",\n  "side": "buy",\n  "order_type": "limit",\n  "quatity": 5,\n  "price": 185.55\n}',
+  2: '{\n  "type": "place_order",\n  "team_id": "T07",\n  "symbol": "AAPL",\n  "side": "BUY",\n  "order_type": "limit",\n  "quantity": 5,\n  "price": 185.55\n}',
+  3: '{\n  "type": "place_order",\n  "team_id": "T07",\n  "symbol": "AAPL",\n  "side": "buy",\n  "order_type": "limit",\n  "quantity": "",\n  "price": 185.55\n}',
+  4: '{\n  "type": "place_order",\n  "team_id": "T07",\n  "symbol": "AAPL",\n  "side": "buy",\n  "order_type": "limit",\n  "quantity": 5\n}',
+  5: '{"type": "place_order", "symbol": "AAPL", side: buy,\n quantity: 5,}   <-- not JSON'
+};
+var FIELDS = ["type", "team_id", "symbol", "side", "order_type", "quantity", "price"];
+function validate(src) {
+  var o;
+  try { o = JSON.parse(src); }
+  catch (e) {
+    return { json: false, errs: [{ f: "(body)", m: "json.decoder.JSONDecodeError — " + e.message, t: "json_invalid", v: "" }] };
+  }
+  if (o === null || typeof o !== "object" || Array.isArray(o)) {
+    return { json: true, errs: [{ f: "(body)", m: "Input should be a valid dictionary or instance of PlaceOrder", t: "model_type", v: String(o) }] };
+  }
+  var errs = [], notes = [];
+  Object.keys(o).forEach(function (k) {
+    if (FIELDS.indexOf(k) < 0) errs.push({ f: k, m: "Extra inputs are not permitted", t: "extra_forbidden", v: JSON.stringify(o[k]) });
+  });
+  function req(f) {
+    if (!(f in o) || o[f] === null) { errs.push({ f: f, m: "Field required", t: "missing", v: "" }); return false; }
+    return true;
+  }
+  if (req("type") && o.type !== "place_order") {
+    errs.push({ f: "type", m: "Input should be 'place_order'", t: "literal_error", v: JSON.stringify(o.type) });
+  }
+  if (req("team_id")) {
+    if (typeof o.team_id !== "string") errs.push({ f: "team_id", m: "Input should be a valid string", t: "string_type", v: JSON.stringify(o.team_id) });
+    else if (!o.team_id.length) errs.push({ f: "team_id", m: "String should have at least 1 character", t: "string_too_short", v: '""' });
+  }
+  if (req("symbol")) {
+    if (typeof o.symbol !== "string") errs.push({ f: "symbol", m: "Input should be a valid string", t: "string_type", v: JSON.stringify(o.symbol) });
+    else if (!/^[A-Z]{1,5}$/.test(o.symbol)) errs.push({ f: "symbol", m: "String should match pattern '^[A-Z]{1,5}$'", t: "string_pattern_mismatch", v: JSON.stringify(o.symbol) });
+  }
+  if (req("side") && o.side !== "buy" && o.side !== "sell") {
+    errs.push({ f: "side", m: "Input should be 'buy' or 'sell'", t: "literal_error", v: JSON.stringify(o.side) });
+  }
+  if (req("order_type") && o.order_type !== "limit" && o.order_type !== "market") {
+    errs.push({ f: "order_type", m: "Input should be 'limit' or 'market'", t: "literal_error", v: JSON.stringify(o.order_type) });
+  }
+  if (req("quantity")) {
+    var q = o.quantity;
+    if (typeof q === "string") {
+      if (/^\s*\d+\s*$/.test(q)) notes.push("quantity was the string " + JSON.stringify(q) + " and was coerced to the int " + parseInt(q, 10) + " (pydantic lax mode). In strict mode this is an error — decide which you want.");
+      else errs.push({ f: "quantity", m: "Input should be a valid integer, unable to parse string as an integer", t: "int_parsing", v: JSON.stringify(q) });
+    } else if (typeof q !== "number") {
+      errs.push({ f: "quantity", m: "Input should be a valid integer", t: "int_type", v: JSON.stringify(q) });
+    } else if (Math.floor(q) !== q) {
+      errs.push({ f: "quantity", m: "Input should be a valid integer, got a number with a fractional part", t: "int_from_float", v: String(q) });
+    } else if (q <= 0) {
+      errs.push({ f: "quantity", m: "Input should be greater than 0", t: "greater_than", v: String(q) });
+    }
+  }
+  if ("price" in o && o.price !== null) {
+    if (typeof o.price !== "number") errs.push({ f: "price", m: "Input should be a valid number", t: "float_type", v: JSON.stringify(o.price) });
+    else if (o.price <= 0) errs.push({ f: "price", m: "Input should be greater than 0", t: "greater_than", v: String(o.price) });
+  } else if (o.order_type === "limit") {
+    errs.push({ f: "price", m: "price is required when order_type='limit'", t: "value_error", v: "None" });
+  }
+  return { json: true, errs: errs, notes: notes, obj: o };
+}
+function vaRun() {
+  var r = validate($("vaIn").value);
+  var out = $("vaOut");
+  out.innerHTML = "";
+  if (!r.errs.length) {
+    $("vaHead").textContent = "Validator · passed";
+    var d = document.createElement("div");
+    d.className = "row1 good";
+    d.innerHTML = "<b>✓ PlaceOrder validated</b>PlaceOrder(type='place_order', team_id='" + r.obj.team_id +
+      "', symbol='" + r.obj.symbol + "', side='" + r.obj.side + "', order_type='" + r.obj.order_type +
+      "', quantity=" + parseInt(r.obj.quantity, 10) + ", price=" + (r.obj.price === undefined ? "None" : r.obj.price) + ")";
+    out.appendChild(d);
+    (r.notes || []).forEach(function (n) {
+      var w = document.createElement("div");
+      w.className = "row1";
+      w.style.borderLeftColor = "#d29922";
+      w.innerHTML = "<b>⚠ coercion</b><i>" + n + "</i>";
+      out.appendChild(w);
+    });
+    $("vaNext").innerHTML = "<b>Accepted.</b> The order reaches the matching engine, crosses or rests, and you " +
+      "get back an <code>OrderAck(order_id=…, queue_ahead=…)</code> — followed by a " +
+      "<code>TradeExecution</code> if it crossed.";
+  } else {
+    $("vaHead").textContent = "Validator · " + r.errs.length + " error" + (r.errs.length > 1 ? "s" : "");
+    var h = document.createElement("div");
+    h.className = "row1";
+    h.innerHTML = "<b>pydantic_core._pydantic_core.ValidationError</b>" + r.errs.length +
+      " validation error" + (r.errs.length > 1 ? "s" : "") + " for PlaceOrder";
+    out.appendChild(h);
+    r.errs.forEach(function (e) {
+      var d2 = document.createElement("div");
+      d2.className = "row1";
+      d2.innerHTML = "<b>" + e.f + "</b>" + e.m + "<br/><i>[type=" + e.t +
+        (e.v ? ", input_value=" + e.v : "") + "]</i>";
+      out.appendChild(d2);
+    });
+    $("vaNext").innerHTML = !r.json
+      ? "<b>Rejected before the model even ran.</b> <code>json.loads()</code> raised, so " +
+        "<code>parse_message()</code> was never called. The exchange logs it and keeps your connection open — " +
+        "but if the garbage repeats, expect to be disconnected."
+      : "<b>Rejected at the boundary.</b> The matching engine never saw this message. That is the entire " +
+        "point of validating at the edge: a malformed order cannot corrupt the book, and the error names the " +
+        "field instead of surfacing as a <code>KeyError</code> three layers deep at 09:31.";
+  }
+}
+$("vaRun").addEventListener("click", vaRun);
+$("vaIn").addEventListener("input", vaRun);
+[0, 1, 2, 3, 4, 5].forEach(function (k) {
+  $("vaP" + k).addEventListener("click", function () { $("vaIn").value = PRESETS[k]; vaRun(); });
+});
+$("vaIn").value = PRESETS[0];
+vaRun();
+
+/* ── 4. VERSIONING WITH DEFAULTS ─────────────────────────────── */
+var vs = { bot: "v1", ex: "v1", mode: "add" };
+function vsSet(k, v) { vs[k] = v; vsDraw(); }
+$("vsBotOld").addEventListener("click", function () { vsSet("bot", "v1"); });
+$("vsBotNew").addEventListener("click", function () { vsSet("bot", "v2"); });
+$("vsExOld").addEventListener("click", function () { vsSet("ex", "v1"); });
+$("vsExNew").addEventListener("click", function () { vsSet("ex", "v2"); });
+$("vsAdd").addEventListener("click", function () { vsSet("mode", "add"); });
+$("vsBreak").addEventListener("click", function () { vsSet("mode", "break"); });
+
+function vsWireFor(ex, mode) {
+  var base = { type: "order_ack", order_id: "c7f21a", symbol: "AAPL", side: "buy", status: "accepted", price: 185.55 };
+  var qtyKey = (mode === "break" && ex === "v2") ? "qty" : "quantity";
+  base[qtyKey] = 5;
+  if (ex === "v2") { base.queue_ahead = 3; base.maker_rebate = 0.0; base.microprice = 185.503; }
+  return base;
+}
+function vsCheck(bot, ex, mode) {
+  var w = vsWireFor(ex, mode);
+  var wantQty = (mode === "break" && bot === "v2") ? "qty" : "quantity";
+  var missing = [], ignored = [], defaulted = [];
+  var known = ["type", "order_id", "symbol", "side", "status", "price", wantQty];
+  if (bot === "v2") { known = known.concat(["queue_ahead", "maker_rebate", "microprice"]); }
+  if (!(wantQty in w)) missing.push(wantQty);
+  Object.keys(w).forEach(function (k) { if (known.indexOf(k) < 0) ignored.push(k); });
+  if (bot === "v2") {
+    ["queue_ahead", "maker_rebate", "microprice"].forEach(function (k) { if (!(k in w)) defaulted.push(k); });
+  }
+  return { ok: !missing.length, missing: missing, ignored: ignored, defaulted: defaulted, wire: w, wantQty: wantQty };
+}
+function vsDraw() {
+  $("vsBotOld").setAttribute("aria-pressed", vs.bot === "v1" ? "true" : "false");
+  $("vsBotNew").setAttribute("aria-pressed", vs.bot === "v2" ? "true" : "false");
+  $("vsExOld").setAttribute("aria-pressed", vs.ex === "v1" ? "true" : "false");
+  $("vsExNew").setAttribute("aria-pressed", vs.ex === "v2" ? "true" : "false");
+  $("vsAdd").setAttribute("aria-pressed", vs.mode === "add" ? "true" : "false");
+  $("vsBreak").setAttribute("aria-pressed", vs.mode === "break" ? "true" : "false");
+
+  [["vsC11", "v1", "v1"], ["vsC12", "v1", "v2"], ["vsC21", "v2", "v1"], ["vsC22", "v2", "v2"]].forEach(function (c) {
+    var r = vsCheck(c[1], c[2], vs.mode);
+    var cell = $(c[0]);
+    cell.textContent = r.ok ? "✓ parses" : "✗ ValidationError";
+    cell.className = r.ok ? "pass" : "fail";
+    if (vs.bot === c[1] && vs.ex === c[2]) { cell.style.outline = "2px solid #7cb0ff"; }
+    else { cell.style.outline = "none"; }
+  });
+
+  var res = vsCheck(vs.bot, vs.ex, vs.mode);
+  $("vsHead").textContent = "On the wire · exchange " + vs.ex + " → bot " + vs.bot;
+  $("vsWire").textContent = "OrderAck as JSON, sent by exchange " + vs.ex + ":\n" +
+    JSON.stringify(res.wire, null, 2);
+
+  var out = $("vsOut");
+  out.innerHTML = "";
+  function row(cls, head, body) {
+    var d = document.createElement("div");
+    d.className = "row1" + (cls === "good" ? " good" : "");
+    if (cls === "warn") d.style.borderLeftColor = "#d29922";
+    d.innerHTML = "<b>" + head + "</b><i>" + body + "</i>";
+    out.appendChild(d);
+  }
+  if (res.ok) {
+    row("good", "✓ OrderAck validated", "bot " + vs.bot + "'s model accepted the message and your on_ack hook fired normally.");
+    if (res.ignored.length) {
+      row("warn", "ignored " + res.ignored.length + " unknown field(s): " + res.ignored.join(", "),
+        "pydantic's default is to ignore extras on input. This is what keeps an old bot alive against a newer exchange — and it is why you should never set extra='forbid' on the RECEIVE path.");
+    }
+    if (res.defaulted.length) {
+      row("warn", "filled " + res.defaulted.length + " field(s) from defaults: " + res.defaulted.join(", "),
+        "The old exchange never sent them, so the new model used its declared defaults (queue_ahead=0, maker_rebate=0.0, microprice=None). Your code must treat 0 as “unknown”, not as “no queue”.");
+    }
+  } else {
+    row("bad", "✗ 1 validation error for OrderAck",
+      res.missing[0] + " — Field required [type=missing]. The exchange sent " +
+      (res.wantQty === "quantity" ? "'qty'" : "'quantity'") + " and this bot's model requires '" +
+      res.wantQty + "'. Every message of this type now fails, mid-session, for as long as the versions disagree.");
+  }
+
+  $("vsNote").innerHTML = vs.mode === "add"
+    ? "<b>Add, with defaults: all four combinations work.</b> An old bot ignores fields it has never heard " +
+      "of; a new bot fills in defaults for fields an old exchange never sends. Nobody has to redeploy in " +
+      "lockstep — which is exactly how <code>queue_ahead</code>, <code>maker_rebate</code> and " +
+      "<code>microprice</code> were added to the real <code>OrderAck</code> mid-season without breaking a " +
+      "single team."
+    : "<b>Rename, and half the matrix goes red.</b> A one-line diff (<code>quantity</code> → " +
+      "<code>qty</code>) breaks every peer that has not redeployed, in both directions. And the nastier " +
+      "version of this mistake does not even error: keep the name and change the <em>meaning</em> — price " +
+      "in cents instead of dollars — and every bot keeps parsing happily while being completely wrong.";
+}
+vsDraw();
+
+/* ── MCQ engine (shared across week pages) ───────────────────── */
+Array.prototype.forEach.call(document.querySelectorAll(".mcq"), function (q) {
+  var answer = parseInt(q.getAttribute("data-a"), 10);
+  var opts = Array.prototype.slice.call(q.querySelectorAll(".opt"));
+  var fb = q.querySelector(".fb");
+  opts.forEach(function (o, i) {
+    o.addEventListener("click", function () {
+      if (q.dataset.done === "1") return;
+      q.dataset.done = "1";
+      var right = i === answer;
+      opts.forEach(function (b, j) {
+        b.disabled = true;
+        if (j === answer) b.classList.add("right");
+        else if (j === i) b.classList.add("wrong");
+        else b.classList.add("dim");
+      });
+      fb.innerHTML = (right ? "<b>Correct.</b> " : "<b>Not quite.</b> ") + q.getAttribute("data-exp");
+      fb.className = "fb show " + (right ? "good" : "poor");
+    });
+  });
+});
+</script>
+</body>
+</html>
