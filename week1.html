@@ -231,6 +231,53 @@
   .sw button:focus-visible{outline:2px solid var(--accent-2);outline-offset:-2px}
   @media (max-width:720px){ #hero{padding:34px 15px 28px} }
 
+  /* ── week-1 · Part 1 opening (what OOP solves / the bad bot) ── */
+  h3.subhead{font-size:15.5px;font-weight:700;letter-spacing:-.1px;text-transform:none;color:var(--ink);
+    margin:26px 0 8px;display:flex;align-items:center;gap:9px;scroll-margin-top:64px}
+  h3.subhead .sublbl{font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--accent-2);
+    border:1px solid rgba(var(--accent-2-rgb),.5);background:rgba(var(--accent-rgb),.16);border-radius:5px;padding:1px 6px}
+  .solve{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .solve .panel h4{margin-bottom:2px}
+  .solve .panel p.sub{margin:4px 0 0}
+  .solve .tr,.solve .fx{font-size:12px;color:var(--muted);margin-top:8px;padding-left:9px;border-left:2px solid var(--bad)}
+  .solve .fx{border-left-color:var(--ok)}
+  .solve .tr b{color:#f4b6b1} .solve .fx b{color:#bce8c4}
+  @media (max-width:980px){ .solve{grid-template-columns:repeat(2,minmax(0,1fr))} }
+  .mornbar{gap:8px}
+  .mornbar .sw{margin-left:auto}
+  .mstep{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;
+    padding:12px 14px;min-height:150px}
+  .mstep.bad{border-left-color:var(--bad)} .mstep.ok{border-left-color:var(--ok)}
+  .mstep p{font-size:12.8px;color:var(--muted);margin:6px 0 0;max-width:none}
+  .mstep p b{color:var(--ink)}
+  .mtag{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;
+    color:var(--accent-2);margin-bottom:5px}
+  .mtag.bad{color:var(--bad)} .mtag.ok{color:var(--ok)}
+  table.t td.off{color:var(--bad);font-weight:700}
+  .codecard{transition:opacity .2s}
+  .codecard.dim{opacity:.48}
+  .codehead{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  pre.code.lined{font-size:11px;line-height:1.58;padding:10px 0;max-height:470px;overflow:auto}
+  pre.code.lined .ln{display:block;padding:0 12px 0 0;border-left:3px solid transparent}
+  pre.code.lined .ln::before{content:attr(data-l);display:inline-block;width:2.2em;margin-right:10px;text-align:right;
+    color:#3d4452;-webkit-user-select:none;user-select:none}
+  pre.code.lined .ln.hot{background:rgba(248,81,73,.17);border-left-color:var(--bad)}
+  pre.code.lined.goodc .ln.hot{background:rgba(63,185,80,.15);border-left-color:var(--ok)}
+  pre.code.lined .ln.hot::before{color:var(--ink)}
+  pre.code.lined:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+  .tablewrap{overflow-x:auto}
+  table.aiask td{font-family:var(--sans);font-size:12.3px;line-height:1.55;vertical-align:top;color:var(--muted)}
+  table.aiask td.n{font-family:var(--mono);font-size:11.8px;white-space:nowrap}
+  table.aiask td:nth-child(2){border-left:2px solid rgba(248,81,73,.45)}
+  table.aiask td:nth-child(3){border-left:2px solid rgba(63,185,80,.45)}
+  @media (max-width:720px){
+    .solve{grid-template-columns:minmax(0,1fr)}
+    .mornbar .sw{margin-left:0}
+    table.aiask td.n{white-space:normal}
+    table.aiask{min-width:560px}
+  }
+  @media (prefers-reduced-motion: reduce){ .codecard{transition:none} html{scroll-behavior:auto} }
+
   /* ── mobile guard (identical on every page): single column under 720px,
         no horizontal overflow. Must stay last in the sheet. ───────────── */
   @media (max-width:720px){
@@ -272,6 +319,210 @@
 <section id="what">
   <div class="kicker">Part 1</div>
   <h2><span class="secnum">1</span>What is object-oriented programming?</h2>
+  <p class="lead">Start with the problem, not the vocabulary. A trading bot is a small program that changes
+  very quickly, runs unattended, and spends real money every time it is wrong. Object-oriented programming is
+  a set of tools for keeping that kind of program honest: each fact in one place, each piece behind a
+  contract, and the same code running in a test, a backtest and the live arena.</p>
+
+  <!-- ── 1a · what OOP solves ─────────────────────────────── -->
+  <h3 class="subhead" id="what-solves"><span class="sublbl">1a</span>What OOP solves, as a software-engineering problem</h3>
+  <p class="sub" style="margin-bottom:12px">Six problems that every growing codebase hits. Each card gives the
+  symptom, what it costs in a trading system, and the OOP tool that removes it. You will see all six fire in
+  the bot below.</p>
+  <div class="solve">
+    <div class="panel tight">
+      <h4>Shared mutable state</h4>
+      <p class="sub">A global <code>pos</code> dict that any function may write. Two writers, no owner.</p>
+      <div class="tr"><b>In trading:</b> the position is counted twice, so the exit order is twice the size you meant.</div>
+      <div class="fx"><b>OOP:</b> encapsulation. One <code>Portfolio</code> owns positions; only confirmed fills change it.</div>
+    </div>
+    <div class="panel tight">
+      <h4>No contracts between pieces</h4>
+      <p class="sub">Orders are dicts; the side is whatever string the author typed: <code>'buy'</code>, <code>'BUY'</code>, <code>'b'</code>.</p>
+      <div class="tr"><b>In trading:</b> the order is rejected, or a helper reads it as the wrong side.</div>
+      <div class="fx"><b>OOP:</b> a typed value object (<code>Signal</code>) that refuses a bad side when it is created.</div>
+    </div>
+    <div class="panel tight">
+      <h4>Copy-paste variants</h4>
+      <p class="sub"><code>momo_aapl()</code> and <code>momo_nvda()</code>: the same strategy, pasted, then edited separately.</p>
+      <div class="tr"><b>In trading:</b> a fix lands in one copy only, and the other one breaches the position limit.</div>
+      <div class="fx"><b>OOP:</b> one <code>Strategy</code> class, one instance per symbol; subclass only for a real difference.</div>
+    </div>
+    <div class="panel tight">
+      <h4>Change here, break there</h4>
+      <p class="sub">The fee rate is typed as a literal in two functions, written in two different ways.</p>
+      <div class="tr"><b>In trading:</b> the venue changes its fee, one copy gets updated, and your cash and P&amp;L stop matching the venue's statement.</div>
+      <div class="fx"><b>OOP:</b> one <code>FeeModel</code> object. One fact, one place.</div>
+    </div>
+    <div class="panel tight">
+      <h4>Untestable code</h4>
+      <p class="sub">The strategy calls the socket directly and reads globals.</p>
+      <div class="tr"><b>In trading:</b> you cannot backtest the code you run live, so the backtest is a second copy that drifts.</div>
+      <div class="fx"><b>OOP:</b> the strategy is an object behind an interface; the simulator runs the same class offline.</div>
+    </div>
+    <div class="panel tight">
+      <h4>Onboarding</h4>
+      <p class="sub">A teammate (or an AI assistant) cannot tell which copy is live or which keys an order dict needs.</p>
+      <div class="tr"><b>In trading:</b> the next change goes into the wrong copy, two hours before the session.</div>
+      <div class="fx"><b>OOP:</b> classes, type hints and a UML diagram work as a map. That map is this week's deliverable.</div>
+    </div>
+  </div>
+
+  <!-- ── 1b · how bad can it get ──────────────────────────── -->
+  <h3 class="subhead" id="what-bad" style="margin-top:34px"><span class="sublbl">1b</span>How bad can it get? One morning with a procedural bot</h3>
+  <p class="sub" style="max-width:96ch">On the left is a realistic 42-line bot of the kind that "worked yesterday": globals,
+  orders as raw dicts, the position updated in two places, a strategy pasted for a second symbol before a fix,
+  the fee written twice, and a bare <code>except</code> that "keeps the bot alive". On the right is the same
+  strategy with the same rules, written as objects on the arena SDK. It is <em class="hi">not shorter</em>: the
+  difference is that each fact lives in exactly one place. Both files run: we replayed the same eight ticks
+  through a venue that validates orders with the arena's real <code>PlaceOrder</code> schema, and every number
+  below is that run's output.</p>
+
+  <div class="panel" id="mornWidget" style="margin-top:14px">
+    <h3>Interactive · run the bad bot through one morning</h3>
+    <div class="row mornbar">
+      <button class="btn" id="mnBack" type="button" aria-label="Previous step">&#9664; Back</button>
+      <button class="btn primary" id="mnNext" type="button" aria-label="Next step">Next &#9654;</button>
+      <button class="btn" id="mnReset" type="button">&#8634; Reset</button>
+      <span class="pill acc" id="mnTick">step 0 / 7 &#183; 09:30:00</span>
+      <span class="sw" role="group" aria-label="Which bot runs the morning">
+        <button id="mnBad" type="button" aria-pressed="true">the procedural bot</button><button id="mnOop" type="button" aria-pressed="false">same morning, OOP version</button>
+      </span>
+    </div>
+    <p class="sub mono" id="mnPx" style="margin:10px 0 12px">AAPL 185.00 &#183; NVDA 120.00</p>
+
+    <div class="split-r" style="gap:16px">
+      <div class="stack">
+        <div class="stats">
+          <div class="stat"><div class="sl">rejected orders</div><div class="sv" id="mnRej">0</div></div>
+          <div class="stat"><div class="sl">risk breaches</div><div class="sv" id="mnBr">0</div></div>
+          <div class="stat"><div class="sl">bot &#8800; venue (shares)</div><div class="sv" id="mnMis">0</div></div>
+          <div class="stat"><div class="sl">P&amp;L since open</div><div class="sv" id="mnPnl">$0.00</div></div>
+        </div>
+        <table class="t" aria-label="What the bot believes versus what the venue holds">
+          <thead><tr><th></th><th id="mnColBot">bot thinks</th><th>venue says</th></tr></thead>
+          <tbody id="mnRows"></tbody>
+        </table>
+      </div>
+      <div class="mstep" id="mnStory" aria-live="polite">
+        <div class="mtag" id="mnTag">the open</div>
+        <h4 id="mnTitle">Two symbols, one bot, $100,000</h4>
+        <p id="mnBody"></p>
+      </div>
+    </div>
+
+    <div class="grid2 codepair" style="margin-top:14px">
+      <div class="codecard" id="mnBadCard">
+        <div class="codehead"><span class="pill bad">procedural</span><span class="sub mono">bot.py</span></div>
+        <pre class="code lined" id="mnBadCode" tabindex="0" aria-label="Procedural bot source"><span class="ln" data-l="1" id="bb1"><span class="c"># bot.py — "it worked yesterday"</span></span><span class="ln" data-l="2" id="bb2">TEAM, MAX_POS = <span class="s">'team07'</span>, <span class="n">200</span>        <span class="c"># max shares per symbol</span></span><span class="ln" data-l="3" id="bb3">pos = {}                             <span class="c"># global: anyone can write it</span></span><span class="ln" data-l="4" id="bb4">cash = <span class="n">100_000.0</span></span><span class="ln" data-l="5" id="bb5">hist = {<span class="s">'AAPL'</span>: [], <span class="s">'NVDA'</span>: []}</span><span class="ln" data-l="6" id="bb6">ws = <span class="k">None</span>                            <span class="c"># live socket, set at startup</span></span><span class="ln" data-l="7" id="bb7"> </span><span class="ln" data-l="8" id="bb8"><span class="k">def</span> <span class="b">send</span>(sym, side, qty, px):</span><span class="ln" data-l="9" id="bb9">    <span class="k">global</span> cash</span><span class="ln" data-l="10" id="bb10">    ws.send({<span class="s">'type'</span>: <span class="s">'place_order'</span>, <span class="s">'team_id'</span>: TEAM,</span><span class="ln" data-l="11" id="bb11">             <span class="s">'symbol'</span>: sym, <span class="s">'side'</span>: side, <span class="s">'order_type'</span>: <span class="s">'limit'</span>,</span><span class="ln" data-l="12" id="bb12">             <span class="s">'price'</span>: px, <span class="s">'quantity'</span>: qty})       <span class="c"># raw dict</span></span><span class="ln" data-l="13" id="bb13">    sgn = <span class="n">1</span> <span class="k">if</span> side == <span class="s">'buy'</span> <span class="k">else</span> -<span class="n">1</span></span><span class="ln" data-l="14" id="bb14">    pos[sym] = pos.get(sym, <span class="n">0</span>) + sgn * qty</span><span class="ln" data-l="15" id="bb15">    cash -= sgn * qty * px + <span class="n">0.001</span> * qty * px</span><span class="ln" data-l="16" id="bb16"> </span><span class="ln" data-l="17" id="bb17"><span class="k">def</span> <span class="b">on_message</span>(msg):                 <span class="c"># everything the venue says</span></span><span class="ln" data-l="18" id="bb18">    <span class="k">try</span>:</span><span class="ln" data-l="19" id="bb19">        <span class="k">if</span> msg[<span class="s">'type'</span>] == <span class="s">'trade_execution'</span>:</span><span class="ln" data-l="20" id="bb20">            q = msg[<span class="s">'quantity'</span>]</span><span class="ln" data-l="21" id="bb21">            <span class="k">if</span> msg[<span class="s">'seller_id'</span>] == TEAM:</span><span class="ln" data-l="22" id="bb22">                q = -q</span><span class="ln" data-l="23" id="bb23">            pos[msg[<span class="s">'symbol'</span>]] = pos.get(msg[<span class="s">'symbol'</span>], <span class="n">0</span>) + q</span><span class="ln" data-l="24" id="bb24">        <span class="k">elif</span> msg[<span class="s">'type'</span>] == <span class="s">'error'</span>:</span><span class="ln" data-l="25" id="bb25">            print(<span class="s">'REJECTED'</span>, msg[<span class="s">'reason'</span>])  <span class="c"># it is 'message'</span></span><span class="ln" data-l="26" id="bb26">    <span class="k">except</span>:                          <span class="c"># "keeps the bot alive"</span></span><span class="ln" data-l="27" id="bb27">        <span class="k">pass</span></span><span class="ln" data-l="28" id="bb28"> </span><span class="ln" data-l="29" id="bb29"><span class="k">def</span> <span class="b">momo_aapl</span>(px):                   <span class="c"># fixed Tuesday</span></span><span class="ln" data-l="30" id="bb30">    h = hist[<span class="s">'AAPL'</span>]; h.append(px); p = pos.get(<span class="s">'AAPL'</span>, <span class="n">0</span>)</span><span class="ln" data-l="31" id="bb31">    <span class="k">if</span> len(h) &gt; <span class="n">1</span> <span class="k">and</span> h[-<span class="n">1</span>] &gt; h[-<span class="n">2</span>] <span class="k">and</span> p + <span class="n">100</span> &lt;= MAX_POS \</span><span class="ln" data-l="32" id="bb32">            <span class="k">and</span> cash &gt; <span class="n">100</span> * px * <span class="n">1.0015</span>:</span><span class="ln" data-l="33" id="bb33">        send(<span class="s">'AAPL'</span>, <span class="s">'buy'</span>, <span class="n">100</span>, px)</span><span class="ln" data-l="34" id="bb34">    <span class="k">elif</span> len(h) &gt; <span class="n">1</span> <span class="k">and</span> h[-<span class="n">1</span>] &lt; h[-<span class="n">2</span>] <span class="k">and</span> p &gt; <span class="n">0</span>:</span><span class="ln" data-l="35" id="bb35">        send(<span class="s">'AAPL'</span>, <span class="s">'sell'</span>, p, px)          <span class="c"># exit everything</span></span><span class="ln" data-l="36" id="bb36"> </span><span class="ln" data-l="37" id="bb37"><span class="k">def</span> <span class="b">momo_nvda</span>(px):                   <span class="c"># pasted Monday, before the fix</span></span><span class="ln" data-l="38" id="bb38">    h = hist[<span class="s">'NVDA'</span>]; h.append(px); p = pos.get(<span class="s">'NVDA'</span>, <span class="n">0</span>)</span><span class="ln" data-l="39" id="bb39">    <span class="k">if</span> len(h) &gt; <span class="n">1</span> <span class="k">and</span> h[-<span class="n">1</span>] &gt; h[-<span class="n">2</span>]:</span><span class="ln" data-l="40" id="bb40">        send(<span class="s">'NVDA'</span>, <span class="s">'buy'</span>, <span class="n">100</span>, px)</span><span class="ln" data-l="41" id="bb41">    <span class="k">elif</span> len(h) &gt; <span class="n">1</span> <span class="k">and</span> h[-<span class="n">1</span>] &lt; h[-<span class="n">2</span>] <span class="k">and</span> p &gt; <span class="n">0</span>:</span><span class="ln" data-l="42" id="bb42">        send(<span class="s">'NVDA'</span>, <span class="s">'SELL'</span>, p, px)</span></pre>
+      </div>
+      <div class="codecard dim" id="mnOopCard">
+        <div class="codehead"><span class="pill ok">object-oriented</span><span class="sub mono">team/trader.py</span></div>
+        <pre class="code lined goodc" id="mnOopCode" tabindex="0" aria-label="Object-oriented bot source"><span class="ln" data-l="1" id="ob1"><span class="k">from</span> abc <span class="k">import</span> ABC, abstractmethod</span><span class="ln" data-l="2" id="ob2"><span class="k">from</span> arena <span class="k">import</span> Trader, Signal</span><span class="ln" data-l="3" id="ob3"> </span><span class="ln" data-l="4" id="ob4"><span class="k">class</span> <span class="b">FeeModel</span>:                      <span class="c"># the one place fees live</span></span><span class="ln" data-l="5" id="ob5">    <span class="k">def</span> <span class="b">__init__</span>(<span class="k">self</span>, taker: float = <span class="n">0.0015</span>) -&gt; <span class="k">None</span>:</span><span class="ln" data-l="6" id="ob6">        <span class="k">self</span>.taker = taker</span><span class="ln" data-l="7" id="ob7">    <span class="k">def</span> <span class="b">all_in</span>(<span class="k">self</span>, qty: int, px: float) -&gt; float:</span><span class="ln" data-l="8" id="ob8">        <span class="k">return</span> qty * px * (<span class="n">1</span> + <span class="k">self</span>.taker)</span><span class="ln" data-l="9" id="ob9"> </span><span class="ln" data-l="10" id="ob10"><span class="k">class</span> <span class="b">Strategy</span>(ABC):                 <span class="c"># the contract for every signal</span></span><span class="ln" data-l="11" id="ob11">    <span class="n">@</span><span class="n">abstractmethod</span></span><span class="ln" data-l="12" id="ob12">    <span class="k">def</span> <span class="b">side</span>(<span class="k">self</span>, prices: list[float]) -&gt; str | <span class="k">None</span>: ...</span><span class="ln" data-l="13" id="ob13"> </span><span class="ln" data-l="14" id="ob14"><span class="k">class</span> <span class="b">Momentum</span>(Strategy):            <span class="c"># one class, one per symbol</span></span><span class="ln" data-l="15" id="ob15">    <span class="k">def</span> <span class="b">side</span>(<span class="k">self</span>, prices: list[float]) -&gt; str | <span class="k">None</span>:</span><span class="ln" data-l="16" id="ob16">        <span class="k">if</span> len(prices) &lt; <span class="n">2</span> <span class="k">or</span> prices[-<span class="n">1</span>] == prices[-<span class="n">2</span>]:</span><span class="ln" data-l="17" id="ob17">            <span class="k">return</span> <span class="k">None</span></span><span class="ln" data-l="18" id="ob18">        <span class="k">return</span> <span class="s">'buy'</span> <span class="k">if</span> prices[-<span class="n">1</span>] &gt; prices[-<span class="n">2</span>] <span class="k">else</span> <span class="s">'sell'</span></span><span class="ln" data-l="19" id="ob19"> </span><span class="ln" data-l="20" id="ob20"><span class="k">class</span> <span class="b">Risk</span>:                          <span class="c"># one rule set, every symbol</span></span><span class="ln" data-l="21" id="ob21">    <span class="k">def</span> <span class="b">__init__</span>(<span class="k">self</span>, max_pos: int, lot: int, fees: FeeModel):</span><span class="ln" data-l="22" id="ob22">        <span class="k">self</span>.max_pos, <span class="k">self</span>.lot, <span class="k">self</span>.fees = max_pos, lot, fees</span><span class="ln" data-l="23" id="ob23">    <span class="k">def</span> <span class="b">size</span>(<span class="k">self</span>, side, held: int, cash: float, px: float) -&gt; int:</span><span class="ln" data-l="24" id="ob24">        <span class="k">if</span> side == <span class="s">'sell'</span>:</span><span class="ln" data-l="25" id="ob25">            <span class="k">return</span> max(held, <span class="n">0</span>)      <span class="c"># exit what the venue holds</span></span><span class="ln" data-l="26" id="ob26">        q = min(<span class="k">self</span>.lot, <span class="k">self</span>.max_pos - held) <span class="k">if</span> side <span class="k">else</span> <span class="n">0</span></span><span class="ln" data-l="27" id="ob27">        ok = q &gt; <span class="n">0</span> <span class="k">and</span> cash &gt;= <span class="k">self</span>.fees.all_in(q, px)</span><span class="ln" data-l="28" id="ob28">        <span class="k">return</span> q <span class="k">if</span> ok <span class="k">else</span> <span class="n">0</span></span><span class="ln" data-l="29" id="ob29"> </span><span class="ln" data-l="30" id="ob30"><span class="k">class</span> <span class="b">MyBot</span>(Trader):</span><span class="ln" data-l="31" id="ob31">    <span class="k">def</span> <span class="b">__init__</span>(<span class="k">self</span>, strategies: dict[str, Strategy], risk: Risk):</span><span class="ln" data-l="32" id="ob32">        <span class="k">self</span>.strategies, <span class="k">self</span>.risk = strategies, risk</span><span class="ln" data-l="33" id="ob33">    <span class="k">def</span> <span class="b">on_tick</span>(<span class="k">self</span>, market, portfolio) -&gt; Signal | <span class="k">None</span>:</span><span class="ln" data-l="34" id="ob34">        <span class="k">for</span> sym, strat <span class="k">in</span> <span class="k">self</span>.strategies.items():</span><span class="ln" data-l="35" id="ob35">            px = market.mid_price(sym)</span><span class="ln" data-l="36" id="ob36">            <span class="k">if</span> px <span class="k">is</span> <span class="k">None</span>:           <span class="c"># no book yet: sit out</span></span><span class="ln" data-l="37" id="ob37">                <span class="k">continue</span></span><span class="ln" data-l="38" id="ob38">            held = portfolio.positions.get(sym, <span class="n">0</span>)  <span class="c"># venue's number</span></span><span class="ln" data-l="39" id="ob39">            side = strat.side(market.prices(sym))</span><span class="ln" data-l="40" id="ob40">            qty = <span class="k">self</span>.risk.size(side, held, portfolio.cash, px)</span><span class="ln" data-l="41" id="ob41">            <span class="k">if</span> qty:                  <span class="c"># validated here, in-process</span></span><span class="ln" data-l="42" id="ob42">                <span class="k">return</span> Signal(symbol=sym, side=side,</span><span class="ln" data-l="43" id="ob43">                              quantity=qty, price=px)</span><span class="ln" data-l="44" id="ob44">        <span class="k">return</span> <span class="k">None</span></span><span class="ln" data-l="45" id="ob45"> </span><span class="ln" data-l="46" id="ob46">bot = MyBot({<span class="s">'AAPL'</span>: Momentum(), <span class="s">'NVDA'</span>: Momentum()},</span><span class="ln" data-l="47" id="ob47">            Risk(max_pos=<span class="n">200</span>, lot=<span class="n">100</span>, fees=FeeModel()))</span></pre>
+      </div>
+    </div>
+    <p class="sub" style="margin-top:10px">Simplifications, so the bugs are easy to see: every valid limit order fills in
+    full at its price, the taker fee is 0.0015 of notional, and shorting is allowed (as on the arena venue).
+    Momentum here is deliberately naive: buy on an uptick, exit on a downtick.</p>
+  </div>
+
+  <div class="note" style="margin-top:16px"><b>A real-world anchor: Knight Capital, 1 August 2012.</b>
+  While deploying new order-routing code, a technician did not copy it to one of Knight's eight routing servers.
+  The new code reused a flag that had once switched on "Power Peg", a routine unused since 2003 but never
+  deleted. On the eighth server the flag woke it up, and because the code that counted its fills had been moved
+  years earlier, it kept sending child orders without noticing they were already filled. In about 45 minutes it
+  sent millions of orders in 154 stocks, and Knight lost roughly $460 million (the figure in the SEC's 2013
+  order; Knight's own estimate that week was $440 million). The firm needed a rescue and was sold the next year.
+  To be fair to the facts, this is mainly a story about <em class="hi">deployment and dead code</em>, not about
+  OOP. But the ingredients are the ones you just stepped through: one copy that differs from the others, a
+  shared flag with two meanings, and code that could not see its own fills.</div>
+
+  <!-- ── 1c · talking to a bot ────────────────────────────── -->
+  <h3 class="subhead" id="what-bots" style="margin-top:34px"><span class="sublbl">1c</span>Why this matters when you talk to a bot</h3>
+  <p class="sub" style="margin-bottom:12px;max-width:96ch">"Bot" means two different things in this course, and structure
+  matters to both of them: <strong>(a)</strong> your trading bot talks to the exchange, and <strong>(b)</strong>
+  you may talk to an AI coding assistant about your bot.</p>
+
+  <div class="split">
+    <div class="panel">
+      <h4>(a) Your bot talks to the exchange through a message contract</h4>
+      <p class="sub">Every message on the arena's wire is a pydantic v2 model in <code>shared/messages.py</code>:
+      <code>Handshake</code> to log in, <code>PlaceOrder</code> and <code>CancelOrder</code> to trade, and
+      <code>OrderAck</code>, <code>TradeExecution</code> and <code>ErrorMsg</code> coming back. Raw dicts on
+      the wire are forbidden. The reason is <em class="hi">where</em> a mistake is caught: an object is checked
+      when it is built, on the line that built it, while a dict is checked by the venue, later and somewhere else,
+      and the answer comes back as one more message your bot has to read.</p>
+      <p class="sub" style="margin-top:8px">What goes wrong for a bot that builds raw dicts:</p>
+      <ul class="plain" style="margin-top:6px">
+        <li><strong>Silent rejection.</strong> The venue answers <code>ErrorMsg(code='PARSE_ERROR')</code>.
+        If the bot never reads it, or swallows it as in step 5 above, the order simply never happened.</li>
+        <li><strong>Wrong side.</strong> Code like <code>'sell' if side == 'buy' else 'buy'</code> turns
+        <code>'BUY'</code> into <code>'buy'</code>, so the "closing" order adds to the position.</li>
+        <li><strong>Retry storms.</strong> A bot that cannot tell "rejected" from "not acknowledged yet" tends to
+        resend. Resends of a valid order are real orders: duplicates fill.</li>
+        <li><strong>Rate-limit hits.</strong> Each of those orders and cancels uses up the per-tick message quota
+        (20 for a student team by default). After that the venue answers <code>RATE_LIMITED</code>, and the
+        cancel you actually needed is refused too.</li>
+      </ul>
+      <div class="note" style="margin-top:12px"><b>Be precise about what validation buys you.</b> A wrong type or a
+      missing required field raises. A misspelled <em>optional</em> field does not: pydantic ignores unknown
+      keys by default, so <code>stop_prise=181.0</code> leaves <code>stop_price=None</code> without complaint.
+      Use <code>extra='forbid'</code> when that matters. Validation also checks types, not judgement:
+      <code>Signal</code> will accept <code>quantity=5000</code>. Size limits are your <code>Risk</code>
+      object's job.</div>
+    </div>
+    <div class="stack">
+      <pre class="code lined" aria-label="Typed message examples"><span class="ln" data-l="1" id="wr1"><span class="k">from</span> pydantic <span class="k">import</span> ConfigDict, ValidationError</span><span class="ln" data-l="2" id="wr2"><span class="k">from</span> shared.messages <span class="k">import</span> PlaceOrder   <span class="c"># venue's schema</span></span><span class="ln" data-l="3" id="wr3"> </span><span class="ln" data-l="4" id="wr4"><span class="k">try</span>:</span><span class="ln" data-l="5" id="wr5">    PlaceOrder(team_id=<span class="s">'team07'</span>, symbol=<span class="s">'AAPL'</span>, side=<span class="s">'BUY'</span>,</span><span class="ln" data-l="6" id="wr6">               order_type=<span class="s">'limit'</span>, price=<span class="n">185.40</span>, quantity=<span class="n">5</span>)</span><span class="ln" data-l="7" id="wr7"><span class="k">except</span> ValidationError <span class="k">as</span> e:</span><span class="ln" data-l="8" id="wr8">    print(e.errors()[<span class="n">0</span>][<span class="s">'msg'</span>])</span><span class="ln" data-l="9" id="wr9">    <span class="c"># Input should be 'buy' or 'sell'</span></span><span class="ln" data-l="10" id="wr10"> </span><span class="ln" data-l="11" id="wr11">o = PlaceOrder(team_id=<span class="s">'team07'</span>, symbol=<span class="s">'AAPL'</span>, side=<span class="s">'buy'</span>,</span><span class="ln" data-l="12" id="wr12">               order_type=<span class="s">'stop'</span>, price=<span class="n">180.0</span>, quantity=<span class="n">5</span>,</span><span class="ln" data-l="13" id="wr13">               stop_prise=<span class="n">181.0</span>)   <span class="c"># typo, OPTIONAL field</span></span><span class="ln" data-l="14" id="wr14">print(o.stop_price)                <span class="c"># None: silently ignored</span></span><span class="ln" data-l="15" id="wr15"> </span><span class="ln" data-l="16" id="wr16"><span class="k">class</span> <span class="b">StrictOrder</span>(PlaceOrder):     <span class="c"># opt in to strictness</span></span><span class="ln" data-l="17" id="wr17">    model_config = ConfigDict(extra=<span class="s">'forbid'</span>)</span><span class="ln" data-l="18" id="wr18"><span class="k">try</span>:</span><span class="ln" data-l="19" id="wr19">    StrictOrder(**o.model_dump(), stop_prise=<span class="n">181.0</span>)</span><span class="ln" data-l="20" id="wr20"><span class="k">except</span> ValidationError <span class="k">as</span> e:</span><span class="ln" data-l="21" id="wr21">    print(e.errors()[<span class="n">0</span>][<span class="s">'msg'</span>])</span><span class="ln" data-l="22" id="wr22">    <span class="c"># Extra inputs are not permitted</span></span><span class="ln" data-l="23" id="wr23"> </span><span class="ln" data-l="24" id="wr24">ws.send(o.model_dump_json())       <span class="c"># JSON from the model only</span></span></pre>
+      <p class="sub">Runs as written against the arena's real schema; the printed messages are in the comments.
+      In your own bot you will rarely build a <code>PlaceOrder</code> by hand: you return a <code>Signal</code>
+      and the SDK builds the message.</p>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:18px">
+    <h4>(b) An AI coding assistant reasons from your code's structure</h4>
+    <p class="sub" style="max-width:100ch">Using an AI assistant is <strong>optional</strong> in this course:
+    any provider, or none. If you do use one, know what it works from. It sees your files, not your intentions.
+    Clear classes, type hints and one interface give it a contract to work against and tests to run. Spaghetti
+    code gives it three plausible places to edit and no way to know which one is live. When that happens it does
+    not usually stop and ask; it confidently edits one of the copies. Nothing here is special to AI: the same is
+    true of a human teammate reading your code for the first time. Here is the same request sent to both bots
+    from the morning above:</p>
+    <div class="tablewrap" style="margin-top:10px">
+      <table class="t aiask">
+        <thead><tr><th>you ask</th><th>what typically happens in the procedural <code>bot.py</code></th><th>in the OOP <code>team/trader.py</code></th></tr></thead>
+        <tbody>
+          <tr><td class="n">"Add a 2% stop-loss."</td>
+            <td>There is no entry price anywhere, so it invents a global <code>entry = {}</code>, fills it in
+            <code>send()</code> (before the venue confirms), and adds the check to <code>momo_aapl</code>, the copy
+            it was shown. Following the local style, the stop sells <code>pos[...]</code>, the double-counted
+            number.</td>
+            <td>The entry price comes from the <code>on_fill()</code> hook, which the SDK calls only on confirmed
+            fills. Exit sizing already lives in <code>Risk.size()</code>, so the stop is one more rule there, or a
+            <code>StopLossRisk(Risk)</code> subclass, applied to every symbol and sized from
+            <code>portfolio.positions</code>. A unit test with <code>held=200</code> runs in milliseconds with
+            no socket.</td></tr>
+          <tr><td class="n">"The venue's taker fee is now 0.002; update it."</td>
+            <td>It searches for <code>0.001</code>, changes <code>send()</code>, and misses the
+            <code>1.0015</code> in <code>momo_aapl</code>, because that literal does not look like a fee. Cash
+            and the affordability check now use different rates.</td>
+            <td><code>FeeModel(taker=0.002)</code>: one argument in one place, and every caller picks it up.</td></tr>
+          <tr><td class="n">"Add MSFT."</td>
+            <td>It copies the nearest function, <code>momo_nvda</code>, which is the copy without the position
+            cap and with <code>'SELL'</code>. The repo now has three strategies and two bugs in each new one.</td>
+            <td><code>{'MSFT': Momentum(), ...}</code>: one dictionary entry. There is no second copy to go
+            stale.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="sub" style="margin-top:10px;max-width:100ch">To be honest about it: an assistant can be wrong in
+    a clean codebase too. Structure does not make it smarter. It narrows the set of plausible edits, and
+    validation plus tests catch the wrong ones before they reach the venue. You still read every diff. The
+    invariant "my position equals the venue's" is invisible in <code>bot.py</code>; in the OOP version it is
+    written into the code, because only the portfolio can change a position.</p>
+  </div>
+
+  <h3 class="subhead" id="what-vocab" style="margin-top:34px"><span class="sublbl">1d</span>Now the vocabulary: objects</h3>
   <p class="lead">Look at a market and you see nouns. An <em class="hi">order</em> with a side and a price.
   An <em class="hi">order book</em> that holds orders and matches them. A <em class="hi">portfolio</em> that
   owns cash and positions. A <em class="hi">strategy</em> that turns prices into intentions. Object-oriented
@@ -878,6 +1129,125 @@ function mk(tag, attrs) {
   for (var k in attrs) { if (attrs.hasOwnProperty(k)) e.setAttribute(k, attrs[k]); }
   return e;
 }
+
+/* ── 0. ONE MORNING, TWO BOTS (Part 1 · 1b) ──────────────────────
+   Every number below is the output of replaying the two bots shown on
+   the page through the same eight ticks, against a venue that validates
+   with the arena's real PlaceOrder schema. Positions: [bot, venue]. */
+var MORN = [
+  { t: "09:30:00", px: "AAPL 185.00 · NVDA 120.00 · the open",
+    bad: { tag: "the open", title: "Two symbols, one bot, $100,000",
+      body: "Both strategies need two prices before they act, so nothing happens on the first tick. Press <b>Next</b> and watch the counters and the highlighted lines.",
+      hot: [], s: [0, 0, 0, 0], r: [[0, 0], [0, 0], [100000, 100000]] },
+    oop: { tag: "the open", title: "Same open, same prices, same strategy",
+      body: "The only difference is structure. Press <b>Next</b>.",
+      hot: [], s: [0, 0, 0, 0], r: [[0, 0], [0, 0], [100000, 100000]] } },
+  { t: "09:30:05", px: "AAPL 185.40 ▲ · NVDA 120.00",
+    bad: { tag: "shared mutable state", title: "The position is written in two places",
+      body: "AAPL ticks up. <code>momo_aapl</code> buys 100 and the venue fills 100. <code>send()</code> adds 100 to <code>pos</code> as soon as the order is sent (line 14), and <code>on_message()</code> adds the same 100 again when the fill arrives (line 23). The bot now believes it holds <b>200</b>. Nothing looks wrong yet, but every later decision reads that number.",
+      hot: [3, 14, 23], s: [0, 0, 100, -27.81], r: [[200, 100], [0, 0], [81441.46, 81432.19]] },
+    oop: { tag: "encapsulation · one owner", title: "The bot reads the position; it never writes it",
+      body: "Same AAPL buy. The bot reads <code>portfolio.positions</code> (line 38), the local mirror the engine updates from the venue's <code>PortfolioUpdate</code>. There is one number and it is the venue's: <b>100</b>.",
+      hot: [38], s: [0, 0, 0, -27.81], r: [[100, 100], [0, 0], [81432.19, 81432.19]] } },
+  { t: "09:30:10 – 09:30:20", px: "AAPL 185.40 · NVDA 120.50 ▲ 121.00 ▲ 121.60 ▲",
+    bad: { tag: "copy-paste variant", title: "A fix applied to one copy only",
+      body: "NVDA rallies for three ticks. <code>momo_nvda</code> was pasted on Monday, before Tuesday's <code>MAX_POS</code> check went into <code>momo_aapl</code> (line 31). The copy has no check (line 39), so it buys on every uptick, and the venue now holds <b>300 NVDA against a 200-share limit</b>. Look at the P&amp;L: the breach is making money right now. That is how this kind of bug gets through a code review.",
+      hot: [31, 37, 39], s: [0, 1, 400, 87.73], r: [[200, 100], [600, 300], [45095.15, 45067.73]] },
+    oop: { tag: "one class · one Risk object", title: "No second copy for a fix to miss",
+      body: "The same <code>Momentum</code> class runs for both symbols (line 46), and the same <code>Risk.size()</code> applies to all of them (line 26). At 200 shares there is no room left, so the third buy is never sent.",
+      hot: [26, 46, 47], s: [0, 0, 0, 105.96], r: [[100, 100], [200, 200], [57245.97, 57245.97]] } },
+  { t: "09:30:25", px: "AAPL 184.60 ▼ · NVDA 121.60",
+    bad: { tag: "oversized order", title: "The exit is twice the intended size",
+      body: "AAPL ticks down, and the exit sells \"everything\": <code>p = 200</code>, the double-counted number (line 35). The venue holds 100, fills the 200-share sell, and you are now <b>short 100 AAPL</b> that you never meant to open. The bot believes it is short 200.",
+      hot: [35], s: [0, 2, 400, -47.65], r: [[-200, -100], [600, 300], [81978.23, 81932.35]] },
+    oop: { tag: "sized from the venue", title: "The exit takes you flat, not short",
+      body: "<code>Risk.size()</code> answers a sell with <code>held</code> (line 25), the 100 the venue reports. The exit takes the position to zero.",
+      hot: [24, 25], s: [0, 0, 0, -1.72], r: [[0, 0], [200, 200], [75678.28, 75678.28]] } },
+  { t: "09:30:30", px: "AAPL 184.60 · NVDA 119.80 ▼",
+    bad: { tag: "magic strings", title: "'SELL' is not 'sell'",
+      body: "NVDA ticks down. The pasted copy exits with <code>side='SELL'</code> (line 42) in a raw dict (lines 10–12). The venue's <code>PlaceOrder</code> schema accepts only <code>'buy'</code> or <code>'sell'</code>, so the order is rejected: <code>PARSE_ERROR</code>, <i>Input should be 'buy' or 'sell'</i>. All 300 NVDA are still on the book.",
+      hot: [10, 11, 12, 42], s: [1, 2, 400, -587.65], r: [[-200, -100], [0, 300], [153786.35, 81932.35]] },
+    oop: { tag: "value object · validated at construction", title: "A typo would fail on the line that wrote it",
+      body: "The exit becomes <code>Signal(symbol='NVDA', side='sell', quantity=200, …)</code> (lines 42–43). If anyone had typed <code>'SELL'</code>, pydantic would raise <code>ValidationError</code> on that line, inside your own process, the first time a test ran it. You would not learn about it from a venue error message minutes later.",
+      hot: [42, 43], s: [0, 0, 0, -397.66], r: [[0, 0], [0, 0], [99602.34, 99602.34]] } },
+  { t: "09:30:30", px: "same tick · what the bot now believes",
+    bad: { tag: "bare except", title: "The rejection is swallowed, and the bot thinks it is flat",
+      body: "<code>send()</code> booked the sale before the venue answered (lines 13–15). <code>pos['NVDA']</code> is now 0, and cash has gone up by <b>$71,808 that does not exist</b>. The rejection arrives as <code>{'type': 'error', 'code': …, 'message': …}</code>. <code>on_message</code> reads <code>msg['reason']</code> (line 25), which raises <code>KeyError</code>, and the bare <code>except</code> (lines 26–27) swallows it. Nothing is logged.",
+      hot: [13, 14, 15, 25, 26, 27], s: [1, 2, 400, -587.65], r: [[-200, -100], [0, 300], [153786.35, 81932.35]] },
+    oop: { tag: "errors surface", title: "State changes only when the venue confirms",
+      body: "Your code books nothing. <code>on_tick</code> returns a <code>Signal</code>, and the <code>Trader</code> base class (line 30) does the sending and handles acks and fills. Positions change only on the venue's confirmation. A venue rejection is logged by the engine with its code (<code>Exchange error [RATE_LIMITED] …</code>), and there is no <code>except</code> in your code that could swallow it.",
+      hot: [30, 44], s: [0, 0, 0, -397.66], r: [[0, 0], [0, 0], [99602.34, 99602.34]] } },
+  { t: "09:30:35", px: "AAPL 184.60 · NVDA 117.50 ▼▼",
+    bad: { tag: "the damage", title: "Long into the drop, and the bot does not know",
+      body: "NVDA falls to 117.50. <code>momo_nvda</code> checks <code>p &gt; 0</code> (line 41), sees 0, and does nothing. The venue holds <b>300 NVDA long and 100 AAPL short</b>. P&amp;L since the open is <b>−$1,277.65</b>. The same strategy written cleanly is at −$397.66 (switch to the OOP version to see it). That is <b>$880 of damage in 35 seconds</b>, and the positions are still open.",
+      hot: [41], s: [1, 2, 400, -1277.65], r: [[-200, -100], [0, 300], [153786.35, 81932.35]] },
+    oop: { tag: "honest P&L", title: "Flat into the drop, and still losing money",
+      body: "The OOP bot is still down (<b>−$397.66</b>), because naive momentum loses on a choppy morning. OOP does not make a strategy good. It makes the bot do what you wrote, so the P&amp;L you see belongs to the strategy and not to your bugs.",
+      hot: [38], s: [0, 0, 0, -397.66], r: [[0, 0], [0, 0], [99602.34, 99602.34]] } },
+  { t: "12:00", px: "reconciliation",
+    bad: { tag: "change here, break there · untestable", title: "Nothing reconciles, and you cannot replay the morning",
+      body: "The fee is written twice and the two versions disagree: <code>0.001</code> in <code>send()</code> (line 15) and <code>1.0015</code> in the affordability check (line 32). The venue charges 0.0015, so even before the phantom sale the bot's cash was <b>$45.88</b> off. To find the bug you want to replay the morning offline, but the strategies call <code>send()</code>, which uses the live <code>ws</code> (lines 6 and 10). A backtest means writing a second copy of the bot, and that copy will drift just as <code>momo_nvda</code> did.",
+      hot: [6, 10, 15, 32], s: [1, 2, 400, -1277.65], r: [[-200, -100], [0, 300], [153786.35, 81932.35]] },
+    oop: { tag: "one FeeModel · same code offline", title: "One fee, and the same class runs live and offline",
+      body: "The fee lives in one object (lines 4–8), so a new rate is a single change: <code>FeeModel(taker=…)</code>. And because <code>MyBot</code> is just a <code>Trader</code>, <code>arena.as_signal_fn(bot)</code> runs this exact class in the simulator, so you can replay the morning with no socket.",
+      hot: [4, 5, 6, 7, 8, 46, 47], s: [0, 0, 0, -397.66], r: [[0, 0], [0, 0], [99602.34, 99602.34]] } }
+];
+var mnStep = 0, mnMode = "bad";
+var mnReduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function mnFmtPos(v) { return (v > 0 ? "+" : "") + v; }
+function mnFmtCash(v) { return "$" + v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function mnFmtPnl(v) {
+  var s = Math.abs(v).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return (v < 0 ? "−$" : v > 0 ? "+$" : "$") + s;
+}
+function mnHot(preId, prefix, lines) {
+  var pre = $(preId);
+  Array.prototype.forEach.call(pre.querySelectorAll(".ln.hot"), function (l) { l.classList.remove("hot"); });
+  lines.forEach(function (n) { var l = $(prefix + n); if (l) l.classList.add("hot"); });
+  if (lines.length) {
+    var first = $(prefix + Math.min.apply(null, lines));
+    var top = first.offsetTop - pre.clientHeight / 3;
+    if (pre.scrollTo) pre.scrollTo({ top: Math.max(0, top), behavior: mnReduce ? "auto" : "smooth" });
+    else pre.scrollTop = Math.max(0, top);
+  }
+}
+function mnSet(id, val, cls) { var e = $(id); e.textContent = val; e.className = "sv" + (cls ? " " + cls : ""); }
+function mnDraw() {
+  var st = MORN[mnStep], d = st[mnMode], bad = mnMode === "bad";
+  $("mnTick").textContent = "step " + mnStep + " / " + (MORN.length - 1) + " · " + st.t;
+  $("mnPx").textContent = st.px;
+  $("mnTag").textContent = d.tag;
+  $("mnTag").className = "mtag" + (mnStep === 0 ? "" : bad ? " bad" : " ok");
+  $("mnTitle").textContent = d.title;
+  $("mnBody").innerHTML = d.body;
+  $("mnStory").className = "mstep" + (mnStep === 0 ? "" : bad ? " bad" : " ok");
+  mnSet("mnRej", String(d.s[0]), d.s[0] ? "bad" : "ok");
+  mnSet("mnBr", String(d.s[1]), d.s[1] ? "bad" : "ok");
+  mnSet("mnMis", String(d.s[2]), d.s[2] ? "bad" : "ok");
+  mnSet("mnPnl", mnFmtPnl(d.s[3]), d.s[3] < -500 ? "bad" : d.s[3] < 0 ? "warn" : "ok");
+  $("mnColBot").textContent = bad ? "bot thinks" : "bot reads";
+  var names = ["AAPL", "NVDA", "cash"], rows = "";
+  d.r.forEach(function (pair, i) {
+    var f = i === 2 ? mnFmtCash : mnFmtPos, off = Math.abs(pair[0] - pair[1]) > 0.005;
+    rows += "<tr><td class=\"n\">" + names[i] + "</td><td class=\"" + (off ? "off" : "") + "\">" + f(pair[0]) +
+      "</td><td>" + f(pair[1]) + "</td></tr>";
+  });
+  $("mnRows").innerHTML = rows;
+  $("mnBadCard").classList.toggle("dim", !bad);
+  $("mnOopCard").classList.toggle("dim", bad);
+  mnHot("mnBadCode", "bb", bad ? d.hot : []);
+  mnHot("mnOopCode", "ob", bad ? [] : d.hot);
+  $("mnBack").disabled = mnStep === 0;
+  $("mnNext").disabled = mnStep === MORN.length - 1;
+  $("mnBad").setAttribute("aria-pressed", bad ? "true" : "false");
+  $("mnOop").setAttribute("aria-pressed", bad ? "false" : "true");
+}
+$("mnNext").addEventListener("click", function () { if (mnStep < MORN.length - 1) { mnStep++; mnDraw(); } });
+$("mnBack").addEventListener("click", function () { if (mnStep > 0) { mnStep--; mnDraw(); } });
+$("mnReset").addEventListener("click", function () { mnStep = 0; mnDraw(); });
+$("mnBad").addEventListener("click", function () { mnMode = "bad"; mnDraw(); });
+$("mnOop").addEventListener("click", function () { mnMode = "oop"; mnDraw(); });
+mnDraw();
 
 /* ── 1. FOUR-PILLARS EXPLORER ────────────────────────────────── */
 var PILLARS = ["enc", "abs", "inh", "pol"];
