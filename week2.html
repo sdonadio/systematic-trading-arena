@@ -221,6 +221,55 @@
   .qslot{transition:fill .12s}
   .cmp{display:none} .cmp.on{display:grid;gap:12px}
 
+  /* ── week-2 · threads & processes (Part 4) ────────────────── */
+  .hb{display:grid;grid-template-columns:92px minmax(0,1fr) 62px;gap:8px;align-items:center;
+    font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-bottom:7px}
+  .hb .bt{position:relative;height:22px;background:var(--panel-2);border:1px solid var(--line);border-radius:5px;overflow:hidden}
+  .hb .bt i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;transition:width .25s}
+  .hb .bv{color:var(--ink);font-weight:700;text-align:right}
+  .tlv{display:grid;grid-template-columns:28px minmax(0,1fr) minmax(0,1fr) 62px;gap:4px 6px;font-family:var(--mono);font-size:11.5px}
+  .tlv .h{font-size:9.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--dim);padding-bottom:3px}
+  .tlv .ix{color:var(--dim);text-align:right;padding:4px 0}
+  .tlv .op{border-radius:5px;padding:4px 7px;background:var(--panel2);border:1px solid var(--line);color:var(--ink)}
+  .tlv .op.a{border-left:3px solid var(--sky)} .tlv .op.b{border-left:3px solid var(--violet)}
+  .tlv .op.lost{border-color:var(--bad);background:rgba(248,81,73,.14);color:#f4b6b1}
+  .tlv .op.blk{border-style:dashed;color:var(--warn)}
+  .tlv .op.gap{background:transparent;border:1px dashed var(--line-2);color:var(--muted);text-align:center}
+  .tlv .sw2{grid-column:2 / 4;text-align:center;font-size:10.5px;color:var(--warn);border-top:1px dashed rgba(210,153,34,.5);padding-top:1px}
+  .tlv .bal{color:var(--accent-2);text-align:right;padding:4px 0}
+  .hist{display:flex;align-items:flex-end;gap:2px;height:110px;padding:6px 4px 0;background:var(--panel-2);
+    border:1px solid var(--line);border-radius:8px}
+  .hist i{flex:1 1 0;background:var(--violet);border-radius:2px 2px 0 0;min-height:1px;opacity:.85}
+  .hist i.zero{background:var(--ok)}
+  .haxis{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:3px}
+  .cols{position:relative;display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:5px;align-items:end;height:190px;
+    padding:18px 6px 0;background:var(--panel-2);border:1px solid var(--line);border-radius:10px}
+  .cols .cl{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0}
+  .cols .cl b{font-family:var(--mono);font-size:10.5px;color:var(--ink);margin-bottom:3px;white-space:nowrap}
+  .cols .cl i{display:block;width:100%;border-radius:4px 4px 0 0;transition:height .25s}
+  .cols .cl i.model{background:repeating-linear-gradient(135deg,rgba(124,176,255,.55) 0 4px,rgba(124,176,255,.25) 4px 8px)}
+  .cols .cl i.meas{background:var(--accent-2)}
+  .cols .cl i.seq{background:#5f6673}
+  .cols .cl.sel i{outline:2px solid #fff;outline-offset:1px}
+  .cols .ref{position:absolute;left:0;right:0;border-top:1px dashed var(--muted);pointer-events:none}
+  .clab{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:5px;padding:4px 6px 0;
+    font-family:var(--mono);font-size:10.5px;color:var(--dim);text-align:center}
+  table.dec{width:100%;border-collapse:collapse;font-size:12.5px}
+  table.dec th{font-size:9.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--dim);
+    text-align:left;padding:0 9px 8px;border-bottom:1px solid var(--line)}
+  table.dec td{padding:9px;border-bottom:1px solid rgba(39,44,54,.8);color:var(--muted);vertical-align:top}
+  table.dec td:first-child{color:var(--ink);font-weight:650}
+  @media (max-width:720px){
+    table.dec thead{display:none}
+    table.dec,table.dec tbody,table.dec tr,table.dec td{display:block;width:100%}
+    table.dec tr{border:1px solid var(--line);border-radius:9px;padding:8px 10px;margin-bottom:9px;background:var(--panel2)}
+    table.dec td{border:none;padding:3px 0}
+    table.dec td[data-l]::before{content:attr(data-l);display:block;font-size:9.5px;font-weight:800;letter-spacing:1px;
+      text-transform:uppercase;color:var(--dim)}
+    .tlv{grid-template-columns:22px minmax(0,1fr) minmax(0,1fr) 50px;font-size:10.5px}
+    .cols .cl b{font-size:9px}
+  }
+
   /* ── mobile guard (identical on every page): single column under 720px,
         no horizontal overflow. Must stay last in the sheet. ───────────── */
   @media (max-width:720px){
@@ -250,6 +299,7 @@
     <li>Say precisely what concurrency is, how it differs from parallelism, and pick threads, asyncio or processes from the workload alone.</li>
     <li>Trace a coroutine through the event loop: ready queue, <code>await</code>, suspension, resume.</li>
     <li>Keep <code>on_tick</code> non-blocking — offload blocking work with <code>run_in_executor</code> and bound your queues so back-pressure works for you.</li>
+    <li>Explain why a read-modify-write races across threads even with the GIL, fix it with a <code>Lock</code>, and say when processes beat threads, using measured numbers.</li>
   </ul>
   <div class="row" style="margin-top:22px">
     <span class="pill bad">Scoring begins this week</span>
@@ -609,10 +659,299 @@ threading.Thread(target=poll_yahoo, daemon=<span class="k">True</span>).start()
   </div>
 </section>
 
+<!-- ══════════════ THREADS & PROCESSES ══════════════ -->
+<section id="threads">
+  <div class="kicker">Part 4 · deck slides 13&#8211;23</div>
+  <h2><span class="secnum">4</span>Threads and processes: what the loop hands work to</h2>
+  <p class="lead">The loop is the default, but not the whole system. A blocking library with no async API goes on
+  a <strong>thread</strong>; CPU-heavy work goes to a <strong>process</strong>. Here is what each one really buys you,
+  measured. Every number marked <span class="pill acc">measured</span> comes from the course&#8217;s
+  <code>week2_demos/*.py</code> and Quizzes 2 and 3, run on 2026-10-09 (10-core M-series Mac, Python 3.14.7). Your
+  laptop will give different absolute times and the same ratios.</p>
+
+  <!-- (a) GIL -->
+  <h3 style="margin-top:28px">4a &#183; Why threads exist, and what the GIL means</h3>
+  <div class="grid2">
+    <div class="panel">
+      <p class="sub" style="margin-top:0"><strong>Threads exist so you can wait in parallel.</strong> CPython has one
+      Global Interpreter Lock per interpreter, so <em class="hi">one thread executes Python bytecode at any
+      instant</em>. A thread that blocks (a socket read, an HTTP call, <code>time.sleep</code>, and many C kernels
+      in numpy, zlib or hashlib) <em class="hi">releases</em> the GIL, so the others run while it waits.</p>
+      <ul class="plain" style="margin-top:8px">
+        <li>The interpreter switches threads every <b>5&#8239;ms</b> (<code>sys.getswitchinterval()</code>). That is pre-emptive and can land mid-function.</li>
+        <li>The GIL protects the interpreter, <strong>not your data</strong>. It does not make a three-step update atomic (4b).</li>
+        <li>The free-threaded 3.13t/3.14t builds remove it. They are not the default build you run.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h4>gil.py <span class="pill acc" style="margin-left:6px">measured</span></h4>
+      <table class="t" style="margin-top:6px">
+        <thead><tr><th>4 tasks</th><th>serial</th><th>4 threads</th><th>speedup</th></tr></thead>
+        <tbody>
+          <tr><td class="n">wait: time.sleep(0.5)</td><td>2.02 s</td><td>0.51 s</td><td style="color:var(--ok)">4.0&#215;</td></tr>
+          <tr><td class="n">crunch: while n: n -= 1</td><td>0.91 s</td><td>0.93 s</td><td style="color:var(--bad)">none</td></tr>
+        </tbody>
+      </table>
+      <pre class="code" style="margin-top:11px"><span class="k">def</span> crunch(n):                  <span class="c"># CPU-bound: pure Python bytecode</span>
+    <span class="k">while</span> n: n -= <span class="n">1</span>
+<span class="k">def</span> wait(s):                    <span class="c"># I/O-bound: blocks with the GIL released</span>
+    time.sleep(s)
+<span class="k">def</span> threaded(fn, arg):
+    ts = [threading.Thread(target=fn, args=(arg,)) <span class="k">for</span> _ <span class="k">in</span> range(<span class="n">4</span>)]
+    [t.start() <span class="k">for</span> t <span class="k">in</span> ts]; [t.join() <span class="k">for</span> t <span class="k">in</span> ts]</pre>
+    </div>
+  </div>
+
+  <h3 style="margin-top:24px">Interactive &#183; slide from I/O-bound to CPU-bound</h3>
+  <p class="sub" style="margin-bottom:12px">Each task takes 0.5&#8239;s: first it waits (I/O, GIL released), then it
+  computes (GIL held). The lanes are a real scheduling simulation, not a formula. Threads take tasks from a shared
+  list, only one thread holds the GIL at a time, the holder gives it up after 5&#8239;ms of compute, and each
+  handoff costs 0.1&#8239;ms. Move the mix to the right and watch the extra threads turn red: they are queueing
+  for the lock.</p>
+  <div class="split" id="glWrap">
+    <div class="stack">
+      <div class="panel tight">
+        <div class="hb"><span>1 thread</span><span class="bt"><i id="gl1" style="background:#5f6673"></i></span><span class="bv" id="gl1v">&#8212;</span></div>
+        <div class="hb" style="margin-bottom:0"><span id="glNl">N threads</span><span class="bt"><i id="glN" style="background:var(--accent-2)"></i></span><span class="bv" id="glNv">&#8212;</span></div>
+      </div>
+      <div class="panel tight">
+        <h3 id="glGh">Timeline · N threads</h3>
+        <canvas id="glCv" style="display:block;width:100%;height:120px" role="img" aria-label="Per-thread timeline of computing, waiting on I/O and queueing for the GIL"></canvas>
+        <div class="legend">
+          <span><i style="background:var(--accent-2)"></i>holds the GIL (computing)</span>
+          <span><i style="background:rgba(210,153,34,.6)"></i>waiting on I/O (GIL released)</span>
+          <span><i style="background:rgba(248,81,73,.45)"></i>ready, but queued for the GIL</span>
+        </div>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="panel tight">
+        <div class="ctl"><label for="glMix">work mix<b id="vglMix"></b></label>
+          <input type="range" id="glMix" min="0" max="100" step="5" value="0" aria-label="Share of each task that is CPU work, from 0 percent (all I/O) to 100 percent (all CPU)"/>
+          <div class="haxis" style="margin-top:0"><span>I/O-bound</span><span>CPU-bound</span></div></div>
+        <div class="ctl"><label for="glThr">threads<b id="vglThr">4</b></label>
+          <input type="range" id="glThr" min="1" max="8" step="1" value="4" aria-label="Number of threads"/></div>
+        <div class="ctl" style="margin-bottom:0"><label for="glTasks">tasks (0.5&#8239;s each)<b id="vglTasks">8</b></label>
+          <input type="range" id="glTasks" min="1" max="16" step="1" value="8" aria-label="Number of tasks"/></div>
+      </div>
+      <div class="row">
+        <button class="btn" id="glP1" type="button">gil.py &#183; wait</button>
+        <button class="btn" id="glP2" type="button">gil.py &#183; crunch</button>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="sl">speedup</div><div class="sv acc" id="glSp">&#8212;</div></div>
+        <div class="stat"><div class="sl">GIL handoffs</div><div class="sv" id="glHo">&#8212;</div></div>
+      </div>
+      <div class="note" id="glNote" role="status" aria-live="polite">&#8212;</div>
+    </div>
+  </div>
+
+  <!-- (b) RACE -->
+  <h3 style="margin-top:34px">4b &#183; The race condition: Quiz 2&#8217;s bank account</h3>
+  <div class="grid2">
+    <div class="panel">
+      <p class="sub" style="margin-top:0">Alice deposits $1 and Bob withdraws $1, at the same time, on the same
+      account. The balance should end where it started. <code>deposit</code> is three steps: <b>read</b> the
+      ledger, write the receipt, <b>write</b> the ledger. If a thread switch lands between the read and the write,
+      the other thread&#8217;s updates are overwritten by a stale value. The GIL allows this: it makes one bytecode
+      atomic, and this invariant is three statements long. Even <code>balance += 1</code> is three bytecodes
+      (load, add, store).</p>
+      <pre class="code" style="margin-top:10px"><span class="k">def</span> deposit(<span class="k">self</span>, amount):
+    new = <span class="k">self</span>.balance + amount      <span class="c"># 1. read the ledger</span>
+    <span class="k">self</span>._write_receipt(new)         <span class="c"># 2. a thread switch can land here</span>
+    <span class="k">self</span>.balance = new               <span class="c"># 3. write: overwrites the other's</span>
+<span class="k">def</span> safe_deposit(<span class="k">self</span>, amount):
+    <span class="k">with</span> <span class="k">self</span>.lock:                  <span class="c"># 1-2-3 as one critical section</span>
+        new = <span class="k">self</span>.balance + amount
+        <span class="k">self</span>._write_receipt(new); <span class="k">self</span>.balance = new</pre>
+    </div>
+    <div class="panel">
+      <h4>What Quiz 2 measured <span class="pill acc" style="margin-left:6px">measured</span></h4>
+      <ul class="plain">
+        <li><strong>Full pq2, 10 million each way:</strong> +2,478,125 &#183; +1,421,558 &#183; +1,271,067. Expected 0.</li>
+        <li><strong>bank_race.py, 1 million each way:</strong> +218,338 &#183; +120,729 &#183; &#8722;210,327. A different wrong answer every run, which is what makes it a race.</li>
+        <li><strong>With the Lock:</strong> +0, every time. The run went from 1.3&#8239;s to 2.1&#8239;s, so put the lock around the three lines and not around the whole loop.</li>
+        <li><strong>The trap:</strong> <code>withdraw()</code> calls <code>deposit()</code>. If both take a plain <code>Lock</code>, Bob deadlocks on his first withdrawal. Take the lock in one place, or use an <code>RLock</code>.</li>
+        <li>&#8220;I ran it three times and it was fine&#8221; is not a test. Races can pass by luck.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 style="margin-top:24px">Interactive &#183; run the race</h3>
+  <p class="sub" style="margin-bottom:12px">Each run has Alice depositing $1 and Bob withdrawing $1, <b>1,000 times
+  each</b>. In this model a thread switch can land after any step, with a 2% chance per step (the real
+  interpreter switches every 5&#8239;ms). On the left is the first point in the last run where the interleaving
+  mattered. On the right are the final balances over every run so far.</p>
+  <div class="row" style="margin-bottom:12px">
+    <span class="sw" role="group" aria-label="Lock">
+      <button id="rcOff" type="button" aria-pressed="true">no lock</button>
+      <button id="rcOn" type="button" aria-pressed="false">with self.lock</button>
+    </span>
+    <button class="btn" id="rcOnce" type="button">Run once</button>
+    <button class="btn primary" id="rcMany" type="button">Run 1000 times</button>
+    <button class="btn" id="rcClear" type="button">&#8634; Clear</button>
+  </div>
+  <div class="split" id="rcWrap">
+    <div class="panel tight">
+      <h3 id="rcTlH">Interleaving · last run</h3>
+      <div class="tlv" id="rcTl"></div>
+      <p class="sub" id="rcTlNote" style="margin-top:9px"></p>
+    </div>
+    <div class="stack">
+      <div class="stats">
+        <div class="stat"><div class="sl">runs</div><div class="sv" id="rcRuns">0</div></div>
+        <div class="stat"><div class="sl">last balance</div><div class="sv" id="rcLast">&#8212;</div></div>
+        <div class="stat"><div class="sl">exactly $0</div><div class="sv" id="rcExact">&#8212;</div></div>
+        <div class="stat"><div class="sl">worst drift</div><div class="sv" id="rcWorst">&#8212;</div></div>
+      </div>
+      <div class="panel tight">
+        <h3>Final balance over all runs</h3>
+        <div class="hist" id="rcHist" role="img" aria-label="Histogram of final balances"></div>
+        <div class="haxis" id="rcHax"></div>
+      </div>
+      <div class="note" id="rcNote" role="status" aria-live="polite">Press <b>Run once</b> or <b>Run 1000 times</b>.</div>
+    </div>
+  </div>
+
+  <!-- (c) THREADS vs PROCESSES -->
+  <h3 style="margin-top:34px">4c &#183; Threads vs processes: Quiz 3&#8217;s dot product</h3>
+  <p class="sub" style="margin-bottom:12px">Two vectors of 20 million floats and a dot product, which is pure
+  arithmetic. Each worker rebuilds <em class="hi">its own slice</em> from <code>(seed, n)</code>, so the 160&#8239;MB
+  of lists never has to be sent to it. Solid bars are measured. Hatched bars are a model fitted to those
+  measurements, so treat them as the shape of the curve and not as data.</p>
+  <div class="split" id="dpWrap">
+    <div class="stack">
+      <div>
+        <div class="cols" id="dpCols" role="img" aria-label="Wall time by worker count"></div>
+        <div class="clab" id="dpLab"></div>
+      </div>
+      <div class="legend">
+        <span><i style="background:#5f6673"></i>sequential (measured; dashed line)</span>
+        <span><i style="background:var(--accent-2)"></i>measured</span>
+        <span><i style="background:repeating-linear-gradient(135deg,rgba(124,176,255,.55) 0 4px,rgba(124,176,255,.25) 4px 8px)"></i>model</span>
+      </div>
+      <div class="note" id="dpModel"></div>
+    </div>
+    <div class="stack">
+      <div class="panel tight">
+        <div class="row" style="margin-bottom:12px">
+          <span class="sw" role="group" aria-label="Worker type">
+            <button id="dpThr" type="button" aria-pressed="false">threads</button>
+            <button id="dpProc" type="button" aria-pressed="true">processes</button>
+          </span>
+        </div>
+        <div class="ctl"><label for="dpW">workers<b id="vdpW">4</b></label>
+          <input type="range" id="dpW" min="1" max="8" step="1" value="4" aria-label="Number of workers"/></div>
+        <div class="row" id="dpSendRow">
+          <span class="sub">each worker gets:</span>
+          <span class="sw" role="group" aria-label="What each process receives">
+            <button id="dpSeed" type="button" aria-pressed="true">(seed, n)</button>
+            <button id="dpList" type="button" aria-pressed="false">the full lists</button>
+          </span>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="sl">sequential</div><div class="sv">1.85 s</div></div>
+        <div class="stat"><div class="sl" id="dpCfg">this config</div><div class="sv acc" id="dpT">&#8212;</div></div>
+        <div class="stat"><div class="sl">vs sequential</div><div class="sv" id="dpSp">&#8212;</div></div>
+      </div>
+      <div class="note" id="dpNote" role="status" aria-live="polite">&#8212;</div>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:18px">
+    <div class="panel">
+      <h4>Pickling: how work reaches another process</h4>
+      <p class="sub">Processes share nothing. A child receives your function <em class="hi">by name</em> and your
+      data <em class="hi">by pickle</em>, and results come back the same way. A module-level function pickles to its
+      module and its name, nothing else, and the child re-imports the module to find it.</p>
+      <div class="grid2" style="gap:10px;margin-top:8px">
+        <div><div class="pill ok">pickles</div><ul class="plain" style="margin-top:6px">
+          <li>module-level functions</li><li>ints, floats, str, tuples, lists, dicts</li><li>numpy arrays (copied)</li></ul></div>
+        <div><div class="pill bad">PicklingError</div><ul class="plain" style="margin-top:6px">
+          <li>lambdas, nested functions</li><li>sockets, open files</li><li>locks, event loops</li></ul></div>
+      </div>
+      <pre class="code" style="margin-top:11px"><span class="k">def</span> square(x):                     <span class="c"># module level: pickled BY NAME</span>
+    <span class="k">return</span> x * x
+<span class="k">if</span> __name__ == <span class="s">"__main__"</span>:          <span class="c"># REQUIRED: spawn re-imports this file</span>
+    pickle.dumps(square)    <span class="c"># b'...__main__...square...'</span>
+    pickle.dumps(<span class="k">lambda</span> x: x * x)     <span class="c"># PicklingError</span>
+    ctx = mp.get_context(<span class="s">"spawn"</span>)  <span class="c"># choose explicitly</span>
+    <span class="k">with</span> ctx.Pool(<span class="n">2</span>) <span class="k">as</span> pool:
+        pool.map(square, range(<span class="n">6</span>))  <span class="c"># [0, 1, 4, 9, 16, 25]</span></pre>
+    </div>
+    <div class="panel">
+      <h4>Start methods: how the child process begins</h4>
+      <ul class="plain">
+        <li><strong>spawn</strong> starts a fresh interpreter that re-imports your module. It is the default on macOS (since 3.8) and on Windows. <code>pickling.py</code> printed <code>darwin 3.14.7 spawn</code>.</li>
+        <li><strong>fork</strong> copies the parent instantly, including any lock another thread was holding at that moment. It was the Linux default up to 3.13, and 3.12+ warns if threads exist.</li>
+        <li><strong>forkserver</strong> is the Linux default from 3.14.</li>
+        <li><strong>The <code>__main__</code> guard is not optional under spawn.</strong> Without it every child re-runs your <code>Pool(...)</code> line. On 2026-10-09 a four-line script with no guard produced 724 tracebacks in 8&#8239;s and never finished. What you see is a script that hangs, not a clear error.</li>
+        <li>Pick the method with <code>mp.get_context(...)</code> so the code behaves the same on your Mac and on the Linux server. &#8220;Works on my Mac, hangs on Linux&#8221; is often fork copying a lock that another thread held.</li>
+        <li>A pool takes about 0.1&#8211;0.3&#8239;s to start. Create it once and reuse it; never start one per tick.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- (d) DECISION TABLE -->
+  <h3 style="margin-top:34px">4d &#183; Which model where, in a trading system</h3>
+  <p class="sub" style="margin-bottom:12px">Choose per component, based on where its time goes. Most of a trading
+  system waits, and only a small part of it computes.</p>
+  <div class="panel">
+    <table class="dec">
+      <thead><tr><th>Component</th><th>Where the time goes</th><th>Use</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Feed handler (WS in)</td><td data-l="time goes">waiting on the socket, 1000s of msgs</td><td data-l="use"><span class="pill ok">asyncio</span></td><td data-l="why">one loop, no locks: the arena&#8217;s <code>listen()</code></td></tr>
+        <tr><td>Reference price poll</td><td data-l="time goes">blocking HTTP, no async API (yfinance)</td><td data-l="use"><span class="pill warn">a thread</span></td><td data-l="why">the broker&#8217;s <code>yahoo-feed</code> thread</td></tr>
+        <tr><td>Signal, light (z-score)</td><td data-l="time goes">microseconds of numpy</td><td data-l="use"><span class="pill">inline in on_tick</span></td><td data-l="why">a process round-trip costs more than the math</td></tr>
+        <tr><td>Signal, heavy (fit, backtest)</td><td data-l="time goes">CPU, seconds</td><td data-l="use"><span class="pill acc">process pool</span></td><td data-l="why">own GIL, own core; results come back pickled</td></tr>
+        <tr><td>Order gateway (WS out, acks)</td><td data-l="time goes">waiting; ORDER matters</td><td data-l="use"><span class="pill ok">asyncio, one task</span></td><td data-l="why">one writer keeps the sequence; never split it</td></tr>
+        <tr><td>Logs / disk / DB writes</td><td data-l="time goes">blocking I/O</td><td data-l="use"><span class="pill warn">to_thread or a writer thread</span></td><td data-l="why">keeps the loop clean</td></tr>
+      </tbody>
+    </table>
+    <div class="note" style="margin-top:12px"><b>Default: asyncio.</b> Use a thread when a library blocks. Use a process when the CPU is the bottleneck, and only after you have measured that it is.</div>
+  </div>
+
+  <div class="split" style="margin-top:18px">
+    <div class="panel">
+      <h4>Thread &#8596; loop handoff: handoff.py</h4>
+      <pre class="code"><span class="k">import</span> asyncio, threading, time
+prices = {}                                <span class="c"># broker: self.state.yahoo_prices</span>
+<span class="k">def</span> heavy_calc():                          <span class="c"># blocking work the LOOP asks for</span>
+    time.sleep(<span class="n">0.3</span>); <span class="k">return</span> <span class="n">42</span>
+<span class="k">async def</span> main():
+    loop = asyncio.get_running_loop()
+    q = asyncio.Queue()
+    <span class="k">def</span> poll():                            <span class="c"># the "yahoo-feed" thread</span>
+        <span class="k">for</span> i <span class="k">in</span> range(<span class="n">3</span>):
+            time.sleep(<span class="n">0.1</span>)                <span class="c"># yf.Ticker(...): blocking HTTP</span>
+            prices[<span class="s">"AAPL"</span>] = <span class="n">100.0</span> + i     <span class="c"># PULL: plain dict write</span>
+            loop.call_soon_threadsafe(q.put_nowait, i)   <span class="c"># PUSH: wake loop</span>
+    threading.Thread(target=poll, daemon=<span class="k">True</span>, name=<span class="s">"yahoo-feed"</span>).start()
+    t0 = time.perf_counter()
+    score = <span class="k">await</span> asyncio.to_thread(heavy_calc)          <span class="c"># loop → thread</span>
+    got = [<span class="k">await</span> q.get() <span class="k">for</span> _ <span class="k">in</span> range(<span class="n">3</span>)]
+    print(score, got, prices, <span class="s">f"{time.perf_counter() - t0:.2f}s"</span>)
+asyncio.run(main())
+<span class="c"># → 42 [0, 1, 2] {'AAPL': 102.0} 0.31s</span></pre>
+    </div>
+    <div class="panel">
+      <h4>Three safe crossings</h4>
+      <ul class="plain">
+        <li><strong>PULL (what the broker does):</strong> the thread writes <code>state.yahoo_prices[sym] = price</code> and the loop reads it at the next requote. A single dict assignment is atomic under the GIL, so a float needs no lock.</li>
+        <li><strong>PUSH:</strong> <code>loop.call_soon_threadsafe(q.put_nowait, x)</code> is the only safe way for a thread to put something into the loop. <code>asyncio.Queue</code> is not thread-safe, so never call it directly from a thread.</li>
+        <li><strong>Loop &#8594; thread:</strong> <code>await asyncio.to_thread(fn)</code> runs <code>fn</code> on the loop&#8217;s default <code>ThreadPoolExecutor</code> and returns the result to your coroutine. It is the modern way to write <code>run_in_executor(None, fn)</code>.</li>
+        <li><strong>0.31&#8239;s:</strong> the 0.3&#8239;s calculation and the 0.3&#8239;s of polls ran at the same time instead of one after the other.</li>
+      </ul>
+      <div class="note" style="margin-top:10px"><code>to_thread</code> does not make slow code fast. It moves the slowness off the loop. If that code is CPU-bound pure Python, it still holds the GIL and still slows the loop down, so send it to a process instead.</div>
+    </div>
+  </div>
+</section>
+
 <!-- ══════════════ PITFALLS ══════════════ -->
 <section id="pitfalls">
-  <div class="kicker">Part 4</div>
-  <h2><span class="secnum">4</span>Five ways this goes wrong</h2>
+  <div class="kicker">Part 5</div>
+  <h2><span class="secnum">5</span>Five ways this goes wrong</h2>
   <p class="lead">Four of these five will cost you fills in a live session. Open them.</p>
 
   <details class="pit"><summary><code>time.sleep()</code> or <code>requests.get()</code> inside a coroutine</summary>
@@ -675,9 +1014,9 @@ threading.Thread(target=poll_yahoo, daemon=<span class="k">True</span>).start()
 
 <!-- ══════════════ CHECK ══════════════ -->
 <section id="check">
-  <div class="kicker">Part 5</div>
-  <h2><span class="secnum">5</span>Check yourself</h2>
-  <p class="lead">Three questions, instant feedback, nothing recorded.</p>
+  <div class="kicker">Part 6</div>
+  <h2><span class="secnum">6</span>Check yourself</h2>
+  <p class="lead">Five questions, instant feedback, nothing recorded.</p>
 
   <div class="mcq" data-a="2" data-exp="<b>Every task on the loop stops for 800 ms.</b> asyncio is cooperative: the loop can only switch tasks when the running coroutine reaches an await. A blocking call never reaches one, so the feed reader, the order handler and the heartbeat are all frozen — and the ticks that arrive during those 800 ms sit unread in the kernel buffer. Offload it with loop.run_in_executor(None, fn) and the loop keeps turning.">
     <p class="q"><span>Q1</span>Your <code>on_tick</code> calls a library function that blocks for 800&#8239;ms. What happens to the feed-reader coroutine on the same loop?</p>
@@ -711,12 +1050,34 @@ threading.Thread(target=poll_yahoo, daemon=<span class="k">True</span>).start()
     </div>
     <div class="fb" role="status"></div>
   </div>
+
+  <div class="mcq" data-a="3" data-exp="<b>A switch landed between the read and the write.</b> Thread A reads the balance, the interpreter switches to B, B completes several updates, then A writes back the value it computed from the stale read and erases all of B's work. The GIL makes single bytecodes atomic, not your three-line invariant. A threading.Lock held across read, receipt and write fixes it. In pq2 that took the result to +0, and the run time from 1.3 s to 2.1 s.">
+    <p class="q"><span>Q4</span>Quiz 2, ten million deposits and ten million withdrawals of $1 on two threads, ended at +2,478,125. Why?</p>
+    <div class="opts">
+      <button class="opt" type="button">Integer overflow in <code>self.balance</code> after ten million additions</button>
+      <button class="opt" type="button">The GIL was released inside <code>_write_receipt</code>, so both threads ran bytecode at the same instant</button>
+      <button class="opt" type="button">Bob's thread started later, so it had not finished when the balance was printed</button>
+      <button class="opt" type="button">A thread switch between the read and the write let one thread overwrite the other's updates</button>
+    </div>
+    <div class="fb" role="status"></div>
+  </div>
+
+  <div class="mcq" data-a="1" data-exp="<b>4 processes, and you must send (seed, n), not the lists.</b> The dot product is CPU-bound Python, so threads queue for one GIL and add handoff cost: 1.85 s sequential became 2.21 s on 4 threads. Processes have 4 GILs on 4 cores, and that gave 0.78 s. The gain holds only because each worker rebuilds its own slice from a seed. Pickling 160 MB of lists to the workers gives the gain back.">
+    <p class="q"><span>Q5</span>Quiz 3 ran sequentially in 1.85&#8239;s. Which version is fastest, and what does it depend on?</p>
+    <div class="opts">
+      <button class="opt" type="button">4 threads, because the vectors are shared in memory with no copying</button>
+      <button class="opt" type="button">4 processes, as long as each worker receives a seed rather than the full lists</button>
+      <button class="opt" type="button">4 processes, and passing the full lists is faster because the workers skip the random-number generation</button>
+      <button class="opt" type="button"><code>asyncio.gather</code> over 4 coroutines, one per slice</button>
+    </div>
+    <div class="fb" role="status"></div>
+  </div>
 </section>
 
 <!-- ══════════════ NEXT ══════════════ -->
 <section id="next">
-  <div class="kicker">Part 6</div>
-  <h2><span class="secnum">6</span>Do the work</h2>
+  <div class="kicker">Part 7</div>
+  <h2><span class="secnum">7</span>Do the work</h2>
   <div class="grid2" style="margin-top:14px">
     <div class="panel"><h4>In class</h4><ul class="plain">
       <li>Diagram your async pipeline: feed &#8594; <code>asyncio.Queue</code> &#8594; strategy &#8594; orders.</li>
@@ -1181,6 +1542,380 @@ function bpDraw(lat, mx) {
   $("bpNote").innerHTML = note;
 }
 bpSet("await");
+
+/* ── 5. THREADS & PROCESSES (Part 4) ─────────────────────────── */
+function fmtS(sec) { return sec.toFixed(2) + " s"; }
+function signed(n) { return (n > 0 ? "+" : (n < 0 ? "−" : "+")) + Math.abs(n).toLocaleString("en-US"); }
+function money(n) { return (n < 0 ? "−$" : "$") + Math.abs(n).toLocaleString("en-US"); }
+function setPressed(on, off) {
+  on.forEach(function (id) { $(id).setAttribute("aria-pressed", "true"); });
+  off.forEach(function (id) { $(id).setAttribute("aria-pressed", "false"); });
+}
+
+/* 5a · GIL scheduling simulation, integer microseconds.
+   K tasks of D us each: first w us of I/O (GIL released), then a us of CPU (GIL held).
+   N threads pull tasks from a shared list. One GIL: a FIFO queue of ready threads,
+   the holder keeps it for at most SW us of CPU, a handoff between threads costs HO us. */
+function gilSim(K, N, cpuPct) {
+  var D = 500000, SW = 5000, HO = 100;
+  var a = Math.round(D * cpuPct / 100), w = D - a;
+  var th = [], q = [], next = 0, t = 0, holder = -1, last = -1, handoffs = 0, i, guard = 0;
+  for (i = 0; i < N; i++) th.push({ st: "idle", until: 0, ioStart: 0, rem: 0, segs: [] });
+  function seg(k, type, t0, t1) {
+    if (t1 <= t0) return;
+    var S = th[k].segs, L = S[S.length - 1];
+    if (L && L.type === type && L.t1 === t0) L.t1 = t1; else S.push({ type: type, t0: t0, t1: t1 });
+  }
+  function assign(k) {
+    if (next >= K) { th[k].st = "done"; return; }
+    next += 1;
+    if (w > 0) { th[k].st = "io"; th[k].ioStart = t; th[k].until = t + w; }
+    else { th[k].st = "cpu"; th[k].rem = a; q.push(k); }
+  }
+  for (i = 0; i < N; i++) assign(i);
+  while (guard++ < 400000) {
+    if (holder < 0 && q.length) {
+      holder = q.shift();
+      if (last >= 0 && last !== holder) {
+        seg(holder, "gw", t, t + HO);
+        q.forEach(function (k) { seg(k, "gw", t, t + HO); });
+        t += HO; handoffs += 1;
+      }
+      last = holder;
+    }
+    var sliceEnd = holder >= 0 ? t + Math.min(th[holder].rem, SW) : Infinity;
+    var ioNext = Infinity;
+    th.forEach(function (x) { if (x.st === "io" && x.until < ioNext) ioNext = x.until; });
+    var tE = Math.min(sliceEnd, ioNext);
+    if (tE === Infinity) break;
+    if (tE < t) tE = t;
+    if (holder >= 0) { th[holder].rem -= (tE - t); seg(holder, "cpu", t, tE); }
+    q.forEach(function (k) { seg(k, "gw", t, tE); });
+    t = tE;
+    for (i = 0; i < N; i++) {
+      if (th[i].st === "io" && th[i].until <= t) {
+        seg(i, "io", th[i].ioStart, th[i].until);
+        if (a > 0) { th[i].st = "cpu"; th[i].rem = a; q.push(i); } else assign(i);
+      }
+    }
+    if (holder >= 0) {
+      var h = holder;
+      if (th[h].rem <= 0) { holder = -1; assign(h); }
+      else if (tE === sliceEnd) { holder = -1; q.push(h); }
+    }
+  }
+  return { wall: t / 1e6, th: th, handoffs: handoffs };
+}
+var gl = { last: null, serial: 1 };
+function glDraw() {
+  var mix = +$("glMix").value, N = +$("glThr").value, K = +$("glTasks").value;
+  $("vglMix").textContent = (100 - mix) + "% wait · " + mix + "% CPU";
+  $("vglThr").textContent = String(N);
+  $("vglTasks").textContent = String(K);
+  var one = gilSim(K, 1, mix), many = gilSim(K, N, mix);
+  gl.last = many; gl.serial = one.wall;
+  var mx = Math.max(one.wall, many.wall);
+  $("gl1").style.width = (100 * one.wall / mx) + "%";
+  $("glN").style.width = (100 * many.wall / mx) + "%";
+  $("gl1v").textContent = fmtS(one.wall);
+  $("glNv").textContent = fmtS(many.wall);
+  var thw = N + (N === 1 ? " thread" : " threads");
+  $("glNl").textContent = thw;
+  $("glGh").textContent = "Timeline · " + thw + " · " + K + (K === 1 ? " task" : " tasks");
+  var sp = one.wall / many.wall;
+  var spEl = $("glSp");
+  spEl.textContent = sp.toFixed(2) + "×";
+  spEl.className = "sv " + (sp > 1.15 ? "ok" : (sp < 0.995 ? "bad" : "warn"));
+  $("glHo").textContent = many.handoffs.toLocaleString("en-US");
+  $("glCv").setAttribute("aria-label", "Timeline of " + thw + ": finished in " + fmtS(many.wall) + " against " +
+    fmtS(one.wall) + " on one thread");
+  var ideal = Math.min(N, K), v;
+  if (N === 1) {
+    v = "One thread runs the tasks one after another, so the wall time is " + K + " × 0.5 s. Add threads to see what they buy you.";
+  } else if (mix <= 20) {
+    v = "<b>Mostly waiting, so threads pay off: " + sp.toFixed(1) + "×</b> (the ideal is " + ideal + "×). A thread that " +
+        "is waiting has released the GIL, so the waits overlap. This is gil.py&#8217;s <code>wait</code> row, measured at 2.02 s " +
+        "serial and 0.51 s on 4 threads. It is also why the broker&#8217;s yfinance thread works.";
+  } else if (mix >= 80) {
+    v = "<b>Mostly computing, so threads give " + (sp < 1.02 ? "nothing" : "very little") + " (" + sp.toFixed(2) + "×).</b> " +
+        "Only one lane can be blue at any instant, and the rest are red, queueing for the lock. The " +
+        many.handoffs.toLocaleString("en-US") + " handoffs are pure overhead. This is gil.py&#8217;s <code>crunch</code> row, " +
+        "measured at 0.91 s serial and 0.93 s on 4 threads. For a real speedup you need processes (4c).";
+  } else {
+    v = "<b>Mixed: " + sp.toFixed(2) + "×.</b> The waits overlap but the computing does not, so the wall time can never " +
+        "fall below the total CPU time (" + (K * 0.5 * mix / 100).toFixed(2) + " s here). Adding threads moves you towards " +
+        "that floor and never past it.";
+  }
+  $("glNote").innerHTML = v;
+  glPaint();
+}
+function glPaint() {
+  var cv = $("glCv"), r = gl.last;
+  if (!r) return;
+  var N = r.th.length, laneH = 13, gap = 5, top = 4, axisH = 22;
+  var cssW = cv.clientWidth || 600, cssH = top + N * (laneH + gap) + axisH;
+  var dpr = window.devicePixelRatio || 1;
+  cv.style.height = cssH + "px";
+  cv.width = Math.round(cssW * dpr); cv.height = Math.round(cssH * dpr);
+  var c = cv.getContext("2d");
+  c.setTransform(dpr, 0, 0, dpr, 0, 0);
+  c.clearRect(0, 0, cssW, cssH);
+  var x0 = 30, x1 = cssW - 4, span = gl.serial * 1e6;
+  var X = function (us) { return x0 + (x1 - x0) * us / span; };
+  c.font = "11px ui-monospace, Menlo, Consolas, monospace";
+  c.textBaseline = "middle";
+  var col = { cpu: "#7cb0ff", io: "rgba(210,153,34,.6)", gw: "rgba(248,81,73,.45)" };
+  r.th.forEach(function (x, k) {
+    var y = top + k * (laneH + gap);
+    c.fillStyle = "#9aa0a6"; c.textAlign = "left"; c.fillText("T" + (k + 1), 2, y + laneH / 2 + 1);
+    c.fillStyle = "#13161b"; c.fillRect(x0, y, x1 - x0, laneH);
+    x.segs.forEach(function (s) {
+      c.fillStyle = col[s.type];
+      c.fillRect(X(s.t0), y, Math.max(0.5, X(s.t1) - X(s.t0)), laneH);
+    });
+  });
+  var yb = top + N * (laneH + gap) - gap + 3;
+  var xe = Math.min(X(r.wall * 1e6), x1 - 1);
+  c.fillStyle = "#e8e6e3"; c.fillRect(xe - 1, top - 2, 2, yb - top + 2);
+  c.fillStyle = "#9aa0a6"; c.textAlign = "left"; c.fillText("0", x0, yb + 10);
+  c.textAlign = "right"; c.fillText(gl.serial.toFixed(1) + " s", x1, yb + 10);
+  if (xe < x1 - 90) {
+    c.fillStyle = "#e8e6e3"; c.textAlign = xe > x0 + 90 ? "center" : "left";
+    c.fillText("done " + r.wall.toFixed(2) + " s", xe > x0 + 90 ? xe : xe + 4, yb + 10);
+  }
+}
+["glMix", "glThr", "glTasks"].forEach(function (id) { $(id).addEventListener("input", glDraw); });
+$("glP1").addEventListener("click", function () { $("glMix").value = 0; $("glThr").value = 4; $("glTasks").value = 4; glDraw(); });
+$("glP2").addEventListener("click", function () { $("glMix").value = 100; $("glThr").value = 4; $("glTasks").value = 4; glDraw(); });
+window.addEventListener("resize", glPaint);
+glDraw();
+
+/* 5b · the pq2 race. Each step is one of: read / receipt / write. After any step
+   the interpreter may switch threads (probability RC_P). With the lock, a thread that
+   tries to read while the other holds the lock blocks, and control goes back. */
+var RC_N = 1000, RC_P = 0.02;
+var rc = { lock: false, res: [] };
+var RC_WHO = ["Alice", "Bob"];
+function raceRun(lock, rec) {
+  var bal = 0, owner = -1, guard = 0;
+  var T = [{ amt: 1, i: 0, st: 0, loc: 0, rd: 0 }, { amt: -1, i: 0, st: 0, loc: 0, rd: 0 }];
+  var cur = Math.random() < 0.5 ? 0 : 1, ev = rec ? [] : null;
+  function sw() { if (T[1 - cur].i < RC_N) { cur = 1 - cur; if (ev) ev.push({ sw: 1 }); } }
+  while ((T[0].i < RC_N || T[1].i < RC_N) && guard++ < 1e6) {
+    var x = T[cur];
+    if (x.i >= RC_N) { cur = 1 - cur; continue; }
+    if (lock && x.st === 0 && owner >= 0 && owner !== cur) {
+      if (ev) ev.push({ k: cur, op: "blk", bal: bal });
+      sw(); continue;
+    }
+    if (x.st === 0) {
+      if (lock) owner = cur;
+      x.rd = bal; x.loc = bal + x.amt;
+      if (ev) ev.push({ k: cur, op: "read", v: bal, nv: x.loc, bal: bal });
+    } else if (x.st === 1) {
+      if (ev) ev.push({ k: cur, op: "rcpt", v: x.loc, bal: bal });
+    } else {
+      var lost = bal - x.rd;
+      bal = x.loc; x.i += 1;
+      if (lock) owner = -1;
+      if (ev) ev.push({ k: cur, op: "write", v: x.loc, bal: bal, lost: lost });
+    }
+    x.st = (x.st + 1) % 3;
+    if (Math.random() < RC_P) sw();
+  }
+  return { bal: bal, ev: ev };
+}
+function rcCell(e) {
+  var cls = "op " + (e.k === 0 ? "a" : "b"), s;
+  if (e.op === "read") s = "read " + money(e.v) + " → new " + money(e.nv);
+  else if (e.op === "rcpt") s = "receipt(" + money(e.v) + ")";
+  else if (e.op === "blk") { s = "acquire lock: blocked"; cls += " blk"; }
+  else {
+    s = "write " + money(e.v);
+    if (e.lost) { cls += " lost"; s += " ✗ erases " + RC_WHO[1 - e.k] + "’s " + signed(e.lost); }
+  }
+  return '<div class="' + cls + '">' + s + "</div>";
+}
+function rcTimeline(r) {
+  var ev = r.ev, i, lo = -1, hi = -1, focus = -1, note = "";
+  if (!rc.lock) {
+    for (i = 0; i < ev.length; i++) if (ev[i].op === "write" && ev[i].lost) { focus = i; break; }
+    if (focus >= 0) {
+      hi = focus;
+      for (i = focus - 1; i >= 0; i--) if (ev[i].k === ev[focus].k && ev[i].op === "read") { lo = i; break; }
+      var me = RC_WHO[ev[focus].k], other = RC_WHO[1 - ev[focus].k];
+      note = "<b>" + me + "</b> read " + money(ev[lo].v) + ", then the interpreter switched threads and " + other +
+        " moved the ledger to " + money(ev[lo].v + ev[focus].lost) + ". When " + me + " came back it wrote " + money(ev[focus].v) +
+        ", a value computed from the stale read. " + other + "’s " + signed(ev[focus].lost) +
+        " is lost, and no exception is raised.";
+    }
+  } else {
+    for (i = 0; i < ev.length; i++) if (ev[i].op === "blk") { focus = i; break; }
+    if (focus >= 0) {
+      var k = ev[focus].k;
+      for (i = focus - 1; i >= 0; i--) if (ev[i].k === 1 - k && ev[i].op === "read") { lo = i; break; }
+      for (i = focus + 1; i < ev.length; i++) if (ev[i].k === k && ev[i].op === "read") { hi = i; break; }
+      if (hi < 0) hi = Math.min(ev.length - 1, focus + 6);
+      note = "The switch still landed in the middle of " + RC_WHO[1 - k] + "’s deposit, but " + RC_WHO[k] +
+        " could not take the lock, so it blocked and control went back. " + RC_WHO[1 - k] + " finished the read, receipt and write " +
+        "as one unit, and nothing was overwritten. That is what <code>with self.lock:</code> gives you, and the blocking is why it runs slower.";
+    }
+  }
+  var html = '<div class="h"></div><div class="h">Alice +$1</div><div class="h">Bob −$1</div><div class="h" style="text-align:right">ledger</div>';
+  if (focus < 0 || lo < 0) {
+    $("rcTl").innerHTML = html;
+    $("rcTlNote").innerHTML = rc.lock ? "No switch landed inside a critical section in this run. Run it again." :
+      "No switch landed between a read and its write in this run, so this time it came out right. That is luck, not correctness. Run it again.";
+    return;
+  }
+  var idx = [];
+  for (i = lo; i <= hi; i++) idx.push(i);
+  var rows = idx.length > 14 ? idx.slice(0, 7).concat([-1]).concat(idx.slice(idx.length - 5)) : idx;
+  var n = 0;
+  rows.forEach(function (j, pos) {
+    if (j === -1) {
+      var a = rows[pos - 1] + 1, b = rows[pos + 1], wr = 0, who = [0, 0];
+      for (var m = a; m < b; m++) if (ev[m].op === "write") { wr += 1; who[ev[m].k] += 1; }
+      html += '<div class="ix"></div><div class="op gap" style="grid-column:2 / 4">… ' + (b - a) + " more steps" +
+        (wr ? ": " + who[0] + " Alice writes, " + who[1] + " Bob writes" : "") + ' …</div><div class="bal"></div>';
+      return;
+    }
+    var e = ev[j];
+    if (e.sw) { html += '<div></div><div class="sw2">⇄ thread switch</div><div></div>'; return; }
+    n += 1;
+    html += '<div class="ix">' + n + "</div>" + (e.k === 0 ? rcCell(e) + "<div></div>" : "<div></div>" + rcCell(e)) +
+      '<div class="bal">' + money(e.bal) + "</div>";
+  });
+  $("rcTl").innerHTML = html;
+  $("rcTlNote").innerHTML = note;
+}
+function rcStats() {
+  var R = rc.res, n = R.length;
+  $("rcRuns").textContent = n.toLocaleString("en-US");
+  if (!n) {
+    ["rcLast", "rcExact", "rcWorst"].forEach(function (id) { $(id).textContent = "—"; $(id).className = "sv"; });
+    $("rcHist").innerHTML = ""; $("rcHax").innerHTML = "";
+    return;
+  }
+  var last = R[n - 1], ex = 0, worst = 0;
+  R.forEach(function (v) { if (v === 0) ex += 1; if (Math.abs(v) > worst) worst = Math.abs(v); });
+  $("rcLast").textContent = signed(last);
+  $("rcLast").className = "sv " + (last === 0 ? "ok" : "bad");
+  $("rcExact").textContent = Math.round(100 * ex / n) + "%";
+  $("rcExact").className = "sv " + (ex === n ? "ok" : "bad");
+  $("rcWorst").textContent = "$" + worst.toLocaleString("en-US");
+  $("rcWorst").className = "sv " + (worst ? "bad" : "ok");
+  var M = Math.max(worst, 10), half = 20, bw = Math.max(1, Math.ceil(M / half)), bins = [], i;
+  for (i = 0; i <= 2 * half; i++) bins.push(0);
+  R.forEach(function (v) {
+    var b = v === 0 ? 0 : (v > 0 ? 1 : -1) * Math.min(half, Math.ceil(Math.abs(v) / bw));
+    bins[b + half] += 1;
+  });
+  var top = Math.max.apply(null, bins), h = "";
+  bins.forEach(function (c, j) {
+    h += '<i class="' + (j === half ? "zero" : "") + '" style="height:' + (c ? Math.max(2, 100 * c / top) : 0) +
+      '%" title="' + c + ' runs"></i>';
+  });
+  $("rcHist").innerHTML = h;
+  $("rcHist").setAttribute("aria-label", "Histogram of final balances: " + ex + " of " + n + " runs ended at exactly zero");
+  $("rcHax").innerHTML = "<span>−$" + (bw * half).toLocaleString("en-US") + '</span><span style="color:var(--ok)">$0</span><span>+$' +
+    (bw * half).toLocaleString("en-US") + "</span>";
+}
+function rcGo(times) {
+  for (var i = 0; i < times - 1; i++) rc.res.push(raceRun(rc.lock, false).bal);
+  var r = raceRun(rc.lock, true);
+  rc.res.push(r.bal);
+  rcTimeline(r);
+  rcStats();
+  var n = rc.res.length, ex = rc.res.filter(function (v) { return v === 0; }).length;
+  $("rcNote").innerHTML = rc.lock ?
+    "<b>With the lock: " + ex.toLocaleString("en-US") + " of " + n.toLocaleString("en-US") + " runs ended at exactly $0.</b> The " +
+    "switches still happen, but none of them can come between a read and its write. pq2 measured the same: +0 every time, with the run going from 1.3 s to 2.1 s." :
+    "<b>No lock: " + ex.toLocaleString("en-US") + " of " + n.toLocaleString("en-US") + " runs ended at $0.</b> The rest either lost " +
+    "money or created it, and the sign changes from run to run. The real pq2, with 10 million each way, ended at +2,478,125, +1,421,558 and +1,271,067.";
+}
+function rcMode(lock) {
+  rc.lock = lock; rc.res = [];
+  setPressed([lock ? "rcOn" : "rcOff"], [lock ? "rcOff" : "rcOn"]);
+  $("rcTlH").textContent = lock ? "Interleaving · a switch inside the lock" : "Interleaving · the first lost update";
+  $("rcTl").innerHTML = ""; $("rcTlNote").textContent = "";
+  rcStats();
+  $("rcNote").innerHTML = "Lock " + (lock ? "on" : "off") + ". Press <b>Run once</b> or <b>Run 1000 times</b>.";
+}
+$("rcOff").addEventListener("click", function () { rcMode(false); });
+$("rcOn").addEventListener("click", function () { rcMode(true); });
+$("rcOnce").addEventListener("click", function () { rcGo(1); });
+$("rcMany").addEventListener("click", function () { rcGo(1000); });
+$("rcClear").addEventListener("click", function () { rcMode(rc.lock); });
+rcMode(false);
+rcGo(1);
+
+/* 5c · pq3 dot product. Measured: sequential 1.85 s, 4 threads 2.21 s, 4 processes 0.78 s.
+   Everything else is a model pinned to those three points (formulas printed under the chart). */
+var DP_S = 1.85, DP_MAX = 2.8;
+var dp = { mode: "proc", send: "seed" };
+function dpTime(mode, W, send) {
+  if (mode === "thr") return DP_S * (1 + 0.26 * (1 - 1 / W));
+  if (send === "seed") return DP_S / W + 0.20 + 0.03 * W;
+  return 0.6 * DP_S + 0.6 + 0.4 * DP_S / W + 0.20 + 0.03 * W;
+}
+function dpMeasured(mode, W, send) {
+  if (W !== 4) return null;
+  if (mode === "thr") return 2.21;
+  return send === "seed" ? 0.78 : null;
+}
+function dpVal(mode, W, send) { var m = dpMeasured(mode, W, send); return m === null ? dpTime(mode, W, send) : m; }
+function dpDraw() {
+  var W = +$("dpW").value, k;
+  $("vdpW").textContent = String(W);
+  $("dpSendRow").style.display = dp.mode === "proc" ? "" : "none";
+  var h = '<div class="ref" style="bottom:calc((100% - 18px) * ' + (0.9 * DP_S / DP_MAX).toFixed(4) + ')"></div>';
+  var lab = "<span>seq</span>";
+  h += '<div class="cl"><b>1.85</b><i class="seq" style="height:' + (90 * DP_S / DP_MAX) + '%"></i></div>';
+  for (k = 1; k <= 8; k++) {
+    var m = dpMeasured(dp.mode, k, dp.send), v = dpVal(dp.mode, k, dp.send);
+    h += '<div class="cl' + (k === W ? " sel" : "") + '"><b>' + v.toFixed(2) + '</b><i class="' + (m === null ? "model" : "meas") +
+      '" style="height:' + (90 * Math.min(v, DP_MAX) / DP_MAX) + '%"></i></div>';
+    lab += "<span" + (k === W ? ' style="color:#fff;font-weight:700"' : "") + ">" + k + "</span>";
+  }
+  $("dpCols").innerHTML = h;
+  $("dpLab").innerHTML = lab;
+  var mW = dpMeasured(dp.mode, W, dp.send), t = dpVal(dp.mode, W, dp.send), sp = DP_S / t;
+  var unit = dp.mode === "thr" ? (W === 1 ? "thread" : "threads") : (W === 1 ? "process" : "processes");
+  $("dpCfg").textContent = W + " " + unit + (mW === null ? " · model" : " · measured");
+  $("dpT").textContent = fmtS(t);
+  $("dpSp").textContent = sp >= 1 ? sp.toFixed(2) + "× faster" : (1 / sp).toFixed(2) + "× slower";
+  $("dpSp").className = "sv " + (sp > 1.05 ? "ok" : "bad");
+  $("dpCols").setAttribute("aria-label", "Wall time by worker count. " + W + " " + unit + ": " + fmtS(t) + " against 1.85 s sequential");
+  var note;
+  if (dp.mode === "thr") {
+    note = "<b>Threads never win.</b> The work is CPU-bound bytecode and there is one GIL, so the threads take turns " +
+      "and pay for every handoff. One thread only ties the sequential run, and 4 threads measured <b>2.21 s</b>, which is slower than the 1.85 s sequential run, and more threads only add " +
+      "more handoffs. It is the same lesson as 4a, now on a real workload.";
+  } else if (dp.send === "seed") {
+    note = W === 1 ?
+      "<b>One process is slower than no process.</b> You pay the start-up cost (spawn re-imports the module) and get no parallelism back." :
+      "<b>Processes win: " + sp.toFixed(1) + "×.</b> Each worker has its own interpreter, its own GIL and its own core. 4 processes measured " +
+      "<b>0.78 s</b> rather than 1.85/4 = 0.46 s, because pool start-up is included in the number. Each worker receives only " +
+      "<code>(seed, n)</code>, a few bytes, and rebuilds its slice itself. That design is half of the lesson.";
+  } else {
+    note = "<b>Send the lists and you give the win back.</b> The parent has to build all 40 million floats itself, one at a time, and " +
+      "then pickle about 160 MB into the pipes for the workers to unpickle. Only the multiply-and-sum still runs in parallel. " +
+      "This is TODO 3 of Quiz 3. Every bar in this mode is a model, not a measurement, so run it yourself to get real numbers.";
+  }
+  $("dpNote").innerHTML = note;
+}
+$("dpModel").innerHTML = "<b>How the model works.</b> Threads: 1.85 × (1 + 0.26 × (1 − 1/W)). The extra cost of " +
+  "competing for the GIL levels off as W grows, and the formula is pinned to 2.21 s at W = 4. Processes sent seeds: 1.85/W + 0.20 + 0.03·W, " +
+  "which is the work split W ways plus pool start-up plus a per-worker spawn cost, pinned to 0.78 s at W = 4. Processes sent the full lists: " +
+  "about 60% of the work (building the vectors) stays in the parent, and pickling adds 0.6 s. The measuring machine has 10 cores, so the " +
+  "model never runs out of cores up to W = 8. On a 4-core laptop the curve flattens after 4.";
+$("dpW").addEventListener("input", dpDraw);
+$("dpThr").addEventListener("click", function () { dp.mode = "thr"; setPressed(["dpThr"], ["dpProc"]); dpDraw(); });
+$("dpProc").addEventListener("click", function () { dp.mode = "proc"; setPressed(["dpProc"], ["dpThr"]); dpDraw(); });
+$("dpSeed").addEventListener("click", function () { dp.send = "seed"; setPressed(["dpSeed"], ["dpList"]); dpDraw(); });
+$("dpList").addEventListener("click", function () { dp.send = "list"; setPressed(["dpList"], ["dpSeed"]); dpDraw(); });
+dpDraw();
 
 /* ── MCQ engine (shared across week pages) ───────────────────── */
 Array.prototype.forEach.call(document.querySelectorAll(".mcq"), function (q) {
