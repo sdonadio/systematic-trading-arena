@@ -14,7 +14,7 @@ The weeks build one system, and nothing is thrown away:
 | 1 | UML & Object-Oriented Programming |
 | 2 | Concurrency & Async in Python |
 | 3 | Socket Streaming & Protocols |
-| 4 | Backtesting & Tick Data |
+| 4 | Backtesting and Its Data |
 | 5 | Algorithmic Complexity & Data Structures |
 | 6 | Big Data & Distributed Computing |
 | 7 | Machine Learning Signals & Model Ops |

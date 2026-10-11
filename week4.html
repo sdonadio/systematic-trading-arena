@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="icon" href="data:," />
-<title>Week 4 · Backtesting &amp; Tick Data — Systematic Trading Arena</title>
+<title>Week 4 · Backtesting and Its Data — Systematic Trading Arena</title>
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{
@@ -360,12 +360,12 @@
 </head>
 <body>
 
-<nav class="top"><a href="index.html">Systematic Trading Arena</a><span class="crumbs"><a href="week3.html">&larr; Week 3</a> &middot; <b>Week 4 &middot; Backtesting &amp; Tick Data</b> &middot; <a href="week5.html">Week 5 &rarr;</a></span></nav>
+<nav class="top"><a href="index.html">Systematic Trading Arena</a><span class="crumbs"><a href="week3.html">&larr; Week 3</a> &middot; <b>Week 4 &middot; Backtesting and Its Data</b> &middot; <a href="week5.html">Week 5 &rarr;</a></span></nav>
 
 <!-- ══════════════ HERO ══════════════ -->
 <section id="hero">
   <div class="wk">WEEK 4</div>
-  <h1>Backtesting &amp; Tick Data</h1>
+  <h1>Backtesting and Its Data</h1>
   <p class="promise">A backtest replays recorded market data through your strategy, simulates the fills and the
   costs, and ends in numbers you can be wrong about cheaply. This page follows what a backtest needs: the data
   and where it lives (a SQL database first, then kdb+ and the time-series databases, then plain Parquet files),
@@ -590,11 +590,11 @@ rows:   686</pre>
   </div>
 
   <div class="note" style="margin-top:16px"><b>Measured on the Session 2 tape</b> (the whole recording loaded into
-  SQLite, one table per message type): database file <span class="ph">{{SQL_DB_BYTES}}</span> bytes, loaded in
-  <span class="ph">{{SQL_LOAD_S}}</span> s; "AAPL mid at every tick" takes <span class="ph">{{SQL_QUERY_NOINDEX_MS}}</span> ms
-  with no index and <span class="ph">{{SQL_QUERY_INDEX_MS}}</span> ms with the <code>(symbol, t)</code> index, which
-  itself adds <span class="ph">{{SQL_INDEX_BYTES}}</span> bytes. Compare with the JSONL (264,960,858 bytes, 2.1&#8211;2.7 s
-  for the same question) and, in Part 5, Parquet (6,740,873 bytes, 0.5&#8211;1.5 ms).</div>
+  SQLite, one table per message type): database file 50,081,792 bytes, loaded in 4.6 s (3.6 s parsing JSON,
+  1.0 s inserting); four indexes add 1,794,048 bytes (+4&#8201;%). The index pays off on narrow questions: the
+  AAPL event window at t400 drops from 10.4 ms to 0.02 ms. It does not help "AAPL mid at every tick" (3.7 ms
+  without, 4.2 ms with), because that query reads every AAPL row anyway. Compare that question with the JSONL
+  (264,960,858 bytes, 2.1&#8211;2.7 s) and, in Part 5, Parquet (6,740,873 bytes, 0.5&#8211;1.5 ms).</div>
 </section>
 
 <!-- ══════════════ 3 · WHY SQL IS TOO LIMITED ══════════════ -->
@@ -620,7 +620,7 @@ rows:   686</pre>
       operator in standard SQL. You write a correlated subquery or a <code>LATERAL</code> join: one index probe per
       trade at best, a nested loop at worst. It works, it reads badly, and it is easy to get subtly wrong.</p></div>
     <div class="card"><h4><i>5</i>Size</h4><p>No column compression, a per-row header, and a depth list exploded into
-      twenty child rows per snapshot. The database is <span class="ph">{{SQL_DB_BYTES}}</span> bytes; the same tape in
+      twenty child rows per snapshot. The database is 50,081,792 bytes; the same tape in
       Parquet is 6,740,873.</p></div>
   </div>
 
@@ -1230,7 +1230,7 @@ var W4DATA = {"slice":{"lo":390,"hi":480,"warm":{"AMD":229.935,"MSFT":409.7,"AAP
 <script>
 "use strict";
 /* ════════════════════════════════════════════════════════════════
-   Week 4 — Backtesting & Tick Data
+   Week 4 — Backtesting and Its Data
    Every widget runs on real data from the Session 2 tape (W4DATA,
    exported from the lab's Parquet warehouse) except Part 3's six rows,
    which are also real, and Part 2's index model, which is arithmetic.
