@@ -684,7 +684,7 @@ CMD ["python", "-m", "team.trader"]</pre>
         <div class="kv"><span>Reject rate</span><b class="ok">&lt; 2%</b></div>
         <div class="kv"><span>Position vs limit</span><b>&lt; 70%</b></div>
         <div class="kv"><span>on_tick latency</span><b>&lt; 8 ms</b></div>
-        <div class="w-note">Rate limits are enforced from this week on. A bot that over-sends gets throttled &mdash;
+        <div class="w-note">Rate limits have been enforced since Week 8. A bot that over-sends gets throttled &mdash;
         which shows up first as a rising reject rate, not as an error.</div>
       </div>
     </div>
@@ -889,10 +889,10 @@ CMD ["python", "-m", "team.trader"]</pre>
         <p class="w-sub">This week each maps to one live component and they all run on the same tick.</p>
         <table class="tbl">
           <tr><th>Pillar</th><th>Built in</th><th>Runs as</th></tr>
-          <tr><td class="name">Signal</td><td>W3, W7</td><td>on_tick()</td></tr>
+          <tr><td class="name">Signal</td><td>W3, W8</td><td>on_tick()</td></tr>
           <tr><td class="name">Execution</td><td>W2, W4</td><td>quotes + CLOB</td></tr>
-          <tr><td class="name">Risk</td><td>W5</td><td>check_order()</td></tr>
-          <tr><td class="name">Portfolio</td><td>W6</td><td>cash + positions</td></tr>
+          <tr><td class="name">Risk</td><td>W6</td><td>check_order()</td></tr>
+          <tr><td class="name">Portfolio</td><td>W7</td><td>cash + positions</td></tr>
           <tr><td class="name">Evaluation</td><td>W9</td><td>scoring.py</td></tr>
         </table>
         <div class="w-note"><b>The parts have been unit-correct for weeks.</b> The only open question tonight is whether
@@ -1375,7 +1375,7 @@ score  = ratio * max(0, 1 - <b>PENALTY</b>*mdd)   <i># PENALTY = 2.0</i>
       live: 'Both components pass their own tests. The seam is what is broken — so only a test of the conversation can see it.' },
     { t: 'A fill arrives but the portfolio never marks it', L: 1, test: 'test_fill_updates_position_and_cash',
       cost: '6 s, in CI',
-      live: 'Your P&L is fiction and your position is a guess. This is the bug that turns into a Week-9 reconciliation break.' },
+      live: 'Your P&L is fiction and your position is a guess. This is the bug that turns into a Part 2 reconciliation break.' },
     { t: 'The bot never reconnects after ConnectionClosed', L: 2, test: 'test_session_survives_socket_drop',
       cost: '45 s, in the end-to-end run against the headless sim',
       live: 'One blip and your bot is a spectator with an open position for the rest of the session. Nothing throws; the process is alive.' },

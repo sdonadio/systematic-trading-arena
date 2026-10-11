@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="icon" href="data:," />
-<title>Week 6 · Big Data &amp; Distributed Computing — Systematic Trading Arena</title>
+<title>Week 7 · Big Data &amp; Distributed Computing — Systematic Trading Arena</title>
 <style>
   /* ══ Reset & tokens ═══════════════════════════════════════════ */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -453,11 +453,11 @@
 </head>
 <body>
 
-<nav class="top"><a href="index.html">Systematic Trading Arena</a><span class="crumbs"><a href="week5.html">&larr; Week 5</a> &middot; <b>Week 6 &middot; Big Data &amp; Distributed Computing</b> &middot; <a href="week7.html">Week 7 &rarr;</a></span></nav>
+<nav class="top"><a href="index.html">Systematic Trading Arena</a><span class="crumbs"><a href="week6.html">&larr; Week 6</a> &middot; <b>Week 7 &middot; Big Data &amp; Distributed Computing</b> &middot; <a href="week8.html">Week 8 &rarr;</a></span></nav>
 
 <section id="hero" class="hero">
  <div class="wrap">
-  <div class="eyebrow">Week 6 &middot; Scale</div>
+  <div class="eyebrow">Week 7 &middot; Scale</div>
   <h1>Big Data &amp;<br/>Distributed Computing</h1>
   <p class="promise">Think in columns and processes &mdash; so a strategy search takes minutes instead of hours, and your data fits before you rent a cluster.</p>
   <ul class="willbe">
@@ -467,6 +467,7 @@
   </ul>
   <div class="chips">
     <span class="chip hl">3 hours</span>
+    <span class="chip hl">Fri Nov 13 &middot; live block: season week 7</span>
     <span class="chip">memory wall</span>
     <span class="chip">Parquet &middot; columnar</span>
     <span class="chip">vectorisation</span>
@@ -483,7 +484,7 @@
   <div class="eyebrow">What is it?</div>
   <h2>The bottleneck stops being ideas and becomes bytes</h2>
 
-  <p class="lead">Weeks 4 and 5 gave you a backtester and fast signals. One run, one symbol set, a DataFrame
+  <p class="lead">Weeks 4 and 6 gave you a backtester and fast signals. One run, one symbol set, a DataFrame
   that fits in RAM. That works &mdash; until it doesn't.</p>
 
   <p>Two things break at the same time. <b>Feature pipelines explode in size:</b> rolling features across ten
@@ -492,7 +493,7 @@
   across a grid &mdash; sequentially that is hours, in parallel it is minutes.</p>
 
   <p>So this week has exactly two skills: <b>store and stream data efficiently</b>, and <b>spread compute across
-  cores and machines</b>. Both are prerequisites for Week 7's machine learning, where training is only feasible
+  cores and machines</b>. Both are prerequisites for Week 8's machine learning, where training is only feasible
   if your data is already cheap to read and your compute already fans out.</p>
 
   <h3 style="margin-top:26px">The memory wall</h3>
@@ -1048,23 +1049,23 @@ PATH = <span class="s">'cache/features.parquet'</span>
   plus a working parallel sweep. Graded 35 / 30 / 20 / 15: the sign-off covering columnar storage and caching, a
   parallel backtest sweep that runs correctly and reproducibly with the seed pinned, a feature pipeline that
   produces the <code>history</code> your <code>on_tick</code> consumes, and multi-venue connect via
-  <code>EXCHANGE_URLS</code> on a clean W6 branch.</p>
+  <code>EXCHANGE_URLS</code> on a clean W7 branch.</p>
   <div class="nextgrid">
       <a class="nextcard" href="https://github.com/sdonadio/algoarena-team-template">
         <div class="l">Code</div>
         <div class="t">Get the code</div>
         <div class="d">Labs and homework live in your course&#8217;s LMS; the starter repo is public. Use it as a template, clone, <code>make install</code>.</div>
       </a>
-    <a class="nextcard" href="week5.html">
-      <div class="l">Previous</div><div class="t">&larr; Week 5 &middot; Algorithmic Complexity &amp; Data Structures</div>
+    <a class="nextcard" href="week6.html">
+      <div class="l">Previous</div><div class="t">&larr; Week 6 &middot; Algorithmic Complexity &amp; Data Structures</div>
       <div class="d">Big-O, the heap-plus-dict order book, and O(1) rolling statistics in the hot path.</div></a>
-    <a class="nextcard" href="week7.html">
-      <div class="l">Next</div><div class="t">Week 7 &middot; Machine Learning Signals &amp; Model Ops &rarr;</div>
+    <a class="nextcard" href="week8.html">
+      <div class="l">Next</div><div class="t">Week 8 &middot; Machine Learning Signals &amp; Model Ops &rarr;</div>
       <div class="d">Turn those cached features into a trained model, and serve predictions into <code>on_tick</code> without blocking the loop.</div></a>
   </div>
   <p class="sub" style="margin-top:18px">Reading before next class: <code>tests/sim_session.py</code> &mdash; the
   <code>run()</code> API you fan out, and the <code>seed=</code> argument that makes every worker reproducible.
-  This week is the foundation for Week 7: training is only feasible if your data is already cheap to read and
+  This week is the foundation for Week 8: training is only feasible if your data is already cheap to read and
   your compute already spreads.</p>
  </div>
 </section>
