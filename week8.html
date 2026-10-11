@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="icon" href="data:," />
-<title>Week 8 · CI/CD, Testing &amp; UI — Systematic Trading Arena</title>
+<title>Week 8 · Machine Learning Signals &amp; Model Ops — Systematic Trading Arena</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -309,46 +309,37 @@
   }
 
   /* ── Week-8 specifics ───────────────────────────────────────── */
-  .layer-chips { display: flex; gap: 0; flex-wrap: wrap; }
-  .lay-detail { background: var(--panel-2); border: 1px solid var(--border); border-radius: 9px; padding: 12px 14px; }
-  .lay-detail h4 { font-size: 13.5px; }
-  .lay-detail h4 span { color: var(--c, var(--accent-2)); }
-  .lay-detail .meta { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px; }
-  .lay-detail .meta div { font-size: 11px; color: var(--muted); }
-  .lay-detail .meta b { display: block; font-family: var(--mono); font-size: 13px; color: var(--ink); }
-  .lay-detail p { font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+  .feat-list { display: grid; gap: 6px; }
+  .feat-list label {
+    display: flex; align-items: flex-start; gap: 9px; cursor: pointer;
+    background: var(--panel-2); border: 1px solid var(--border); border-radius: 7px;
+    padding: 7px 10px; font-size: 12px; line-height: 1.45;
+  }
+  .feat-list label:hover { border-color: var(--accent-2); }
+  .feat-list label input { margin-top: 3px; flex-shrink: 0; }
+  .feat-list label .fn { font-family: var(--mono); font-size: 11.5px; color: var(--accent-2); }
+  .feat-list label .fd { color: var(--muted); font-size: 11px; display: block; }
+  .feat-list label.off { opacity: .62; }
 
-  .toggles { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 6px; }
-  .toggles label {
-    display: flex; align-items: flex-start; gap: 8px; cursor: pointer; font-size: 12px; line-height: 1.45;
-    background: var(--panel-2); border: 1px solid var(--border); border-radius: 7px; padding: 7px 10px;
+  .lifecycle { display: flex; gap: 0; flex-wrap: wrap; margin: 4px 0 12px; }
+  .lc-node {
+    flex: 1 1 130px; text-align: left; border-radius: 0; padding: 9px 11px;
+    border: 1px solid var(--border); margin-left: -1px; background: var(--panel-2);
   }
-  .toggles label:hover { border-color: var(--accent-2); }
-  .toggles label input { margin-top: 3px; flex-shrink: 0; }
-  .toggles label .fd { display: block; color: var(--muted); font-size: 11px; }
-  @media (max-width: 720px) { .toggles { grid-template-columns: minmax(0,1fr); } }
-
-  /* mini dashboard mock */
-  .dash { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
-  @media (max-width: 720px) { .dash { grid-template-columns: minmax(0,1fr); } }
-  .tile { background: var(--panel-2); border: 1px solid var(--border); border-radius: 9px; padding: 10px 12px 12px; }
-  .tile .th {
-    display: flex; align-items: center; justify-content: space-between; gap: 8px;
-    font-size: 9px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted);
-    padding-bottom: 7px; margin-bottom: 8px; border-bottom: 1px solid var(--border);
+  .lc-node:first-child { border-radius: 8px 0 0 8px; margin-left: 0; }
+  .lc-node:last-child { border-radius: 0 8px 8px 0; }
+  .lc-node .st { font-family: var(--mono); font-size: 9.5px; color: var(--muted); }
+  .lc-node .nm { font-size: 12.5px; font-weight: 700; margin-top: 2px; }
+  .lc-node.on { background: rgba(var(--accent-rgb),0.26); border-color: var(--accent-2); }
+  .lc-node.on .st { color: var(--accent-2); }
+  @media (max-width: 720px) {
+    .lc-node { flex: 1 1 100%; margin-left: 0; border-radius: 8px !important; margin-bottom: 4px; }
   }
-  .kv { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 12px; padding: 3px 0; }
-  .kv span { color: var(--muted); }
-  .kv b { font-family: var(--mono); font-size: 12.5px; color: var(--ink); font-weight: 600; }
-  .kv b.ok { color: var(--ok); } .kv b.warn { color: var(--warn); } .kv b.bad { color: var(--bad); }
-  .banner {
-    display: flex; align-items: center; gap: 10px; border-radius: 8px; padding: 8px 12px; margin-bottom: 10px;
-    font-size: 12.5px; border: 1px solid var(--border); background: var(--panel-2); color: var(--muted);
-  }
-  .banner.live { border-color: rgba(63,185,80,0.34); background: rgba(63,185,80,0.09); color: var(--ink); }
-  .banner.warn { border-color: rgba(210,153,34,0.4); background: rgba(210,153,34,0.10); color: var(--ink); }
-  .banner.bad { border-color: rgba(248,81,73,0.4); background: rgba(248,81,73,0.10); color: var(--ink); }
-  .banner .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+  .lc-detail { background: var(--panel-2); border: 1px solid var(--border); border-radius: 9px; padding: 12px 14px; }
+  .lc-detail h4 { font-size: 13.5px; }
+  .lc-detail .role { font-size: 11px; color: var(--accent-2); font-family: var(--mono); }
+  .lc-detail p { font-size: 12.5px; color: var(--muted); margin-top: 7px; }
+  .lc-detail .fail { font-size: 12px; color: var(--warn); margin-top: 7px; }
 
   /* ── mobile guard (identical on every page): single column under 720px,
         no horizontal overflow. Must stay last in the sheet. ───────────── */
@@ -367,21 +358,21 @@
 </head>
 <body>
 
-<nav class="top"><a href="index.html">Systematic Trading Arena</a><span class="crumbs"><a href="week7.html">&larr; Week 7</a> &middot; <b>Week 8 &middot; CI/CD, Testing &amp; UI</b> &middot; <a href="week9.html">Week 9 &rarr;</a></span></nav>
+<nav class="top"><a href="index.html">Systematic Trading Arena</a><span class="crumbs"><a href="week7.html">&larr; Week 7</a> &middot; <b>Week 8 &middot; Machine Learning Signals &amp; Model Ops</b> &middot; <a href="week9.html">Week 9 &rarr;</a></span></nav>
 
 <main>
 
 <!-- ══ HERO ══════════════════════════════════════════════════ -->
 <section id="hero">
-  <div class="wk">WEEK 8</div>
-  <h1>CI/CD, Testing &amp; <em>UI</em></h1>
-  <p class="promise">A green run on your laptop proves nothing. This week your bot becomes trustworthy: tests that pin
-  its behaviour, a pipeline that refuses to merge red code, an image that runs identically anywhere, and a dashboard
-  that tells you it is alive.</p>
+  <div class="wk">WEEK 8 · FRI NOV 20 · LIVE BLOCK: SEASON WEEK 8</div>
+  <h1>Machine Learning Signals &amp; <em>Model Ops</em></h1>
+  <p class="promise">A model is just another signal &mdash; a number your bot still has to size, risk-manage and route.
+  This week you learn to earn that number honestly: features known at time <code>t</code>, splits that respect time,
+  and a validated artifact that predicts inside your per-tick budget.</p>
   <ul class="able">
-    <li><b>Test at the right layer</b> &mdash; and know which layer would have caught the bug that just cost you a session.</li>
-    <li><b>Wire a pipeline</b> that runs <code>pytest</code> on every push and blocks the merge when it fails.</li>
-    <li><b>Read a live dashboard</b> and say, in one glance, whether your bot is healthy or quietly broken.</li>
+    <li><b>Build a feature matrix</b> from prices and the order book without leaking the future into a single column.</li>
+    <li><b>Validate walk-forward</b> and recognise the exact moment a backtest score stops being a measurement.</li>
+    <li><b>Operate a model</b>: persist it, load it once, predict in <code>on_tick</code>, and watch it drift.</li>
   </ul>
 </section>
 
@@ -389,89 +380,100 @@
 <section id="what">
   <div class="sec-head">
     <span class="kicker">What is it?</span>
-    <h2>Production engineering: proving it works, everywhere, every time</h2>
-    <p class="lead">Three habits, one goal &mdash; your bot behaves the same on your laptop, in CI, and on the live arena
-    at 6:05pm with the class watching the leaderboard.</p>
+    <h2>Supervised learning, pointed at the future</h2>
+    <p class="lead">Learn a mapping <code>f(X) &rarr; y</code> from historical examples. In trading, <code>X</code> is
+    everything you know <em>now</em>; <code>y</code> is the piece of the future you are predicting.</p>
   </div>
 
-  <div class="grid2">
+  <div class="grid2 narrow-right">
     <div>
-      <p>A test is an executable claim about your code. <code>pytest</code> discovers every function named
-      <code>test_*</code>, runs it, and reports which claims still hold. That is all. The engineering judgement is not in
-      writing asserts &mdash; it is in choosing <em>which claim to make at which layer</em>.</p>
-      <p>The pyramid is that judgement made visible. Many unit tests at the base, each pinning one function in
-      milliseconds with no I/O. Fewer integration tests, wiring two or three components together with fakes instead of
-      the network. A handful of end-to-end runs that drive the whole path &mdash; bot to exchange to fill to P&amp;L
-      &mdash; and catch the wiring bugs nothing else can see, slowly and a little flakily.</p>
-      <p>Push logic down. A bug caught by a unit test costs you seconds; the same bug caught end-to-end costs a minute
-      of CI; the same bug caught live costs you a session, in public.</p>
-      <pre class="code"><i># tests/test_signal.py</i>
-<b>from</b> strategy <b>import</b> momentum_signal
+      <p>Every row of your dataset is one point in time. The features in that row must be computable from data that had
+      already printed at that instant &mdash; the last mid, the rolling volatility over the previous twenty ticks, the
+      current book imbalance. The label belongs to the future: the return from <code>t</code> to <code>t+h</code>, or
+      merely its sign.</p>
+      <p>Two label choices, two different jobs. <b>Classification</b> predicts direction and is robust &mdash; you can
+      size by the predicted probability. <b>Regression</b> predicts magnitude, is more informative, and is noisier and
+      harder. Either way the horizon <code>h</code> must match how long you actually intend to hold: a label about the
+      next 30 seconds cannot justify a position you keep for an hour.</p>
+      <p>The golden rule has one clause. <b>Every feature in <code>X</code> must be knowable at <code>t</code>.</b>
+      Anything else is leakage, and leakage does not look like a bug &mdash; it looks like a great model.</p>
+      <pre class="code"><i># one row per point-in-time observation</i>
+X = features known <b>AT</b> time t     <i># no future data!</i>
+y = label about t+h              <i># the horizon</i>
 
-<b>def</b> test_momentum_goes_long_on_uptrend():
-    prices = [100, 101, 102, 103, 104]
-    sig = momentum_signal(prices, lookback=3)
-    <b>assert</b> sig.side == 'buy'
-    <b>assert</b> sig.qty &gt; 0
+<i># classification  -&gt; sign of the next return</i>
+y = 1 <b>if</b> ret(t, t+h) &gt; 0 <b>else</b> 0
+<i># regression      -&gt; magnitude of the next return</i>
+y = ret(t, t+h)
 
-<b>def</b> test_momentum_flat_when_no_trend():
-    <b>assert</b> momentum_signal([100, 100, 100], 3) <b>is</b> None</pre>
-      <div class="w-note"><b>Name the test after the behaviour it pins.</b> When it goes red six weeks from now, the name
-      is the whole bug report. One behaviour per test, and <code>@pytest.mark.parametrize</code> for the variations.</div>
+model.fit(X_train, y_train)
+y_hat = model.predict(X_now)     <i># -&gt; a signal</i></pre>
     </div>
     <div>
       <div class="widget" style="margin-top:0">
-        <div class="w-head"><h3>The platform is built on its tests</h3><span class="w-tag">~1,280</span></div>
-        <p class="w-sub">Why we can change the engine under you every week without breaking your bot.</p>
+        <div class="w-head"><h3>Why it is dangerous here</h3><span class="w-tag">low SNR</span></div>
+        <p class="w-sub">Three properties of market data that make ML in finance different from ML on images.</p>
         <div class="stats" style="flex-direction:column">
-          <div class="stat" style="--c:var(--ok)">
-            <div class="lbl">100% on the source of truth</div>
-            <div class="num">orderbook.py</div>
-            <div class="sub">The matching engine gets zero slack: a wrong fill corrupts every downstream P&amp;L, leaderboard row and tearsheet.</div>
+          <div class="stat" style="--c:var(--bad)">
+            <div class="lbl">Signal-to-noise</div>
+            <div class="num">~52%</div>
+            <div class="sub">Returns are mostly noise. A model at 52% out-of-sample can be excellent &mdash; or pure overfit. You cannot tell by looking at it.</div>
           </div>
-          <div class="stat" style="--c:var(--sky)">
-            <div class="lbl">Round-trip message tests</div>
-            <div class="num">dump → parse</div>
-            <div class="sub">Every wire message in <code>tests/test_messages.py</code> is dumped to JSON, parsed back, and asserted identical. The schema is the contract.</div>
+          <div class="stat" style="--c:var(--warn)">
+            <div class="lbl">Non-stationarity</div>
+            <div class="num">drift</div>
+            <div class="sub">The data-generating process changes. Yesterday's edge decays and a model trained on it rots silently, still returning confident numbers.</div>
           </div>
           <div class="stat" style="--c:var(--violet)">
-            <div class="lbl">Network-free simulator</div>
-            <div class="num">sim_session</div>
-            <div class="sub">A full season in one process with no sockets — deterministic, CI-friendly, and the model for your own tests.</div>
+            <div class="lbl">Feedback &amp; scarcity</div>
+            <div class="num">n&nbsp;small</div>
+            <div class="sub">Little independent data, and your own orders move the price. Backtests flatter; the live session collects.</div>
           </div>
         </div>
+        <div class="w-note"><b>Simple first.</b> Every W3&ndash;W7 signal is a baseline. ML has to beat it
+        <em>out-of-sample, after costs</em> to earn its place in your bot.</div>
       </div>
     </div>
   </div>
 
   <!-- WIDGET 1 -->
   <div class="widget">
-    <div class="w-head"><span class="w-tag">Widget 1</span><h3>Test-pyramid explorer</h3></div>
-    <p class="w-sub">Click a layer for an example test against a trading bot. Then inject a bug and see which layer
-    would have caught it &mdash; and what the delay cost.</p>
-
-    <div class="controls">
-      <div class="ctl layer-chips">
-        <button id="w8-lay-0" class="seg on" aria-pressed="true">Unit</button><button id="w8-lay-1" class="seg" aria-pressed="false">Integration</button><button id="w8-lay-2" class="seg" aria-pressed="false">End-to-end</button>
-      </div>
-      <div class="ctl">
-        <label for="w8-bug">inject a bug</label>
-        <select id="w8-bug" aria-label="Choose a bug to inject into the bot"></select>
-      </div>
-    </div>
+    <div class="w-head"><span class="w-tag">Widget 1</span><h3>Feature-engineering playground</h3></div>
+    <p class="w-sub">A synthetic tick series for one symbol. Pick features, set the label horizon, and watch the design
+    matrix assemble. Click a row in the matrix to see which instant it was cut from.</p>
 
     <div class="grid2">
-      <div class="svg-wrap">
-        <svg class="stage" id="w8-pyr" viewBox="0 0 360 232" role="img"
-             aria-label="Testing pyramid: many fast unit tests at the base, fewer integration tests, a few end-to-end runs at the top"></svg>
+      <div>
+        <div class="controls">
+          <div class="ctl"><label for="w7-h">horizon h</label>
+            <input type="range" id="w7-h" min="1" max="12" step="1" value="5" aria-label="Label horizon in ticks" />
+            <output id="w7-h-out">5 ticks</output></div>
+          <div class="ctl">
+            <button id="w7-lbl-cls" class="seg on" aria-pressed="true">y = sign</button><button id="w7-lbl-reg" class="seg" aria-pressed="false">y = return</button>
+          </div>
+          <button id="w7-reseed">&#8635; New series</button>
+        </div>
+        <div class="svg-wrap">
+          <svg class="stage" id="w7-px" viewBox="0 0 720 250" role="img"
+               aria-label="Synthetic price series with the feature window and the label horizon highlighted"></svg>
+        </div>
+        <div class="w-note" id="w7-fx-note"></div>
       </div>
       <div>
-        <div class="lay-detail" id="w8-lay-detail"></div>
-        <div class="verdict" id="w8-bug-verdict"></div>
+        <div class="feat-list" id="w7-feats"></div>
+        <div class="stats">
+          <div class="stat" style="--c:var(--sky)"><div class="lbl">Matrix shape</div><div class="num" id="w7-shape">&mdash;</div><div class="sub" id="w7-shape-sub">usable rows &times; features</div></div>
+          <div class="stat" style="--c:var(--accent-2)"><div class="lbl">Rows per feature</div><div class="num" id="w7-dof">&mdash;</div><div class="sub">degrees of freedom you are spending</div></div>
+        </div>
+        <div style="overflow-x:auto;margin-top:12px">
+          <table class="tbl" id="w7-mat"></table>
+        </div>
+        <div class="verdict" id="w7-verdict"></div>
       </div>
     </div>
-    <div class="w-note"><b>The layer is a cost decision.</b> Every bug is catchable somewhere; the question is how many
-    minutes &mdash; or how many sessions &mdash; pass before you find out. Pick the cheapest layer that can see it.</div>
+    <div class="w-note"><b>Read the warm-up.</b> <code>vol_20</code> needs twenty prior returns and the label needs
+    <code>h</code> future ticks, so the first rows and the last <code>h</code> rows are unusable. Dropping them is
+    correct; quietly filling them is leakage. Features are cheap &mdash; labels are precious.</div>
   </div>
 </section>
 
@@ -479,117 +481,128 @@
 <section id="how">
   <div class="sec-head">
     <span class="kicker">How does it work?</span>
-    <h2>A pipeline is a gate, and determinism is what makes it mean something</h2>
-    <p class="lead">Continuous integration runs your suite on every push, on a clean machine that is not yours.
-    Continuous delivery ships what passes. The merge stays blocked until the checks are green.</p>
+    <h2>Splitting in time is the whole discipline</h2>
+    <p class="lead">Fitting the model is one line. Everything that decides whether the number means anything happens in
+    how you cut the data &mdash; and in how many times you look.</p>
   </div>
 
-  <div class="grid2">
-    <div>
-      <p>A GitHub Actions workflow is YAML in <code>.github/workflows/</code>. An event (<code>on: [push]</code>)
-      triggers jobs; each job runs ordered steps on a fresh runner; a matrix fans the same job out across Python
-      versions. Nothing in it is clever &mdash; and that is the point. The runner has no internet by design, no cached
-      state, and none of your local environment. If your suite passes there, it passes anywhere.</p>
-      <pre class="code">on: [push, pull_request]        <i># trigger</i>
-jobs:
-  test:                         <i># a job</i>
-    runs-on: ubuntu-latest      <i># the runner</i>
-    strategy:
-      matrix:
-        python: ['3.11', '3.12']  <i># fan out</i>
-    steps:                      <i># ordered</i>
-      - uses: actions/checkout@v4
-      - run: make install
-      - run: pytest -q</pre>
-    </div>
-    <div>
-      <p>Reproducibility is the other half. Same code plus same dependencies plus same OS equals same behaviour, so pin
-      exact versions (<code>==</code>, never <code>&gt;=</code>), isolate in a venv, and freeze the whole environment in
-      an image. Order the Docker layers stable-to-volatile so the <code>pip install</code> layer stays cached and only
-      your code layer rebuilds.</p>
-      <pre class="code"><i># requirements.txt — pin exact versions</i>
-websockets==12.0
-pydantic==2.7.1
-
-<i># Dockerfile — freeze the environment</i>
-FROM python:3.11-slim
-WORKDIR /app
-COPY requirements.txt .         <i># cached layer</i>
-RUN pip install -r requirements.txt
-COPY . .                        <i># code layer</i>
-CMD ["python", "-m", "team.trader"]</pre>
-    </div>
-  </div>
+  <p>Random shuffling is the default in every tutorial and it is catastrophic on a time series. Shuffle, and a row from
+  next Tuesday sits in your training set while its neighbour &mdash; nearly the same market state &mdash; sits in the
+  test set. The model does not learn structure; it learns to recognise its neighbours. Your test score becomes a
+  measurement of how similar adjacent ticks are, which is close to 100% and completely useless.</p>
 
   <!-- WIDGET 2 -->
   <div class="widget">
-    <div class="w-head"><span class="w-tag">Widget 2</span><h3>CI pipeline simulator</h3></div>
-    <p class="w-sub">Push a commit and watch the gate. Break something and the pipeline stops at the first red stage
-    &mdash; nothing downstream runs, and the merge is blocked.</p>
+    <div class="w-head"><span class="w-tag">Widget 2</span><h3>Leakage detector</h3></div>
+    <p class="w-sub">The same data, the same model, three ways of cutting it. Watch the <em>reported</em> test accuracy
+    move while the <em>live</em> accuracy does not.</p>
 
-    <div class="grid2 narrow-right">
+    <div class="controls">
+      <div class="ctl">
+        <button id="w7-sp-rand" class="seg" aria-pressed="false">Random split</button><button id="w7-sp-time" class="seg on" aria-pressed="true">Split in time</button><button id="w7-sp-emb" class="seg" aria-pressed="false">Embargo + purge</button>
+      </div>
+      <div class="ctl"><label for="w7-train">train share</label>
+        <input type="range" id="w7-train" min="50" max="90" step="5" value="70" aria-label="Training share of the sample" />
+        <output id="w7-train-out">70%</output></div>
+      <div class="ctl"><label for="w7-emb">embargo</label>
+        <input type="range" id="w7-emb" min="0" max="12" step="1" value="5" aria-label="Embargo width in ticks" />
+        <output id="w7-emb-out">5 ticks</output></div>
+    </div>
+
+    <div class="svg-wrap">
+      <svg class="stage" id="w7-split" viewBox="0 0 720 150" role="img"
+           aria-label="Time axis showing how the sample is divided into training and test blocks"></svg>
+    </div>
+
+    <div class="grid2" style="margin-top:12px">
       <div>
-        <div class="svg-wrap">
-          <svg class="stage" id="w8-pipe" viewBox="0 0 720 130" role="img"
-               aria-label="CI pipeline stages from push through lint, tests, build and deploy"></svg>
-        </div>
-        <div class="controls" style="margin-top:12px">
-          <button id="w8-pipe-run" class="primary">&#9654; git push</button>
-          <button id="w8-pipe-reset">&#8634; Reset</button>
-          <span class="badge idle" id="w8-pipe-badge">no run yet</span>
-        </div>
         <div class="stats" style="margin-top:0">
-          <div class="stat" style="--c:var(--sky)"><div class="lbl">Runs</div><div class="num" id="w8-pipe-runs">0</div><div class="sub">pushes to this branch</div></div>
-          <div class="stat" style="--c:var(--bad)"><div class="lbl">Red</div><div class="num" id="w8-pipe-red">0</div><div class="sub">blocked merges</div></div>
-          <div class="stat" style="--c:var(--warn)"><div class="lbl">Flaky failures</div><div class="num" id="w8-pipe-flake">0</div><div class="sub">red without a code change</div></div>
+          <div class="stat" style="--c:var(--muted)"><div class="lbl">In-sample</div><div class="num" id="w7-acc-in">&mdash;</div><div class="sub">accuracy on the training block</div></div>
+          <div class="stat" style="--c:var(--warn)"><div class="lbl">Reported test</div><div class="num" id="w7-acc-test">&mdash;</div><div class="sub">the number you would put in your report</div></div>
+          <div class="stat" style="--c:var(--ok)"><div class="lbl">Live</div><div class="num" id="w7-acc-live">&mdash;</div><div class="sub">what the arena actually pays you for</div></div>
+        </div>
+        <div class="svg-wrap" style="margin-top:12px">
+          <svg class="stage" id="w7-gap" viewBox="0 0 720 118" role="img"
+               aria-label="Bar chart comparing reported test accuracy with live accuracy"></svg>
         </div>
       </div>
       <div>
-        <div class="toggles" id="w8-pipe-toggles"></div>
-        <div class="log" id="w8-pipe-log" style="margin-top:10px" aria-live="polite" aria-label="CI run log"></div>
+        <pre class="code" id="w7-split-code"></pre>
+        <div class="verdict" id="w7-split-verdict"></div>
       </div>
     </div>
-    <div class="verdict" id="w8-pipe-verdict">Push a commit to run the pipeline.</div>
+    <div class="w-note"><b>Why the embargo.</b> A label at time <code>t</code> looks <code>h</code> ticks ahead, so rows
+    within <code>h</code> of the boundary see across the wall even under a clean chronological split. Purging those rows
+    costs you a handful of samples and buys you a number you can trust.</div>
   </div>
+
+  <p>Once the wall is in the right place, one split is still not an evaluation &mdash; it is a single sample. Walk-forward
+  (rolling-origin) validation trains on the past, tests on the next unseen block, rolls forward and repeats. Every test
+  block is out-of-sample, which is exactly the situation your bot is in at every tick of the live session: it only ever
+  knows the past.</p>
 
   <!-- WIDGET 3 -->
   <div class="widget">
-    <div class="w-head"><span class="w-tag">Widget 3</span><h3>Determinism: same input, same result</h3></div>
-    <p class="w-sub">The same strategy test, run repeatedly. On the left the randomness is seeded; on the right it is
-    not. Both panels overlay every run you trigger.</p>
+    <div class="w-head"><span class="w-tag">Widget 3</span><h3>Walk-forward validation animator</h3></div>
+    <p class="w-sub">Step the folds forward and collect the out-of-sample score of each test block. Then flip on a regime
+    shift and watch the expanding window &mdash; which never forgets &mdash; lose to the rolling one.</p>
 
     <div class="controls">
-      <button id="w8-det-1">Run once</button>
-      <button id="w8-det-5" class="primary">Run 5&times;</button>
-      <button id="w8-det-reset">&#8634; Reset</button>
-      <span class="ctl">assertion: <code>final_pnl == 412</code></span>
+      <div class="ctl">
+        <button id="w7-wf-exp" class="seg on" aria-pressed="true">Expanding window</button><button id="w7-wf-roll" class="seg" aria-pressed="false">Rolling window</button>
+      </div>
+      <div class="ctl"><label for="w7-folds">folds</label>
+        <input type="range" id="w7-folds" min="3" max="8" step="1" value="5" aria-label="Number of walk-forward folds" />
+        <output id="w7-folds-out">5</output></div>
+      <label class="ctl"><input type="checkbox" id="w7-drift" /> regime shift at fold 3</label>
+      <button id="w7-wf-step">Step &rarr;</button>
+      <button id="w7-wf-play" class="primary">&#9654; Roll forward</button>
+      <button id="w7-wf-reset">&#8634; Reset</button>
     </div>
 
-    <div class="grid2">
-      <div>
-        <div class="svg-wrap">
-          <svg class="stage" id="w8-det-seed" viewBox="0 0 340 150" role="img"
-               aria-label="Overlaid equity paths from seeded runs, all identical"></svg>
-        </div>
-        <div class="stats" style="margin-top:10px">
-          <div class="stat" style="--c:var(--ok)"><div class="lbl">random.seed(0)</div><div class="num" id="w8-det-seed-n">0 runs</div><div class="sub" id="w8-det-seed-sub">distinct results: —</div></div>
-        </div>
+    <div class="grid2 narrow-right">
+      <div class="svg-wrap">
+        <svg class="stage" id="w7-wf" viewBox="0 0 720 260" role="img"
+             aria-label="Walk-forward folds: training blocks followed by out-of-sample test blocks"></svg>
       </div>
       <div>
-        <div class="svg-wrap">
-          <svg class="stage" id="w8-det-rand" viewBox="0 0 340 150" role="img"
-               aria-label="Overlaid equity paths from unseeded runs, diverging"></svg>
+        <div class="stats" style="margin-top:0;flex-direction:column">
+          <div class="stat" style="--c:var(--accent-2)"><div class="lbl">Mean OOS score</div><div class="num" id="w7-wf-mean">&mdash;</div><div class="sub">the only score worth reporting</div></div>
+          <div class="stat" style="--c:var(--warn)"><div class="lbl">Dispersion across folds</div><div class="num" id="w7-wf-sd">&mdash;</div><div class="sub">a good mean with huge spread is not an edge</div></div>
         </div>
-        <div class="stats" style="margin-top:10px">
-          <div class="stat" style="--c:var(--bad)"><div class="lbl">no seed</div><div class="num" id="w8-det-rand-n">0 runs</div><div class="sub" id="w8-det-rand-sub">distinct results: —</div></div>
+        <div class="svg-wrap" style="margin-top:12px">
+          <svg class="stage" id="w7-wf-bars" viewBox="0 0 340 130" role="img" aria-label="Per-fold out-of-sample scores"></svg>
         </div>
+        <div class="verdict" id="w7-wf-verdict">Roll the folds forward to collect out-of-sample scores.</div>
       </div>
     </div>
-    <div class="verdict" id="w8-det-verdict">Run the test a few times in each mode.</div>
-    <div class="w-note"><b>Three sources of nondeterminism, three fixes.</b> Randomness &rarr; seed it. The network
-    &rarr; inject a fake or a recorded fixture; a CI runner has no internet anyway. The clock and IDs &rarr; pass them
-    in, never call <code>datetime.now()</code> deep inside logic. A test that fails one run in twenty trains your team
-    to ignore red, which defeats the entire point of having a suite.</div>
+    <div class="w-note"><b>In AlgoArena.</b> <code>tests/sim_session.py</code> runs the whole arena in one process with
+    no network, so a fold is one call: fit on <code>history[:train_end]</code>, then run the bot over the test block only
+    and read the out-of-sample P&amp;L. Same bot object you will ship &mdash; validate it honestly, then do not touch it.</div>
+  </div>
+
+  <!-- WIDGET 4 -->
+  <div class="widget">
+    <div class="w-head"><span class="w-tag">Widget 4</span><h3>Model-ops lifecycle</h3></div>
+    <p class="w-sub">Training is roughly 10% of the job. Click a stage to see what it owns, how it fails, and which line
+    of your bot it corresponds to.</p>
+
+    <div class="lifecycle" id="w7-lc" role="group" aria-label="Model lifecycle stages"></div>
+    <div class="grid2 narrow-right">
+      <div class="lc-detail" id="w7-lc-detail"></div>
+      <div>
+        <div class="controls" style="margin-top:0">
+          <div class="ctl"><label for="w7-age">weeks since training</label>
+            <input type="range" id="w7-age" min="0" max="12" step="1" value="0" aria-label="Weeks since the model was trained" />
+            <output id="w7-age-out">0</output></div>
+        </div>
+        <div class="svg-wrap">
+          <svg class="stage" id="w7-drift-svg" viewBox="0 0 340 150" role="img"
+               aria-label="Live accuracy decaying away from the backtest baseline as the model ages"></svg>
+        </div>
+        <div class="verdict" id="w7-drift-verdict"></div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -597,95 +610,98 @@ CMD ["python", "-m", "team.trader"]</pre>
 <section id="why">
   <div class="sec-head">
     <span class="kicker">Why does it matter in trading?</span>
-    <h2>Live failures are public, and you cannot fix what you cannot see</h2>
-    <p class="lead">A missing dependency, a hardcoded path, an untested edge case &mdash; any one of them crashes your bot
-    mid-session while the dashboard shows the whole class your equity curve flatlining.</p>
+    <h2>Accuracy is a vanity metric. Net, risk-adjusted P&amp;L is the score.</h2>
+    <p class="lead">A 55% classifier that flips every tick pays the spread endlessly and finishes the season below idle
+    cash. A 52% classifier that trades forty times pays for itself.</p>
+  </div>
+
+  <p>The arena settles this argument with numbers. Every fill pays a taker fee or earns a maker rebate, every crossing of
+  the spread costs half of it, and the season leaderboard ranks risk-adjusted return &mdash; not raw P&amp;L. So the
+  question a model has to answer is never "is it accurate?" but "does its edge per trade survive the cost of the trades
+  it wants to make?"</p>
+
+  <!-- WIDGET 5 -->
+  <div class="widget">
+    <div class="w-head"><span class="w-tag">Widget 5</span><h3>Does the edge survive the costs?</h3></div>
+    <p class="w-sub">Your model's statistical edge on the left; the arena's toll booth on the right. The equity curve is
+    the same signal, before and after costs.</p>
+
+    <div class="controls">
+      <div class="ctl"><label for="w7-hit">hit rate</label>
+        <input type="range" id="w7-hit" min="46" max="60" step="0.5" value="53" aria-label="Model hit rate in percent" />
+        <output id="w7-hit-out">53.0%</output></div>
+      <div class="ctl"><label for="w7-payoff">avg win / avg loss</label>
+        <input type="range" id="w7-payoff" min="70" max="160" step="5" value="100" aria-label="Payoff ratio" />
+        <output id="w7-payoff-out">1.00</output></div>
+      <div class="ctl"><label for="w7-trades">trades / session</label>
+        <input type="range" id="w7-trades" min="10" max="400" step="10" value="60" aria-label="Trades per session" />
+        <output id="w7-trades-out">60</output></div>
+      <div class="ctl"><label for="w7-cost">cost / trade</label>
+        <input type="range" id="w7-cost" min="0" max="10" step="0.5" value="3" aria-label="Round-trip cost per trade in basis points" />
+        <output id="w7-cost-out">3.0 bp</output></div>
+    </div>
+
+    <div class="grid2 narrow-right">
+      <div class="svg-wrap">
+        <svg class="stage" id="w7-eq" viewBox="0 0 720 260" role="img"
+             aria-label="Equity curves for the model signal gross and net of costs, against the momentum baseline"></svg>
+      </div>
+      <div>
+        <div class="stats" style="margin-top:0">
+          <div class="stat" style="--c:var(--sky)"><div class="lbl">Gross edge / trade</div><div class="num" id="w7-e-gross">&mdash;</div><div class="sub">expectancy before fees</div></div>
+          <div class="stat" style="--c:var(--bad)"><div class="lbl">Cost drag</div><div class="num" id="w7-e-cost">&mdash;</div><div class="sub">trades &times; cost, per session</div></div>
+        </div>
+        <div class="stats">
+          <div class="stat" style="--c:var(--ok)"><div class="lbl">Net session P&amp;L</div><div class="num" id="w7-e-net">&mdash;</div><div class="sub">what the ledger records</div></div>
+          <div class="stat" style="--c:var(--accent-2)"><div class="lbl">Sharpe-like</div><div class="num" id="w7-e-shp">&mdash;</div><div class="sub">mean / stdev of trade returns</div></div>
+        </div>
+        <div class="verdict" id="w7-e-verdict"></div>
+      </div>
+    </div>
+    <div class="w-note"><b>Turnover is a design parameter, not an accident.</b> Raise the confidence threshold in
+    <code>on_tick</code> and you trade less, pay less, and keep more of a smaller edge. Slower, surer signals win seasons
+    in this arena because the score divides by volatility.</div>
   </div>
 
   <div class="grid2">
-    <div>
-      <p>Shipping is not the end of the job. A running bot needs configuration you can change without a rebuild
-      (ports, poll intervals &mdash; plain env vars), secrets that never enter git or the image (tokens injected at
-      runtime), and observability: structured logs for what happened, metrics for what is happening now.</p>
-      <p>A dashboard is metrics made glanceable, and a trading dashboard has four non-negotiable panes. <b>Positions</b>
-      &mdash; what do I own, and is it what I think I own. <b>P&amp;L</b> &mdash; realized, unrealized, and the shape of
-      the curve. <b>Risk</b> &mdash; how close am I to a limit, and what is my worst case right now. <b>Connectivity</b>
-      &mdash; is the socket up, is the feed fresh, am I being throttled. Miss the fourth pane and you will confidently
-      quote on a price that stopped updating four minutes ago.</p>
-      <p>The arena's own UI is exactly this: <code>teacher/web_dashboard.py</code> with MARKET (live books), FLOW (who
-      trades with whom), STATS and SEASON (per-team analytics and standings). The deploy kit behind it &mdash;
-      <code>systemd</code> units, Caddy for TLS, Docker for the environment &mdash; is how the hosted arena becomes
-      reproducible from bare metal up.</p>
-    </div>
-    <div>
-      <div class="widget" style="margin-top:0">
-        <div class="w-head"><h3>The healthy baseline</h3></div>
-        <p class="w-sub">You must know what normal looks like <em>before</em> the incident, or you cannot recognise
-        abnormal during it. Write these down in calm markets.</p>
-        <div class="kv"><span>Feed age</span><b class="ok">&lt; 6 s</b></div>
-        <div class="kv"><span>Socket state</span><b class="ok">OPEN</b></div>
-        <div class="kv"><span>Fills per minute</span><b>2 – 9</b></div>
-        <div class="kv"><span>Reject rate</span><b class="ok">&lt; 2%</b></div>
-        <div class="kv"><span>Position vs limit</span><b>&lt; 70%</b></div>
-        <div class="kv"><span>on_tick latency</span><b>&lt; 8 ms</b></div>
-        <div class="w-note">Rate limits are enforced from this week on. A bot that over-sends gets throttled &mdash;
-        which shows up first as a rising reject rate, not as an error.</div>
-      </div>
-    </div>
-  </div>
+    <div class="widget">
+      <div class="w-head"><h3>Train offline &middot; load once &middot; predict in <code>on_tick</code></h3></div>
+      <p class="w-sub">The split that keeps you inside the latency budget: heavy work outside the loop, only
+      <code>predict()</code> inside it.</p>
+      <pre class="code"><i># team/trader.py</i>
+<b>import</b> joblib
+<b>from</b> arena <b>import</b> Trader, Signal
 
-  <!-- WIDGET 4 -->
-  <div class="widget">
-    <div class="w-head"><span class="w-tag">Widget 4</span><h3>Mini live dashboard</h3></div>
-    <p class="w-sub">A mock of the four panes, ticking on a seeded feed. Pause it, step one tick at a time, and inject an
-    incident &mdash; then ask which pane told you first.</p>
+<b>class</b> MLTrader(Trader):
+    <b>def</b> __init__(self):
+        self.model = joblib.load('model.pkl')   <u># load ONCE</u>
 
-    <div class="controls">
-      <button id="w8-dash-play" class="primary">&#9654; Play</button>
-      <button id="w8-dash-step">Step 1 tick</button>
-      <button id="w8-dash-reset">&#8634; Reset</button>
-      <div class="ctl">
-        <label for="w8-dash-inc">inject incident</label>
-        <select id="w8-dash-inc" aria-label="Inject an incident into the live session">
-          <option value="none">none — healthy session</option>
-          <option value="stale">the Yahoo feed stalls</option>
-          <option value="drop">the WebSocket drops</option>
-          <option value="limit">position limit breached</option>
-          <option value="throttle">rate limit: orders throttled</option>
-        </select>
-      </div>
-      <span class="ctl">tick <output id="w8-dash-tick">0</output></span>
+    <b>def</b> on_tick(self, market, portfolio):
+        <b>for</b> sym <b>in</b> market.symbols():
+            px = market.prices(sym)
+            <b>if</b> len(px) &lt; 21: <b>continue</b>
+            X = features(px, market, sym)        <u># same fn as offline</u>
+            p = self.model.predict_proba([X])[0][1]
+            <b>if</b> p &gt; 0.60 <b>and</b> portfolio.can_buy(sym, 5, market.mid_price(sym)):
+                <b>return</b> Signal(symbol=sym, side='buy', quantity=5,
+                              price=market.best_ask(sym), confidence=p)
+        <b>return</b> None</pre>
     </div>
-
-    <div class="banner" id="w8-dash-banner"><span class="dot"></span><span id="w8-dash-banner-txt">Session idle. Press play.</span></div>
-
-    <div class="dash">
-      <div class="tile">
-        <div class="th"><span>Positions</span><span id="w8-dash-pos-badge" class="badge idle">flat</span></div>
-        <table class="tbl" id="w8-dash-pos"></table>
-      </div>
-      <div class="tile">
-        <div class="th"><span>P&amp;L</span><span id="w8-dash-pnl-badge" class="badge idle">—</span></div>
-        <svg class="stage" id="w8-dash-pnl" viewBox="0 0 340 118" role="img" aria-label="Net worth over the session"></svg>
-        <div class="kv"><span>realized</span><b id="w8-dash-real">$0</b></div>
-        <div class="kv"><span>unrealized</span><b id="w8-dash-unreal">$0</b></div>
-        <div class="kv"><span>net worth</span><b id="w8-dash-nw">$100,000</b></div>
-      </div>
-      <div class="tile">
-        <div class="th"><span>Risk</span><span id="w8-dash-risk-badge" class="badge idle">within limits</span></div>
-        <svg class="stage" id="w8-dash-risk" viewBox="0 0 340 108" role="img" aria-label="Limit usage gauges"></svg>
-        <div class="kv"><span>worst-case loss if flat now</span><b id="w8-dash-wc">$0</b></div>
-      </div>
-      <div class="tile">
-        <div class="th"><span>Connectivity</span><span id="w8-dash-conn-badge" class="badge idle">idle</span></div>
-        <div class="kv"><span>WebSocket</span><b id="w8-dash-ws">CLOSED</b></div>
-        <div class="kv"><span>feed age</span><b id="w8-dash-age">—</b></div>
-        <div class="kv"><span>msgs / s</span><b id="w8-dash-msgs">0</b></div>
-        <div class="kv"><span>on_tick latency</span><b id="w8-dash-lat">—</b></div>
-        <div class="kv"><span>rejects</span><b id="w8-dash-rej">0</b></div>
-      </div>
+    <div class="widget">
+      <div class="w-head"><h3>The model replaces the signal, not the system</h3></div>
+      <p class="w-sub">Everything you built in W4&ndash;W7 stays exactly where it is.</p>
+      <table class="tbl">
+        <tr><th>Layer</th><th>W7 bot</th><th>W8 bot</th></tr>
+        <tr><td class="name">Signal</td><td>momentum rule</td><td style="color:var(--accent-2)">model.predict_proba</td></tr>
+        <tr><td class="name">Sizing</td><td>fixed 5 lots</td><td>scaled by confidence</td></tr>
+        <tr><td class="name">Risk</td><td>check_order()</td><td>unchanged</td></tr>
+        <tr><td class="name">Routing</td><td>best_ask()</td><td>unchanged</td></tr>
+        <tr><td class="name">Portfolio</td><td>cash + positions</td><td>unchanged</td></tr>
+      </table>
+      <div class="w-note"><b>Two equivalent seams.</b> Register a <code>signal_fn</code> in the plugin registry, or
+      subclass <code>arena.Trader</code> and implement <code>on_tick</code>. The engine calls whichever you registered.
+      This week also fires the season's second IPO &mdash; handle it in <code>on_ipo</code>.</div>
     </div>
-    <div class="verdict" id="w8-dash-verdict">Nothing is wrong yet. Note what healthy looks like before you break it.</div>
   </div>
 </section>
 
@@ -693,53 +709,54 @@ CMD ["python", "-m", "team.trader"]</pre>
 <section id="pitfalls">
   <div class="sec-head">
     <span class="kicker">Common mistakes</span>
-    <h2>Five ways a tested bot still dies live</h2>
-    <p class="lead">Each of these has cost a team a session. Each expands.</p>
+    <h2>Five ways to produce a beautiful, worthless model</h2>
+    <p class="lead">Every one of these has shipped in a real fund. Each expands.</p>
   </div>
 
   <details class="pit">
-    <summary><span>Tests that reach the network</span></summary>
-    <div class="body">A unit test that calls <code>yfinance</code> is not a unit test: it is slow, it changes every
-      second, it fails on a plane, and it fails in CI where there is no internet by design. Worse, it passes locally, so
-      you only discover it after you push.
-      <div class="fix">Fix: inject a fake feed (<code>class FakeFeed: def price(self, sym): return 185.0</code>) or
-      <code>monkeypatch</code> the call. Use <code>tests/sim_session.py</code> when you need a whole session.</div></div>
+    <summary><span><code>train_test_split(shuffle=True)</code> on a time series</span></summary>
+    <div class="body">The tutorial default. Adjacent ticks are nearly identical, so a shuffled split puts a row's
+      near-twin on the other side of the wall. The model memorises neighbours and reports accuracy in the 70s and 80s.
+      <b>The tell:</b> a test score far above anything the literature reports for return prediction.
+      <div class="fix">Fix: cut by index, never by permutation &mdash; <code>X[:cut]</code> / <code>X[cut:]</code> &mdash;
+      and purge the <code>h</code> rows that straddle the boundary.</div></div>
   </details>
 
   <details class="pit">
-    <summary><span>Tolerating a flaky test</span></summary>
-    <div class="body">One test fails roughly one run in twenty, so the team learns to click "re-run". Now red means
-      nothing, and the day a real regression lands nobody notices. A flaky test is worse than no test because it
-      destroys the signal value of the whole suite.
-      <div class="fix">Fix: treat a flake as a P1 bug. Seed the randomness, freeze the clock, remove the sleep-based
-      timing, or delete the test. Never leave it amber.</div></div>
+    <summary><span>A feature that quietly contains its own label</span></summary>
+    <div class="body">A rolling calculation centred instead of trailing, a column derived from the close of the bar you
+      are predicting, a "current session VWAP" that includes the future. Silent and fatal: the model looks brilliant
+      offline and random live. <b>The tell:</b> one feature dominates the importance ranking and the edge collapses the
+      instant you go live.
+      <div class="fix">Fix: for each feature ask "at exactly which timestamp could I have computed this?" Then compute
+      features with the same function offline and inside <code>on_tick</code> &mdash; one function, two callers.</div></div>
   </details>
 
   <details class="pit">
-    <summary><span>Chasing the coverage number</span></summary>
-    <div class="body">Coverage measures which lines executed, not whether anything was asserted. You can reach 95% with
-      tests that call every function and check nothing. Meanwhile the two branches that matter &mdash; the reject path
-      and the reconnect path &mdash; are the untested ones, because they are the awkward ones.
-      <div class="fix">Fix: read the report to find the gaps you did not know you had, and hold the source of truth
-      (your signal and risk logic) to a high bar. Do not pad the number with trivial tests.</div></div>
+    <summary><span>Tuning on the test block (data snooping)</span></summary>
+    <div class="body">Try a hundred configurations, keep the best test score, report it. You have now fitted the test set;
+      its score is a maximum over noise, not a measurement. The published number is inflated by roughly the spread of
+      your hundred attempts. <b>The tell:</b> your best configuration is nowhere near your second best.
+      <div class="fix">Fix: tune on a validation block, look at the test block <em>once</em>, log every experiment you
+      ran, and deflate your Sharpe for the number of trials.</div></div>
   </details>
 
   <details class="pit">
-    <summary><span>Unpinned dependencies and "works on my machine"</span></summary>
-    <div class="body">Your <code>requirements.txt</code> says <code>pydantic&gt;=2</code>. Three weeks later the runner
-      resolves a new minor version, a validator becomes stricter, and your bot cannot parse a message it has parsed all
-      season. The code did not change; the environment did.
-      <div class="fix">Fix: pin exact versions, commit the pin, and containerise. Order Docker layers stable-to-volatile
-      so the dependency layer stays cached and the rebuild only touches your code.</div></div>
+    <summary><span>Feature mismatch between training and <code>on_tick</code></span></summary>
+    <div class="body">Offline you standardised with the full-sample mean and standard deviation; live you standardise with
+      a rolling one. Offline the imbalance used total depth; live it uses top-of-book. The model receives inputs it has
+      never seen and outputs confident nonsense. <b>The tell:</b> live predictions cluster at one extreme.
+      <div class="fix">Fix: persist the scaler and the feature list <em>with</em> the model, and assert the live feature
+      vector's length and order on the first tick.</div></div>
   </details>
 
   <details class="pit">
-    <summary><span>A dashboard with no connectivity pane</span></summary>
-    <div class="body">Positions, P&amp;L and risk all look perfect &mdash; because they are computed from a price that
-      stopped updating four minutes ago. The socket is open, the process is alive, nothing has thrown, and you are
-      quoting into a market that has moved on. Partial failure is the normal failure mode of a live system.
-      <div class="fix">Fix: show feed age, socket state and reject rate next to the money, and alarm on staleness rather
-      than on exceptions. Detect, do not assume.</div></div>
+    <summary><span>A model you cannot run inside a tick</span></summary>
+    <div class="body">A gradient-boosted forest of 2,000 trees, re-fitted every tick "to stay fresh", loading the pickle
+      inside <code>on_tick</code>. Your bot misses the market it correctly predicted, and the season's rate limits (enforced from Week 8) throttle the
+      backlog. <b>The tell:</b> your fills print at prices two ticks behind your signals.
+      <div class="fix">Fix: load once in <code>__init__</code>, time <code>predict()</code> against the per-tick budget
+      from W6, and prefer a small model you can actually run. A model you can't run live scores nothing.</div></div>
   </details>
 </section>
 
@@ -748,52 +765,52 @@ CMD ["python", "-m", "team.trader"]</pre>
   <div class="sec-head">
     <span class="kicker">Check yourself</span>
     <h2>Three questions</h2>
-    <p class="lead">Instant feedback, no grading.</p>
+    <p class="lead">Instant feedback, no grading. Pick the answer you would defend in a demo.</p>
+  </div>
+
+  <div class="q" data-a="2">
+    <div class="qn">Question 1</div>
+    <div class="qt">Your classifier reports 84% out-of-sample accuracy on next-tick direction for AAPL. What is the
+      single most likely explanation?</div>
+    <div class="opts">
+      <button class="opt"><span class="k">A</span>The feature set is unusually strong &mdash; ship it.</button>
+      <button class="opt"><span class="k">B</span>The model is under-regularised and needs a shallower tree.</button>
+      <button class="opt"><span class="k">C</span>The future leaked in &mdash; through a shuffled split or a feature computed with information from after <code>t</code>.</button>
+      <button class="opt"><span class="k">D</span>The horizon is too long for the label.</button>
+    </div>
+    <div class="fb"><b>C.</b> Next-tick direction on a liquid name is close to a coin flip; the honest range is roughly
+      50&ndash;55%. An 84% is not a good model, it is a diagnostic: something on the other side of the wall got into
+      training. Check the split first, then hunt the feature.</div>
   </div>
 
   <div class="q" data-a="1">
-    <div class="qn">Question 1</div>
-    <div class="qt">Your <code>on_tick</code> returns a buy signal when it should return <code>None</code>. Which test
-      layer should have caught it, and why that one?</div>
+    <div class="qn">Question 2</div>
+    <div class="qt">You label with a horizon of <code>h = 10</code> ticks and split chronologically at 70%. Why is an
+      embargo still needed?</div>
     <div class="opts">
-      <button class="opt"><span class="k">A</span>End-to-end &mdash; only a full session exercises <code>on_tick</code> realistically.</button>
-      <button class="opt"><span class="k">B</span>Unit &mdash; it is one function over a fixed price list, so it costs milliseconds and needs no I/O.</button>
-      <button class="opt"><span class="k">C</span>Integration &mdash; the signal only means something once the order book is wired in.</button>
-      <button class="opt"><span class="k">D</span>None &mdash; signal logic is inherently probabilistic and cannot be unit-tested.</button>
+      <button class="opt"><span class="k">A</span>It isn't &mdash; a chronological split is already leak-free.</button>
+      <button class="opt"><span class="k">B</span>The last training rows have labels that reach 10 ticks into the test block, so they already contain test-period information.</button>
+      <button class="opt"><span class="k">C</span>It balances the class distribution across the two blocks.</button>
+      <button class="opt"><span class="k">D</span>It compensates for the transaction costs the backtest ignores.</button>
     </div>
-    <div class="fb"><b>B.</b> Arrange a fake market and a portfolio, call <code>on_tick</code>, assert the
-      <code>Signal</code> (or the <code>None</code>). Pushing this claim down to the base of the pyramid is what makes it
-      cheap enough to run on every push.</div>
+    <div class="fb"><b>B.</b> The wall stops features, not labels. A label is <em>about</em> the future, so rows within
+      <code>h</code> of the cut straddle it. Purge those <code>h</code> rows and the boundary is genuinely sealed &mdash;
+      the cost is a handful of samples.</div>
   </div>
 
   <div class="q" data-a="3">
-    <div class="qn">Question 2</div>
-    <div class="qt">A test in your suite fails about one run in twenty, always with a different P&amp;L. What is the
-      correct response?</div>
-    <div class="opts">
-      <button class="opt"><span class="k">A</span>Add a retry so CI re-runs the job automatically.</button>
-      <button class="opt"><span class="k">B</span>Mark it <code>@pytest.mark.skip</code> until after the season.</button>
-      <button class="opt"><span class="k">C</span>Loosen the assertion to a range wide enough to always pass.</button>
-      <button class="opt"><span class="k">D</span>Find the nondeterminism &mdash; unseeded randomness, a real clock, or network I/O &mdash; and remove it.</button>
-    </div>
-    <div class="fb"><b>D.</b> The other three all preserve the flake and destroy the signal. Seed the RNG, inject the
-      clock, fake the feed. With the seed fixed, a red test fails the same way every time &mdash; which is the only
-      reason a failure is debuggable.</div>
-  </div>
-
-  <div class="q" data-a="0">
     <div class="qn">Question 3</div>
-    <div class="qt">Mid-session, your dashboard shows a flat P&amp;L, no rejects, positions unchanged, and a socket in
-      <code>OPEN</code>. What is the first thing you check?</div>
+    <div class="qt">Two bots, same walk-forward hit rate of 53%. Bot A trades 30 times a session, bot B trades 350 times.
+      Round-trip cost is 3 bp. Who ranks higher on the season leaderboard, and why?</div>
     <div class="opts">
-      <button class="opt"><span class="k">A</span>Feed age &mdash; a stalled price feed produces exactly this picture while the socket stays healthy.</button>
-      <button class="opt"><span class="k">B</span>The signal thresholds, since the model has clearly stopped firing.</button>
-      <button class="opt"><span class="k">C</span>The exchange's fee schedule.</button>
-      <button class="opt"><span class="k">D</span>Nothing &mdash; a flat P&amp;L with an open socket is a healthy session.</button>
+      <button class="opt"><span class="k">A</span>Bot B &mdash; more trades means more chances for the edge to compound.</button>
+      <button class="opt"><span class="k">B</span>They tie: the same hit rate implies the same expectancy.</button>
+      <button class="opt"><span class="k">C</span>Bot B, because higher turnover lowers the volatility of its equity curve.</button>
+      <button class="opt"><span class="k">D</span>Bot A &mdash; a thin per-trade edge is consumed by 350 round trips of cost, and the leaderboard divides by volatility.</button>
     </div>
-    <div class="fb"><b>A.</b> This is the classic partial failure: the transport is fine, the data is dead. Everything
-      downstream still computes, confidently, from a frozen price. That is why the connectivity pane sits next to the
-      money, and why staleness is an alarm rather than an exception.</div>
+    <div class="fb"><b>D.</b> Expectancy is per trade and small; costs are per trade and certain. Multiply both by 350 and
+      the certain term wins. On top of that, <code>exchange/scoring.py</code> ranks return per unit of volatility with a
+      drawdown penalty, so the churn is punished twice.</div>
   </div>
 </section>
 
@@ -802,7 +819,8 @@ CMD ["python", "-m", "team.trader"]</pre>
   <div class="sec-head">
     <span class="kicker">Do the work</span>
     <h2>This week's work</h2>
-    <p class="lead">Deliverables: a CI pipeline review, a Docker reproducibility sign-off, and your dashboard plan.</p>
+    <p class="lead">Deliverable: a model integration plan plus the walk-forward evaluation checklist &mdash; features,
+    label, horizon, folds, one test look, measured <code>predict()</code> latency.</p>
   </div>
   <div class="nextgrid">
     <a class="nextcard" href="https://github.com/sdonadio/algoarena-team-template">
@@ -812,9 +830,9 @@ CMD ["python", "-m", "team.trader"]</pre>
     </a>
   </div>
   <div class="weeknav">
-    <a href="week7.html">&larr; Week 7 &middot; Machine Learning Signals &amp; Model Ops</a>
+    <a href="week7.html">&larr; Week 7 &middot; Big Data &amp; Distributed Computing</a>
     <a href="index.html">All weeks</a>
-    <a href="week9.html">Week 9 &middot; Integration &amp; Demo &rarr;</a>
+    <a href="week9.html">Week 9 &middot; CI/CD, Testing &amp; UI + Season Finale &rarr;</a>
   </div>
 </section>
 
@@ -941,112 +959,472 @@ CMD ["python", "-m", "team.trader"]</pre>
 })();
 
 /* ══════════════════════════════════════════════════════════════
-   WEEK 8 · Widget 1 — test-pyramid explorer + bug injector
+   WEEK 8 · Widget 1 — feature-engineering playground
    ══════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
-  var A = window.ARENA, C = A.C, cur = 0, bug = 0;
+  var A = window.ARENA, C = A.C, N = 140;
+  var seed = 20250907, sel = 96, h = 5, cls = true, data = null;
 
-  var LAYERS = [
-    { nm: 'Unit', col: C.ok, tag: 'many · fast · no I/O', count: '≈ 60', time: '1.2 s', flake: 'none',
-      what: 'One function or class, isolated, in milliseconds. No sockets, no files, no clock. This is the bulk of your suite and the layer you should reach for first.',
-      code: '<i># tests/test_my_bot.py</i>\n<b>from</b> team.trader <b>import</b> MyBot\n\n<b>def</b> test_buys_on_uptrend():\n    bot = MyBot()\n    mkt = FakeMarket(prices=[100,101,102,103])\n    pf  = Portfolio(cash=10_000)\n    sig = bot.on_tick(mkt, pf)\n    <b>assert</b> sig.side == \'buy\'\n    <b>assert</b> sig.quantity &gt; 0' },
-    { nm: 'Integration', col: C.sky, tag: 'some · seconds · fakes, not sockets', count: '≈ 8', time: '6 s', flake: 'low',
-      what: 'Two or three components wired together — bot plus order book, risk plus router — with fakes standing in for the network. Catches contract mismatches between parts that each pass their own tests.',
-      code: '<i># tests/test_bot_book.py</i>\n<b>def</b> test_risk_vetoes_before_the_book_sees_it():\n    book = OrderBook(\'AAPL\')\n    bot  = MyBot(limit=100)\n    bot.portfolio.position[\'AAPL\'] = 100   <i># at limit</i>\n    sig  = bot.on_tick(FakeMarket(), bot.portfolio)\n    orders = bot.route(sig, book)\n    <b>assert</b> orders == []                 <i># vetoed</i>\n    <b>assert</b> book.best_bid() <b>is</b> None' },
-    { nm: 'End-to-end', col: C.violet, tag: 'few · slow · brittle', count: '1 – 2', time: '45 s', flake: 'medium',
-      what: 'The whole path: bot to exchange to fill to P&L to leaderboard. Slow and a little flaky, but the only layer that sees wiring, ordering and reconnection bugs. Run it against the headless sim, never against the live venue.',
-      code: '<i># tests/test_session_e2e.py</i>\n<b>from</b> tests.sim_session <b>import</b> SimSession\n\n<b>def</b> test_full_session_settles_and_scores():\n    res = SimSession(seed=0).run(\n        n_ticks=600, symbols=[\'AAPL\',\'TSLA\'],\n        strategies=[(\'mine\', my_signal_fn)])\n    <b>assert</b> res.fills > 0\n    <b>assert</b> res.net_worth(\'mine\') == res.cash(\'mine\') \\\n         + res.unrealized(\'mine\')' }
+  function gen(sd) {
+    var r = A.rng(sd), px = [185], sp = [], bq = [], aq = [], i;
+    for (i = 1; i < N; i++) px.push(px[i - 1] * (1 + 0.00006 * Math.sin(i / 15) + 0.0019 * A.gauss(r)));
+    for (i = 0; i < N; i++) {
+      sp.push(0.015 + 0.05 * r());
+      bq.push(80 + Math.round(880 * r()));
+      aq.push(80 + Math.round(880 * r()));
+    }
+    return { px: px, sp: sp, bq: bq, aq: aq };
+  }
+  function rets(px, i, n) { var o = [], k; for (k = i - n + 1; k <= i; k++) o.push(px[k] / px[k - 1] - 1); return o; }
+
+  var FEATS = [
+    { nm: 'ret_1', dsc: 'return over the last tick', warm: 2, on: true,
+      f: function (d, i) { return d.px[i] / d.px[i - 1] - 1; },
+      fmt: function (v) { return A.sgn(v * 100, 3); } },
+    { nm: 'mom_10', dsc: 'momentum: price now vs 10 ticks ago', warm: 11, on: true,
+      f: function (d, i) { return d.px[i] / d.px[i - 10] - 1; },
+      fmt: function (v) { return A.sgn(v * 100, 3); } },
+    { nm: 'vol_20', dsc: 'volatility: stdev of the last 20 returns', warm: 21, on: true,
+      f: function (d, i) { return A.stdev(rets(d.px, i, 20)); },
+      fmt: function (v) { return (v * 100).toFixed(3); } },
+    { nm: 'spread_bp', dsc: '(ask − bid) / mid, in basis points', warm: 1, on: false,
+      f: function (d, i) { return d.sp[i] / d.px[i] * 10000; },
+      fmt: function (v) { return v.toFixed(1); } },
+    { nm: 'imbalance', dsc: '(bidQ − askQ) / (bidQ + askQ) — book pressure', warm: 1, on: true,
+      f: function (d, i) { return (d.bq[i] - d.aq[i]) / (d.bq[i] + d.aq[i]); },
+      fmt: function (v) { return A.sgn(v, 3); } }
   ];
 
-  var BUGS = [
-    { t: 'Momentum sign flipped — the bot buys the downtrend', L: 0, test: 'test_momentum_goes_long_on_uptrend',
-      cost: '0.4 s, on your laptop, before you push',
-      live: 'Unnoticed, it is a strategy that loses money confidently for a whole session — and looks like "the market was hard".' },
-    { t: 'Rolling window off by one — px[-11] instead of px[-10]', L: 0, test: 'test_momentum_lookback_is_exactly_10',
-      cost: '0.4 s, if you assert the value and not just the side',
-      live: 'A one-tick shift in every feature. Small enough to survive review, large enough to destroy an ML signal.' },
-    { t: 'Message schema renamed: quantity → qty', L: 0, test: 'test_messages.py round-trip',
-      cost: '0.2 s, in the round-trip test that dumps to JSON and parses back',
-      live: 'Your bot cannot parse an ack it has parsed all season. Every order looks lost; the bot retries; the rate limiter throttles you.' },
-    { t: 'Risk veto is never consulted before the order is sent', L: 1, test: 'test_risk_vetoes_before_the_book_sees_it',
-      cost: '6 s, in CI, on the push that introduced it',
-      live: 'Both components pass their own tests. The seam is what is broken — so only a test of the conversation can see it.' },
-    { t: 'A fill arrives but the portfolio never marks it', L: 1, test: 'test_fill_updates_position_and_cash',
-      cost: '6 s, in CI',
-      live: 'Your P&L is fiction and your position is a guess. This is the bug that turns into a Week-9 reconciliation break.' },
-    { t: 'The bot never reconnects after ConnectionClosed', L: 2, test: 'test_session_survives_socket_drop',
-      cost: '45 s, in the end-to-end run against the headless sim',
-      live: 'One blip and your bot is a spectator with an open position for the rest of the session. Nothing throws; the process is alive.' },
-    { t: 'Two orders race on the same order id under load', L: 2, test: 'test_session_e2e under a load burst',
-      cost: '45 s, and only under load — this is why you run the E2E at all',
-      live: 'A double fill. The retry was not idempotent, so a replay stopped being a no-op.' }
-  ];
+  function onFeats() { return FEATS.filter(function (f) { return f.on; }); }
+  function warmMax() { var w = 2, o = onFeats(), i; for (i = 0; i < o.length; i++) w = Math.max(w, o[i].warm); return w; }
+  function lo() { return warmMax() - 1; }
+  function hi() { return N - 1 - h; }
 
-  function drawPyr() {
-    var svg = A.$('w8-pyr'); A.clear(svg);
-    var cx = 168, geo = [
-      { y: 14, h: 58, wt: 54, wb: 124 },
-      { y: 76, h: 62, wt: 132, wb: 218 },
-      { y: 142, h: 72, wt: 226, wb: 330 }
-    ];
-    var order = [2, 1, 0];
-    order.forEach(function (li, i) {
-      var g = geo[i], L = LAYERS[li], on = cur === li, catches = BUGS[bug].L === li;
-      var pts = [
-        [cx - g.wt / 2, g.y], [cx + g.wt / 2, g.y],
-        [cx + g.wb / 2, g.y + g.h], [cx - g.wb / 2, g.y + g.h]
-      ].map(function (p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' ');
-      var poly = A.add(svg, 'polygon', {
-        points: pts, fill: L.col, opacity: on ? 0.34 : 0.13,
-        stroke: catches ? C.warn : L.col, 'stroke-width': catches ? 2.2 : (on ? 1.8 : 1),
-        'stroke-dasharray': catches && !on ? '4 3' : null,
-        tabindex: '0', role: 'button', cursor: 'pointer',
-        'aria-label': 'show the ' + L.nm + ' layer'
+  function buildFeatList() {
+    var box = A.$('w7-feats');
+    A.clear(box);
+    FEATS.forEach(function (ft, i) {
+      var lab = document.createElement('label');
+      lab.className = ft.on ? '' : 'off';
+      var cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.checked = ft.on;
+      cb.setAttribute('aria-label', 'include feature ' + ft.nm);
+      cb.addEventListener('change', function () {
+        ft.on = cb.checked; lab.className = ft.on ? '' : 'off'; render();
       });
-      poly.addEventListener('click', function () { cur = li; render(); });
-      poly.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); cur = li; render(); }
-      });
-      A.T(svg, cx, g.y + g.h / 2 + 1, L.nm, { fill: on ? '#fff' : L.col, size: 12, anchor: 'middle', weight: 700, mono: false });
-      A.T(svg, cx, g.y + g.h / 2 + 15, L.tag, { fill: C.muted, size: 8.5, anchor: 'middle' });
-      A.T(svg, 344, g.y + g.h / 2 + 4, L.count, { fill: C.dim, size: 9.5, anchor: 'end' });
-      if (catches) A.T(svg, 16, g.y + g.h / 2 + 4, '◀ catches it', { fill: C.warn, size: 9, weight: 700 });
+      var sp = document.createElement('span');
+      sp.innerHTML = '<span class="fn">' + ft.nm + '</span><span class="fd">' + ft.dsc +
+        ' · needs ' + ft.warm + ' prior tick' + (ft.warm === 1 ? '' : 's') + '</span>';
+      lab.appendChild(cb); lab.appendChild(sp); box.appendChild(lab);
     });
-    A.T(svg, cx, 228, 'a bug caught at the base costs seconds; at the top, a minute; live, a session',
-      { fill: C.dim, size: 8.5, anchor: 'middle' });
+  }
+
+  function drawChart() {
+    var svg = A.$('w7-px'); A.clear(svg);
+    var x0 = 40, x1 = 706, mn = Infinity, mx = -Infinity, i;
+    for (i = 0; i < N; i++) { if (data.px[i] < mn) mn = data.px[i]; if (data.px[i] > mx) mx = data.px[i]; }
+    var pad = (mx - mn) * 0.12; mn -= pad; mx += pad;
+    var X = function (i) { return x0 + (x1 - x0) * i / (N - 1); };
+    var Y = function (p) { return 152 - (p - mn) / (mx - mn) * 128; };
+
+    A.add(svg, 'line', { x1: x0, y1: 152, x2: x1, y2: 152, stroke: C.border });
+    var w = warmMax();
+    A.add(svg, 'rect', { x: X(Math.max(0, sel - w + 1)), y: 22, width: X(sel) - X(Math.max(0, sel - w + 1)),
+      height: 130, fill: C.sky, opacity: 0.10 });
+    A.add(svg, 'rect', { x: X(sel), y: 22, width: X(Math.min(N - 1, sel + h)) - X(sel), height: 130,
+      fill: C.warn, opacity: 0.13 });
+    A.T(svg, X(Math.max(0, sel - w + 1)) + 4, 34, 'feature window · ' + w + ' ticks', { fill: C.sky, size: 9 });
+    A.T(svg, X(sel) + 4, 148, 'label horizon h=' + h, { fill: C.warn, size: 9 });
+
+    var pts = [], k;
+    for (k = 0; k < N; k++) pts.push([X(k), Y(data.px[k])]);
+    A.path(svg, pts, { stroke: C.accent2, 'stroke-width': 1.5 });
+    A.add(svg, 'line', { x1: X(sel), y1: 22, x2: X(sel), y2: 152, stroke: C.ink, 'stroke-dasharray': '3 3', opacity: 0.75 });
+    A.add(svg, 'circle', { cx: X(sel), cy: Y(data.px[sel]), r: 3.6, fill: C.ink });
+    A.T(svg, X(sel), 18, 't = ' + sel, { fill: C.ink, size: 9.5, anchor: 'middle' });
+
+    var j = Math.min(N - 1, sel + h), fut = data.px[j] / data.px[sel] - 1;
+    A.add(svg, 'circle', { cx: X(j), cy: Y(data.px[j]), r: 3.2, fill: fut >= 0 ? C.ok : C.bad });
+    A.add(svg, 'line', { x1: X(sel), y1: Y(data.px[sel]), x2: X(j), y2: Y(data.px[j]),
+      stroke: fut >= 0 ? C.ok : C.bad, 'stroke-width': 1.4, 'stroke-dasharray': '2 2' });
+    A.T(svg, X(j) + 5, Y(data.px[j]) - 5, (cls ? 'y=' + (fut > 0 ? 1 : 0) : 'y=' + A.sgn(fut * 100, 3) + '%'),
+      { fill: fut >= 0 ? C.ok : C.bad, size: 10, weight: 700 });
+    A.T(svg, x0, 166, 'mid price', { fill: C.dim, size: 9 });
+
+    /* order-book imbalance strip */
+    A.add(svg, 'line', { x1: x0, y1: 212, x2: x1, y2: 212, stroke: C.border });
+    A.T(svg, x0, 190, 'order-book imbalance  (bidQ − askQ) / (bidQ + askQ)', { fill: C.dim, size: 9 });
+    for (k = 0; k < N; k++) {
+      var v = (data.bq[k] - data.aq[k]) / (data.bq[k] + data.aq[k]);
+      var hh = Math.abs(v) * 26;
+      A.add(svg, 'rect', { x: X(k) - 1.6, y: v >= 0 ? 212 - hh : 212, width: 3.2, height: Math.max(0.7, hh),
+        fill: v >= 0 ? C.sky : C.accent2, opacity: k === sel ? 1 : 0.42 });
+    }
+    A.T(svg, x1, 242, 'tick index', { fill: C.dim, size: 9, anchor: 'end' });
+  }
+
+  function drawMatrix() {
+    var tb = A.$('w7-mat'); A.clear(tb);
+    var on = onFeats(), i, k;
+    var hr = document.createElement('tr');
+    hr.innerHTML = '<th>t</th>' + on.map(function (f) { return '<th>' + f.nm + '</th>'; }).join('') + '<th>y</th>';
+    tb.appendChild(hr);
+    if (!on.length) {
+      var er = document.createElement('tr');
+      er.innerHTML = '<td colspan="2" style="color:var(--warn)">no features selected</td>';
+      tb.appendChild(er);
+      return;
+    }
+    var start = A.clamp(sel - 2, lo(), Math.max(lo(), hi() - 5));
+    for (i = start; i < Math.min(hi() + 1, start + 6); i++) {
+      var tr = document.createElement('tr');
+      if (i === sel) tr.className = 'hl';
+      var html = '<td>' + i + '</td>';
+      for (k = 0; k < on.length; k++) html += '<td>' + on[k].fmt(on[k].f(data, i)) + '</td>';
+      var fr = data.px[Math.min(N - 1, i + h)] / data.px[i] - 1;
+      html += '<td style="color:' + (fr >= 0 ? C.ok : C.bad) + '">' +
+        (cls ? (fr > 0 ? '1' : '0') : A.sgn(fr * 100, 3)) + '</td>';
+      tr.innerHTML = html;
+      tr.setAttribute('tabindex', '0');
+      tr.setAttribute('role', 'button');
+      tr.setAttribute('aria-label', 'inspect row at tick ' + i);
+      (function (ix) {
+        tr.addEventListener('click', function () { sel = ix; render(); });
+        tr.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sel = ix; render(); }
+        });
+      })(i);
+      tb.appendChild(tr);
+    }
   }
 
   function render() {
-    var L = LAYERS[cur], b = BUGS[bug];
-    A.setSeg([A.$('w8-lay-0'), A.$('w8-lay-1'), A.$('w8-lay-2')], cur);
-    drawPyr();
-    A.$('w8-lay-detail').innerHTML =
-      '<h4><span>' + L.nm + '</span> tests</h4>' +
-      '<div class="meta"><div>count<b>' + L.count + '</b></div><div>suite time<b>' + L.time +
-      '</b></div><div>flakiness<b>' + L.flake + '</b></div></div>' +
-      '<p>' + L.what + '</p>' +
-      '<pre class="code">' + L.code + '</pre>';
-    var v = A.$('w8-bug-verdict');
-    v.className = 'verdict ' + (b.L === 0 ? 'ok' : (b.L === 1 ? 'warn' : 'bad'));
-    v.innerHTML = '<b>Injected:</b> ' + b.t + '<br/><b>Caught by:</b> ' + LAYERS[b.L].nm.toLowerCase() +
-      ' — <code>' + b.test + '</code> · <b>cost to catch:</b> ' + b.cost + '.<br/><b>If you have no such test:</b> ' + b.live;
+    var on = onFeats();
+    sel = A.clamp(sel, lo(), Math.max(lo(), hi()));
+    A.$('w7-h-out').textContent = h + ' tick' + (h === 1 ? '' : 's');
+    drawChart(); drawMatrix();
+
+    var rows = Math.max(0, hi() - lo() + 1), cols = on.length;
+    A.$('w7-shape').textContent = cols ? rows + ' × ' + cols : '—';
+    A.$('w7-shape-sub').textContent = cols
+      ? 'dropped: ' + (warmMax() - 1) + ' warm-up + ' + h + ' horizon'
+      : 'usable rows × features';
+    var dof = cols ? rows / cols : 0;
+    A.$('w7-dof').textContent = cols ? dof.toFixed(0) : '—';
+
+    var v = A.$('w7-verdict');
+    if (!cols) {
+      v.className = 'verdict warn';
+      v.innerHTML = '<b>No features, no model.</b> Tick at least one box — and notice that every box you add shortens the usable history and spends degrees of freedom.';
+    } else if (dof >= 40) {
+      v.className = 'verdict ok';
+      v.innerHTML = '<b>' + dof.toFixed(0) + ' rows per feature.</b> Comfortable. A linear or regularised-linear model has enough evidence per coefficient to mean something.';
+    } else if (dof >= 15) {
+      v.className = 'verdict warn';
+      v.innerHTML = '<b>' + dof.toFixed(0) + ' rows per feature.</b> Thin. Regularise hard (ridge / lasso, shallow trees) and expect the fold-to-fold dispersion to be wide.';
+    } else {
+      v.className = 'verdict bad';
+      v.innerHTML = '<b>' + dof.toFixed(0) + ' rows per feature.</b> You are fitting noise. In low signal-to-noise data, adding a feature is a cost you must earn back out-of-sample.';
+    }
+
+    var note = A.$('w7-fx-note');
+    if (cols) {
+      var fr = data.px[Math.min(N - 1, sel + h)] / data.px[sel] - 1;
+      note.innerHTML = '<b>Row t = ' + sel + '.</b> ' +
+        on.map(function (f) { return f.nm + ' = ' + f.fmt(f.f(data, sel)); }).join(' · ') +
+        ' → y = <b>' + (cls ? (fr > 0 ? '1' : '0') : A.sgn(fr * 100, 3) + '%') + '</b>' +
+        ' (return over the next ' + h + ' ticks: ' + A.sgn(fr * 100, 3) + '%). ' +
+        'Every number on the left of the arrow was printed at or before t; the number on the right is the future you are trying to buy.';
+    } else {
+      note.textContent = '';
+    }
   }
 
   function init() {
-    if (!A.$('w8-pyr')) return;
-    [0, 1, 2].forEach(function (i) {
-      A.$('w8-lay-' + i).addEventListener('click', function () { cur = i; render(); });
+    if (!A.$('w7-px')) return;
+    data = gen(seed);
+    buildFeatList();
+    A.$('w7-h').addEventListener('input', function () { h = +this.value; render(); });
+    A.$('w7-reseed').addEventListener('click', function () { seed = (seed * 31 + 17) % 2147483647; data = gen(seed); render(); });
+    var bc = A.$('w7-lbl-cls'), br = A.$('w7-lbl-reg');
+    bc.addEventListener('click', function () { cls = true; A.setSeg([bc, br], 0); render(); });
+    br.addEventListener('click', function () { cls = false; A.setSeg([bc, br], 1); render(); });
+    render();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   WEEK 8 · Widget 2 — leakage detector
+   ══════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  var A = window.ARENA, C = A.C;
+  var mode = 'time', share = 0.70, emb = 5, NB = 58, HZ = 10;
+
+  function accs() {
+    var honest = 0.505 + 0.020 * (share - 0.5) / 0.4;
+    var insample = 0.79 - 0.11 * (share - 0.5) / 0.4;
+    var reported;
+    if (mode === 'rand') reported = honest + 0.285 - 0.03 * (share - 0.5) / 0.4;
+    else if (mode === 'time') reported = honest + 0.021;
+    else reported = honest + 0.021 * Math.max(0, 1 - emb / HZ);
+    return { honest: honest, insample: insample, reported: reported };
+  }
+
+  function drawSplit() {
+    var svg = A.$('w7-split'); A.clear(svg);
+    var x0 = 12, x1 = 708, bw = (x1 - x0) / NB, y = 44, hgt = 40;
+    var trainN = Math.round(NB * share);
+    var embB = mode === 'emb' ? Math.min(trainN, Math.ceil(emb / HZ * 4)) : 0;
+    var r = A.rng(4242), i, kind, fill;
+
+    A.T(svg, x0, 20, 'time  ────────────────────────────────────────────────────────▶', { fill: C.dim, size: 10 });
+    for (i = 0; i < NB; i++) {
+      if (mode === 'rand') kind = r() < share ? 'tr' : 'te';
+      else if (i < trainN - embB) kind = 'tr';
+      else if (i < trainN) kind = 'pu';
+      else kind = 'te';
+      fill = kind === 'tr' ? C.accent : (kind === 'te' ? C.sky : C.warn);
+      A.add(svg, 'rect', { x: x0 + i * bw + 0.6, y: y, width: bw - 1.2, height: hgt, rx: 1.5,
+        fill: fill, opacity: kind === 'pu' ? 0.5 : 0.82 });
+    }
+    A.add(svg, 'rect', { x: x0, y: y, width: x1 - x0, height: hgt, fill: 'none', stroke: C.border, rx: 2 });
+
+    if (mode === 'rand') {
+      for (i = 3; i < NB - 3; i += 7) {
+        var cx = x0 + (i + 0.5) * bw;
+        A.path(svg, [[cx, y - 3], [cx + bw * 0.5, y - 14], [cx + bw, y - 3]],
+          { stroke: C.bad, 'stroke-width': 1.3, 'stroke-dasharray': '2 2' });
+      }
+      A.T(svg, x0 + 4, y - 20, 'every test block has a near-identical neighbour inside the training set',
+        { fill: C.bad, size: 10, weight: 700 });
+      A.T(svg, x1, y + hgt + 18, 'the model recognises neighbours, it does not predict', { fill: C.bad, size: 9.5, anchor: 'end' });
+    } else {
+      var wx = x0 + (trainN - embB) * bw;
+      A.add(svg, 'line', { x1: wx, y1: y - 12, x2: wx, y2: y + hgt + 10, stroke: C.ink, 'stroke-width': 1.4 });
+      A.T(svg, wx - 6, y - 16, 'the wall', { fill: C.ink, size: 10, anchor: 'end', weight: 700 });
+      if (embB > 0) {
+        A.T(svg, wx + 4, y - 16, 'purged: ' + emb + ' ticks of label horizon', { fill: C.warn, size: 10, weight: 700 });
+      } else if (mode === 'emb') {
+        A.T(svg, wx + 4, y - 16, 'embargo 0 — labels still reach across', { fill: C.bad, size: 10, weight: 700 });
+      } else {
+        A.T(svg, wx + 4, y - 16, 'labels with horizon h reach ' + HZ + ' ticks past the wall', { fill: C.warn, size: 10 });
+      }
+      A.T(svg, x0 + 4, y + hgt + 18, 'train: fit here only', { fill: C.accent2, size: 9.5 });
+      A.T(svg, x1, y + hgt + 18, 'test: look ONCE', { fill: C.sky, size: 9.5, anchor: 'end' });
+    }
+    var lg = [['train', C.accent], ['test', C.sky], ['purged', C.warn]];
+    for (i = 0; i < lg.length; i++) {
+      A.add(svg, 'rect', { x: x0 + i * 90, y: 128, width: 9, height: 9, rx: 2, fill: lg[i][1], opacity: 0.85 });
+      A.T(svg, x0 + i * 90 + 14, 136, lg[i][0], { fill: C.muted, size: 9.5 });
+    }
+  }
+
+  function drawGap() {
+    var svg = A.$('w7-gap'); A.clear(svg);
+    var a = accs(), x0 = 96, x1 = 640, s = function (v) { return x0 + (x1 - x0) * (v - 0.45) / 0.45; };
+    var rows = [['reported', a.reported, C.warn, 26], ['live', a.honest, C.ok, 62]];
+    A.add(svg, 'line', { x1: x0, y1: 12, x2: x0, y2: 92, stroke: C.border });
+    rows.forEach(function (rw) {
+      A.T(svg, x0 - 10, rw[3] + 12, rw[0], { fill: C.muted, size: 10, anchor: 'end' });
+      A.add(svg, 'rect', { x: x0, y: rw[3], width: Math.max(2, s(rw[1]) - x0), height: 17, rx: 2, fill: rw[2], opacity: 0.8 });
+      A.T(svg, s(rw[1]) + 7, rw[3] + 13, (rw[1] * 100).toFixed(1) + '%', { fill: rw[2], size: 11, weight: 700 });
     });
-    var sel = A.$('w8-bug');
-    BUGS.forEach(function (b, i) {
-      var o = document.createElement('option');
-      o.value = String(i); o.textContent = b.t;
-      sel.appendChild(o);
+    var d = a.reported - a.honest;
+    if (d > 0.01) {
+      A.add(svg, 'line', { x1: s(a.honest), y1: 22, x2: s(a.honest), y2: 84, stroke: C.bad, 'stroke-dasharray': '3 3' });
+      A.add(svg, 'rect', { x: s(a.honest), y: 24, width: s(a.reported) - s(a.honest), height: 19, fill: C.bad, opacity: 0.16 });
+      A.T(svg, (s(a.honest) + s(a.reported)) / 2, 108, 'self-deception: ' + (d * 100).toFixed(1) + ' points',
+        { fill: C.bad, size: 10, anchor: 'middle', weight: 700 });
+    } else {
+      A.T(svg, x0, 108, 'reported ≈ live — the number is a measurement, not a hope', { fill: C.ok, size: 10 });
+    }
+    A.T(svg, x1 + 6, 92, '90%', { fill: C.dim, size: 9 });
+  }
+
+  var CODE = {
+    rand: '<i># WRONG — shuffles the future into the past</i>\ntrain, test = train_test_split(\n    X, y, shuffle=<b>True</b>, test_size=SHARE)\n\n<i># adjacent ticks are near-duplicates, so every</i>\n<i># test row has a twin in train</i>',
+    time: '<i># RIGHT — a hard wall in time</i>\ncut = int(len(X) * SHARE)\nX_train, y_train = X[:cut], y[:cut]\nX_test,  y_test  = X[cut:], y[cut:]\n\n<i># labels still look h ticks past the cut</i>',
+    emb: '<i># RIGHT + purged boundary</i>\ncut = int(len(X) * SHARE)\nX_train, y_train = X[:cut-EMB], y[:cut-EMB]\nX_test,  y_test  = X[cut:], y[cut:]\n\n<u># EMB rows straddling the wall are dropped</u>'
+  };
+
+  function render() {
+    var a = accs();
+    A.$('w7-train-out').textContent = (share * 100).toFixed(0) + '%';
+    A.$('w7-emb-out').textContent = emb + ' ticks';
+    A.$('w7-emb').disabled = mode !== 'emb';
+    A.$('w7-acc-in').textContent = (a.insample * 100).toFixed(1) + '%';
+    A.$('w7-acc-test').textContent = (a.reported * 100).toFixed(1) + '%';
+    A.$('w7-acc-live').textContent = (a.honest * 100).toFixed(1) + '%';
+    A.$('w7-split-code').innerHTML = CODE[mode]
+      .replace('SHARE', share.toFixed(2)).replace('SHARE', share.toFixed(2)).replace(/EMB/g, emb);
+    drawSplit(); drawGap();
+
+    var v = A.$('w7-split-verdict');
+    if (mode === 'rand') {
+      v.className = 'verdict bad';
+      v.innerHTML = '<b>Leaking.</b> The reported ' + (a.reported * 100).toFixed(1) + '% is a measurement of how similar ' +
+        'neighbouring ticks are — not of any edge. Live, the same model prints ' + (a.honest * 100).toFixed(1) +
+        '%. Nothing about the model changed; only the honesty of the split did.';
+    } else if (mode === 'time') {
+      v.className = 'verdict warn';
+      v.innerHTML = '<b>Almost clean.</b> The wall stops features but not labels: the last training rows carry a ' +
+        HZ + '-tick label that reaches into the test block, worth about 2 points of fake accuracy. Switch on the embargo.';
+    } else if (emb >= HZ) {
+      v.className = 'verdict ok';
+      v.innerHTML = '<b>Honest.</b> Embargo ≥ horizon, so no training label can see across the wall. ' +
+        (a.reported * 100).toFixed(1) + '% is what you should expect live — unglamorous, and yours to trade.';
+    } else {
+      v.className = 'verdict warn';
+      v.innerHTML = '<b>Partly purged.</b> ' + emb + ' ticks of embargo against a ' + HZ + '-tick horizon still lets ' +
+        'the tail of the training labels peek. Push the embargo to ' + HZ + '.';
+    }
+  }
+
+  function init() {
+    if (!A.$('w7-split')) return;
+    var b = [A.$('w7-sp-rand'), A.$('w7-sp-time'), A.$('w7-sp-emb')], ms = ['rand', 'time', 'emb'];
+    b.forEach(function (btn, i) {
+      btn.addEventListener('click', function () { mode = ms[i]; A.setSeg(b, i); render(); });
     });
-    sel.addEventListener('change', function () {
-      bug = Math.max(0, Math.min(BUGS.length - 1, +this.value || 0));
-      cur = BUGS[bug].L;
+    A.$('w7-train').addEventListener('input', function () { share = +this.value / 100; render(); });
+    A.$('w7-emb').addEventListener('input', function () { emb = +this.value; render(); });
+    render();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   WEEK 8 · Widget 3 — walk-forward validation animator
+   ══════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  var A = window.ARENA, C = A.C;
+  var n = 5, mode = 'exp', drift = false, shown = 0, timer = null;
+
+  function scores() {
+    var r = A.rng(99), out = [], k, base;
+    for (k = 0; k < n; k++) {
+      base = 0.62 + 0.30 * (r() - 0.5);
+      if (drift && k >= 2) base -= (mode === 'exp') ? Math.min(1.45, 0.27 * (k - 1)) : (k === 2 ? 0.44 : 0.11);
+      out.push(base);
+    }
+    return out;
+  }
+
+  function draw() {
+    var svg = A.$('w7-wf'); A.clear(svg);
+    var x0 = 64, x1 = 700, X = function (u) { return x0 + (x1 - x0) * u; };
+    var laneH = Math.min(26, 196 / n), sc = scores(), k;
+    A.T(svg, x0, 18, 'time  ──────────────────────────────────────────────▶', { fill: C.dim, size: 10 });
+
+    if (drift) {
+      var rx = X(3 / (n + 1));
+      A.add(svg, 'rect', { x: rx, y: 24, width: x1 - rx, height: 12 + n * laneH, fill: C.bad, opacity: 0.06 });
+      A.add(svg, 'line', { x1: rx, y1: 24, x2: rx, y2: 30 + n * laneH, stroke: C.bad, 'stroke-dasharray': '4 3' });
+      A.T(svg, rx + 5, 34, 'regime shift', { fill: C.bad, size: 9.5, weight: 700 });
+    }
+
+    for (k = 0; k < n; k++) {
+      var y = 40 + k * laneH, on = k < shown, op = on ? 1 : 0.22;
+      var ts = (k + 1) / (n + 1), te = (k + 2) / (n + 1);
+      var trs = mode === 'exp' ? 0 : Math.max(0, ts - 2 / (n + 1));
+      A.T(svg, 8, y + laneH * 0.62, 'fold ' + (k + 1), { fill: on ? C.ink : C.dim, size: 9.5 });
+      A.add(svg, 'rect', { x: X(trs), y: y, width: X(ts) - X(trs), height: laneH - 7, rx: 2,
+        fill: C.accent, opacity: 0.78 * op });
+      A.add(svg, 'rect', { x: X(ts), y: y, width: X(te) - X(ts), height: laneH - 7, rx: 2,
+        fill: C.sky, opacity: 0.85 * op });
+      if (k === 0) {
+        A.T(svg, X(trs) + 6, y + laneH * 0.55, 'train', { fill: '#fff', size: 9, opacity: op });
+        A.T(svg, X(ts) + 5, y + laneH * 0.55, 'test', { fill: '#05121f', size: 9, opacity: op, weight: 700 });
+      }
+      if (on) {
+        A.T(svg, X(te) + 8, y + laneH * 0.58, A.sgn(sc[k], 2),
+          { fill: sc[k] >= 0 ? C.ok : C.bad, size: 10.5, weight: 700 });
+      }
+    }
+    A.T(svg, x0, 42 + n * laneH + 16, mode === 'exp'
+      ? 'expanding window — every fold keeps all history, including regimes that are gone'
+      : 'rolling window — each fold forgets the distant past and re-learns the present',
+      { fill: C.muted, size: 10 });
+    A.T(svg, x0, 42 + n * laneH + 32, 'score of a fold = out-of-sample metric on its test block only',
+      { fill: C.dim, size: 9.5 });
+  }
+
+  function drawBars() {
+    var svg = A.$('w7-wf-bars'); A.clear(svg);
+    var sc = scores(), x0 = 30, x1 = 322, zy = 74, k;
+    var bw = (x1 - x0) / n;
+    A.add(svg, 'line', { x1: x0 - 6, y1: zy, x2: x1, y2: zy, stroke: C.border });
+    A.T(svg, 4, zy + 3, '0', { fill: C.dim, size: 9 });
+    A.T(svg, 4, 20, '+1.4', { fill: C.dim, size: 9 });
+    A.T(svg, 4, 118, '−1.0', { fill: C.dim, size: 9 });
+    for (k = 0; k < n; k++) {
+      var v = k < shown ? sc[k] : 0;
+      var hh = Math.abs(v) / 1.4 * 54;
+      A.add(svg, 'rect', { x: x0 + k * bw + 3, y: v >= 0 ? zy - hh : zy, width: bw - 6,
+        height: Math.max(k < shown ? 1.5 : 0, hh), rx: 1.5,
+        fill: v >= 0 ? C.ok : C.bad, opacity: k < shown ? 0.85 : 0.12 });
+      A.T(svg, x0 + k * bw + bw / 2, 128, String(k + 1), { fill: C.dim, size: 9, anchor: 'middle' });
+    }
+    A.T(svg, x1, 12, 'per-fold OOS score', { fill: C.dim, size: 9, anchor: 'end' });
+  }
+
+  function render() {
+    A.$('w7-folds-out').textContent = String(n);
+    draw(); drawBars();
+    var sc = scores().slice(0, shown);
+    var m = A.mean(sc), sd = A.stdev(sc);
+    A.$('w7-wf-mean').textContent = shown ? A.sgn(m, 2) : '—';
+    A.$('w7-wf-sd').textContent = shown > 1 ? '±' + sd.toFixed(2) : '—';
+    var v = A.$('w7-wf-verdict');
+    if (!shown) {
+      v.className = 'verdict';
+      v.innerHTML = 'Step or roll the folds forward to collect out-of-sample scores.';
+    } else if (drift && mode === 'exp' && shown >= 3) {
+      v.className = 'verdict bad';
+      v.innerHTML = '<b>The expanding window is drowning.</b> It keeps averaging in a regime that no longer exists, so ' +
+        'each new fold scores worse than the last. A declining fold series is the signature of drift — not of bad luck.';
+    } else if (drift && mode === 'roll' && shown >= 3) {
+      v.className = 'verdict ok';
+      v.innerHTML = '<b>The rolling window absorbs the shock.</b> One bad fold at the break, then it re-learns the new ' +
+        'regime. That is the trade-off: less history, faster adaptation. Under drift, forgetting is a feature.';
+    } else if (shown > 1 && sd > 0.55 * Math.abs(m)) {
+      v.className = 'verdict warn';
+      v.innerHTML = '<b>Mean ' + A.sgn(m, 2) + ', dispersion ±' + sd.toFixed(2) + '.</b> A decent average with this much ' +
+        'spread is not an edge you can size — it is a coin flip with a good mood. Report both numbers, always.';
+    } else {
+      v.className = 'verdict ok';
+      v.innerHTML = '<b>Mean ' + A.sgn(m, 2) + ' across ' + shown + ' out-of-sample block' + (shown === 1 ? '' : 's') +
+        '.</b> Tight dispersion, no trend in the folds: this is the one number you may put in your report.';
+    }
+    A.$('w7-wf-step').disabled = shown >= n;
+    A.$('w7-wf-play').textContent = timer ? '❙❙ Pause' : '▶ Roll forward';
+  }
+
+  function stop() { if (timer) { clearInterval(timer); timer = null; } }
+
+  function init() {
+    if (!A.$('w7-wf')) return;
+    var be = A.$('w7-wf-exp'), br = A.$('w7-wf-roll');
+    be.addEventListener('click', function () { mode = 'exp'; A.setSeg([be, br], 0); render(); });
+    br.addEventListener('click', function () { mode = 'roll'; A.setSeg([be, br], 1); render(); });
+    A.$('w7-folds').addEventListener('input', function () {
+      n = +this.value; shown = Math.min(shown, n); stop(); render();
+    });
+    A.$('w7-drift').addEventListener('change', function () { drift = this.checked; render(); });
+    A.$('w7-wf-step').addEventListener('click', function () { stop(); if (shown < n) shown++; render(); });
+    A.$('w7-wf-reset').addEventListener('click', function () { stop(); shown = 0; render(); });
+    A.$('w7-wf-play').addEventListener('click', function () {
+      if (timer) { stop(); render(); return; }
+      if (shown >= n) shown = 0;
+      timer = setInterval(function () {
+        shown++;
+        if (shown >= n) { shown = n; stop(); }
+        render();
+      }, 620);
       render();
     });
     render();
@@ -1055,479 +1433,199 @@ CMD ["python", "-m", "team.trader"]</pre>
 })();
 
 /* ══════════════════════════════════════════════════════════════
-   WEEK 8 · Widget 2 — CI pipeline simulator
+   WEEK 8 · Widget 4 — model-ops lifecycle + drift monitor
    ══════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
   var A = window.ARENA, C = A.C;
-  var STAGES = ['push', 'lint · ruff', 'unit tests', 'integration', 'build image', 'deploy'];
-  var state = [], runs = 0, red = 0, flakes = 0, busy = false, timers = [];
+  var age = 0, cur = 0;
 
-  var TOG = [
-    { id: 'fail', nm: 'a failing unit test', dsc: 'assert flipped in test_buys_on_uptrend', stage: 2, on: false,
-      log: 'FAILED tests/test_my_bot.py::test_buys_on_uptrend — assert \'sell\' == \'buy\'',
-      fix: 'Read the diff pytest printed, fix the logic (or the claim), push again. This is CI doing its only job.' },
-    { id: 'net', nm: 'a test that hits the network', dsc: 'calls yfinance instead of a fake', stage: 3, on: false,
-      log: 'ERROR tests/test_feed.py — ConnectionError: runner has no internet',
-      fix: 'Inject a FakeFeed or monkeypatch the call. It passed locally only because your laptop has Wi-Fi.' },
-    { id: 'unpinned', nm: 'unpinned dependency', dsc: 'pydantic>=2 instead of ==2.7.1', stage: 4, on: false,
-      log: 'ERROR pip resolved pydantic 2.11.0 — image build fails on a stricter validator',
-      fix: 'Pin exact versions and commit the pin. The code did not change; the environment did.' },
-    { id: 'flaky', nm: 'one flaky test', dsc: 'unseeded RNG — fails about 1 run in 4', stage: 2, on: false,
-      log: 'FAILED tests/test_sim.py::test_pnl — assert 397 == 412  (no seed)',
-      fix: 'Seed the RNG. Until you do, red means nothing and everyone learns to click re-run.' }
+  var STAGES = [
+    { st: '01', nm: 'Train', code: 'model.fit(X_train, y_train)',
+      what: 'Offline, on your machine, on the training slice only. Heavy, slow, and never in the hot path. Fit the scaler here too — it is part of the model.',
+      fail: 'Failure mode: re-fitting inside on_tick "to stay fresh". You blow the per-tick budget and every tick trains on a different dataset.' },
+    { st: '02', nm: 'Validate', code: 'walk_forward(folds=5) → mean OOS',
+      what: 'Walk-forward folds, then exactly one look at the held-out test block. Report the mean and the dispersion, and log every configuration you tried.',
+      fail: 'Failure mode: tuning against the test block. After the second look it is a training set wearing a test set\'s name.' },
+    { st: '03', nm: 'Persist', code: "joblib.dump(model, 'model.pkl')",
+      what: 'Serialise the fitted model together with its feature list, its scaler and a version string. The artifact must be enough to reproduce a prediction byte for byte.',
+      fail: 'Failure mode: pickling the model but not the scaler or the column order. Live features arrive in a different order and the model answers confidently anyway.' },
+    { st: '04', nm: 'Serve', code: 'load in __init__ · predict in on_tick',
+      what: 'Load once when the bot starts; inside on_tick build features with the same function you used offline and call predict. Measure that call against the W6 latency budget.',
+      fail: 'Failure mode: loading the pickle per tick. Your bot is right about the market and late to it — the fill prints two ticks away.' },
+    { st: '05', nm: 'Monitor drift', code: 'live acc vs backtest · P&L vs sim',
+      what: 'Watch live hit rate, the distribution of each feature, and live P&L against the backtest. Decide the retraining trigger before the season starts, and version every model so you can roll back.',
+      fail: 'Failure mode: no baseline. If you never wrote down what healthy looks like, you cannot recognise the week it stopped working.' }
   ];
 
-  function tog(id) { for (var i = 0; i < TOG.length; i++) if (TOG[i].id === id) return TOG[i]; return null; }
+  function drawDrift() {
+    var svg = A.$('w7-drift-svg'); A.clear(svg);
+    var x0 = 34, x1 = 328, y0 = 18, y1 = 112;
+    var Y = function (a) { return y1 - (a - 0.44) / 0.12 * (y1 - y0); };
+    var X = function (w) { return x0 + (x1 - x0) * w / 12; };
+    var live = function (w) { return 0.548 - 0.0081 * w; };
 
-  function draw() {
-    var svg = A.$('w8-pipe'); A.clear(svg);
-    var x0 = 8, w = 106, gap = 12, i;
-    for (i = 0; i < STAGES.length; i++) {
-      var st = state[i] || 'idle', x = x0 + i * (w + gap);
-      var col = st === 'pass' ? C.ok : st === 'fail' ? C.bad : st === 'run' ? C.warn : st === 'skip' ? C.dim : C.muted;
-      A.add(svg, 'rect', { x: x, y: 34, width: w, height: 44, rx: 7, fill: col,
-        opacity: st === 'idle' ? 0.08 : (st === 'skip' ? 0.06 : 0.2), stroke: col,
-        'stroke-width': st === 'run' ? 2 : 1, 'stroke-dasharray': st === 'skip' ? '3 3' : null });
-      A.T(svg, x + w / 2, 54, STAGES[i], { fill: st === 'idle' || st === 'skip' ? C.muted : '#fff', size: 10, anchor: 'middle', weight: 600 });
-      var mark = st === 'pass' ? '✓ passed' : st === 'fail' ? '✕ failed' : st === 'run' ? '· running' : st === 'skip' ? '– skipped' : 'idle';
-      A.T(svg, x + w / 2, 68, mark, { fill: col, size: 9, anchor: 'middle' });
-      if (i < STAGES.length - 1) {
-        A.T(svg, x + w + gap / 2, 60, '▸', { fill: C.border, size: 12, anchor: 'middle' });
-      }
-    }
-    A.T(svg, x0, 22, 'on: [push, pull_request]   →   jobs run in order; a red stage stops everything after it',
-      { fill: C.dim, size: 9.5 });
-    var anyFail = state.indexOf('fail') >= 0;
-    A.T(svg, x0, 104, anyFail ? '⛔ merge blocked — main is protected by these checks'
-      : (state[5] === 'pass' ? '✓ green — this commit is release-ready' : ''),
-      { fill: anyFail ? C.bad : C.ok, size: 10.5, weight: 700 });
-  }
+    A.add(svg, 'line', { x1: x0, y1: y1, x2: x1, y2: y1, stroke: C.border });
+    A.add(svg, 'line', { x1: x0, y1: y0, x2: x0, y2: y1, stroke: C.border });
+    A.add(svg, 'line', { x1: x0, y1: Y(0.548), x2: x1, y2: Y(0.548), stroke: C.sky, 'stroke-dasharray': '4 3', opacity: 0.8 });
+    A.T(svg, x0 + 4, Y(0.548) - 5, 'backtest 54.8%', { fill: C.sky, size: 9 });
+    A.add(svg, 'rect', { x: x0, y: Y(0.51), width: x1 - x0, height: y1 - Y(0.51), fill: C.bad, opacity: 0.08 });
+    A.add(svg, 'line', { x1: x0, y1: Y(0.51), x2: x1, y2: Y(0.51), stroke: C.bad, 'stroke-dasharray': '3 3' });
+    A.T(svg, x1, Y(0.51) + 11, 'retrain trigger 51%', { fill: C.bad, size: 9, anchor: 'end' });
 
-  function logln(cls, s) {
-    var el = A.$('w8-pipe-log'), d = document.createElement('div');
-    d.innerHTML = '<span class="t">' + new Date().toTimeString().slice(0, 8) + '</span> <span class="' + cls + '">' + s + '</span>';
-    el.appendChild(d);
-    el.scrollTop = el.scrollHeight;
-  }
-
-  function verdict(kind, html) {
-    var v = A.$('w8-pipe-verdict');
-    v.className = 'verdict ' + kind;
-    v.innerHTML = html;
-  }
-
-  function run() {
-    if (busy) return;
-    busy = true; runs++;
-    state = ['idle', 'idle', 'idle', 'idle', 'idle', 'idle'];
-    A.$('w8-pipe-runs').textContent = String(runs);
-    A.$('w8-pipe-badge').className = 'badge warn';
-    A.$('w8-pipe-badge').textContent = 'running';
-    logln('b', '── push ' + Math.random().toString(16).slice(2, 9) + ' → CI run #' + runs + ' ──');
-    draw();
-
-    var i = 0;
-    function step() {
-      if (i >= STAGES.length) {
-        busy = false;
-        A.$('w8-pipe-badge').className = 'badge ok';
-        A.$('w8-pipe-badge').textContent = 'green · merge allowed';
-        logln('g', 'all checks passed in 53s — deployed');
-        verdict('ok', '<b>Green.</b> Six stages, 53 seconds, no human involved. That is the whole promise of CI: the ' +
-          'suite you wrote is now the contract for what is allowed into <code>main</code>, enforced on a machine that ' +
-          'is not yours and has none of your local state.');
-        draw();
-        return;
-      }
-      state[i] = 'run'; draw();
-      timers.push(setTimeout(function () {
-        var f = null, k;
-        for (k = 0; k < TOG.length; k++) {
-          if (!TOG[k].on || TOG[k].stage !== i) continue;
-          if (TOG[k].id === 'flaky') { if (Math.random() < 0.25) { f = TOG[k]; } }
-          else { f = TOG[k]; break; }
-        }
-        if (f) {
-          state[i] = 'fail';
-          for (k = i + 1; k < STAGES.length; k++) state[k] = 'skip';
-          red++;
-          A.$('w8-pipe-red').textContent = String(red);
-          logln('r', f.log);
-          if (f.id === 'flaky') {
-            flakes++;
-            A.$('w8-pipe-flake').textContent = String(flakes);
-            logln('y', 'note: the code did not change since the last green run');
-            verdict('bad', '<b>Red — and nothing changed.</b> This is a flaky failure: the same commit passed a moment ' +
-              'ago. Push again and it may well go green, which is exactly the disease. ' + f.fix);
-          } else {
-            verdict('bad', '<b>Blocked at "' + STAGES[i] + '".</b> Everything after it is skipped, so a bad build can ' +
-              'never reach deploy. <b>Fix:</b> ' + f.fix);
-          }
-          A.$('w8-pipe-badge').className = 'badge bad';
-          A.$('w8-pipe-badge').textContent = 'merge blocked';
-          busy = false; draw();
-          return;
-        }
-        state[i] = 'pass';
-        logln('g', ({
-          0: 'checkout actions/checkout@v4 · python 3.11, 3.12',
-          1: 'ruff: 0 issues',
-          2: 'pytest -q tests/unit — 60 passed in 1.2s',
-          3: 'pytest -q tests/integration — 8 passed in 6.0s (no network)',
-          4: 'docker build: 6 layers, pip layer cached',
-          5: 'deploy: systemd restarted team-trader.service'
-        })[i]);
-        i++;
-        step();
-      }, 430));
-    }
-    step();
-  }
-
-  function reset() {
-    timers.forEach(clearTimeout); timers = [];
-    busy = false;
-    state = ['idle', 'idle', 'idle', 'idle', 'idle', 'idle'];
-    A.clear(A.$('w8-pipe-log'));
-    A.$('w8-pipe-badge').className = 'badge idle';
-    A.$('w8-pipe-badge').textContent = 'no run yet';
-    verdict('', 'Push a commit to run the pipeline.');
-    draw();
-  }
-
-  function init() {
-    if (!A.$('w8-pipe')) return;
-    var box = A.$('w8-pipe-toggles');
-    TOG.forEach(function (t) {
-      var lab = document.createElement('label');
-      var cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.setAttribute('aria-label', 'inject ' + t.nm);
-      cb.addEventListener('change', function () { t.on = cb.checked; });
-      var sp = document.createElement('span');
-      sp.innerHTML = t.nm + '<span class="fd">' + t.dsc + ' · fails at <b>' + STAGES[t.stage] + '</b></span>';
-      lab.appendChild(cb); lab.appendChild(sp); box.appendChild(lab);
-    });
-    A.$('w8-pipe-run').addEventListener('click', run);
-    A.$('w8-pipe-reset').addEventListener('click', reset);
-    reset();
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
-})();
-
-/* ══════════════════════════════════════════════════════════════
-   WEEK 8 · Widget 3 — determinism: seeded vs unseeded
-   ══════════════════════════════════════════════════════════════ */
-(function () {
-  'use strict';
-  var A = window.ARENA, C = A.C, N = 40, TARGET = 412;
-  var seeded = [], unseeded = [];
-
-  function pathFrom(r, fix) {
-    var p = [0], i;
-    for (i = 1; i <= N; i++) p.push(p[i - 1] + (r() - 0.42) * 46);
-    if (fix) {
-      var adj = (TARGET - p[N]) / N;
-      for (i = 1; i <= N; i++) p[i] += adj * i;
-    }
-    return p;
-  }
-
-  function drawPane(id, runs, col) {
-    var svg = A.$(id); A.clear(svg);
-    var x0 = 34, x1 = 332, y0 = 12, y1 = 116, mn = -180, mx = 620;
-    var X = function (i) { return x0 + (x1 - x0) * i / N; };
-    var Y = function (v) { return y1 - (v - mn) / (mx - mn) * (y1 - y0); };
-    A.add(svg, 'line', { x1: x0, y1: Y(0), x2: x1, y2: Y(0), stroke: C.border });
-    A.add(svg, 'line', { x1: x0, y1: Y(TARGET), x2: x1, y2: Y(TARGET), stroke: C.ink, 'stroke-dasharray': '3 3', opacity: 0.5 });
-    A.T(svg, x0 + 2, Y(TARGET) - 4, 'expected 412', { fill: C.muted, size: 8.5 });
-    A.T(svg, 2, Y(0) + 3, '0', { fill: C.dim, size: 8.5 });
-    runs.forEach(function (p, k) {
-      var pts = p.map(function (v, i) { return [X(i), Y(v)]; });
-      A.path(svg, pts, { stroke: col, 'stroke-width': k === runs.length - 1 ? 1.9 : 1.2,
-        opacity: k === runs.length - 1 ? 0.95 : 0.4 });
-      A.add(svg, 'circle', { cx: X(N), cy: Y(p[N]), r: 2.6, fill: col, opacity: 0.9 });
-    });
-    if (!runs.length) A.T(svg, (x0 + x1) / 2, (y0 + y1) / 2, 'no runs yet', { fill: C.dim, size: 10, anchor: 'middle' });
-    A.T(svg, x1, y1 + 14, 'tick', { fill: C.dim, size: 8.5, anchor: 'end' });
-    A.T(svg, x0, y1 + 14, 'session P&L', { fill: C.dim, size: 8.5 });
-  }
-
-  function distinct(runs) {
-    var s = {}, n = 0, i;
-    for (i = 0; i < runs.length; i++) {
-      var k = Math.round(runs[i][N]);
-      if (!s[k]) { s[k] = 1; n++; }
-    }
-    return n;
-  }
-  function passes(runs) {
-    var n = 0, i;
-    for (i = 0; i < runs.length; i++) if (Math.round(runs[i][N]) === TARGET) n++;
-    return n;
+    var pts = [], w;
+    for (w = 0; w <= age; w += 0.25) pts.push([X(w), Y(live(w))]);
+    if (pts.length < 2) pts.push([X(0) + 0.6, Y(live(0))]);
+    A.path(svg, pts, { stroke: C.accent2, 'stroke-width': 1.8 });
+    A.add(svg, 'circle', { cx: X(age), cy: Y(live(age)), r: 3.4, fill: live(age) < 0.51 ? C.bad : C.ok });
+    A.T(svg, 4, Y(0.548) + 3, '55%', { fill: C.dim, size: 8.5 });
+    A.T(svg, 4, y1 + 3, '44%', { fill: C.dim, size: 8.5 });
+    A.T(svg, x1, y1 + 14, 'weeks since training', { fill: C.dim, size: 9, anchor: 'end' });
+    A.T(svg, x0, y1 + 14, 'live hit rate', { fill: C.accent2, size: 9 });
   }
 
   function render() {
-    drawPane('w8-det-seed', seeded, C.ok);
-    drawPane('w8-det-rand', unseeded, C.bad);
-    A.$('w8-det-seed-n').textContent = seeded.length + ' run' + (seeded.length === 1 ? '' : 's');
-    A.$('w8-det-rand-n').textContent = unseeded.length + ' run' + (unseeded.length === 1 ? '' : 's');
-    A.$('w8-det-seed-sub').textContent = seeded.length
-      ? 'distinct results: ' + distinct(seeded) + ' · assertion passed ' + passes(seeded) + '/' + seeded.length
-      : 'distinct results: —';
-    A.$('w8-det-rand-sub').textContent = unseeded.length
-      ? 'distinct results: ' + distinct(unseeded) + ' · assertion passed ' + passes(unseeded) + '/' + unseeded.length
-      : 'distinct results: —';
-    var v = A.$('w8-det-verdict');
-    if (!seeded.length) {
-      v.className = 'verdict';
-      v.innerHTML = 'Run the test a few times in each mode.';
-    } else if (unseeded.length < 2) {
-      v.className = 'verdict warn';
-      v.innerHTML = 'Run it a few more times — the difference only becomes obvious once the paths overlay.';
-    } else {
+    var box = A.$('w7-lc');
+    A.clear(box);
+    STAGES.forEach(function (s, i) {
+      var b = document.createElement('button');
+      b.className = 'lc-node' + (i === cur ? ' on' : '');
+      b.setAttribute('aria-pressed', i === cur ? 'true' : 'false');
+      b.innerHTML = '<div class="st">' + s.st + (i < STAGES.length - 1 ? ' ▸' : ' ⟲') + '</div><div class="nm">' + s.nm + '</div>';
+      b.addEventListener('click', function () { cur = i; render(); });
+      box.appendChild(b);
+    });
+    var s = STAGES[cur];
+    A.$('w7-lc-detail').innerHTML =
+      '<h4>' + s.st + ' · ' + s.nm + '</h4>' +
+      '<div class="role">' + s.code + '</div>' +
+      '<p>' + s.what + '</p>' +
+      '<div class="fail">' + s.fail + '</div>';
+
+    A.$('w7-age-out').textContent = String(age);
+    drawDrift();
+    var acc = 0.548 - 0.0081 * age, v = A.$('w7-drift-verdict');
+    if (acc < 0.51) {
       v.className = 'verdict bad';
-      v.innerHTML = '<b>' + seeded.length + ' seeded runs, ' + distinct(seeded) + ' distinct result. ' +
-        unseeded.length + ' unseeded runs, ' + distinct(unseeded) + ' distinct results.</b> The left pane is a test: ' +
-        'the same input produced the same number, so <code>assert final_pnl == 412</code> holds every time and a red ' +
-        'run means something changed. The right pane is a coin flip wearing a test\'s name — it passed ' +
-        passes(unseeded) + ' of ' + unseeded.length + ' times, and you cannot debug a failure you cannot reproduce.';
+      v.innerHTML = '<b>Drift detected at week ' + age + '.</b> Live hit rate ' + (acc * 100).toFixed(1) +
+        '% has crossed the trigger. Retrain on recent data, or fall back to the W7 rule-based signal — do not keep sizing on a dead model.';
+    } else if (acc < 0.525) {
+      v.className = 'verdict warn';
+      v.innerHTML = '<b>Decaying.</b> ' + (acc * 100).toFixed(1) + '% live against a 54.8% backtest. Still profitable, ' +
+        'but the gap is the alarm: check whether the feature distributions moved before you blame the market.';
+    } else {
+      v.className = 'verdict ok';
+      v.innerHTML = '<b>Healthy.</b> ' + (acc * 100).toFixed(1) + '% live, in line with the backtest. This is what you ' +
+        'must write down <em>now</em> — the baseline you will compare against during the incident.';
     }
   }
 
-  function once() {
-    seeded.push(pathFrom(A.rng(0), true));
-    unseeded.push(pathFrom(Math.random, false));
-    if (seeded.length > 8) { seeded.shift(); unseeded.shift(); }
-    render();
-  }
-
   function init() {
-    if (!A.$('w8-det-seed')) return;
-    A.$('w8-det-1').addEventListener('click', once);
-    A.$('w8-det-5').addEventListener('click', function () { var i; for (i = 0; i < 5; i++) once(); });
-    A.$('w8-det-reset').addEventListener('click', function () { seeded = []; unseeded = []; render(); });
+    if (!A.$('w7-lc')) return;
+    A.$('w7-age').addEventListener('input', function () { age = +this.value; render(); });
     render();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
 
 /* ══════════════════════════════════════════════════════════════
-   WEEK 8 · Widget 4 — mini live dashboard (pause / step)
+   WEEK 8 · Widget 5 — does the edge survive the costs?
    ══════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
   var A = window.ARENA, C = A.C;
-  var SYMS = [{ s: 'AAPL', px: 228.40 }, { s: 'NVDA', px: 121.80 }];
-  var INC_AT = 6, LIMIT = 500;
-  var st, timer = null, inc = 'none', r = A.rng(8081);
+  var p = 0.53, payoff = 1.0, T = 60, cost = 3.0, L = 10;
 
-  function fresh() {
-    return {
-      tick: 0, px: [228.40, 121.80], mark: [228.40, 121.80], qty: [0, 0], avg: [0, 0],
-      cash: 100000, realized: 0, hist: [100000], age: 0, ws: 'CLOSED', msgs: 0, lat: 0, rej: 0, frozen: false
-    };
+  function metrics() {
+    var W = L * payoff;
+    var edge = p * W - (1 - p) * L;
+    var win = W - cost, loss = -L - cost;
+    var m = p * win + (1 - p) * loss;
+    var vr = p * (win - m) * (win - m) + (1 - p) * (loss - m) * (loss - m);
+    var sd = Math.sqrt(vr);
+    return { W: W, edge: edge, m: m, sd: sd, net: T * m, drag: T * cost,
+      shp: sd > 0 ? m / sd * Math.sqrt(T) : 0, base: 30 * (2.0 - cost) };
   }
 
-  function step() {
-    var s = st, i;
-    s.tick++;
-    s.ws = 'OPEN';
-    s.msgs = 18 + Math.round(r() * 10);
-    s.lat = 4 + r() * 4;
-    var live = !(inc === 'stale' && s.tick >= INC_AT);
-    for (i = 0; i < 2; i++) {
-      if (live) s.px[i] = s.px[i] * (1 + (r() - 0.5) * 0.0042);
-      s.mark[i] = live ? s.px[i] : s.mark[i];
+  function draw(mt) {
+    var svg = A.$('w7-eq'); A.clear(svg);
+    var r = A.rng(31337), gross = [0], net = [0], i, o;
+    for (i = 1; i <= T; i++) {
+      o = r() < p ? mt.W : -L;
+      gross.push(gross[i - 1] + o);
+      net.push(net[i - 1] + o - cost);
     }
-    s.age = live ? 1 + Math.round(r() * 3) : (s.tick - INC_AT + 1) * 3;
-    s.frozen = !live;
-
-    /* the bot keeps trading */
-    var target = inc === 'limit' && s.tick >= INC_AT ? 640 : Math.min(360, 40 * s.tick);
-    for (i = 0; i < 2; i++) {
-      var want = Math.round(target / 2);
-      if (want > s.qty[i]) {
-        var add = Math.min(want - s.qty[i], 60);
-        s.avg[i] = (s.avg[i] * s.qty[i] + s.mark[i] * add) / (s.qty[i] + add);
-        s.qty[i] += add;
-        s.cash -= add * s.mark[i];
-      }
+    var mn = 0, mx = 0;
+    for (i = 0; i <= T; i++) {
+      mn = Math.min(mn, net[i], gross[i]); mx = Math.max(mx, net[i], gross[i]);
     }
-    if (inc === 'drop' && s.tick >= INC_AT && s.tick < INC_AT + 3) {
-      s.ws = 'RECONNECTING · backoff ' + Math.pow(2, s.tick - INC_AT) + 's';
-      s.msgs = 0;
-    } else if (inc === 'drop' && s.tick === INC_AT + 3) {
-      s.ws = 'OPEN · re-synced';
-    }
-    if (inc === 'throttle' && s.tick >= INC_AT) {
-      s.rej += 4 + Math.round(r() * 3);
-      s.msgs = 120 + Math.round(r() * 40);
-      s.lat = 18 + r() * 10;
-    }
-    var nw = s.cash;
-    for (i = 0; i < 2; i++) nw += s.qty[i] * s.mark[i];
-    s.hist.push(nw);
-    if (s.hist.length > 60) s.hist.shift();
-    render();
-  }
-
-  function drawPnl() {
-    var svg = A.$('w8-dash-pnl'); A.clear(svg);
-    var h = st.hist, x0 = 6, x1 = 334, y0 = 8, y1 = 104, i;
-    var mn = Math.min.apply(null, h), mx = Math.max.apply(null, h);
-    var pad = Math.max(60, (mx - mn) * 0.2); mn -= pad; mx += pad;
-    var X = function (i) { return x0 + (x1 - x0) * i / Math.max(1, h.length - 1); };
+    mn = Math.min(mn, mt.base); mx = Math.max(mx, mt.base);
+    var padv = Math.max(8, (mx - mn) * 0.14); mn -= padv; mx += padv;
+    var x0 = 52, x1 = 700, y0 = 20, y1 = 214;
+    var X = function (i) { return x0 + (x1 - x0) * i / T; };
     var Y = function (v) { return y1 - (v - mn) / (mx - mn) * (y1 - y0); };
-    A.add(svg, 'line', { x1: x0, y1: Y(100000), x2: x1, y2: Y(100000), stroke: C.border, 'stroke-dasharray': '3 3' });
-    A.T(svg, x0 + 2, Y(100000) - 4, 'start 100k', { fill: C.dim, size: 8.5 });
-    var pts = [];
-    for (i = 0; i < h.length; i++) pts.push([X(i), Y(h[i])]);
-    var up = h[h.length - 1] >= 100000;
-    A.path(svg, pts, { stroke: up ? C.ok : C.bad, 'stroke-width': 1.8 });
-    A.add(svg, 'circle', { cx: X(h.length - 1), cy: Y(h[h.length - 1]), r: 3, fill: up ? C.ok : C.bad });
-    if (st.frozen) {
-      A.T(svg, (x0 + x1) / 2, 22, 'marked on a stale price', { fill: C.bad, size: 9.5, anchor: 'middle', weight: 700 });
-    }
-  }
 
-  function drawRisk() {
-    var svg = A.$('w8-dash-risk'); A.clear(svg);
-    var tot = st.qty[0] + st.qty[1];
-    var notion = st.qty[0] * st.mark[0] + st.qty[1] * st.mark[1];
-    var rows = [
-      ['position vs limit', tot / LIMIT],
-      ['notional vs buying power', notion / 200000],
-      ['reject rate', Math.min(1, st.rej / 40)]
-    ];
-    rows.forEach(function (rw, i) {
-      var y = 12 + i * 32, u = A.clamp(rw[1], 0, 1.25);
-      var col = u > 1 ? C.bad : u > 0.75 ? C.warn : C.ok;
-      A.T(svg, 4, y + 8, rw[0], { fill: C.muted, size: 9.5 });
-      A.add(svg, 'rect', { x: 4, y: y + 12, width: 260, height: 8, rx: 4, fill: C.border, opacity: 0.6 });
-      A.add(svg, 'rect', { x: 4, y: y + 12, width: Math.max(1, Math.min(260, 260 * u)), height: 8, rx: 4, fill: col });
-      A.add(svg, 'line', { x1: 4 + 260 * 0.8, y1: y + 9, x2: 4 + 260 * 0.8, y2: y + 23, stroke: C.warn, opacity: 0.5 });
-      A.T(svg, 334, y + 20, (u * 100).toFixed(0) + '%', { fill: col, size: 10, anchor: 'end', weight: 700 });
-    });
+    A.add(svg, 'line', { x1: x0, y1: Y(0), x2: x1, y2: Y(0), stroke: C.border });
+    A.add(svg, 'line', { x1: x0, y1: y0, x2: x0, y2: y1, stroke: C.border });
+    A.T(svg, x0 - 6, Y(0) + 3, '0', { fill: C.dim, size: 9, anchor: 'end' });
+    A.T(svg, x0 - 6, y0 + 8, (mx).toFixed(0) + ' bp', { fill: C.dim, size: 9, anchor: 'end' });
+    A.T(svg, x0 - 6, y1, (mn).toFixed(0) + ' bp', { fill: C.dim, size: 9, anchor: 'end' });
+
+    A.add(svg, 'line', { x1: x0, y1: Y(0), x2: X(30 > T ? T : 30), y2: Y(mt.base * Math.min(1, T / 30)),
+      stroke: C.muted, 'stroke-width': 1.4, 'stroke-dasharray': '5 4' });
+    A.T(svg, X(Math.min(30, T)) + 6, Y(mt.base * Math.min(1, T / 30)) - 4, 'W7 momentum baseline',
+      { fill: C.muted, size: 9 });
+
+    var pg = [], pn = [];
+    for (i = 0; i <= T; i++) { pg.push([X(i), Y(gross[i])]); pn.push([X(i), Y(net[i])]); }
+    A.path(svg, pg, { stroke: C.sky, 'stroke-width': 1.4, 'stroke-dasharray': '4 3', opacity: 0.9 });
+    A.path(svg, pn, { stroke: net[T] >= 0 ? C.ok : C.bad, 'stroke-width': 2 });
+    A.add(svg, 'circle', { cx: X(T), cy: Y(net[T]), r: 3.4, fill: net[T] >= 0 ? C.ok : C.bad });
+    A.T(svg, x1, Y(gross[T]) - 8, 'gross ' + A.sgn(gross[T], 0) + ' bp', { fill: C.sky, size: 10, anchor: 'end' });
+    A.T(svg, x1, Y(net[T]) + (net[T] >= gross[T] ? -8 : 16), 'net ' + A.sgn(net[T], 0) + ' bp',
+      { fill: net[T] >= 0 ? C.ok : C.bad, size: 10.5, anchor: 'end', weight: 700 });
+    A.T(svg, x0, y1 + 22, 'trade number  →  ' + T + ' trades this session', { fill: C.dim, size: 9.5 });
+    A.T(svg, x1, y1 + 22, 'P&L in basis points of capital', { fill: C.dim, size: 9.5, anchor: 'end' });
   }
 
   function render() {
-    var s = st, i;
-    A.$('w8-dash-tick').textContent = String(s.tick);
-    var tb = A.$('w8-dash-pos'); A.clear(tb);
-    var hr = document.createElement('tr');
-    hr.innerHTML = '<th>sym</th><th>qty</th><th>avg</th><th>mark</th><th>unreal</th>';
-    tb.appendChild(hr);
-    var unreal = 0;
-    for (i = 0; i < 2; i++) {
-      var u = s.qty[i] * (s.mark[i] - s.avg[i]);
-      unreal += u;
-      var tr = document.createElement('tr');
-      tr.innerHTML = '<td>' + SYMS[i].s + '</td><td>' + s.qty[i] + '</td><td>' +
-        (s.avg[i] ? s.avg[i].toFixed(2) : '—') + '</td><td>' + s.mark[i].toFixed(2) +
-        '</td><td style="color:' + (u >= 0 ? C.ok : C.bad) + '">' + A.sgn(u, 0) + '</td>';
-      tb.appendChild(tr);
-    }
-    var tot = s.qty[0] + s.qty[1], nw = s.hist[s.hist.length - 1];
-    A.$('w8-dash-real').textContent = '$' + s.realized.toFixed(0);
-    A.$('w8-dash-unreal').textContent = A.sgn(unreal, 0);
-    A.$('w8-dash-unreal').className = unreal >= 0 ? 'ok' : 'bad';
-    A.$('w8-dash-nw').textContent = '$' + nw.toLocaleString(undefined, { maximumFractionDigits: 0 });
-    A.$('w8-dash-ws').textContent = s.ws;
-    A.$('w8-dash-ws').className = s.ws.indexOf('RECONNECTING') === 0 ? 'bad' : (s.tick ? 'ok' : '');
-    A.$('w8-dash-age').textContent = s.tick ? s.age + ' s' : '—';
-    A.$('w8-dash-age').className = s.age > 8 ? 'bad' : s.age > 5 ? 'warn' : 'ok';
-    A.$('w8-dash-msgs').textContent = String(s.msgs);
-    A.$('w8-dash-lat').textContent = s.tick ? s.lat.toFixed(1) + ' ms' : '—';
-    A.$('w8-dash-lat').className = s.lat > 15 ? 'bad' : 'ok';
-    A.$('w8-dash-rej').textContent = String(s.rej);
-    A.$('w8-dash-rej').className = s.rej > 20 ? 'bad' : s.rej > 0 ? 'warn' : 'ok';
+    A.$('w7-hit-out').textContent = (p * 100).toFixed(1) + '%';
+    A.$('w7-payoff-out').textContent = payoff.toFixed(2);
+    A.$('w7-trades-out').textContent = String(T);
+    A.$('w7-cost-out').textContent = cost.toFixed(1) + ' bp';
+    var mt = metrics();
+    draw(mt);
+    A.$('w7-e-gross').textContent = A.sgn(mt.edge, 2) + ' bp';
+    A.$('w7-e-cost').textContent = '−' + mt.drag.toFixed(0) + ' bp';
+    A.$('w7-e-net').textContent = A.sgn(mt.net, 0) + ' bp';
+    A.$('w7-e-shp').textContent = mt.shp.toFixed(2);
 
-    var pb = A.$('w8-dash-pos-badge');
-    pb.className = 'badge ' + (tot > LIMIT ? 'bad' : tot ? 'ok' : 'idle');
-    pb.textContent = tot ? tot + ' / ' + LIMIT + ' lots' : 'flat';
-    var nb = A.$('w8-dash-pnl-badge');
-    nb.className = 'badge ' + (nw >= 100000 ? 'ok' : 'bad');
-    nb.textContent = s.tick ? A.sgn(nw - 100000, 0) : '—';
-    var rb = A.$('w8-dash-risk-badge');
-    rb.className = 'badge ' + (tot > LIMIT || s.rej > 20 ? 'bad' : tot / LIMIT > 0.75 ? 'warn' : 'ok');
-    rb.textContent = tot > LIMIT ? 'limit breached' : tot / LIMIT > 0.75 ? 'near limit' : 'within limits';
-    var cb = A.$('w8-dash-conn-badge');
-    var connBad = s.age > 8 || s.ws.indexOf('RECONNECTING') === 0 || s.rej > 20;
-    cb.className = 'badge ' + (!s.tick ? 'idle' : connBad ? 'bad' : s.age > 5 ? 'warn' : 'ok');
-    cb.textContent = !s.tick ? 'idle' : connBad ? 'degraded' : 'healthy';
-
-    drawPnl(); drawRisk();
-
-    var b = A.$('w8-dash-banner'), bt = A.$('w8-dash-banner-txt'), v = A.$('w8-dash-verdict');
-    var wc = tot * 0.02 * (s.mark[0] + s.mark[1]) / 2;
-    A.$('w8-dash-wc').textContent = '−$' + wc.toFixed(0);
-    if (!s.tick) {
-      b.className = 'banner'; bt.textContent = 'Session idle. Press play.';
-      v.className = 'verdict';
-      v.innerHTML = 'Nothing is wrong yet. Note what healthy looks like <em>before</em> you break it.';
-      return;
-    }
-    if (inc === 'stale' && s.tick >= INC_AT) {
-      b.className = 'banner bad';
-      bt.innerHTML = '<b>Feed age ' + s.age + 's</b> — the Yahoo poll has stalled. Prices are frozen; the socket is fine.';
+    var v = A.$('w7-e-verdict');
+    if (mt.net <= 0) {
       v.className = 'verdict bad';
-      v.innerHTML = '<b>Partial failure.</b> Positions, P&L and risk all look calm because they are computed from a ' +
-        'price that stopped moving at tick ' + INC_AT + '. Only the connectivity pane can tell you. A robust bot ' +
-        'treats staleness as an alarm: stop quoting, widen, or flatten — never keep pricing off a dead feed.';
-    } else if (inc === 'drop' && s.ws.indexOf('RECONNECTING') === 0) {
-      b.className = 'banner warn';
-      bt.innerHTML = '<b>Socket dropped</b> — reconnecting with exponential backoff, orders queued, state re-sync pending.';
+      v.innerHTML = '<b>Pure alpha in the backtest, pure cost live.</b> The gross curve climbs and the net curve sinks: ' +
+        'a ' + A.sgn(mt.edge, 2) + ' bp edge cannot pay a ' + cost.toFixed(1) + ' bp toll. Either find a bigger edge or trade far less often.';
+    } else if (mt.net < mt.base) {
       v.className = 'verdict warn';
-      v.innerHTML = '<b>This is survivable if you wrote it that way.</b> On <code>ConnectionClosed</code>: back off, ' +
-        'reconnect, re-sync positions from the exchange, then resume. A bot that crashes on a blip spends the rest of ' +
-        'the session as a spectator holding ' + tot + ' lots.';
-    } else if (inc === 'limit' && tot > LIMIT) {
-      b.className = 'banner bad';
-      bt.innerHTML = '<b>Position limit breached</b> — ' + tot + ' lots against a ' + LIMIT + ' limit.';
-      v.className = 'verdict bad';
-      v.innerHTML = '<b>The risk pane went red before the P&L did.</b> That is the point of showing limit usage rather ' +
-        'than only money: the loss has not happened yet. <code>RiskManager.check_order()</code> should have vetoed the ' +
-        'order that crossed the line — the dashboard is your evidence that it did not.';
-    } else if (inc === 'throttle' && s.tick >= INC_AT) {
-      b.className = 'banner bad';
-      bt.innerHTML = '<b>Rate limited</b> — ' + s.rej + ' rejects, ' + s.msgs + ' msgs/s, latency ' + s.lat.toFixed(0) + ' ms.';
-      v.className = 'verdict bad';
-      v.innerHTML = '<b>Throttling shows up as rejects, not as an exception.</b> Nothing raised; your orders are simply ' +
-        'refused. From Week 8 the arena enforces rate limits, so a bot that re-sends on every tick spends its budget ' +
-        'on noise and has none left when its signal is right.';
+      v.innerHTML = '<b>Positive, but beaten by the baseline.</b> ' + A.sgn(mt.net, 0) + ' bp against the W7 momentum ' +
+        'rule\'s ' + mt.base.toFixed(0) + ' bp. A model that does not beat the simple signal out-of-sample has not earned its place in the bot.';
+    } else if (mt.shp < 1) {
+      v.className = 'verdict warn';
+      v.innerHTML = '<b>Profitable, thin.</b> ' + A.sgn(mt.net, 0) + ' bp at a Sharpe-like ' + mt.shp.toFixed(2) +
+        '. The season score divides by volatility, so this ranks below a steadier book with the same P&L. Raise the confidence threshold and cut turnover.';
     } else {
-      b.className = 'banner live';
-      bt.innerHTML = '<b>Healthy</b> — socket open, feed ' + s.age + 's old, ' + s.msgs + ' msgs/s, latency ' + s.lat.toFixed(1) + ' ms.';
       v.className = 'verdict ok';
-      v.innerHTML = '<b>This is the baseline.</b> Four panes, one glance: what I own, what it is worth, how close I am ' +
-        'to a limit, and whether I am still connected. Write these numbers down now — during the incident you will not ' +
-        'have time to work out what normal was.';
+      v.innerHTML = '<b>The edge survives.</b> ' + A.sgn(mt.net, 0) + ' bp net at a Sharpe-like ' + mt.shp.toFixed(2) +
+        ', past the ' + mt.base.toFixed(0) + ' bp baseline. Note how quickly this dies if you drag turnover up — the toll is per trade, the edge is not.';
     }
-  }
-
-  function play() {
-    if (timer) { clearInterval(timer); timer = null; A.$('w8-dash-play').innerHTML = '&#9654; Play'; return; }
-    timer = setInterval(step, 820);
-    A.$('w8-dash-play').innerHTML = '&#10073;&#10073; Pause';
   }
 
   function init() {
-    if (!A.$('w8-dash-pnl')) return;
-    st = fresh();
-    A.$('w8-dash-play').addEventListener('click', play);
-    A.$('w8-dash-step').addEventListener('click', function () {
-      if (timer) { clearInterval(timer); timer = null; A.$('w8-dash-play').innerHTML = '&#9654; Play'; }
-      step();
-    });
-    A.$('w8-dash-reset').addEventListener('click', function () {
-      if (timer) { clearInterval(timer); timer = null; A.$('w8-dash-play').innerHTML = '&#9654; Play'; }
-      r = A.rng(8081); st = fresh(); render();
-    });
-    A.$('w8-dash-inc').addEventListener('change', function () {
-      inc = this.value; r = A.rng(8081); st = fresh(); render();
-    });
+    if (!A.$('w7-eq')) return;
+    A.$('w7-hit').addEventListener('input', function () { p = +this.value / 100; render(); });
+    A.$('w7-payoff').addEventListener('input', function () { payoff = +this.value / 100; render(); });
+    A.$('w7-trades').addEventListener('input', function () { T = +this.value; render(); });
+    A.$('w7-cost').addEventListener('input', function () { cost = +this.value; render(); });
     render();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();

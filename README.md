@@ -15,11 +15,11 @@ The weeks build one system, and nothing is thrown away:
 | 2 | Concurrency & Async in Python |
 | 3 | Socket Streaming & Protocols |
 | 4 | Backtesting and Its Data |
-| 5 | Algorithmic Complexity & Data Structures |
-| 6 | Big Data & Distributed Computing |
-| 7 | Machine Learning Signals & Model Ops |
-| 8 | CI/CD, Testing & UI |
-| 9 | Integration & Demo — Season Finale |
+| 5 | Midterm week — no class (midterm on weeks 1–4) |
+| 6 | Algorithmic Complexity & Data Structures |
+| 7 | Big Data & Distributed Computing |
+| 8 | Machine Learning Signals & Model Ops |
+| 9 | CI/CD, Testing & UI + Integration & Demo — Season Finale |
 
 The code the weeks refer to is **AlgoArena**, a Python trading-competition
 platform. The public starter repo is

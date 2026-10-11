@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="icon" href="data:," />
-<title>Week 6 · Big Data &amp; Distributed Computing — Systematic Trading Arena</title>
+<title>Week 6 · Algorithmic Complexity &amp; Data Structures — Systematic Trading Arena</title>
 <style>
   /* ══ Reset & tokens ═══════════════════════════════════════════ */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -374,66 +374,45 @@
   }
 
   /* ══ page-local ═══════════════════════════════════════════════ */
-  .lane { display: grid; grid-template-columns: 132px 1fr 96px; gap: 10px; align-items: center; margin-top: 9px; }
+  .bigo-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; align-items: start; }
+  .ladder-row { display: flex; align-items: center; gap: 6px; }
+  .pricebtn {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    padding: 5px 8px; border-radius: 5px; cursor: pointer;
+    background: var(--panel); border: 1px solid var(--line-2); color: var(--ink-dim);
+  }
+  .pricebtn:hover { border-color: var(--accent-2); color: var(--ink); }
+  .pricebtn:focus-visible { outline: 2px solid var(--accent-3); outline-offset: 2px; }
+  .pricebtn.bidside { border-color: rgba(63,185,80,0.45); color: #a9dfb2; }
+  .pricebtn.askside { border-color: rgba(248,81,73,0.45); color: #f0b0ac; }
+  .heaplist { font-family: var(--mono); font-size: 11px; line-height: 1.85; }
+  .heaplist .row { display: flex; justify-content: space-between; gap: 8px; padding: 0 2px; border-bottom: 1px dotted var(--line); }
+  .heaplist .row.stale { color: var(--ink-mute); text-decoration: line-through; }
+  .heaplist .row .why { font-size: 9.5px; text-decoration: none; color: var(--warn); letter-spacing: 0.4px; }
+  .oplog {
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+    max-height: 118px; overflow-y: auto; background: #0b0e14;
+    border: 1px solid var(--line); border-radius: 7px; padding: 8px 10px;
+  }
+  .oplog div { white-space: nowrap; }
+  .oplog b { color: var(--accent-3); font-weight: 600; }
+  .lane { display: grid; grid-template-columns: 116px 1fr 92px; gap: 10px; align-items: center; margin-top: 9px; }
   .lane .nm { font-size: 11.5px; font-weight: 700; }
-  .lane .nm .s2 { display: block; font-weight: 400; font-size: 10px; color: var(--ink-mute); }
-  .lane .tr { height: 16px; border-radius: 8px; background: var(--panel-2); border: 1px solid var(--line); overflow: hidden; position: relative; }
-  .lane .fl { height: 100%; width: 0; border-radius: 8px 0 0 8px; transition: width 0.1s linear; }
-  .lane .tm { font-family: var(--mono); font-size: 11.5px; text-align: right; color: var(--ink); }
+  .lane .tr { height: 15px; border-radius: 8px; background: var(--panel-2); border: 1px solid var(--line); overflow: hidden; }
+  .lane .fl { height: 100%; border-radius: 8px 0 0 8px; transition: width 0.32s ease-out; }
+  .lane .tm { font-family: var(--mono); font-size: 11.5px; text-align: right; }
   .warnbar {
     margin-top: 12px; padding: 9px 12px; border-radius: 8px; font-size: 12px;
     border: 1px solid var(--line-2); background: var(--panel-2); color: var(--muted);
   }
   .warnbar.hot { border-color: rgba(248,81,73,0.5); background: rgba(248,81,73,0.10); color: #f0d5d3; }
-  .warnbar.mid { border-color: rgba(210,153,34,0.5); background: rgba(210,153,34,0.09); color: #eddfc0; }
   .warnbar.cool { border-color: rgba(63,185,80,0.4); background: rgba(63,185,80,0.09); color: #cfe9d2; }
   .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-family: var(--mono); font-size: 11.5px; margin-top: 4px; }
   .kv .k2 { color: var(--ink-mute); }
   .kv .v2 { color: var(--ink); text-align: right; }
-
-  /* dtype rows (widget 1) */
-  .dtrow {
-    display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center;
-    padding: 5px 0; border-bottom: 1px dotted var(--line);
-  }
-  .dtrow:last-child { border-bottom: none; }
-  .dtrow .cn { font-family: var(--mono); font-size: 11.5px; color: var(--ink-dim); }
-  .dtrow .cn i { font-style: normal; color: var(--ink-mute); }
-  .dtrow .cn b { color: var(--accent-3); font-weight: 600; }
-
-  /* column chips (widget 4) */
-  .colgrid { display: flex; flex-wrap: wrap; gap: 6px; }
-  .colbtn {
-    font-family: var(--mono); font-size: 11px; font-weight: 600;
-    padding: 5px 9px; border-radius: 6px; cursor: pointer;
-    background: var(--panel); border: 1px solid var(--line-2); color: var(--ink-mute);
-  }
-  .colbtn:hover { border-color: var(--accent-2); color: var(--ink-dim); }
-  .colbtn:focus-visible { outline: 2px solid var(--accent-3); outline-offset: 2px; }
-  .colbtn[aria-pressed="true"] {
-    background: rgba(var(--accent-rgb),0.34); border-color: var(--accent-2); color: #eaf2ff;
-  }
-  .colbtn .w { color: var(--ink-mute); font-weight: 400; }
-  .colbtn[aria-pressed="true"] .w { color: var(--accent-3); }
-  .qbox {
-    font-family: var(--mono); font-size: 11.5px; line-height: 1.75;
-    background: #0b0e14; border: 1px solid var(--line); border-radius: 7px;
-    padding: 9px 11px; margin-top: 10px; color: #dfe4ec; overflow-x: auto;
-  }
-  .qbox .k { color: var(--info); }
-  .qbox .s { color: #9ee6a4; }
-  .qbox .c { color: var(--ink-mute); }
-
-  .oplog {
-    font-family: var(--mono); font-size: 11px; color: var(--muted);
-    max-height: 120px; overflow-y: auto; background: #0b0e14;
-    border: 1px solid var(--line); border-radius: 7px; padding: 8px 10px;
-  }
-  .oplog div { white-space: nowrap; }
-  .oplog b { color: var(--accent-3); font-weight: 600; }
-
   @media (max-width: 720px) {
-    .lane { grid-template-columns: 92px 1fr 78px; gap: 7px; }
+    .bigo-grid { grid-template-columns: 1fr; }
+    .lane { grid-template-columns: 84px 1fr 76px; gap: 7px; }
   }
 
   /* ── mobile guard (identical on every page): single column under 720px,
@@ -453,602 +432,554 @@
 </head>
 <body>
 
-<nav class="top"><a href="index.html">Systematic Trading Arena</a><span class="crumbs"><a href="week5.html">&larr; Week 5</a> &middot; <b>Week 6 &middot; Big Data &amp; Distributed Computing</b> &middot; <a href="week7.html">Week 7 &rarr;</a></span></nav>
+<nav class="top"><a href="index.html">Systematic Trading Arena</a><span class="crumbs"><a href="week5.html">&larr; Week 5</a> &middot; <b>Week 6 &middot; Algorithmic Complexity &amp; Data Structures</b> &middot; <a href="week7.html">Week 7 &rarr;</a></span></nav>
 
 <section id="hero" class="hero">
  <div class="wrap">
-  <div class="eyebrow">Week 6 &middot; Scale</div>
-  <h1>Big Data &amp;<br/>Distributed Computing</h1>
-  <p class="promise">Think in columns and processes &mdash; so a strategy search takes minutes instead of hours, and your data fits before you rent a cluster.</p>
+  <div class="eyebrow">Week 6 &middot; Performance</div>
+  <h1>Algorithmic Complexity<br/>&amp; Data Structures</h1>
+  <p class="promise">Pick the right data structure, know its cost, and profile the hot path &mdash; before the market punishes you for guessing.</p>
   <ul class="willbe">
-    <li><b>You will be able to</b> size a dataset in memory and pick a storage layout &mdash; Parquet, downcast dtypes &mdash; before reaching for a cluster.</li>
-    <li><b>You will be able to</b> parallelise a backtest sweep with <code>ProcessPoolExecutor</code> and collect one metric per configuration.</li>
-    <li><b>You will be able to</b> design a feature pipeline that builds and caches offline, so <code>on_tick</code> does no heavy compute.</li>
+    <li><b>You will be able to</b> profile your bot with <code>cProfile</code> and name the one function that dominates the run.</li>
+    <li><b>You will be able to</b> convert an O(n)-per-tick statistic into O(1) rolling state with a <code>deque</code> and Welford's method.</li>
+    <li><b>You will be able to</b> defend a complexity claim with a sound microbenchmark &mdash; warm up, repeat, take the minimum.</li>
   </ul>
   <div class="chips">
     <span class="chip hl">3 hours</span>
-    <span class="chip">memory wall</span>
-    <span class="chip">Parquet &middot; columnar</span>
-    <span class="chip">vectorisation</span>
-    <span class="chip">GIL &middot; processes</span>
-    <span class="chip">map&ndash;reduce</span>
-    <span class="chip">EXCHANGE_URLS</span>
+    <span class="chip hl">Fri Nov 6 &middot; live block: season week 6</span>
+    <span class="chip">Big-O</span>
+    <span class="chip">dict &middot; deque &middot; heap</span>
+    <span class="chip">Welford O(1)</span>
+    <span class="chip">shared/orderbook.py</span>
+    <span class="chip">p99 tail latency</span>
   </div>
  </div>
 </section>
 
-<!-- ══════════════════════════════ WHAT ══════════════════════════════ -->
 <section id="what">
  <div class="wrap">
   <div class="eyebrow">What is it?</div>
-  <h2>The bottleneck stops being ideas and becomes bytes</h2>
+  <h2>Big-O is a statement about growth, not a stopwatch</h2>
+  <p class="lead">Big-O describes how the work an algorithm does <b>scales with the size of its input</b>, ignoring
+  constants. It answers one question: what breaks as <span class="mono">n</span> grows? It deliberately refuses to
+  answer a different one: how many microseconds does this take on my laptop today.</p>
+  <p>Those are complementary. Big-O tells you <b>which curve you are on</b>; profiling tells you <b>where you sit on
+  it</b>. You need both, and you need them in that order, because you cannot optimise your way out of the wrong curve.
+  Complexity is a design decision made when you choose the container &mdash; not a tweak you apply afterwards.</p>
+  <p>The ladder below is the whole vocabulary. O(1) is a dict lookup or a <code>deque</code> append: it does not care
+  about <span class="mono">n</span>. O(log n) is a binary search or a heap push &mdash; doubling
+  <span class="mono">n</span> adds a single step. O(n) is scanning a list. O(n log n) is a sort, the realistic floor
+  for comparison sorting. O(n&sup2;) is a nested loop over the data: perfectly fine at
+  <span class="mono">n = 100</span>, and fatal at <span class="mono">n = 10&#8310;</span>.</p>
 
-  <p class="lead">Weeks 4 and 5 gave you a backtester and fast signals. One run, one symbol set, a DataFrame
-  that fits in RAM. That works &mdash; until it doesn't.</p>
-
-  <p>Two things break at the same time. <b>Feature pipelines explode in size:</b> rolling features across ten
-  symbols &times; months of ticks &times; a dozen transforms quickly exceeds a single pandas frame held in memory.
-  And <b>a real search is thousands of runs:</b> tuning a lookback or a threshold means re-running the backtest
-  across a grid &mdash; sequentially that is hours, in parallel it is minutes.</p>
-
-  <p>So this week has exactly two skills: <b>store and stream data efficiently</b>, and <b>spread compute across
-  cores and machines</b>. Both are prerequisites for Week 7's machine learning, where training is only feasible
-  if your data is already cheap to read and your compute already fans out.</p>
-
-  <h3 style="margin-top:26px">The memory wall</h3>
-  <p>A DataFrame lives in RAM. pandas loads the whole frame plus overhead &mdash; often <b>2&ndash;10&times; the
-  file size</b> &mdash; and once your working set approaches physical memory, everything falls off a cliff. The OS
-  starts swapping to disk, which is roughly <b>1000&times; slower</b>. The symptoms are familiar: a
-  <code>MemoryError</code>, a machine grinding to a halt, a notebook that never returns. The dataset didn't
-  change. Your access pattern did.</p>
-
-  <div class="grid3" style="margin-top:18px">
-    <div class="box">
-      <h4>1 &middot; Store smaller</h4>
-      <p>Downcast <code>float64</code>&rarr;<code>float32</code>, <code>object</code>&rarr;<code>category</code>,
-      and write columnar Parquet instead of CSV text. Often this alone removes the problem.</p>
-    </div>
-    <div class="box">
-      <h4>2 &middot; Process in chunks</h4>
-      <p>If it won't fit, don't load it all. Stream bounded pieces and reduce as you go: constant memory,
-      any file size.</p>
-    </div>
-    <div class="box">
-      <h4>3 &middot; Go out-of-core</h4>
-      <p>Spread the work over processes, then over machines. Last resort, not first &mdash; and only after
-      you have measured.</p>
-    </div>
-  </div>
-
-  <p><b>Measure first.</b> <code>df.info(memory_usage='deep')</code> and <code>df.memory_usage()</code> tell you
-  what you actually hold. The widget below is that calculation, made draggable: pick a shape, pick dtypes, and
-  watch the bar cross the RAM line.</p>
-
-  <!-- ── WIDGET 1 ─────────────────────────────────────────────── -->
   <div class="panel">
    <div class="panel-head">
-     <h3>The memory wall, as a calculator</h3>
-     <span class="tag">Widget 1 &middot; drag the shape, flip the dtypes</span>
+     <h3>The Big-O race</h3>
+     <span class="tag">Widget 1 &middot; drag n</span>
    </div>
-
    <div class="ctls">
      <div class="ctl">
-       <label for="mw-rows">Rows <span class="v" id="mw-rows-v">10,833,068</span></label>
-       <input type="range" id="mw-rows" min="0" max="48" value="31" step="1"
-              aria-label="Number of rows in the tick dataset, logarithmic scale" />
-     </div>
-     <div class="ctl">
-       <label for="mw-feat">Feature columns <span class="v" id="mw-feat-v">8</span></label>
-       <input type="range" id="mw-feat" min="0" max="34" value="8" step="1"
-              aria-label="Number of rolling feature columns added to the tick schema" />
-     </div>
-     <div class="ctl">
-       <label for="mw-ram">Machine RAM <span class="v" id="mw-ram-v">16 GB</span></label>
-       <input type="range" id="mw-ram" min="0" max="4" value="1" step="1"
-              aria-label="Physical memory available on the machine" />
+       <label for="bo-n">Input size n <span class="v" id="bo-nv">1,024</span></label>
+       <input type="range" id="bo-n" min="0" max="48" step="1" value="24"
+              aria-label="Input size n, logarithmic from 8 to one million" />
      </div>
      <div class="ctl" style="flex:0 0 auto;min-width:auto">
-       <label>Presets</label>
+       <label>Bar axis</label>
+       <div class="btnrow" role="tablist" aria-label="Bar axis scale">
+         <button class="btn" id="bo-log" role="tab" aria-selected="true">Log</button>
+         <button class="btn" id="bo-lin" role="tab" aria-selected="false">Linear</button>
+       </div>
+     </div>
+     <div class="ctl" style="flex:0 0 auto;min-width:auto">
+       <label>Per-tick budget</label>
        <div class="btnrow">
-         <button class="btn" id="mw-wide" type="button">All float64 / object</button>
-         <button class="btn" id="mw-narrow" type="button">Downcast everything</button>
+         <span class="chip hl mono">1 ms &middot; 25,000 ops</span>
        </div>
      </div>
    </div>
-
    <div class="panel-body">
-    <div class="grid-side">
-      <div>
-        <svg class="viz" id="mw-svg" viewBox="0 0 660 188" role="img"
-             aria-label="Horizontal bars comparing the in-memory pandas footprint, the Parquet file size and the CSV file size for the chosen dataset shape, against a vertical marker showing the machine's physical memory."></svg>
-        <div class="legend">
-          <span><i style="background:var(--accent-2)"></i> in RAM (pandas)</span>
-          <span><i style="background:#3fb950"></i> on disk (Parquet + zstd)</span>
-          <span><i style="background:#6f757f"></i> on disk (CSV text)</span>
-          <span><i style="background:#f85149;height:11px;width:2px"></i> physical RAM</span>
-        </div>
-        <div class="warnbar" id="mw-warn">&nbsp;</div>
-      </div>
-
-      <div>
-        <h4 style="margin-bottom:6px">Tick schema &mdash; pick a dtype per column</h4>
-        <div id="mw-cols"></div>
-        <div class="kv" style="margin-top:12px">
-          <span class="k2">bytes / row</span><span class="v2" id="mw-perrow">&mdash;</span>
-          <span class="k2">columns</span><span class="v2" id="mw-ncols">&mdash;</span>
-          <span class="k2">object overhead</span><span class="v2" id="mw-objov">&mdash;</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="stats" style="margin-top:16px;border:1px solid var(--line);border-radius:9px;overflow:hidden">
-      <div class="stat"><div class="k">Rows</div><div class="v" id="mw-s-rows">&mdash;</div><div class="d">ticks</div></div>
-      <div class="stat"><div class="k">In RAM</div><div class="v" id="mw-s-ram">&mdash;</div><div class="d">pandas frame + index</div></div>
-      <div class="stat"><div class="k">Of physical</div><div class="v" id="mw-s-pct">&mdash;</div><div class="d">before any copy</div></div>
-      <div class="stat"><div class="k">Parquet</div><div class="v" id="mw-s-pq">&mdash;</div><div class="d">columnar + zstd</div></div>
-      <div class="stat"><div class="k">CSV</div><div class="v" id="mw-s-csv">&mdash;</div><div class="d">row-oriented text</div></div>
-      <div class="stat"><div class="k">Saved</div><div class="v" id="mw-s-save">&mdash;</div><div class="d">vs all-wide dtypes</div></div>
+    <div class="bigo-grid">
+     <div>
+       <svg class="viz" id="bo-svg" viewBox="0 0 620 262" aria-label="Horizontal bar chart comparing operation counts for constant, logarithmic, linear, linearithmic and quadratic complexity at the selected input size, with a one millisecond per-tick budget marker."></svg>
+       <div class="legend">
+         <span><i style="background:var(--ok)"></i> inside budget</span>
+         <span><i style="background:var(--warn)"></i> at the edge</span>
+         <span><i style="background:var(--bad)"></i> blown &mdash; you are trading stale prices</span>
+         <span><i style="background:var(--accent-3)"></i> 1 ms budget marker</span>
+       </div>
+     </div>
+     <div>
+       <h4>Double n and see who notices</h4>
+       <div class="tscroll">
+         <table class="mini" id="bo-tbl">
+           <thead><tr><th>Class</th><th class="num">ops at n</th><th class="num">ops at 2n</th><th class="num">&times;</th></tr></thead>
+           <tbody></tbody>
+         </table>
+       </div>
+       <div class="warnbar" id="bo-note"></div>
+     </div>
     </div>
    </div>
-
-   <div class="panel-note">An <code>object</code> column does not store 8 bytes per row &mdash; it stores an
-   8-byte pointer <b>plus</b> a Python string object of roughly 60 bytes. That single choice is usually the
-   whole 2&ndash;10&times; overhead. <code>category</code> replaces it with a 1-byte code and one shared
-   dictionary. Parquet sizes assume zstd at per-dtype ratios; a real file will differ, the ordering will not.</div>
+   <div class="panel-note">Wall times assume a flat <b>40 ns per elementary operation</b> &mdash; roughly interpreted
+   Python. The constant is a guess; the <i>shape</i> is not. Switch to the linear axis to see why O(n&sup2;) is a
+   different kind of animal, then switch back to log to read all five at once.</div>
   </div>
 
-  <h3 style="margin-top:30px">Row versus columnar &mdash; CSV versus Parquet</h3>
-  <p>How bytes are laid out on disk decides how many of them you must read, and how well they compress.
-  <b>CSV</b> is row-oriented text: no types, no column pruning, huge on disk, and re-parsed from scratch every
-  time. <b>Parquet</b> is columnar, typed and compressed, so you read only the columns and row groups you
-  actually touch. Columns of similar values compress 5&ndash;20&times; under zstd or snappy.</p>
-  <p>The rule is simple: <b>CSV to exchange with humans, Parquet for anything you re-read.</b> You will feel the
-  difference in Widget 4.</p>
-
-  <div class="grid2" style="margin-top:6px">
-   <div>
-    <h4>pandas &mdash; eager</h4>
-    <pre class="code"><span class="c"># each line runs now, single-core, in RAM</span>
-df = pd.read_parquet(<span class="s">'ticks.parquet'</span>)
-out = (df[df.symbol == <span class="s">'AAPL'</span>]
-         .assign(ret=df.close.pct_change())
-         .groupby(<span class="s">'symbol'</span>).ret.std())</pre>
-   </div>
-   <div>
-    <h4>Polars &mdash; lazy</h4>
-    <pre class="code"><span class="c"># builds a plan, optimises it, runs multi-core</span>
-out = (pl.scan_parquet(<span class="s">'ticks.parquet'</span>)
-         .filter(pl.col(<span class="s">'symbol'</span>) == <span class="s">'AAPL'</span>)
-         .select(pl.col(<span class="s">'close'</span>).pct_change())
-         .collect())   <span class="c"># the plan runs HERE</span></pre>
-   </div>
+  <div class="grid2" style="margin-top:22px">
+    <div class="box">
+      <h4>Reading Big-O correctly</h4>
+      <p><b>Constants still matter.</b> O(n) with a tight inner loop can beat O(log n) with heavy per-call overhead
+      at small <span class="mono">n</span> &mdash; but <span class="mono">n</span> grows, and the curve always wins
+      eventually.</p>
+      <p><b>Worst versus average.</b> A dict is O(1) average and O(n) worst under pathological collisions. You design
+      for the common case and you guard the tail.</p>
+      <p><b>Amortised cost</b> is the honest average over a sequence. <code>list.append</code> is O(1) amortised: the
+      occasional O(n) resize is averaged over many cheap appends. Judge the workload, not the worst single call.</p>
+    </div>
+    <div class="box">
+      <h4>Time versus space</h4>
+      <p><b>Time complexity</b> is what you usually optimise in a hot path &mdash; cycles are the scarce resource per
+      tick.</p>
+      <p><b>Space complexity</b> is how much memory grows with <span class="mono">n</span>. A cache or lookup table
+      buys speed with memory: the classic space-for-time trade.</p>
+      <p>In a live market that trade is usually worth taking. Memory is cheap and refills overnight; a tick you were
+      too slow to price is gone forever.</p>
+    </div>
   </div>
-  <p class="sub">The course stack ships <b>numpy + pandas</b>; Polars is the big-data option, not a requirement.
-  pandas is eager, single-core and in-RAM &mdash; mature, universal, and fine below roughly 1&ndash;5 GB. Polars
-  builds a query plan, optimises it, runs multi-core and can stream larger-than-RAM. Pick pandas for interop and
-  small-to-medium data; pick Polars for wide scans, many gigabytes, and speed-critical pipelines.</p>
+
+  <h3 style="margin-top:26px">Choosing the container <i>is</i> choosing the complexity</h3>
+  <p>Know the cost of the operation you perform most often, then pick the structure that makes that one operation
+  cheap. Everything else is negotiable.</p>
+  <div class="panel">
+    <div class="panel-head"><h3>Core structures &amp; their costs</h3><span class="tag">the four that carry trading code</span></div>
+    <div class="tscroll">
+     <table class="mini">
+      <thead><tr><th>structure</th><th>access</th><th>search</th><th>insert</th><th>delete</th><th>the question it answers</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">list / array</td><td class="mono">O(1) idx</td><td class="mono">O(n)</td><td class="mono">O(n) mid</td><td class="mono">O(n) mid</td><td>ordered sequence; append is O(1) amortised</td></tr>
+        <tr class="hl"><td class="mono">dict</td><td class="mono">O(1) key</td><td class="mono">O(1) avg</td><td class="mono">O(1) avg</td><td class="mono">O(1) avg</td><td><b>&ldquo;what is X?&rdquo;</b> &mdash; order id &rarr; Order</td></tr>
+        <tr class="hl"><td class="mono">set</td><td class="mono">&mdash;</td><td class="mono">O(1) avg</td><td class="mono">O(1) avg</td><td class="mono">O(1) avg</td><td><b>&ldquo;have I seen X?&rdquo;</b> &mdash; dedup seen ids</td></tr>
+        <tr class="hl"><td class="mono">deque</td><td class="mono">O(n) mid</td><td class="mono">O(n)</td><td class="mono">O(1) ends</td><td class="mono">O(1) ends</td><td><b>&ldquo;last k things?&rdquo;</b> &mdash; <code>maxlen</code> is a free window</td></tr>
+        <tr class="hl"><td class="mono">heap / pq</td><td class="mono">O(1) min</td><td class="mono">O(n)</td><td class="mono">O(log n)</td><td class="mono">O(log n)</td><td><b>&ldquo;best of many?&rdquo;</b> &mdash; best bid/ask, top-k</td></tr>
+        <tr><td class="mono">binary search</td><td class="mono">O(log n)</td><td class="mono">O(log n)</td><td class="mono">&mdash;</td><td class="mono">&mdash;</td><td>lookup in a <i>sorted</i> sequence</td></tr>
+      </tbody>
+     </table>
+    </div>
+    <div class="panel-note"><code>heapq</code> is a <b>min</b>-heap over tuples &mdash; negate the key for a max-heap.
+    That single detail is why the bid side of a book stores <span class="mono">-price</span>.</div>
+  </div>
  </div>
 </section>
 
-<!-- ══════════════════════════════ HOW ══════════════════════════════ -->
 <section id="how">
  <div class="wrap">
   <div class="eyebrow">How does it work?</div>
-  <h2>Vectorise, then chunk, then fan out across processes</h2>
+  <h2>The order book is a data-structure problem</h2>
+  <p class="lead">An order book must answer <b>&ldquo;what is the best price?&rdquo;</b> constantly, and it must match by
+  <b>price&ndash;time priority</b>: best price first, and within a price, earliest arrival first. Every design decision
+  in <code>shared/orderbook.py</code> follows from those two sentences.</p>
+  <p>The naive answer is a list of resting orders that you scan to find the best bid and ask. That scan is O(n), and
+  you do it on <i>every single incoming order</i>. Book depth is not small and it grows during exactly the volatile
+  moments when you need speed most.</p>
+  <p>The arena's answer is a <b>min-heap plus a dict</b>. The heap gives O(log n) insert and O(1) peek at the extreme
+  &mdash; exactly the operation repeated most. The heap is keyed on the tuple
+  <code>(price, seq, order_id)</code>: price orders the book, <span class="mono">seq</span> breaks ties by strict
+  arrival order, and the id is the final tiebreak. It is <span class="mono">seq</span> and not a timestamp because
+  floats tie and a monotonic counter never does &mdash; that is what makes time priority <i>true</i> rather than
+  approximate.</p>
+  <p>The last trick is where students get surprised. A <code>dict</code> of live orders is the <b>canonical source of
+  truth</b>; the heaps are only a fast index into it. Cancelling deletes from the dict and leaves the heap entry
+  behind &mdash; <b>lazy deletion</b> &mdash; so cancels are O(1) and stale entries are discarded when they surface at
+  the top. Reads iterate the canonical set, so a lazily-stale heap entry can never leak into an answer.</p>
 
-  <p class="lead">Three levers, in this order. Most people reach for the third first and wonder why a cluster
-  didn't help.</p>
-
-  <p><b>Lever one: stop looping in Python.</b> A Python-level <code>for</code> over a price series pays
-  interpreter overhead on every element &mdash; boxing, dispatch, bounds checks. numpy pushes the same arithmetic
-  into a typed C loop over contiguous memory and pays it once. <code>df.apply()</code> sits awkwardly in the
-  middle: it is a Python call per row wearing a vectorised costume.</p>
-
-  <!-- ── WIDGET 2 ─────────────────────────────────────────────── -->
   <div class="panel">
    <div class="panel-head">
-     <h3>The vectorisation race</h3>
-     <span class="tag">Widget 2 &middot; same arithmetic, three ways</span>
+     <h3>Order-book structure explorer</h3>
+     <span class="tag">Widget 2 &middot; same command stream, two structures</span>
    </div>
-
    <div class="ctls">
-     <div class="ctl">
-       <label for="vz-n">Elements <span class="v" id="vz-n-v">977,808</span></label>
-       <input type="range" id="vz-n" min="0" max="44" value="28" step="1"
-              aria-label="Number of array elements to process, logarithmic scale" />
-     </div>
      <div class="ctl" style="flex:0 0 auto;min-width:auto">
-       <label>Run the race</label>
-       <div class="btnrow">
-         <button class="btn primary" id="vz-run" type="button">&#9654; Run</button>
-         <button class="btn" id="vz-reset" type="button">&#8634; Reset</button>
+       <label>Side of the order you send</label>
+       <div class="btnrow" role="group" aria-label="Order side">
+         <button class="btn on" id="ob-buy" aria-pressed="true">Buy (bid)</button>
+         <button class="btn" id="ob-sell" aria-pressed="false">Sell (ask)</button>
        </div>
      </div>
+     <div class="ctl">
+       <label for="ob-qty">Quantity <span class="v" id="ob-qtyv">200</span></label>
+       <input type="range" id="ob-qty" min="100" max="1500" step="100" value="200" aria-label="Order quantity" />
+     </div>
+     <div class="ctl" style="flex:1 1 260px">
+       <label>Click a price to rest a limit order there</label>
+       <div class="ladder-row" id="ob-prices" role="group" aria-label="Price levels"></div>
+     </div>
    </div>
-
+   <div class="ctls" style="border-top:1px solid var(--line)">
+     <div class="btnrow">
+       <button class="btn primary" id="ob-mkt">Send market order &rarr;</button>
+       <button class="btn" id="ob-cancel">Cancel a random resting order</button>
+       <button class="btn" id="ob-run50">Run 50 random ops</button>
+       <button class="btn" id="ob-reset">&#8634; Reset</button>
+     </div>
+   </div>
    <div class="panel-body">
     <div class="grid-side">
      <div>
-      <div class="lane">
-        <div class="nm" style="color:#f85149">Python <code>for</code><span class="s2">interpreted, per element</span></div>
-        <div class="tr"><div class="fl" id="vz-f0" style="background:#f85149"></div></div>
-        <div class="tm" id="vz-t0">&mdash;</div>
-      </div>
-      <div class="lane">
-        <div class="nm" style="color:#d29922"><code>df.apply()</code><span class="s2">a Python call per row</span></div>
-        <div class="tr"><div class="fl" id="vz-f1" style="background:#d29922"></div></div>
-        <div class="tm" id="vz-t1">&mdash;</div>
-      </div>
-      <div class="lane">
-        <div class="nm" style="color:#3fb950">numpy vectorised<span class="s2">one typed C loop</span></div>
-        <div class="tr"><div class="fl" id="vz-f2" style="background:#3fb950"></div></div>
-        <div class="tm" id="vz-t2">&mdash;</div>
-      </div>
-      <div class="warnbar" id="vz-warn">Press <b>Run</b>. All three lanes advance at the same speed on a shared
-      scale, so the lane that finishes first is genuinely faster.</div>
+       <h4>The book &mdash; canonical state (the dict)</h4>
+       <svg class="viz" id="ob-svg" viewBox="0 0 560 300" aria-label="Order book ladder showing ask levels above and bid levels below, with resting quantity per price level and the best bid and best ask marked."></svg>
+       <div class="legend">
+         <span><i style="background:rgba(63,185,80,0.55)"></i> bids</span>
+         <span><i style="background:rgba(248,81,73,0.55)"></i> asks</span>
+         <span><i style="background:var(--accent-3)"></i> best bid / best ask</span>
+       </div>
+       <h4 style="margin-top:16px">Operation log</h4>
+       <div class="oplog" id="ob-log" aria-live="polite" aria-label="Operation log"></div>
      </div>
-
      <div>
-      <pre class="code"><span class="c"># 1 · Python loop — interpreter per element</span>
-out = []
-<span class="k">for</span> i <span class="k">in</span> range(1, len(px)):
-    out.append(px[i] / px[i-1] - 1)
-
-<span class="c"># 2 · df.apply — still a Python call per row</span>
-df[<span class="s">'ret'</span>] = df.close.apply(f)
-
-<span class="c"># 3 · vectorised — one C loop, no Python</span>
-ret = px[1:] / px[:-1] - 1</pre>
-      <div class="kv" style="margin-top:10px">
-        <span class="k2">loop vs numpy</span><span class="v2" id="vz-sp0">&mdash;</span>
-        <span class="k2">apply vs numpy</span><span class="v2" id="vz-sp1">&mdash;</span>
-      </div>
+       <h4>Cumulative elementary operations</h4>
+       <div class="lane">
+         <div class="nm" style="color:var(--accent-3)">heap + dict</div>
+         <div class="tr"><div class="fl" id="ob-fill-a" style="width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-2))"></div></div>
+         <div class="tm" id="ob-ops-a">0</div>
+       </div>
+       <div class="lane">
+         <div class="nm" style="color:var(--bad)">sorted list</div>
+         <div class="tr"><div class="fl" id="ob-fill-b" style="width:0%;background:linear-gradient(90deg,#8f2b26,var(--bad))"></div></div>
+         <div class="tm" id="ob-ops-b">0</div>
+       </div>
+       <div class="stats" style="margin-top:14px;border:1px solid var(--line);border-radius:9px;overflow:hidden">
+         <div class="stat"><div class="k">resting orders</div><div class="v" id="ob-n">0</div><div class="d">book depth n</div></div>
+         <div class="stat"><div class="k">ops this action</div><div class="v" id="ob-last">&mdash;</div><div class="d">heap+dict / list</div></div>
+         <div class="stat"><div class="k">list overhead</div><div class="v" id="ob-ratio">&mdash;</div><div class="d">&times; the heap design</div></div>
+       </div>
+       <h4 style="margin-top:16px">Bid heap &mdash; top entries <span class="mono" style="color:var(--ink-mute)">(-price, seq, id)</span></h4>
+       <div class="heaplist" id="ob-heap"></div>
+       <div class="warnbar" id="ob-note"></div>
      </div>
     </div>
    </div>
-
-   <div class="panel-note">Modelled at <b>65 ns</b> per element for the Python loop, <b>22 ns</b> for
-   <code>apply</code>, and <b>0.9 ns</b> plus a fixed <b>12 &micro;s</b> of call overhead for numpy. Those
-   constants are illustrative but the shape is real: below a few thousand elements numpy's overhead dominates
-   and the loop is fine; above a million, the loop is a coffee break and above ten million it is a lunch break.</div>
+   <div class="panel-note">Costs are counted as elementary operations, not seconds. <b>heap + dict:</b> one dict write
+   plus <span class="mono">&lceil;log&#8322;n&rceil;</span> sift steps on insert, a single dict delete on cancel (lazy),
+   and a sift per stale entry discarded at the top. <b>sorted list:</b> a binary search to find the slot plus the
+   <span class="mono">O(n)</span> shift to make room, and a linear scan plus shift to cancel. Push the depth up and
+   watch only one of the two counters care.</div>
   </div>
 
-  <p style="margin-top:26px"><b>Lever two: bound your memory, not your file size.</b> If it won't fit, don't load
-  it all. Read a stream of chunks, reduce each one, and combine &mdash; constant memory for any file size. This is
-  a local map&ndash;reduce, and it is the same shape you will later run across processes and machines.</p>
+  <h3 style="margin-top:30px">The other hot path: statistics that recompute themselves</h3>
+  <p><code>on_tick</code> fires on every price update. If it recomputes a mean and a volatility over the full window
+  each time, the per-tick cost is O(k) and the session cost is O(n&middot;k) &mdash; the classic O(n&sup2;) trap when
+  the window is the whole history. The fix is to keep <b>running state</b> instead of rescanning: a running sum gives
+  an O(1) mean, and <b>Welford's method</b> gives mean <i>and</i> variance in one pass, in constant time, without ever
+  storing history.</p>
 
-  <pre class="code"><span class="c"># bounded pieces, streaming reduce → O(1) memory</span>
-total, n = 0.0, 0
-<span class="k">for</span> chunk <span class="k">in</span> pd.read_csv(<span class="s">'huge.csv'</span>, chunksize=1_000_000):
-    total += chunk[<span class="s">'volume'</span>].sum()   <span class="c"># MAP: reduce per chunk</span>
-    n     += len(chunk)
-<span class="k">print</span>(total / n)   <span class="c"># REDUCE: never held the full file in RAM</span></pre>
-
-  <p><b>Lever three: use processes, not threads.</b> The GIL lets only one thread execute Python bytecode at a
-  time, so for CPU-bound work threads buy you nothing &mdash; they take turns. Separate processes have separate
-  interpreters and separate GILs, which is real parallelism. <code>ProcessPoolExecutor</code> is the clean stdlib
-  API; joblib's <code>Parallel/delayed</code> is the same idea in one line. The
-  <code>if __name__ == '__main__':</code> guard is mandatory, not stylistic: without it each spawned child
-  re-imports your module and re-launches the pool.</p>
-
-  <p>Map&ndash;reduce is the mental model behind all of it. <b>Map</b> applies the same function to each
-  independent piece &mdash; per symbol, per chunk, per parameter. <b>Reduce</b> combines the partials: a sum, a
-  concat, a best-Sharpe. The <b>shard key</b> is the split, and you choose it so the pieces are genuinely
-  independent. Backtests are the poster child: no run needs another, so speedup is near-linear. A stateful order
-  book is the counter-example &mdash; it cannot be sharded blindly, because the dependencies force coordination.</p>
-
-  <!-- ── WIDGET 3 ─────────────────────────────────────────────── -->
   <div class="panel">
    <div class="panel-head">
-     <h3>Chunk it, map it, reduce it</h3>
-     <span class="tag">Widget 3 &middot; step the pipeline, add workers</span>
+     <h3>Rolling statistics: full recompute vs Welford</h3>
+     <span class="tag">Widget 3 &middot; same numbers, different curve</span>
    </div>
-
    <div class="ctls">
      <div class="ctl">
-       <label for="mr-chunk">Chunk size <span class="v" id="mr-chunk-v">1,000,000</span></label>
-       <input type="range" id="mr-chunk" min="0" max="5" value="2" step="1"
-              aria-label="Rows per chunk read from the tick file" />
+       <label for="rs-k">Window k <span class="v" id="rs-kv">50</span></label>
+       <input type="range" id="rs-k" min="5" max="500" step="5" value="50" aria-label="Rolling window size k" />
      </div>
      <div class="ctl">
-       <label for="mr-work">Workers <span class="v" id="mr-work-v">4</span></label>
-       <input type="range" id="mr-work" min="1" max="16" value="4" step="1"
-              aria-label="Number of parallel workers processing chunks" />
+       <label for="rs-n">Ticks in the session <span class="v" id="rs-nv">4,000</span></label>
+       <input type="range" id="rs-n" min="200" max="20000" step="200" value="4000" aria-label="Number of ticks in the session" />
      </div>
      <div class="ctl" style="flex:0 0 auto;min-width:auto">
-       <label>Execution</label>
-       <label class="sw" style="margin-top:2px">
-         <input type="checkbox" id="mr-threads" aria-label="Use threads instead of processes, which serialises CPU-bound work behind the GIL" />
-         <span class="track"></span><span>threads, not processes</span>
-       </label>
-     </div>
-     <div class="ctl" style="flex:0 0 auto;min-width:auto">
-       <label>Pipeline</label>
+       <label>Stream it</label>
        <div class="btnrow">
-         <button class="btn" id="mr-step" type="button">Step &rarr;</button>
-         <button class="btn primary" id="mr-play" type="button">&#9654; Play</button>
-         <button class="btn" id="mr-reset" type="button">&#8634; Reset</button>
+         <button class="btn" id="rs-play">&#9654; Play the session</button>
+         <button class="btn" id="rs-reset">&#8634; Reset</button>
        </div>
      </div>
    </div>
-
    <div class="panel-body">
-    <svg class="viz" id="mr-svg" viewBox="0 0 660 300" role="img"
-         aria-label="A tick file split into chunks flowing into parallel worker lanes, each computing a partial sum, then into a single reduce box that combines the partials into a mean."></svg>
-
-    <div class="stats" style="margin-top:14px;border:1px solid var(--line);border-radius:9px;overflow:hidden">
-      <div class="stat"><div class="k">Chunks</div><div class="v" id="mr-s-chunks">&mdash;</div><div class="d">of 240 M rows</div></div>
-      <div class="stat"><div class="k">Peak memory</div><div class="v" id="mr-s-mem">&mdash;</div><div class="d">one chunk, constant</div></div>
-      <div class="stat"><div class="k">Sequential</div><div class="v" id="mr-s-seq">&mdash;</div><div class="d">one worker</div></div>
-      <div class="stat"><div class="k">Parallel</div><div class="v" id="mr-s-par">&mdash;</div><div class="d">wall clock</div></div>
-      <div class="stat"><div class="k">Speedup</div><div class="v" id="mr-s-sp">&mdash;</div><div class="d">vs sequential</div></div>
-      <div class="stat"><div class="k">Efficiency</div><div class="v" id="mr-s-eff">&mdash;</div><div class="d">speedup / workers</div></div>
-    </div>
-
-    <div class="grid-side" style="margin-top:14px">
-      <div class="warnbar" id="mr-warn">&nbsp;</div>
-      <div class="oplog" id="mr-log"></div>
+    <div class="grid-side">
+     <div>
+       <h4>Cumulative operations across the session</h4>
+       <svg class="viz" id="rs-svg" viewBox="0 0 600 250" aria-label="Line chart of cumulative elementary operations over the session for the naive full-window recompute versus the incremental constant-time update."></svg>
+       <div class="legend">
+         <span><i style="background:var(--bad)"></i> naive full-window recompute &mdash; O(k) per tick</span>
+         <span><i style="background:var(--ok)"></i> deque + Welford &mdash; O(1) per tick</span>
+       </div>
+       <div class="lane">
+         <div class="nm" style="color:var(--bad)">naive</div>
+         <div class="tr"><div class="fl" id="rs-fill-slow" style="width:0%;background:linear-gradient(90deg,#8f2b26,var(--bad))"></div></div>
+         <div class="tm" id="rs-t-slow">&mdash;</div>
+       </div>
+       <div class="lane">
+         <div class="nm" style="color:var(--ok)">O(1) rolling</div>
+         <div class="tr"><div class="fl" id="rs-fill-fast" style="width:0%;background:linear-gradient(90deg,#1f7a33,var(--ok))"></div></div>
+         <div class="tm" id="rs-t-fast">&mdash;</div>
+       </div>
+       <div class="warnbar" id="rs-note"></div>
+     </div>
+     <div>
+       <div class="stats" style="border:1px solid var(--line);border-radius:9px;overflow:hidden">
+         <div class="stat"><div class="k">ops / tick naive</div><div class="v bad" id="rs-ot-slow">&mdash;</div><div class="d">grows with k</div></div>
+         <div class="stat"><div class="k">ops / tick O(1)</div><div class="v ok" id="rs-ot-fast">&mdash;</div><div class="d">flat, forever</div></div>
+         <div class="stat"><div class="k">speed-up</div><div class="v warn" id="rs-speed">&mdash;</div><div class="d">total ops ratio</div></div>
+       </div>
+       <h4 style="margin-top:15px">Both methods agree &mdash; that is the point</h4>
+       <div class="kv">
+         <span class="k2">mean &mdash; naive rescan</span><span class="v2" id="rs-m-slow">&mdash;</span>
+         <span class="k2">mean &mdash; Welford</span><span class="v2" id="rs-m-fast">&mdash;</span>
+         <span class="k2">variance &mdash; naive rescan</span><span class="v2" id="rs-v-slow">&mdash;</span>
+         <span class="k2">variance &mdash; Welford</span><span class="v2" id="rs-v-fast">&mdash;</span>
+         <span class="k2">absolute disagreement</span><span class="v2" id="rs-diff">&mdash;</span>
+       </div>
+       <p class="sub">Welford is not just faster, it is <b>more trustworthy</b>. The textbook
+       <span class="mono">E[x&sup2;] &minus; E[x]&sup2;</span> shortcut subtracts two large, nearly equal numbers and
+       loses catastrophic precision on price levels far from zero &mdash; and every equity price is far from zero.
+       Welford never forms the sum of squares at all.</p>
+<pre class="code"><span class="c"># O(1) per tick, numerically stable</span>
+<span class="k">class</span> Welford:
+    <span class="k">def</span> __init__(self):
+        self.n=0; self.mean=0.0; self.m2=0.0
+    <span class="k">def</span> update(self, x):
+        self.n += 1
+        d = x - self.mean
+        self.mean += d / self.n
+        self.m2   += d * (x - self.mean)
+    @property
+    <span class="k">def</span> var(self):
+        <span class="k">return</span> self.m2/(self.n-1) <span class="k">if</span> self.n&gt;1 <span class="k">else</span> 0.0</pre>
+     </div>
     </div>
    </div>
-
-   <div class="panel-note">Modelled at <b>80 ns</b> per row of work, <b>0.35 s</b> of process start-up per worker
-   and <b>0.4 ms</b> to return each chunk's partial across the boundary. Notice three things: peak memory is one
-   chunk regardless of file size; efficiency <b>falls</b> as you add workers, because start-up is a fixed cost
-   parallelism cannot amortise away; and past a point more workers are <b>slower</b> &mdash; on this file, 16
-   workers lose to 8. Sixteen workers are never sixteen times faster.</div>
+   <div class="panel-note">Same 40 ns per operation. The naive lane charges
+   <span class="mono">2 &times; min(t, k)</span> operations per tick &mdash; one pass for the mean, one for the variance
+   &mdash; while the rolling lane charges a constant four. Nothing about the <i>answer</i> changes; only the curve does.</div>
   </div>
 
-  <pre class="code"><span class="c"># scripts/param_sweep.py — one backtest per process</span>
-<span class="k">from</span> concurrent.futures <span class="k">import</span> ProcessPoolExecutor
-<span class="k">from</span> tests.sim_session <span class="k">import</span> SimSession
-
-<span class="k">def</span> backtest(lookback):
-    fn = make_momentum(lookback)          <span class="c"># one signal_fn per config</span>
-    res = SimSession().run(n_ticks=2000, strategies=[(<span class="s">'m'</span>, fn)],
-                           symbols=[<span class="s">'AAPL'</span>, <span class="s">'TSLA'</span>], seed=7, verbose=<span class="k">False</span>)
-    <span class="k">return</span> lookback, sharpe(res.traders[0].pnl_curve)
-
-<span class="k">if</span> __name__ == <span class="s">'__main__'</span>:            <span class="good"># mandatory for multiprocessing</span>
-    <span class="k">with</span> ProcessPoolExecutor() <span class="k">as</span> pool:
-        <span class="k">for</span> lb, sr <span class="k">in</span> pool.map(backtest, [5, 10, 20, 40, 80]):
-            <span class="k">print</span>(f<span class="s">'lookback={lb:>3}  Sharpe={sr:6.2f}'</span>)</pre>
-
-  <p><b>And make it safe to re-run.</b> Distributed jobs retry, reorder and run out of process, so correctness
-  demands determinism. A task is <b>idempotent</b> when running it twice yields the same result and no
-  double-writes &mdash; key each output by a hash of its inputs. Pin the seed (<code>SimSession(seed=7)</code>),
-  pin data versions, pin dtypes. Keep workers <b>pure</b>: inputs in, output out, no shared mutable state and no
-  hidden globals. Dask and Ray extend exactly these ideas across many machines when one box is no longer enough.</p>
+  <p style="margin-top:22px">Put the two together and <code>on_tick</code> becomes cheap and flat for the whole
+  session. This is the pattern to copy into your bot this week:</p>
+<pre class="code"><span class="k">class</span> MyBot(Trader):
+    <span class="k">def</span> __init__(self):
+        self.win  = deque(maxlen=<span class="s">50</span>)   <span class="c"># O(1) window, free eviction</span>
+        self.stat = Welford()          <span class="c"># O(1) mean + variance</span>
+    <span class="k">def</span> on_tick(self, market, portfolio):
+        px = market.mid(<span class="s">'AAPL'</span>)
+        self.win.append(px)            <span class="c"># O(1)</span>
+        self.stat.update(px)           <span class="c"># O(1)</span>
+        z = (px - self.stat.mean) / (self.stat.var**<span class="s">0.5</span> <span class="k">or</span> <span class="s">1</span>)
+        <span class="k">if</span> z &lt; -<span class="s">2</span>: <span class="k">return</span> Signal(<span class="s">'AAPL'</span>,<span class="s">'buy'</span>,<span class="s">5</span>,px)
+        <span class="k">return</span> <span class="k">None</span></pre>
  </div>
 </section>
 
-<!-- ══════════════════════════════ WHY ══════════════════════════════ -->
 <section id="why">
  <div class="wrap">
   <div class="eyebrow">Why does it matter in trading?</div>
-  <h2>You cannot search a strategy space you cannot afford to run</h2>
+  <h2>Slow code is not a style problem. It is a P&amp;L problem.</h2>
+  <p class="lead">Prices move while you compute. A signal that takes 50 ms to produce is a signal acting on
+  <b>stale data</b> &mdash; the edge you detected has already been taken by someone whose loop was tighter. Complexity
+  in a hot path is not an engineering nicety; it is the difference between providing liquidity and donating it.</p>
+  <p>There are two distinct questions and they pull in opposite directions. <b>Latency</b> is the time for
+  <i>one</i> operation, end to end &mdash; and for a trader, latency <i>is</i> edge. <b>Throughput</b> is operations
+  <i>per second</i> &mdash; and for an exchange, throughput is capacity under load. Batching raises throughput and adds
+  latency. Tune for the role you actually play.</p>
+  <p>Then there is the part that averages hide. A mean of 1 ms with a p99 of 200 ms means one tick in a hundred is
+  catastrophic &mdash; and it will be one of the volatile ticks, because that is when queues are deepest and the book
+  is thickest. <b>Report p50, p95 and p99.</b> The p99 is what gets you picked off during a shock.</p>
 
-  <p class="lead">A single backtest answers one question. Research is a thousand questions &mdash; and the team
-  that can ask a thousand cheaply finds the edge that the team asking ten never sees.</p>
-
-  <p>Concretely: a month of arena ticks across ten symbols with a dozen features is tens of gigabytes as CSV and
-  a couple as Parquet. If every sweep re-parses the CSV, each configuration costs minutes of pure I/O before any
-  strategy logic runs. Cache the features to Parquet once and each configuration reads in seconds. That is the
-  difference between a grid of five lookbacks and a grid of five hundred.</p>
-
-  <p>The same logic runs in the live arena. AlgoArena is not one exchange &mdash; each Exchange team runs its own
-  WebSocket venue, and <code>EXCHANGE_URLS=ws://host:8765,ws://host:8766</code> lets one bot span them all
-  (<code>broker/config.py</code>, <code>trader/arb_trader.py</code>), while the teacher dashboard aggregates flow
-  and P&amp;L across venues into a single view. Meanwhile the headless sim is pure, in-process and network-free,
-  which is precisely why it fans out safely: one process per symbol set or per grid point, each with its seed
-  pinned.</p>
-
-  <!-- ── WIDGET 4 ─────────────────────────────────────────────── -->
   <div class="panel">
    <div class="panel-head">
-     <h3>Which bytes does your query actually read?</h3>
-     <span class="tag">Widget 4 &middot; click columns to build the query</span>
+     <h3>Ticks per second you can sustain &mdash; and the tail that kills you</h3>
+     <span class="tag">Widget 4 &middot; pick a structure, then hit it with a shock</span>
    </div>
-
+   <div class="tabs" role="tablist" aria-label="Order book implementation">
+     <button class="tab" id="tl-t0" role="tab" aria-selected="false">Linear scan list<span class="s">O(n) &mdash; scan every resting order</span></button>
+     <button class="tab" id="tl-t1" role="tab" aria-selected="false">Sorted list<span class="s">O(n) shift &mdash; cheap peek, dear insert</span></button>
+     <button class="tab" id="tl-t2" role="tab" aria-selected="true">Heap + dict<span class="s">O(log n) &mdash; the arena design</span></button>
+   </div>
    <div class="ctls">
-     <div class="ctl" style="flex:1 1 100%">
-       <label>Columns in the <code>SELECT</code> &mdash; click to toggle <span class="v" id="cs-sel-v">2 of 12</span></label>
-       <div class="colgrid" id="cs-cols"></div>
+     <div class="ctl">
+       <label for="tl-depth">Book depth n <span class="v" id="tl-depthv">800</span></label>
+       <input type="range" id="tl-depth" min="20" max="5000" step="20" value="800" aria-label="Book depth, number of resting orders" />
+     </div>
+     <div class="ctl">
+       <label for="tl-rate">Arriving ticks / second <span class="v" id="tl-ratev">2,000</span></label>
+       <input type="range" id="tl-rate" min="200" max="12000" step="200" value="2000" aria-label="Arriving message rate in ticks per second" />
      </div>
      <div class="ctl" style="flex:0 0 auto;min-width:auto">
-       <label>Row-group skipping</label>
-       <label class="sw" style="margin-top:2px">
-         <input type="checkbox" id="cs-push" checked
-                aria-label="Enable predicate pushdown so Parquet skips row groups that cannot match the WHERE clause" />
-         <span class="track"></span><span>predicate pushdown</span>
-       </label>
-     </div>
-     <div class="ctl" style="flex:0 0 auto;min-width:auto">
-       <label>Presets</label>
+       <label>Market condition</label>
        <div class="btnrow">
-         <button class="btn" id="cs-narrow" type="button">ts + close</button>
-         <button class="btn" id="cs-all" type="button">SELECT *</button>
+         <button class="btn" id="tl-shock" aria-pressed="false">&#9889; Shock burst &times;6</button>
        </div>
      </div>
    </div>
-
    <div class="panel-body">
-    <div class="qbox" id="cs-query">&nbsp;</div>
-
-    <svg class="viz" id="cs-svg" viewBox="0 0 660 236" role="img"
-         aria-label="Two physical layouts of the same table: row-oriented storage where every column of every row is interleaved and must be read, and columnar storage where each column is a contiguous stripe divided into row groups, so only the selected stripes and matching row groups are read."></svg>
-
-    <div class="stats" style="margin-top:14px;border:1px solid var(--line);border-radius:9px;overflow:hidden">
-      <div class="stat"><div class="k">CSV read</div><div class="v bad" id="cs-s-csv">&mdash;</div><div class="d">whole file, always</div></div>
-      <div class="stat"><div class="k">Parquet read</div><div class="v ok" id="cs-s-pq">&mdash;</div><div class="d">pruned + compressed</div></div>
-      <div class="stat"><div class="k">Of the file</div><div class="v" id="cs-s-pct">&mdash;</div><div class="d">of ticks.parquet touched</div></div>
-      <div class="stat"><div class="k">CSV time</div><div class="v" id="cs-s-tcsv">&mdash;</div><div class="d">at 550 MB/s</div></div>
-      <div class="stat"><div class="k">Parquet time</div><div class="v" id="cs-s-tpq">&mdash;</div><div class="d">at 550 MB/s</div></div>
-      <div class="stat"><div class="k">Speedup</div><div class="v" id="cs-s-sp">&mdash;</div><div class="d">I/O only</div></div>
+    <div class="stats" style="border:1px solid var(--line);border-radius:9px;overflow:hidden">
+      <div class="stat"><div class="k">service cost</div><div class="v" id="tl-svc">&mdash;</div><div class="d">per message</div></div>
+      <div class="stat"><div class="k">sustainable</div><div class="v" id="tl-cap">&mdash;</div><div class="d">ticks / second</div></div>
+      <div class="stat"><div class="k">utilisation &rho;</div><div class="v" id="tl-rho">&mdash;</div><div class="d">arrival / capacity</div></div>
+      <div class="stat"><div class="k">mean</div><div class="v" id="tl-mean">&mdash;</div><div class="d">looks fine</div></div>
+      <div class="stat"><div class="k">p50</div><div class="v" id="tl-p50">&mdash;</div><div class="d">median tick</div></div>
+      <div class="stat"><div class="k">p95</div><div class="v" id="tl-p95">&mdash;</div><div class="d">1 in 20</div></div>
+      <div class="stat"><div class="k">p99</div><div class="v" id="tl-p99">&mdash;</div><div class="d">this is the one</div></div>
     </div>
-
-    <div class="warnbar" id="cs-warn" style="margin-top:14px">&nbsp;</div>
+    <svg class="viz" id="tl-svg" viewBox="0 0 620 262" style="margin-top:14px" aria-label="Histogram of per-message response latency on a logarithmic axis, with median, ninety-fifth and ninety-ninth percentile markers and a shaded region beyond the one millisecond decision budget."></svg>
+    <div class="legend">
+      <span><i style="background:var(--accent-2)"></i> response-time distribution</span>
+      <span><i style="background:var(--ok)"></i> p50</span>
+      <span><i style="background:var(--warn)"></i> p95</span>
+      <span><i style="background:var(--bad)"></i> p99</span>
+      <span><i style="background:rgba(248,81,73,0.35)"></i> past the 1 ms budget &mdash; picked off</span>
+    </div>
+    <div class="warnbar" id="tl-note"></div>
    </div>
-
-   <div class="panel-note">120 M ticks, 12 columns, 8 row groups, one symbol matching in one group. Row-oriented
-   text has no column pruning and no statistics to skip on, so a <code>WHERE</code> clause saves it nothing
-   &mdash; it still parses every byte. Columnar storage reads the intersection of the columns you named and the
-   row groups that could possibly match, then decompresses only those.</div>
+   <div class="panel-note">A single-server queue: each message costs
+   <span class="mono">ops &times; 40 ns</span> to service, and response time inflates by
+   <span class="mono">1/(1&minus;&rho;)</span> as arrivals approach capacity. That is why the tail explodes long before
+   the mean does &mdash; and why &ldquo;it was fast on my laptop&rdquo; is not a defence. Samples are drawn from a
+   fixed seed, so the picture is reproducible.</div>
   </div>
 
-  <p><b>Scaling up before scaling out.</b> A bigger box is simple &mdash; more RAM, more cores, no code change
-  &mdash; but there is a ceiling and the largest machines cost superlinearly. More boxes are near-unlimited, but
-  you must partition the work and coordinate the results. Start vertical: more RAM plus smaller dtypes plus
-  Parquet very often removes the problem outright. Reach for a cluster only when one machine genuinely cannot,
-  and in this course that means <code>ProcessPoolExecutor</code> across the cores you already own.</p>
-
-  <pre class="code"><span class="c"># build features offline, cache once, read cheaply forever</span>
-PATH = <span class="s">'cache/features.parquet'</span>
-
-<span class="k">def</span> features():
-    <span class="k">if</span> os.path.exists(PATH):
-        <span class="k">return</span> pd.read_parquet(PATH)     <span class="good"># seconds</span>
-    df = build_features()               <span class="bad"># minutes</span>
-    df.to_parquet(PATH)                 <span class="c"># pay it once</span>
-    <span class="k">return</span> df</pre>
-
-  <p class="sub">The fastest computation is the one you don't repeat. Materialise expensive stages once and every
-  sweep afterwards reads the cached frame; <code>functools.lru_cache</code> covers the pure, repeated calls
-  in-process. This cached frame is exactly the <code>history</code> that your
-  <code>signal_fn(symbol, prices, history, book, portfolio)</code> consumes &mdash; built offline, so
-  <code>on_tick</code> does no heavy compute in the loop.</p>
+  <div class="grid2" style="margin-top:22px">
+    <div class="box">
+      <h4>Budget per tick, tail included</h4>
+      <p>Know your ceiling. At a five-second Yahoo poll you have enormous slack; inside a shock burst, when a hundred
+      messages land in the same second, you do not. Measure the p99 rather than the mean, and sit well under the
+      ceiling with room to spare.</p>
+      <p>In the arena this is directly scored: <code>exchange/scoring.py</code> ranks on risk-adjusted return, and a
+      bot that goes blind for 200 ms during the shock is the bot that takes the drawdown.</p>
+    </div>
+    <div class="box">
+      <h4>The levers, in order of payoff</h4>
+      <p><b>1. The right structure.</b> The biggest lever by an order of magnitude. <code>oid in seen_set</code> is
+      O(1); <code>oid in seen_list</code> is O(n).</p>
+      <p><b>2. Hoist allocation out of the loop.</b> Allocate the <code>deque</code> once and reuse it per tick.</p>
+      <p><b>3. Bind methods to locals</b> in a tight loop to skip the attribute lookup.</p>
+      <p><b>4. Vectorise batch maths</b> with numpy where it fits &mdash; batches, not per-tick scalars.</p>
+      <p><b>5. Then stop.</b> Do not tune cold code.</p>
+    </div>
+  </div>
  </div>
 </section>
 
-<!-- ══════════════════════════════ PITFALLS ══════════════════════════════ -->
 <section id="pitfalls">
  <div class="wrap">
   <div class="eyebrow">Common mistakes</div>
   <h2>Five ways this week goes wrong</h2>
-  <p>Every one of these has been submitted by a previous cohort, usually with the words "but it worked on the
-  sample".</p>
+  <p>Every one of these has been submitted, defended in class, and quietly walked back. Read them before you write
+  your benchmark, not after.</p>
 
   <details class="pit">
-    <summary>Using threads for a CPU-bound sweep, then concluding parallelism doesn't help</summary>
+    <summary>Benchmarking once, cold, and reporting the mean</summary>
     <div class="pit-body">
-      <p>You swap the loop for a <code>ThreadPoolExecutor</code>, run sixteen backtests, and the wall clock
-      barely moves &mdash; sometimes it gets worse. The GIL lets only one thread execute Python bytecode at a
-      time, so your sixteen threads are taking turns on one core while paying context-switch and lock overhead
-      for the privilege. Threads are for <b>I/O</b>-bound waiting, which is why the arena's WebSocket code is
-      async and single-threaded.</p>
-      <p><span class="fix">The fix.</span> CPU-bound work goes in <code>ProcessPoolExecutor</code> &mdash;
-      separate interpreters, separate GILs, real cores. Toggle "threads, not processes" in Widget 3 to watch the
-      lanes serialise.</p>
+      <p>A single call is pure noise: imports, cold caches and the interpreter settling all land inside your one
+      measurement. Then the arithmetic mean drags in every unrelated OS hiccup that happened during the run, so the
+      number you publish describes your machine's mood rather than your code.</p>
+      <p><span class="fix">The fix.</span> Warm up and discard the first runs. Loop enough that the total sits well
+      above timer resolution. Repeat the whole measurement and <b>report the minimum</b>, noting the spread &mdash;
+      the minimum is the least-contaminated run. Use <code>timeit</code> for micro-comparisons and
+      <code>time.perf_counter</code> around a block in situ.</p>
     </div>
   </details>
 
   <details class="pit">
-    <summary>Forgetting the <code>if __name__ == '__main__':</code> guard</summary>
+    <summary>Micro-tuning a function that is on the wrong curve</summary>
     <div class="pit-body">
-      <p>Without the guard, every spawned child re-imports your module top to bottom &mdash; which re-creates
-      the pool, which spawns more children. On macOS and Windows, where the default start method is
-      <code>spawn</code> rather than <code>fork</code>, this is an immediate fork bomb or a
-      <code>RuntimeError</code> about starting a process before the current one finished bootstrapping.</p>
-      <p><span class="fix">The fix.</span> All pool creation and all top-level side effects live under the
-      guard. Anything a worker needs must be importable &mdash; module-level functions, not closures or lambdas,
-      because the arguments and the callable are pickled to cross the process boundary.</p>
+      <p>Shaving 15% off an O(n&sup2;) loop feels productive and accomplishes nothing: double the data and you have
+      given the 15% back with interest. Local-name binding and loop unrolling are constant-factor tools, and constants
+      cannot rescue you from the wrong complexity class.</p>
+      <p><span class="fix">The fix.</span> Fix the curve first &mdash; change the data structure &mdash; then chase
+      constants if the profile still says so. Algorithm beats micro-tuning, every time.</p>
     </div>
   </details>
 
   <details class="pit">
-    <summary>Shipping giant objects to workers, so pickling costs more than the compute</summary>
+    <summary>Optimising code that runs twice per session</summary>
     <div class="pit-body">
-      <p>You pass the full 3 GB DataFrame as an argument to each of eight workers. Python serialises it eight
-      times, copies it across eight pipes, and deserialises it eight times &mdash; and your "parallel" job is
-      slower than the loop it replaced, while peak memory is now nine copies of the frame.</p>
-      <p><span class="fix">The fix.</span> Send <b>references, not payloads</b>. Pass a symbol, a file path or a
-      parameter, and let the worker read its own shard from Parquet. That is why the shard key in Widget 3 is a
-      chunk boundary and why the sweep passes a <code>lookback</code> integer, not a dataset.</p>
+      <p>Programmer intuition about where time goes is famously, reliably wrong. The satisfying function to optimise
+      is rarely the expensive one, and a function called twice a session is worth exactly zero seconds of your
+      attention no matter how ugly it is.</p>
+      <p><span class="fix">The fix.</span> Profile before you touch anything. <code>cProfile</code> gives call counts
+      and cumulative time per function and will name the dominator for you. Spend cycles only where they are
+      multiplied by millions of ticks. Measure, do not guess.</p>
     </div>
   </details>
 
   <details class="pit">
-    <summary>Non-idempotent writes that double-count on retry</summary>
+    <summary>Keeping full history so you can &ldquo;recompute properly&rdquo;</summary>
     <div class="pit-body">
-      <p>A worker appends its partial result to a shared CSV. The task times out, the framework retries it, and
-      now those rows are in the file twice. Your Sharpe is computed over a dataset that silently contains
-      duplicated trades, and nothing crashes &mdash; which is the worst kind of bug, because you will believe
-      the number.</p>
-      <p><span class="fix">The fix.</span> Key each output by a hash of its inputs and write to that path:
-      re-running overwrites rather than appends. Pin the seed so a retry reproduces the same numbers, and make
-      the reduce step tolerate seeing a partial twice.</p>
+      <p>Appending every price to a list and calling <code>sum(hist[-k:]) / k</code> in <code>on_tick</code> looks
+      harmless and correct. It is correct. It is also O(k) per tick, which makes the whole session O(n&middot;k), and
+      the slice allocates a fresh list on every single tick inside your hot loop.</p>
+      <p><span class="fix">The fix.</span> Keep running state instead of history: a running sum for the mean, Welford
+      for the variance, and <code>deque(maxlen=k)</code> so the oldest observation evicts itself for free. Per-tick
+      cost stops growing with the session, and allocation leaves the loop.</p>
     </div>
   </details>
 
   <details class="pit">
-    <summary>Renting a cluster before downcasting a dtype</summary>
+    <summary>Trusting one machine, and one run, on an idle laptop</summary>
     <div class="pit-body">
-      <p>The frame doesn't fit, so the instinct is a distributed engine. But the frame is
-      <code>float64</code> everywhere and the symbol column is <code>object</code> &mdash; roughly 60 bytes per
-      row for a ticker that has ten possible values. Half the memory is Python string objects and the other
-      half is precision you do not have: your prices are quoted to the cent, not to sixteen significant digits.</p>
-      <p><span class="fix">The fix.</span> Measure with <code>df.info(memory_usage='deep')</code>, downcast to
-      <code>float32</code> and <code>category</code>, store Parquet, and re-measure. Widget 1 shows a typical
-      frame dropping back under the RAM line from those two changes alone &mdash; no cluster, no new code.</p>
+      <p>A laptop with nothing else running, thermal headroom and a warm cache is not the server your bot competes on.
+      Absolute microsecond figures measured there do not transfer, and a result that only reproduces on your hardware
+      is not a result.</p>
+      <p><span class="fix">The fix.</span> Compare <b>relative</b> numbers &mdash; before versus after, structure A
+      versus structure B &mdash; on the same machine in the same session. Pin your seeds so the workload is identical
+      across runs, and state your environment when you report. Relative speed-ups travel; absolute ones do not.</p>
     </div>
   </details>
  </div>
 </section>
 
-<!-- ══════════════════════════════ CHECK ══════════════════════════════ -->
 <section id="check">
  <div class="wrap">
   <div class="eyebrow">Check yourself</div>
   <h2>Three questions</h2>
   <p class="sub">Instant feedback, nothing recorded. Pick the best answer.</p>
 
-  <div class="q" data-q="1" data-why="Only one thread can execute Python bytecode at a time, so CPU-bound tasks in a thread pool take turns on a single core instead of running in parallel. Separate processes have separate interpreters and separate GILs, which is why ProcessPoolExecutor gives real speedup. Threads are still the right tool for I/O-bound waiting.">
+  <div class="q" data-q="1" data-why="Cancelling only deletes from the canonical dict, which is O(1); the matching heap entry is left behind and discarded when it surfaces at the top. Because every read iterates the canonical set rather than the heap, a stale entry can never leak into a snapshot or a queue-position answer.">
     <div class="qn">Question 1</div>
-    <div class="qt">Your parameter sweep runs 16 CPU-bound backtests in a <code>ThreadPoolExecutor</code> on a
-    16-core machine and is no faster than a plain loop. What is the explanation?</div>
+    <div class="qt">In <code>shared/orderbook.py</code>, cancelling an order removes it from the <code>_orders</code>
+    dict but leaves its entry in the heap. Why is that correct?</div>
     <div class="opts" role="group" aria-label="Question 1 options">
-      <button class="opt" type="button" data-ok="0"><span class="ltr">A</span><span>Sixteen threads is too many; thread pools only scale to about four workers before contention dominates.</span></button>
-      <button class="opt" type="button" data-ok="1"><span class="ltr">B</span><span>The GIL lets only one thread execute Python bytecode at a time, so the threads take turns on one core &mdash; CPU-bound work needs processes.</span></button>
-      <button class="opt" type="button" data-ok="0"><span class="ltr">C</span><span>The backtests are I/O bound, so the machine is waiting on disk rather than computing.</span></button>
+      <button class="opt" data-ok="0"><span class="ltr">A</span><span>Heaps cannot support deletion at all, so the stale entry is an unavoidable memory leak that is tolerated for speed.</span></button>
+      <button class="opt" data-ok="1"><span class="ltr">B</span><span>Cancels stay O(1), stale entries are discarded lazily when they reach the top, and reads iterate the canonical dict so they never observe a stale entry.</span></button>
+      <button class="opt" data-ok="0"><span class="ltr">C</span><span>The heap is rebuilt from scratch after every cancel, which is cheaper than an in-place delete.</span></button>
     </div>
     <div class="fb" role="status"></div>
   </div>
 
-  <div class="q" data-q="2" data-why="Columnar storage lets you read only the columns the query names, so 2 of 20 columns is roughly a tenth of the bytes, and per-column compression plus row-group statistics cut it further. Row-oriented CSV interleaves every column of every row, so there is nothing to prune — a WHERE clause still parses the whole file.">
+  <div class="q" data-q="2" data-why="Big-O deliberately discards constants, so it describes the shape of the growth curve rather than a duration. At n = 40 a heavier-overhead O(log n) implementation can genuinely lose to a tight O(n) scan; the crossover is an empirical question that only a profiler answers.">
     <div class="qn">Question 2</div>
-    <div class="qt">A research query touches 2 of the 20 columns in a 40 GB tick dataset. Which change reduces
-    the bytes read the most?</div>
+    <div class="qt">Your teammate replaces an O(n) list scan with an O(log n) structure and the benchmark gets
+    <i>slower</i> at the book depth you actually run. What is the most defensible reading?</div>
     <div class="opts" role="group" aria-label="Question 2 options">
-      <button class="opt" type="button" data-ok="0"><span class="ltr">A</span><span>Gzip the CSV, so the file on disk is smaller.</span></button>
-      <button class="opt" type="button" data-ok="0"><span class="ltr">B</span><span>Add a <code>WHERE</code> clause to the CSV read so unmatched rows are skipped.</span></button>
-      <button class="opt" type="button" data-ok="1"><span class="ltr">C</span><span>Store it as columnar Parquet and pass <code>columns=[...]</code>, so only those two column stripes are read.</span></button>
+      <button class="opt" data-ok="0"><span class="ltr">A</span><span>The benchmark is wrong, because a lower complexity class is always faster.</span></button>
+      <button class="opt" data-ok="0"><span class="ltr">B</span><span>Big-O has been disproven for this workload and should be ignored in the write-up.</span></button>
+      <button class="opt" data-ok="1"><span class="ltr">C</span><span>Constants matter and n is still small, so the crossover has not been reached &mdash; Big-O tells you which curve you are on, profiling tells you where you sit on it.</span></button>
     </div>
     <div class="fb" role="status"></div>
   </div>
 
-  <div class="q" data-q="3" data-why="Chunked reading bounds memory at one chunk, so peak usage is set by chunksize and is independent of the file size — a 500 GB file streams in the same footprint as a 5 GB one. It does not make the total work smaller: you still touch every row, so wall-clock time still scales with the file.">
+  <div class="q" data-q="3" data-why="A 1 ms mean with a 200 ms p99 means one tick in a hundred goes blind for a fifth of a second, and those ticks cluster during shocks when the book is thickest and queues are deepest. That is precisely when a stale quote gets picked off, which is why you budget against the p99 and not the average.">
     <div class="qn">Question 3</div>
-    <div class="qt">You replace <code>pd.read_csv(path)</code> with a loop over
-    <code>pd.read_csv(path, chunksize=1_000_000)</code> that sums one column. What have you actually bought?</div>
+    <div class="qt">Your <code>on_tick</code> averages 1 ms but has a p99 of 200 ms. Why is this worse than a flat
+    5 ms every tick?</div>
     <div class="opts" role="group" aria-label="Question 3 options">
-      <button class="opt" type="button" data-ok="0"><span class="ltr">A</span><span>Less total work &mdash; the sum now costs O(chunksize) instead of O(rows).</span></button>
-      <button class="opt" type="button" data-ok="1"><span class="ltr">B</span><span>Constant peak memory set by <code>chunksize</code> and independent of file size &mdash; the same total work, in a bounded footprint.</span></button>
-      <button class="opt" type="button" data-ok="0"><span class="ltr">C</span><span>Automatic parallelism &mdash; pandas processes the chunks across cores.</span></button>
+      <button class="opt" data-ok="0"><span class="ltr">A</span><span>It is not worse &mdash; a lower mean means more ticks processed per second, so throughput decides it.</span></button>
+      <button class="opt" data-ok="1"><span class="ltr">B</span><span>The slow 1% clusters during volatile bursts, so you go blind exactly when a stale quote gets picked off &mdash; budget against the tail, not the average.</span></button>
+      <button class="opt" data-ok="0"><span class="ltr">C</span><span>Because 200 ms exceeds the WebSocket timeout, so those ticks are dropped by the exchange rather than processed late.</span></button>
     </div>
     <div class="fb" role="status"></div>
   </div>
  </div>
 </section>
 
-<!-- ══════════════════════════════ NEXT ══════════════════════════════ -->
 <section id="next">
  <div class="wrap">
   <div class="eyebrow">Take it further</div>
   <h2>This week's work</h2>
-  <p class="sub">Deliverable: a <b>data-architecture sign-off</b> &mdash; your storage and parallelism plan &mdash;
-  plus a working parallel sweep. Graded 35 / 30 / 20 / 15: the sign-off covering columnar storage and caching, a
-  parallel backtest sweep that runs correctly and reproducibly with the seed pinned, a feature pipeline that
-  produces the <code>history</code> your <code>on_tick</code> consumes, and multi-venue connect via
-  <code>EXCHANGE_URLS</code> on a clean W6 branch.</p>
+  <p class="sub">Deliverable: an <b>algorithmic improvement plan</b> for one hot path, backed by a before/after
+  microbenchmark. Graded 40 / 30 / 20 / 10 &mdash; improvement plan with correct complexity analysis, benchmark
+  method and numbers, one O(n)&rarr;O(1) or O(n&sup2;)&rarr;O(n log n) improvement actually landed, and a clean branch
+  with a readable write-up.</p>
   <div class="nextgrid">
       <a class="nextcard" href="https://github.com/sdonadio/algoarena-team-template">
         <div class="l">Code</div>
@@ -1056,16 +987,15 @@ PATH = <span class="s">'cache/features.parquet'</span>
         <div class="d">Labs and homework live in your course&#8217;s LMS; the starter repo is public. Use it as a template, clone, <code>make install</code>.</div>
       </a>
     <a class="nextcard" href="week5.html">
-      <div class="l">Previous</div><div class="t">&larr; Week 5 &middot; Algorithmic Complexity &amp; Data Structures</div>
-      <div class="d">Big-O, the heap-plus-dict order book, and O(1) rolling statistics in the hot path.</div></a>
+      <div class="l">Previous</div><div class="t">&larr; Week 5 &middot; Midterm week</div>
+      <div class="d">No class: the midterm on Weeks 1&ndash;4. The season live block still runs that evening.</div></a>
     <a class="nextcard" href="week7.html">
-      <div class="l">Next</div><div class="t">Week 7 &middot; Machine Learning Signals &amp; Model Ops &rarr;</div>
-      <div class="d">Turn those cached features into a trained model, and serve predictions into <code>on_tick</code> without blocking the loop.</div></a>
+      <div class="l">Next</div><div class="t">Week 7 &middot; Big Data &amp; Distributed Computing &rarr;</div>
+      <div class="d">When one process is not enough: columnar storage, chunking and fanning a parameter sweep across cores.</div></a>
   </div>
-  <p class="sub" style="margin-top:18px">Reading before next class: <code>tests/sim_session.py</code> &mdash; the
-  <code>run()</code> API you fan out, and the <code>seed=</code> argument that makes every worker reproducible.
-  This week is the foundation for Week 7: training is only feasible if your data is already cheap to read and
-  your compute already spreads.</p>
+  <p class="sub" style="margin-top:18px">Reading before next class: <code>shared/orderbook.py</code> &mdash; the
+  heap-plus-dict CLOB with lazy deletion, exhaustively covered by <code>tests/test_orderbook.py</code> because the
+  book is the source of truth.</p>
  </div>
 </section>
 
@@ -1082,6 +1012,15 @@ var C = {
   mute:'#6f757f', dim:'#c6c3bf', ink:'#e8e6e3', info:'#6cb6ff'
 };
 
+function mul32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
 function commas(x) {
   var s = String(Math.round(x)), o = '', c = 0, i;
   for (i = s.length - 1; i >= 0; i--) {
@@ -1091,21 +1030,9 @@ function commas(x) {
   return o;
 }
 
-/* compact row counts: 240 M, 1.2 B */
-function fmtCount(n) {
-  if (n >= 1e9) return (n / 1e9).toFixed(n < 1e10 ? 2 : 1) + ' B';
-  if (n >= 1e6) return (n / 1e6).toFixed(n < 1e7 ? 1 : 0) + ' M';
-  if (n >= 1e3) return (n / 1e3).toFixed(0) + ' k';
-  return String(n);
-}
-
-/* bytes -> readable, fixed widths so the number does not jitter */
-function fmtB(b) {
-  if (b < 1024) return b.toFixed(0) + ' B';
-  if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
-  if (b < 1073741824) return (b / 1048576).toFixed(1) + ' MB';
-  if (b < 1.099511627776e12) return (b / 1073741824).toFixed(2) + ' GB';
-  return (b / 1.099511627776e12).toFixed(2) + ' TB';
+function fmtOps(x) {
+  if (x >= 1e13) return x.toExponential(2).replace('e+', 'e');
+  return commas(x);
 }
 
 /* nanoseconds -> readable */
@@ -1126,714 +1053,728 @@ function esc(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-/* tiny SVG builders */
-function rect(x, y, w, h, fill, extra) {
-  return '<rect x="' + x + '" y="' + y + '" width="' + Math.max(0, w) + '" height="' + h +
-    '" fill="' + fill + '"' + (extra || '') + '/>';
-}
-function txt(x, y, s, fill, size, anchor, weight) {
-  return '<text x="' + x + '" y="' + y + '" fill="' + fill + '" font-size="' + (size || 9.5) +
-    '"' + (anchor ? ' text-anchor="' + anchor + '"' : '') +
-    (weight ? ' font-weight="' + weight + '"' : '') + '>' + s + '</text>';
-}
-function line(x1, y1, x2, y2, stroke, extra) {
-  return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 +
-    '" stroke="' + stroke + '"' + (extra || '') + '/>';
-}
-
-
-/* ══ WIDGET 1 · the memory wall as a calculator ═══════════════════ */
+/* ══ WIDGET 1 · the Big-O race ════════════════════════════════════ */
 (function () {
-  var slRows = document.getElementById('mw-rows');
-  var slFeat = document.getElementById('mw-feat');
-  var slRam = document.getElementById('mw-ram');
-  var svg = document.getElementById('mw-svg');
-  var host = document.getElementById('mw-cols');
-  if (!slRows || !svg || !host) return;
+  var sl = document.getElementById('bo-n');
+  var nv = document.getElementById('bo-nv');
+  var svg = document.getElementById('bo-svg');
+  var tb = document.querySelector('#bo-tbl tbody');
+  var note = document.getElementById('bo-note');
+  var bLog = document.getElementById('bo-log');
+  var bLin = document.getElementById('bo-lin');
+  if (!sl || !svg) return;
 
-  var vRows = document.getElementById('mw-rows-v');
-  var vFeat = document.getElementById('mw-feat-v');
-  var vRam = document.getElementById('mw-ram-v');
-  var warn = document.getElementById('mw-warn');
+  var NSOP = 40;                 /* nanoseconds per elementary op */
+  var BUDGET_NS = 1e6;           /* 1 ms decision budget */
+  var BUDGET_OPS = BUDGET_NS / NSOP;
+  var mode = 'log';
 
-  var RAMS = [8, 16, 32, 64, 128];          /* GB */
-  var OBJ_OVERHEAD = 60;                     /* bytes per Python str in an object column */
-
-  /* the tick schema. wb = wide itemsize, nb = narrow itemsize.
-     cr = zstd compression ratio for that dtype (fraction of raw kept). */
-  var COLS = [
-    { id: 'ts',  nm: 'ts',     wide: 'datetime64[ns]', narrow: 'int32 (ms offset)', wb: 8, nb: 4, crw: 0.12, crn: 0.14, narrowOn: false },
-    { id: 'sym', nm: 'symbol', wide: 'object',         narrow: 'category',          wb: 8, nb: 1, crw: 0.06, crn: 0.03, narrowOn: false, obj: true },
-    { id: 'px',  nm: 'price',  wide: 'float64',        narrow: 'float32',           wb: 8, nb: 4, crw: 0.62, crn: 0.55, narrowOn: false },
-    { id: 'sz',  nm: 'size',   wide: 'int64',          narrow: 'int32',             wb: 8, nb: 4, crw: 0.30, crn: 0.32, narrowOn: false },
-    { id: 'bid', nm: 'bid',    wide: 'float64',        narrow: 'float32',           wb: 8, nb: 4, crw: 0.62, crn: 0.55, narrowOn: false },
-    { id: 'ask', nm: 'ask',    wide: 'float64',        narrow: 'float32',           wb: 8, nb: 4, crw: 0.62, crn: 0.55, narrowOn: false },
-    { id: 'ft',  nm: 'features[k]', wide: 'float64',   narrow: 'float32',           wb: 8, nb: 4, crw: 0.62, crn: 0.55, narrowOn: false, many: true }
+  var CL = [
+    { nm: 'O(1)',       d: 'dict lookup, deque append', f: function (n) { return 1; } },
+    { nm: 'O(log n)',   d: 'heap push, binary search',   f: function (n) { return Math.max(1, Math.log2(n)); } },
+    { nm: 'O(n)',       d: 'scan a list',                f: function (n) { return n; } },
+    { nm: 'O(n log n)', d: 'sort',                       f: function (n) { return n * Math.max(1, Math.log2(n)); } },
+    { nm: 'O(n²)', d: 'nested loop over the data',  f: function (n) { return n * n; } }
   ];
 
-  function rowsAt(i) { return Math.round(1e4 * Math.pow(5e4, i / 48)); }
-
-  /* build the dtype rows once */
-  var html = '';
-  COLS.forEach(function (c) {
-    html += '<div class="dtrow">' +
-      '<span class="cn" id="mw-lbl-' + c.id + '"></span>' +
-      '<label class="sw"><input type="checkbox" id="mw-sw-' + c.id + '" ' +
-      'aria-label="Use the narrow dtype for the ' + c.nm + ' column" />' +
-      '<span class="track"></span></label>' +
-      '</div>';
-  });
-  host.innerHTML = html;
-
-  COLS.forEach(function (c) {
-    c.el = document.getElementById('mw-sw-' + c.id);
-    c.lbl = document.getElementById('mw-lbl-' + c.id);
-    c.el.addEventListener('change', function () { c.narrowOn = c.el.checked; draw(); });
-  });
-
-  document.getElementById('mw-wide').addEventListener('click', function () {
-    COLS.forEach(function (c) { c.narrowOn = false; c.el.checked = false; });
-    draw();
-  });
-  document.getElementById('mw-narrow').addEventListener('click', function () {
-    COLS.forEach(function (c) { c.narrowOn = true; c.el.checked = true; });
-    draw();
-  });
-
-  function measure(rows, nfeat, useNarrow) {
-    var perRow = 0, pqPerRow = 0, objOv = 0, ncols = 0;
-    COLS.forEach(function (c) {
-      var mult = c.many ? nfeat : 1;
-      if (mult === 0) return;
-      ncols += mult;
-      var narrow = useNarrow === null ? c.narrowOn : useNarrow;
-      var item = narrow ? c.nb : c.wb;
-      var cr = narrow ? c.crn : c.crw;
-      perRow += item * mult;
-      pqPerRow += item * cr * mult;
-      /* an object column also holds a Python str per row */
-      if (c.obj && !narrow) { objOv += OBJ_OVERHEAD * mult; }
-    });
-    var raw = rows * perRow;
-    var inRam = rows * (perRow + objOv) + rows * 8;   /* + RangeIndex-free but pandas keeps an index */
-    /* CSV text: digits + separators, roughly 2.6x the packed binary width */
-    var csv = rows * (perRow * 2.6 + 14);
-    return { perRow: perRow, pqPerRow: pqPerRow, objOv: objOv, ncols: ncols,
-             raw: raw, inRam: inRam, pq: rows * pqPerRow, csv: csv };
-  }
+  function nAt(i) { return Math.round(8 * Math.pow(125000, i / 48)); }
 
   function draw() {
-    var rows = rowsAt(+slRows.value);
-    var nfeat = +slFeat.value;
-    var ramGB = RAMS[+slRam.value];
-    var ram = ramGB * 1073741824;
+    var n = nAt(+sl.value);
+    nv.textContent = commas(n);
 
-    vRows.textContent = commas(rows);
-    vFeat.textContent = String(nfeat);
-    vRam.textContent = ramGB + ' GB';
+    var ops = CL.map(function (c) { return c.f(n); });
+    var maxOps = Math.max.apply(null, ops);
+    var X0 = 122, W = 424, ROW = 42, TOP = 34;
 
-    var m = measure(rows, nfeat, null);
-    var wideM = measure(rows, nfeat, false);
+    function frac(v) {
+      if (mode === 'log') return Math.log10(1 + v) / Math.log10(1 + maxOps);
+      return v / maxOps;
+    }
 
-    COLS.forEach(function (c) {
-      var on = c.narrowOn;
-      var w = on ? c.narrow : c.wide;
-      var b = on ? c.nb : c.wb;
-      var extra = (c.obj && !on) ? ' + ~' + OBJ_OVERHEAD + 'B str' : '';
-      var nmTxt = c.many ? 'features[' + nfeat + ']' : c.nm;
-      c.lbl.innerHTML = nmTxt + ' <i>&middot;</i> <b>' + w + '</b> <i>' + b + 'B' + extra + '</i>';
-    });
-
-    document.getElementById('mw-perrow').textContent = (m.perRow + m.objOv) + ' B';
-    document.getElementById('mw-ncols').textContent = m.ncols;
-    document.getElementById('mw-objov').textContent = m.objOv ? m.objOv + ' B/row' : 'none';
-
-    /* ── bars ── */
-    var W = 660, x0 = 96, x1 = 636;
-    var span = x1 - x0;
-    var top = Math.max(ram * 1.25, m.inRam * 1.06, m.csv * 1.02);
-    var sc = function (b) { return Math.max(1.5, span * (b / top)); };
     var s = '';
+    s += '<text x="8" y="16" font-size="9.5" fill="' + C.mute + '" letter-spacing="1.2">COMPLEXITY CLASS</text>';
+    s += '<text x="' + X0 + '" y="16" font-size="9.5" fill="' + C.mute + '" letter-spacing="1.2">'
+       + (mode === 'log' ? 'OPERATIONS · LOG SCALE' : 'OPERATIONS · LINEAR SCALE') + '</text>';
 
-    /* grid */
-    var g, gv;
-    for (g = 0; g <= 4; g++) {
-      gv = top * g / 4;
-      s += line(x0 + span * g / 4, 20, x0 + span * g / 4, 150, C.line, ' stroke-width="1"');
-      s += txt(x0 + span * g / 4, 164, fmtB(gv), C.mute, 8.5, 'middle');
+    /* budget marker */
+    var bx = X0 + Math.min(1, frac(BUDGET_OPS)) * W;
+    if (BUDGET_OPS <= maxOps) {
+      s += '<line x1="' + bx.toFixed(1) + '" y1="24" x2="' + bx.toFixed(1) + '" y2="' + (TOP + 5 * ROW - 10)
+         + '" stroke="' + C.a3 + '" stroke-width="1.3" stroke-dasharray="4 3" />';
+      s += '<text x="' + (bx + 4).toFixed(1) + '" y="' + (TOP + 5 * ROW - 14) + '" font-size="9" fill="' + C.a3 + '">1 ms budget</text>';
     }
 
-    var bars = [
-      { nm: 'in RAM', d: 'pandas', v: m.inRam, c: C.a2, y: 28 },
-      { nm: 'Parquet', d: 'zstd', v: m.pq, c: C.ok, y: 68 },
-      { nm: 'CSV', d: 'text', v: m.csv, c: C.mute, y: 108 }
-    ];
-    var over = m.inRam > ram;
-    bars.forEach(function (b) {
-      var col = (b.nm === 'in RAM' && over) ? C.bad : b.c;
-      s += rect(x0, b.y, sc(b.v), 26, col, ' rx="3" opacity="0.88"');
-      s += txt(x0 - 8, b.y + 17, b.nm, C.dim, 10.5, 'end', '700');
-      s += txt(x0 - 8, b.y + 27, b.d, C.mute, 8, 'end');
-      var lx = x0 + sc(b.v) + 7, anchor = 'start', lc = C.ink;
-      if (lx > x1 - 66) { lx = x0 + sc(b.v) - 7; anchor = 'end'; lc = '#0c1220'; }
-      s += txt(lx, b.y + 17, fmtB(b.v), lc, 10.5, anchor, '600');
+    CL.forEach(function (c, i) {
+      var y = TOP + i * ROW;
+      var v = ops[i];
+      var ns = v * NSOP;
+      var col = ns <= BUDGET_NS * 0.5 ? C.ok : (ns <= BUDGET_NS ? C.warn : C.bad);
+      var w = Math.max(2, frac(v) * W);
+
+      s += '<text x="8" y="' + (y + 11) + '" font-size="12" fill="' + C.ink + '" font-weight="600">' + c.nm + '</text>';
+      s += '<text x="8" y="' + (y + 23) + '" font-size="8.5" fill="' + C.mute + '">' + esc(c.d) + '</text>';
+      s += '<rect x="' + X0 + '" y="' + (y + 1) + '" width="' + W + '" height="19" rx="4" fill="' + C.p2 + '" stroke="' + C.line + '" />';
+      s += '<rect x="' + X0 + '" y="' + (y + 1) + '" width="' + w.toFixed(1) + '" height="19" rx="4" fill="' + col + '" opacity="0.82" />';
+      var lx = X0 + w + 7, anch = 'start', lcol = col;
+      if (lx > 500) { lx = X0 + w - 7; anch = 'end'; lcol = '#0f1115'; }
+      s += '<text x="' + lx.toFixed(1) + '" y="' + (y + 15) + '" font-size="10.5" text-anchor="' + anch
+         + '" fill="' + lcol + '" font-weight="600">' + fmtOps(v) + ' ops · ' + fmtNs(ns) + '</text>';
     });
 
-    /* RAM marker */
-    var rx = x0 + sc(ram);
-    if (ram <= top) {
-      s += line(rx, 16, rx, 152, C.bad, ' stroke-width="1.6" stroke-dasharray="4 3"');
-      s += txt(rx, 12, ramGB + ' GB physical RAM', C.bad, 9, rx > x1 - 120 ? 'end' : 'middle', '700');
-    }
-    s += txt(x0 - 8, 178, 'bytes', C.mute, 8.5, 'end');
     svg.innerHTML = s;
 
-    /* ── stats ── */
-    var pct = m.inRam / ram * 100;
-    var saved = wideM.inRam > 0 ? (1 - m.inRam / wideM.inRam) * 100 : 0;
-    document.getElementById('mw-s-rows').textContent = fmtCount(rows);
-    var elRam = document.getElementById('mw-s-ram');
-    elRam.textContent = fmtB(m.inRam);
-    elRam.className = 'v ' + (over ? 'bad' : (pct > 55 ? 'warn' : 'ok'));
-    var elPct = document.getElementById('mw-s-pct');
-    elPct.textContent = pct.toFixed(pct < 10 ? 1 : 0) + '%';
-    elPct.className = 'v ' + (over ? 'bad' : (pct > 55 ? 'warn' : 'ok'));
-    document.getElementById('mw-s-pq').textContent = fmtB(m.pq);
-    document.getElementById('mw-s-csv').textContent = fmtB(m.csv);
-    var elSave = document.getElementById('mw-s-save');
-    elSave.textContent = saved < 0.5 ? '—' : saved.toFixed(0) + '%';
-    elSave.className = 'v ' + (saved > 40 ? 'ok' : '');
+    /* ratio table */
+    var n2 = n * 2, rows = '';
+    CL.forEach(function (c) {
+      var a = c.f(n), b = c.f(n2);
+      rows += '<tr><td class="mono">' + c.nm + '</td><td class="num">' + fmtOps(a)
+            + '</td><td class="num">' + fmtOps(b) + '</td><td class="num" style="color:'
+            + (b / a >= 3.5 ? C.bad : (b / a >= 1.9 ? C.warn : C.ok)) + '">'
+            + (b / a).toFixed(2) + '</td></tr>';
+    });
+    tb.innerHTML = rows;
 
-    /* ── verdict ── */
-    var cls, msg;
-    if (over) {
-      cls = 'hot';
-      msg = '<b>Over the wall.</b> ' + fmtB(m.inRam) + ' does not fit in ' + ramGB +
-        ' GB. pandas will try, the OS will swap to disk at roughly <b>1000&times; slower</b>, and you get a ' +
-        '<code>MemoryError</code> or a notebook that never returns. ' +
-        (m.objOv ? 'Start by making <code>symbol</code> a <code>category</code> &mdash; that object column alone costs ' +
-          m.objOv + ' B/row.' : 'Downcast the float columns, or read it in chunks.');
-    } else if (pct > 55) {
-      cls = 'mid';
-      msg = '<b>Fits, but the headroom is thin.</b> At ' + pct.toFixed(0) +
-        '% of physical memory you have no room for a copy &mdash; and <code>groupby</code>, <code>merge</code> ' +
-        'and <code>sort_values</code> all materialise one. The next operation is what kills you, not the load.';
-    } else {
-      cls = 'cool';
-      msg = '<b>Comfortable.</b> ' + fmtB(m.inRam) + ' in a ' + ramGB + ' GB machine (' +
-        pct.toFixed(pct < 10 ? 1 : 0) + '%) leaves room for intermediate copies. ' +
-        'On disk this is ' + fmtB(m.pq) + ' as Parquet versus ' + fmtB(m.csv) +
-        ' as CSV &mdash; ' + (m.csv / Math.max(1, m.pq)).toFixed(0) + '&times; smaller, and column-prunable.';
-    }
-    warn.className = 'warnbar ' + cls;
-    warn.innerHTML = msg;
+    var fit = 0, i;
+    for (i = 0; i < ops.length; i++) if (ops[i] * NSOP <= BUDGET_NS) fit++;
+    var cls = fit === 5 ? 'cool' : (fit <= 2 ? 'hot' : '');
+    note.className = 'warnbar ' + cls;
+    note.innerHTML = 'At <b>n = ' + commas(n) + '</b>, <b>' + fit + ' of 5</b> classes finish inside the 1 ms budget. '
+      + 'The quadratic loop needs <b>' + fmtOps(ops[4]) + '</b> operations &mdash; <b>' + fmtNs(ops[4] * NSOP)
+      + '</b>. Doubling n costs the logarithm <b>one extra step</b> and the quadratic loop <b>four times everything</b>.';
   }
 
-  slRows.addEventListener('input', draw);
-  slFeat.addEventListener('input', draw);
-  slRam.addEventListener('input', draw);
-  draw();
+  function setMode(m) {
+    mode = m;
+    bLog.setAttribute('aria-selected', m === 'log' ? 'true' : 'false');
+    bLin.setAttribute('aria-selected', m === 'linear' ? 'true' : 'false');
+    bLog.classList.toggle('on', m === 'log');
+    bLin.classList.toggle('on', m === 'linear');
+    draw();
+  }
+
+  sl.addEventListener('input', draw);
+  bLog.addEventListener('click', function () { setMode('log'); });
+  bLin.addEventListener('click', function () { setMode('linear'); });
+  setMode('log');
 })();
 
-
-/* ══ WIDGET 2 · the vectorisation race ════════════════════════════ */
+/* ══ WIDGET 2 · order-book structure explorer ═════════════════════ */
 (function () {
-  var sl = document.getElementById('vz-n');
-  var vN = document.getElementById('vz-n-v');
-  var btnRun = document.getElementById('vz-run');
-  var btnReset = document.getElementById('vz-reset');
-  var warn = document.getElementById('vz-warn');
-  if (!sl || !btnRun) return;
+  var svg = document.getElementById('ob-svg');
+  if (!svg) return;
+  var priceHost = document.getElementById('ob-prices');
+  var qtySl = document.getElementById('ob-qty'), qtyV = document.getElementById('ob-qtyv');
+  var bBuy = document.getElementById('ob-buy'), bSell = document.getElementById('ob-sell');
+  var bMkt = document.getElementById('ob-mkt'), bCan = document.getElementById('ob-cancel');
+  var bRun = document.getElementById('ob-run50'), bRes = document.getElementById('ob-reset');
+  var oA = document.getElementById('ob-ops-a'), oB = document.getElementById('ob-ops-b');
+  var fA = document.getElementById('ob-fill-a'), fB = document.getElementById('ob-fill-b');
+  var sN = document.getElementById('ob-n'), sL = document.getElementById('ob-last'), sR = document.getElementById('ob-ratio');
+  var heapBox = document.getElementById('ob-heap'), logBox = document.getElementById('ob-log');
+  var note = document.getElementById('ob-note');
 
-  var LANES = [
-    { nm: 'Python for loop', ns: 65, fixed: 0, col: C.bad },
-    { nm: 'df.apply()', ns: 22, fixed: 0, col: C.warn },
-    { nm: 'numpy vectorised', ns: 0.9, fixed: 12000, col: C.ok }
-  ];
-  var els = LANES.map(function (l, i) {
-    return { fl: document.getElementById('vz-f' + i), tm: document.getElementById('vz-t' + i) };
-  });
+  var PRICES = [401.70, 401.80, 401.90, 402.00, 402.10, 402.20, 402.30, 402.40];
+  var MIDREF = 402.05;
+  var st, rnd;
 
-  var DUR = 1250;   /* ms of animation for the slowest lane */
-  var raf = null, t0 = 0, running = false;
-
-  function nAt(i) { return Math.round(1e3 * Math.pow(5e4, i / 44)); }
-
-  function times(n) {
-    return LANES.map(function (l) { return l.fixed + n * l.ns; });
-  }
-
-  function stopAnim() {
-    if (raf) { cancelAnimationFrame(raf); raf = null; }
-    running = false;
-    btnRun.textContent = '▶ Run';
-  }
-
-  function paint(frac) {
-    /* frac in 0..1 of the slowest lane's duration */
-    var n = nAt(+sl.value);
-    var ts = times(n);
-    var tmax = Math.max.apply(null, ts);
-    ts.forEach(function (t, i) {
-      var own = t / tmax;                 /* this lane's share of the shared scale */
-      var w = Math.min(frac, own);        /* constant speed → shorter bar finishes sooner */
-      els[i].fl.style.width = (w * 100) + '%';
-      els[i].tm.textContent = (frac >= own) ? fmtNs(t) : '';
-    });
-    return { n: n, ts: ts, tmax: tmax };
-  }
-
-  function stats(r) {
-    document.getElementById('vz-sp0').textContent = (r.ts[0] / r.ts[2]).toFixed(0) + '× slower';
-    document.getElementById('vz-sp1').textContent = (r.ts[1] / r.ts[2]).toFixed(0) + '× slower';
-  }
-
-  function verdict(r) {
-    var n = r.n, loop = r.ts[0], np = r.ts[2];
-    var cls, msg;
-    if (n < 20000 && loop < np * 3) {
-      cls = 'mid';
-      msg = '<b>At n = ' + commas(n) + ' the loop is fine.</b> numpy\'s fixed ' + fmtNs(12000) +
-        ' of call overhead is most of its time, so vectorising buys you almost nothing. ' +
-        'This is the regime where readability wins &mdash; and where premature vectorising wastes your afternoon.';
-    } else if (loop > 6e10) {
-      cls = 'hot';
-      msg = '<b>' + fmtNs(loop) + ' in the Python loop.</b> That is not a slow function, it is a different ' +
-        'working day: ' + fmtNs(np) + ' vectorised, a <b>' + (loop / np).toFixed(0) +
-        '&times;</b> gap. A feature build at this size is the difference between an overnight job and a coffee break.';
-    } else {
-      cls = 'cool';
-      msg = '<b>' + (loop / np).toFixed(0) + '&times; faster vectorised</b> at n = ' + commas(n) +
-        ' &mdash; ' + fmtNs(loop) + ' down to ' + fmtNs(np) + '. <code>df.apply()</code> lands at ' +
-        fmtNs(r.ts[1]) + ': it looks vectorised but it is still a Python call per row.';
+  /* ── heap with counted sift steps ── */
+  function cmp(a, b) { return (a[0] - b[0]) || (a[1] - b[1]); }
+  function hpush(h, it) {
+    var c = 0, i;
+    h.push(it); i = h.length - 1;
+    while (i > 0) {
+      var p = (i - 1) >> 1; c++;
+      if (cmp(h[i], h[p]) < 0) { var t = h[i]; h[i] = h[p]; h[p] = t; i = p; } else break;
     }
-    warn.className = 'warnbar ' + cls;
-    warn.innerHTML = msg;
+    return c + 1;
+  }
+  function hpop(h) {
+    var c = 0, top = h[0], last = h.pop();
+    if (h.length) {
+      h[0] = last;
+      var i = 0;
+      for (;;) {
+        var l = 2 * i + 1, r = l + 1, m = i;
+        if (l < h.length) { c++; if (cmp(h[l], h[m]) < 0) m = l; }
+        if (r < h.length) { c++; if (cmp(h[r], h[m]) < 0) m = r; }
+        if (m === i) break;
+        var t = h[i]; h[i] = h[m]; h[m] = t; i = m;
+      }
+    }
+    return { item: top, cost: c + 1 };
   }
 
-  function run() {
-    stopAnim();
-    running = true;
-    btnRun.textContent = '■ Stop';
-    t0 = performance.now();
-    (function frame(now) {
-      var frac = Math.min(1, (now - t0) / DUR);
-      var r = paint(frac);
-      if (frac >= 1) { stats(r); verdict(r); stopAnim(); return; }
-      raf = requestAnimationFrame(frame);
-    })(t0);
+  /* ── sorted list with counted comparisons + shifts ── */
+  function kBid(o) { return -o.price * 1e7 + o.seq; }
+  function kAsk(o) { return o.price * 1e7 + o.seq; }
+  function sortedInsert(arr, it, kf) {
+    var lo = 0, hi = arr.length, c = 0;
+    while (lo < hi) { var m = (lo + hi) >> 1; c++; if (kf(arr[m]) < kf(it)) lo = m + 1; else hi = m; }
+    arr.splice(lo, 0, it);
+    return c + (arr.length - lo);
+  }
+  function sortedCancel(arr, id) {
+    var i = 0;
+    for (i = 0; i < arr.length; i++) { if (arr[i].id === id) break; }
+    var cost = i + 1;
+    if (i < arr.length) { arr.splice(i, 1); cost += arr.length - i; }
+    return cost;
+  }
+
+  function bump(a, b, msg) {
+    st.opsA += a; st.opsB += b; st.lastA = a; st.lastB = b;
+    st.log.unshift(msg);
+    if (st.log.length > 40) st.log.pop();
+  }
+
+  function insert(side, price, qty) {
+    st.seq++; st.nid++;
+    var o = { id: st.nid, side: side, price: price, qty: qty, seq: st.seq };
+    st.orders[o.id] = o;
+    var a = 1;
+    a += side === 'buy' ? hpush(st.bidHeap, [-price, o.seq, o.id]) : hpush(st.askHeap, [price, o.seq, o.id]);
+    var b = side === 'buy' ? sortedInsert(st.bidSorted, o, kBid) : sortedInsert(st.askSorted, o, kAsk);
+    bump(a, b, 'insert  ' + (side === 'buy' ? 'BID' : 'ASK') + '  ' + qty + ' @ ' + price.toFixed(2)
+       + '   <b>id ' + o.id + '</b> seq ' + o.seq);
+  }
+
+  function cancelRandom() {
+    var ids = Object.keys(st.orders);
+    if (!ids.length) { bump(0, 0, 'cancel  &mdash; book is empty'); return; }
+    var id = ids[Math.floor(rnd() * ids.length)];
+    var o = st.orders[id];
+    delete st.orders[id];
+    var b = o.side === 'buy' ? sortedCancel(st.bidSorted, o.id) : sortedCancel(st.askSorted, o.id);
+    st.stale++;
+    bump(1, b, 'cancel  <b>id ' + o.id + '</b> @ ' + o.price.toFixed(2)
+       + '   dict delete only &mdash; heap entry left stale');
+  }
+
+  function market(qty) {
+    var side = st.side;
+    var heap = side === 'buy' ? st.askHeap : st.bidHeap;
+    var arr = side === 'buy' ? st.askSorted : st.bidSorted;
+    var need = qty, a = 0, b = 0, filled = 0, disc = 0, lv = 0;
+    while (need > 0 && arr.length) {
+      while (heap.length) {
+        a += 1;
+        if (st.orders[heap[0][2]]) break;
+        a += hpop(heap).cost; disc++;
+      }
+      var o = arr[0];
+      var take = Math.min(need, o.qty);
+      need -= take; filled += take; lv++;
+      b += 1;
+      if (take >= o.qty) {
+        delete st.orders[o.id];
+        arr.splice(0, 1);
+        b += arr.length;
+        if (heap.length) a += hpop(heap).cost;
+      } else { o.qty -= take; a += 1; b += 1; }
+    }
+    bump(a, b, 'market  ' + (side === 'buy' ? 'BUY' : 'SELL') + ' ' + qty + '  filled ' + filled
+       + ' across ' + lv + ' order' + (lv === 1 ? '' : 's')
+       + (disc ? '   <b>' + disc + ' stale</b> heap entr' + (disc === 1 ? 'y' : 'ies') + ' cleaned' : ''));
   }
 
   function reset() {
-    stopAnim();
-    var r = paint(0);
-    els.forEach(function (e) { e.tm.textContent = '—'; });
-    document.getElementById('vz-sp0').textContent = '—';
-    document.getElementById('vz-sp1').textContent = '—';
-    vN.textContent = commas(r.n);
-    warn.className = 'warnbar';
-    warn.innerHTML = 'Press <b>Run</b>. All three lanes advance at the same speed on a shared scale, so the ' +
-      'lane that finishes first is genuinely faster.';
+    st = {
+      orders: {}, seq: 0, nid: 0, side: 'buy',
+      bidHeap: [], askHeap: [], bidSorted: [], askSorted: [],
+      opsA: 0, opsB: 0, lastA: 0, lastB: 0, stale: 0, log: []
+    };
+    rnd = mul32(20240905);
+    insert('buy', 402.00, 600); insert('buy', 401.90, 900); insert('buy', 401.80, 1300);
+    insert('sell', 402.10, 500); insert('sell', 402.20, 800); insert('sell', 402.30, 1200);
+    st.opsA = 0; st.opsB = 0; st.lastA = 0; st.lastB = 0; st.log = [];
+    st.log.unshift('reset   book seeded with 6 resting orders, counters zeroed');
+    setSide('buy');
+    render();
   }
 
-  btnRun.addEventListener('click', function () { if (running) { stopAnim(); } else { run(); } });
-  btnReset.addEventListener('click', reset);
-  sl.addEventListener('input', function () {
-    vN.textContent = commas(nAt(+sl.value));
-    reset();
-  });
+  function run50() {
+    var i;
+    for (i = 0; i < 50; i++) {
+      var r = rnd();
+      if (r < 0.58) {
+        var p = PRICES[Math.floor(rnd() * PRICES.length)];
+        var sd = p <= MIDREF ? 'buy' : 'sell';
+        insert(sd, p, 100 * (1 + Math.floor(rnd() * 12)));
+      } else if (r < 0.82) {
+        cancelRandom();
+      } else {
+        st.side = rnd() < 0.5 ? 'buy' : 'sell';
+        market(100 * (1 + Math.floor(rnd() * 8)));
+      }
+    }
+    setSide(st.side);
+    render();
+  }
+
+  function setSide(s) {
+    st.side = s;
+    bBuy.setAttribute('aria-pressed', s === 'buy' ? 'true' : 'false');
+    bSell.setAttribute('aria-pressed', s === 'sell' ? 'true' : 'false');
+    bBuy.classList.toggle('on', s === 'buy');
+    bSell.classList.toggle('on', s === 'sell');
+  }
+
+  function render() {
+    /* aggregate canonical dict into levels */
+    var bid = {}, ask = {}, k, o, depth = 0;
+    for (k in st.orders) {
+      o = st.orders[k]; depth++;
+      var m = o.side === 'buy' ? bid : ask;
+      var key = o.price.toFixed(2);
+      m[key] = (m[key] || 0) + o.qty;
+    }
+    var bl = Object.keys(bid).map(Number).sort(function (x, y) { return y - x; }).slice(0, 5);
+    var al = Object.keys(ask).map(Number).sort(function (x, y) { return x - y; }).slice(0, 5);
+
+    var maxQ = 100, i;
+    for (i = 0; i < bl.length; i++) maxQ = Math.max(maxQ, bid[bl[i].toFixed(2)]);
+    for (i = 0; i < al.length; i++) maxQ = Math.max(maxQ, ask[al[i].toFixed(2)]);
+
+    var s = '', BX = 214, BW = 328, RH = 24;
+    function row(y, px, qty, isBid, best) {
+      var w = Math.max(2, qty / maxQ * BW);
+      var fill = isBid ? 'rgba(63,185,80,0.30)' : 'rgba(248,81,73,0.28)';
+      var stroke = isBid ? 'rgba(63,185,80,0.65)' : 'rgba(248,81,73,0.6)';
+      var pcol = isBid ? '#8fd39b' : '#f0a49f';
+      s += '<rect x="' + BX + '" y="' + y + '" width="' + BW + '" height="' + (RH - 6) + '" rx="3" fill="' + C.p2 + '" />';
+      s += '<rect x="' + BX + '" y="' + y + '" width="' + w.toFixed(1) + '" height="' + (RH - 6)
+         + '" rx="3" fill="' + fill + '" stroke="' + stroke + '" />';
+      s += '<text x="52" y="' + (y + 13) + '" font-size="11.5" fill="' + pcol + '" font-weight="600">' + px.toFixed(2) + '</text>';
+      s += '<text x="200" y="' + (y + 13) + '" font-size="11" text-anchor="end" fill="' + C.dim + '">' + commas(qty) + '</text>';
+      if (best) {
+        s += '<text x="14" y="' + (y + 13) + '" font-size="9" fill="' + C.a3 + '">BEST</text>';
+        s += '<rect x="' + (BX - 3) + '" y="' + (y - 2) + '" width="' + (BW + 6) + '" height="' + (RH - 2)
+           + '" rx="4" fill="none" stroke="' + C.a3 + '" stroke-width="1" opacity="0.75" />';
+      }
+    }
+
+    s += '<text x="14" y="11" font-size="9" fill="' + C.mute + '" letter-spacing="1.2">ASKS · SELL SIDE</text>';
+    for (i = 0; i < 5; i++) {
+      var idx = al.length - 1 - i;      /* worst ask at the top */
+      var y = 18 + i * RH;
+      if (idx >= 0) row(y, al[idx], ask[al[idx].toFixed(2)], false, idx === 0);
+      else s += '<rect x="' + BX + '" y="' + y + '" width="' + BW + '" height="' + (RH - 6) + '" rx="3" fill="' + C.p2 + '" opacity="0.45" />';
+    }
+    var midY = 18 + 5 * RH + 6;
+    var bestBid = bl.length ? bl[0] : null, bestAsk = al.length ? al[0] : null;
+    var spread = (bestBid !== null && bestAsk !== null) ? (bestAsk - bestBid) : null;
+    s += '<line x1="14" y1="' + midY + '" x2="546" y2="' + midY + '" stroke="' + C.line2 + '" stroke-dasharray="3 3" />';
+    s += '<text x="14" y="' + (midY + 15) + '" font-size="10" fill="' + C.a3 + '">'
+       + (spread === null ? 'no two-sided market' :
+          'spread ' + spread.toFixed(2) + '   mid ' + ((bestAsk + bestBid) / 2).toFixed(3)) + '</text>';
+    s += '<text x="546" y="' + (midY + 15) + '" font-size="10" text-anchor="end" fill="' + C.mute + '">'
+       + depth + ' resting orders in the dict</text>';
+    s += '<text x="14" y="' + (midY + 34) + '" font-size="9" fill="' + C.mute + '" letter-spacing="1.2">BIDS · BUY SIDE</text>';
+    for (i = 0; i < 5; i++) {
+      var y2 = midY + 40 + i * RH;
+      if (i < bl.length) row(y2, bl[i], bid[bl[i].toFixed(2)], true, i === 0);
+      else s += '<rect x="' + BX + '" y="' + y2 + '" width="' + BW + '" height="' + (RH - 6) + '" rx="3" fill="' + C.p2 + '" opacity="0.45" />';
+    }
+    svg.innerHTML = s;
+
+    /* counters */
+    var mx = Math.max(st.opsA, st.opsB, 1);
+    oA.textContent = commas(st.opsA);
+    oB.textContent = commas(st.opsB);
+    fA.style.width = (st.opsA / mx * 100).toFixed(1) + '%';
+    fB.style.width = (st.opsB / mx * 100).toFixed(1) + '%';
+    sN.textContent = commas(depth);
+    sL.textContent = st.lastA + ' / ' + st.lastB;
+    var ratio = st.opsA > 0 ? st.opsB / st.opsA : 0;
+    sR.textContent = ratio ? ratio.toFixed(2) + '×' : '—';
+
+    /* heap peek */
+    var hs = '', shown = Math.min(6, st.bidHeap.length);
+    if (!shown) hs = '<div class="row"><span>bid heap empty</span><span></span></div>';
+    for (i = 0; i < shown; i++) {
+      var e = st.bidHeap[i];
+      var live = !!st.orders[e[2]];
+      hs += '<div class="row' + (live ? '' : ' stale') + '"><span>[' + i + ']  ('
+          + e[0].toFixed(2) + ', ' + e[1] + ', ' + e[2] + ')</span><span class="why">'
+          + (live ? '' : 'STALE · cleaned on access') + '</span></div>';
+    }
+    if (st.bidHeap.length > shown) {
+      hs += '<div class="row" style="border:none"><span style="color:' + C.mute + '">… '
+          + (st.bidHeap.length - shown) + ' more heap entries</span><span></span></div>';
+    }
+    heapBox.innerHTML = hs;
+
+    var staleN = 0;
+    for (i = 0; i < st.bidHeap.length; i++) if (!st.orders[st.bidHeap[i][2]]) staleN++;
+    for (i = 0; i < st.askHeap.length; i++) if (!st.orders[st.askHeap[i][2]]) staleN++;
+
+    var cls = ratio >= 3 ? 'hot' : (ratio > 0 && ratio < 1.6 ? '' : '');
+    note.className = 'warnbar ' + (ratio >= 3 ? 'hot' : (ratio >= 1.6 ? '' : 'cool'));
+    note.innerHTML = 'The sorted list has spent <b>' + (ratio ? ratio.toFixed(2) + '×' : '—')
+      + '</b> the operations of the heap-plus-dict design on the same command stream, and the gap widens with book '
+      + 'depth because every insert and cancel shifts the array. There '
+      + (staleN === 1 ? 'is <b>1</b> lazily-stale heap entry' : 'are <b>' + staleN + '</b> lazily-stale heap entries')
+      + ' right now &mdash; invisible to every read, because reads iterate the canonical dict.';
+
+    /* log */
+    logBox.innerHTML = st.log.map(function (l) { return '<div>' + l + '</div>'; }).join('');
+  }
+
+  /* price ladder buttons */
+  (function () {
+    var h = '', i;
+    for (i = 0; i < PRICES.length; i++) {
+      var p = PRICES[i];
+      h += '<button class="pricebtn ' + (p <= MIDREF ? 'bidside' : 'askside') + '" data-p="' + p.toFixed(2)
+         + '" aria-label="Rest a limit order at ' + p.toFixed(2) + '">' + p.toFixed(2) + '</button>';
+    }
+    priceHost.innerHTML = h;
+    priceHost.addEventListener('click', function (ev) {
+      var t = ev.target.closest ? ev.target.closest('.pricebtn') : null;
+      if (!t) return;
+      insert(st.side, parseFloat(t.getAttribute('data-p')), +qtySl.value);
+      render();
+    });
+  })();
+
+  qtySl.addEventListener('input', function () { qtyV.textContent = commas(+qtySl.value); });
+  bBuy.addEventListener('click', function () { setSide('buy'); });
+  bSell.addEventListener('click', function () { setSide('sell'); });
+  bMkt.addEventListener('click', function () { market(+qtySl.value); render(); });
+  bCan.addEventListener('click', function () { cancelRandom(); render(); });
+  bRun.addEventListener('click', run50);
+  bRes.addEventListener('click', reset);
   reset();
 })();
 
-
-/* ══ WIDGET 3 · chunking + map-reduce pipeline ════════════════════ */
+/* ══ WIDGET 3 · rolling statistics, naive vs Welford ══════════════ */
 (function () {
-  var slChunk = document.getElementById('mr-chunk');
-  var slWork = document.getElementById('mr-work');
-  var swTh = document.getElementById('mr-threads');
-  var svg = document.getElementById('mr-svg');
-  if (!slChunk || !svg) return;
+  var svg = document.getElementById('rs-svg');
+  if (!svg) return;
+  var kS = document.getElementById('rs-k'), kV = document.getElementById('rs-kv');
+  var nS = document.getElementById('rs-n'), nV = document.getElementById('rs-nv');
+  var play = document.getElementById('rs-play'), rst = document.getElementById('rs-reset');
+  var fSlow = document.getElementById('rs-fill-slow'), fFast = document.getElementById('rs-fill-fast');
+  var tSlow = document.getElementById('rs-t-slow'), tFast = document.getElementById('rs-t-fast');
+  var otS = document.getElementById('rs-ot-slow'), otF = document.getElementById('rs-ot-fast');
+  var spd = document.getElementById('rs-speed'), note = document.getElementById('rs-note');
+  var mS = document.getElementById('rs-m-slow'), mF = document.getElementById('rs-m-fast');
+  var vS = document.getElementById('rs-v-slow'), vF = document.getElementById('rs-v-fast');
+  var dEl = document.getElementById('rs-diff');
 
-  var vChunk = document.getElementById('mr-chunk-v');
-  var vWork = document.getElementById('mr-work-v');
-  var warn = document.getElementById('mr-warn');
-  var log = document.getElementById('mr-log');
+  var NSOP = 40, MAXN = 20000;
+  var PX = new Float64Array(MAXN);
+  (function () {
+    var r = mul32(70707), p = 402.15, i;
+    for (i = 0; i < MAXN; i++) {
+      p += (r() - 0.5) * 0.09 + (402.15 - p) * 0.0012;
+      PX[i] = p;
+    }
+  })();
 
-  var TOTAL = 240e6;               /* rows in the tick file */
-  var BPR = 34;                    /* bytes per row in memory */
-  var NS_ROW = 80;                 /* ns of work per row (parse + reduce) */
-  var STARTUP = 0.35;              /* s per worker process */
-  var PICKLE = 0.0004;             /* s per chunk result across the boundary */
-  var CHUNKS = [250e3, 500e3, 1e6, 2e6, 4e6, 8e6];
-  var WCOL = ['#7cb0ff', '#b9d4ff', '#2f6fd0', '#a8c8f5', '#1e4e9c', '#dbe9ff'];
+  var timer = null, tCur = 0;
 
-  var round = 0, timer = null;
+  function cumSlow(T, k) {
+    if (T <= k) return T * (T + 1);
+    return k * (k + 1) + 2 * k * (T - k);
+  }
+  function cumFast(T) { return 4 * T; }
 
-  function model() {
-    var cs = CHUNKS[+slChunk.value];
-    var W = +slWork.value;
-    var threads = swTh.checked;
-    var active = threads ? 1 : W;
-    var chunks = Math.ceil(TOTAL / cs);
-    var rounds = Math.ceil(chunks / active);
-    var chunkS = cs * NS_ROW / 1e9;
-    var seq = chunks * chunkS;
-    var par = rounds * chunkS + (threads ? 0 : W * STARTUP) + chunks * PICKLE;
-    if (threads) par = seq + chunks * 0.0004;   /* GIL: no parallelism, just overhead */
-    return { cs: cs, W: W, threads: threads, active: active, chunks: chunks, rounds: rounds,
-             chunkS: chunkS, seq: seq, par: par, mem: cs * BPR };
+  function stats(T, k) {
+    var w = Math.min(T, k), start = Math.max(0, T - w), i;
+    /* naive: two full passes over the window */
+    var sum = 0;
+    for (i = start; i < T; i++) sum += PX[i];
+    var mn = sum / w, ss = 0;
+    for (i = start; i < T; i++) { var d = PX[i] - mn; ss += d * d; }
+    var vn = w > 1 ? ss / (w - 1) : 0;
+    /* Welford: one incremental pass, no history */
+    var n = 0, mean = 0, m2 = 0;
+    for (i = start; i < T; i++) {
+      n++;
+      var dd = PX[i] - mean;
+      mean += dd / n;
+      m2 += dd * (PX[i] - mean);
+    }
+    var vw = n > 1 ? m2 / (n - 1) : 0;
+    return { mn: mn, vn: vn, mw: mean, vw: vw };
   }
 
   function draw() {
-    var m = model();
-    vChunk.textContent = commas(m.cs);
-    vWork.textContent = String(m.W);
-    if (round > m.rounds) round = m.rounds;
+    var k = +kS.value, n = +nS.value;
+    kV.textContent = commas(k);
+    nV.textContent = commas(n);
+    var T = timer ? Math.max(1, Math.min(n, tCur)) : n;
 
-    var lanes = m.threads ? 1 : m.W;
-    var H = 116 + lanes * 19 + 34;
-    svg.setAttribute('viewBox', '0 0 660 ' + H);
-
+    var L = 62, R = 12, TP = 16, B = 30, W = 600 - L - R, H = 250 - TP - B;
+    var maxY = Math.max(1, cumSlow(n, k));
     var s = '';
-    var x0 = 78, x1 = 470, span = x1 - x0;
 
-    /* ── the file, split into chunks ── */
-    s += txt(x0 - 8, 30, 'ticks.csv', C.dim, 10, 'end', '700');
-    s += txt(x0 - 8, 41, fmtCount(TOTAL) + ' rows', C.mute, 8, 'end');
-    var segs = Math.min(m.chunks, 120);
-    var segW = span / segs;
-    var done = Math.min(m.chunks, round * m.active);
-    var i, segDone;
-    for (i = 0; i < segs; i++) {
-      /* map display segment -> chunk index */
-      var ci = Math.floor(i * m.chunks / segs);
-      segDone = ci < done;
-      var owner = ci % m.active;
-      s += rect(x0 + i * segW + 0.35, 18, Math.max(0.8, segW - 0.7), 26,
-        segDone ? WCOL[owner % WCOL.length] : C.p2,
-        segDone ? ' opacity="0.9"' : ' stroke="' + C.line + '" stroke-width="0.6"');
+    /* grid */
+    var g;
+    for (g = 0; g <= 4; g++) {
+      var gy = TP + H - g / 4 * H;
+      s += '<line x1="' + L + '" y1="' + gy.toFixed(1) + '" x2="' + (L + W) + '" y2="' + gy.toFixed(1)
+         + '" stroke="' + C.line + '" stroke-width="1" />';
+      s += '<text x="' + (L - 7) + '" y="' + (gy + 3.5).toFixed(1) + '" font-size="9" text-anchor="end" fill="'
+         + C.mute + '">' + fmtOps(maxY * g / 4) + '</text>';
     }
-    s += rect(x0, 18, span, 26, 'none', ' stroke="' + C.line2 + '" stroke-width="1" rx="2"');
-    s += txt(x0 + span / 2, 58, commas(m.chunks) + ' chunks of ' + commas(m.cs) + ' rows  ·  ' +
-      fmtB(m.mem) + ' held at a time', C.mute, 9, 'middle');
+    for (g = 0; g <= 4; g++) {
+      var gx = L + g / 4 * W;
+      s += '<text x="' + gx.toFixed(1) + '" y="' + (TP + H + 16) + '" font-size="9" text-anchor="middle" fill="'
+         + C.mute + '">' + commas(n * g / 4) + '</text>';
+    }
+    s += '<text x="' + (L + W / 2) + '" y="' + (TP + H + 28) + '" font-size="9" text-anchor="middle" fill="'
+       + C.mute + '" letter-spacing="1.1">TICKS ELAPSED</text>';
 
-    /* arrow: split -> map */
-    s += txt(x0 + span / 2, 78, 'SPLIT ↓  shard key = chunk boundary', C.a3, 9, 'middle', '700');
-
-    /* ── worker lanes ── */
-    var ly = 92, lh = 19;
-    var partials = [];
-    for (i = 0; i < lanes; i++) {
-      var mine = 0, k;
-      for (k = i; k < m.chunks; k += m.active) { if (k < done) mine++; }
-      var myTotal = 0;
-      for (k = i; k < m.chunks; k += m.active) { myTotal++; }
-      partials.push(mine);
-      var frac = myTotal ? mine / myTotal : 0;
-      var y = ly + i * lh;
-      var col = WCOL[i % WCOL.length];
-      s += txt(x0 - 8, y + 11, (m.threads ? 'thread' : 'w') + i, col, 9.5, 'end', '700');
-      s += rect(x0, y + 2, span, 13, C.p2, ' rx="6" stroke="' + C.line + '" stroke-width="0.7"');
-      s += rect(x0, y + 2, span * frac, 13, col, ' rx="6" opacity="0.85"');
-      s += txt(x1 + 8, y + 11, mine + '/' + myTotal, mine === myTotal && mine > 0 ? C.ok : C.mute, 9);
-      if (m.threads && i === 0) {
-        s += txt(x0 + span / 2, y + 11.5, 'GIL — one at a time', '#0c1220', 8.5, 'middle', '700');
+    function path(fn, upto) {
+      var d = '', i, STEPS = 90;
+      for (i = 0; i <= STEPS; i++) {
+        var t = upto * i / STEPS;
+        var x = L + (t / n) * W;
+        var y = TP + H - Math.min(1, fn(t) / maxY) * H;
+        d += (i ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1) + ' ';
       }
+      return d;
     }
 
-    /* ── reduce box ── */
-    var rx = 540, rw = 104;
-    var ry = 92, rh = Math.max(46, lanes * lh - 4);
-    s += rect(rx, ry, rw, rh, C.p2, ' rx="8" stroke="' + C.a2 + '" stroke-width="1.2"');
-    s += txt(rx + rw / 2, ry + 18, 'REDUCE', C.a3, 10, 'middle', '700');
-    var tot = partials.reduce(function (a, b) { return a + b; }, 0);
-    s += txt(rx + rw / 2, ry + 33, tot + ' partials', C.dim, 9.5, 'middle');
-    if (tot >= m.chunks && m.chunks > 0) {
-      s += txt(rx + rw / 2, ry + 47, 'mean = 4,182.6', C.ok, 9.5, 'middle', '700');
-    } else {
-      s += txt(rx + rw / 2, ry + 47, 'of ' + commas(m.chunks), C.mute, 9, 'middle');
+    /* faint full-session curves for reference while playing */
+    if (timer) {
+      s += '<path d="' + path(function (t) { return cumSlow(t, k); }, n) + '" fill="none" stroke="' + C.bad
+         + '" stroke-width="1" opacity="0.22" stroke-dasharray="3 3" />';
     }
-    /* connectors */
-    for (i = 0; i < lanes; i++) {
-      var cy = ly + i * lh + 8.5;
-      s += line(x1 + 34, cy, rx - 4, ry + rh / 2, C.line2, ' stroke-width="0.8" opacity="0.7"');
-    }
+    s += '<path d="' + path(function (t) { return cumSlow(t, k); }, T) + '" fill="none" stroke="' + C.bad + '" stroke-width="2.1" />';
+    s += '<path d="' + path(cumFast, T) + '" fill="none" stroke="' + C.ok + '" stroke-width="2.1" />';
 
-    /* progress footer */
-    var fy = 92 + lanes * lh + 18;
-    s += txt(x0 - 8, fy, 'round', C.mute, 9, 'end', '700');
-    s += rect(x0, fy - 9, span, 11, C.p2, ' rx="5" stroke="' + C.line + '" stroke-width="0.7"');
-    s += rect(x0, fy - 9, span * (m.rounds ? round / m.rounds : 0), 11, C.a2, ' rx="5"');
-    s += txt(x1 + 8, fy, round + ' / ' + m.rounds, C.dim, 9.5);
+    /* end dots + labels */
+    var xe = L + (T / n) * W;
+    var ys = TP + H - Math.min(1, cumSlow(T, k) / maxY) * H;
+    var yf = TP + H - Math.min(1, cumFast(T) / maxY) * H;
+    s += '<circle cx="' + xe.toFixed(1) + '" cy="' + ys.toFixed(1) + '" r="3.2" fill="' + C.bad + '" />';
+    s += '<circle cx="' + xe.toFixed(1) + '" cy="' + yf.toFixed(1) + '" r="3.2" fill="' + C.ok + '" />';
+    s += '<text x="' + (L + 8) + '" y="' + (TP + 14) + '" font-size="10" fill="' + C.bad
+       + '">naive recompute · O(k) per tick</text>';
+    s += '<text x="' + (L + 8) + '" y="' + (TP + H - 8) + '" font-size="10" fill="' + C.ok
+       + '">deque + Welford · O(1) per tick</text>';
     svg.innerHTML = s;
 
-    /* ── stats ── */
-    document.getElementById('mr-s-chunks').textContent = commas(m.chunks);
-    document.getElementById('mr-s-mem').textContent = fmtB(m.mem);
-    document.getElementById('mr-s-seq').textContent = fmtS(m.seq);
-    document.getElementById('mr-s-par').textContent = fmtS(m.par);
-    var sp = m.seq / m.par;
-    var elSp = document.getElementById('mr-s-sp');
-    elSp.textContent = sp.toFixed(2) + '×';
-    elSp.className = 'v ' + (sp > 2.5 ? 'ok' : (sp > 1.15 ? 'warn' : 'bad'));
-    var eff = sp / m.W * 100;
-    var elEff = document.getElementById('mr-s-eff');
-    elEff.textContent = eff.toFixed(0) + '%';
-    elEff.className = 'v ' + (eff > 70 ? 'ok' : (eff > 40 ? 'warn' : 'bad'));
+    /* numbers */
+    var cs = cumSlow(T, k), cf = cumFast(T);
+    var ratio = cf > 0 ? cs / cf : 0;
+    var mx = Math.max(cs, cf, 1);
+    fSlow.style.width = (cs / mx * 100).toFixed(1) + '%';
+    fFast.style.width = Math.max(0.6, cf / mx * 100).toFixed(1) + '%';
+    tSlow.textContent = fmtNs(cs * NSOP);
+    tFast.textContent = fmtNs(cf * NSOP);
+    otS.textContent = commas(2 * Math.min(T, k));
+    otF.textContent = '4';
+    spd.textContent = ratio.toFixed(1) + '×';
 
-    /* ── verdict ── */
-    var cls, msg;
-    if (m.threads) {
-      cls = 'hot';
-      msg = '<b>Threads do not help here.</b> Only one thread executes Python bytecode at a time, so ' +
-        m.W + ' threads take turns on one core: ' + fmtS(m.par) + ' versus ' + fmtS(m.seq) +
-        ' sequential. You pay switching overhead for zero parallelism. Switch it off &mdash; CPU-bound work ' +
-        'needs <code>ProcessPoolExecutor</code>.';
-    } else if (eff < 45) {
-      cls = 'mid';
-      msg = '<b>Diminishing returns.</b> ' + m.W + ' workers give only ' + sp.toFixed(2) +
-        '&times; &mdash; ' + eff.toFixed(0) + '% efficiency. ' + fmtS(m.W * STARTUP) +
-        ' of process start-up plus ' + fmtS(m.chunks * PICKLE) + ' of pickling are fixed costs that ' +
-        'parallelism cannot amortise. Bigger chunks mean fewer boundary crossings.';
-    } else {
-      cls = 'cool';
-      msg = '<b>' + sp.toFixed(2) + '&times; on ' + m.W + ' workers</b> (' + eff.toFixed(0) +
-        '% efficiency): ' + fmtS(m.seq) + ' down to ' + fmtS(m.par) +
-        '. Peak memory stays at <b>' + fmtB(m.mem) + '</b> &mdash; one chunk &mdash; no matter how large the ' +
-        'file grows. That is the whole point of chunking.';
-    }
-    warn.className = 'warnbar ' + cls;
-    warn.innerHTML = msg;
+    var q = stats(T, k);
+    mS.textContent = q.mn.toFixed(9);
+    mF.textContent = q.mw.toFixed(9);
+    vS.textContent = q.vn.toFixed(9);
+    vF.textContent = q.vw.toFixed(9);
+    var diff = Math.max(Math.abs(q.mn - q.mw), Math.abs(q.vn - q.vw));
+    dEl.textContent = diff === 0 ? '0 (exact)' : diff.toExponential(1);
 
-    /* ── log ── */
-    var lg = '';
-    if (round === 0) {
-      lg = '<div>ready · ' + commas(m.chunks) + ' chunks, ' +
-        (m.threads ? '1 effective lane (GIL)' : m.W + ' processes') + '</div>';
-    } else {
-      var shown = 0;
-      for (i = round; i >= 1 && shown < 8; i--, shown++) {
-        var from = (i - 1) * m.active, to = Math.min(m.chunks, i * m.active);
-        lg += '<div>round <b>' + i + '</b> · map chunks ' + from + '–' + (to - 1) +
-          ' · ' + (to - from) + ' partial' + (to - from === 1 ? '' : 's') +
-          ' · +' + fmtS(m.chunkS) + '</div>';
-      }
-      if (round >= m.rounds) {
-        lg = '<div><b>reduce</b> · ' + commas(m.chunks) + ' partials → mean · ' +
-          fmtS(m.par) + ' wall</div>' + lg;
-      }
-    }
-    log.innerHTML = lg;
+    note.className = 'warnbar ' + (ratio >= 20 ? 'hot' : (ratio >= 5 ? '' : 'cool'));
+    note.innerHTML = 'Over <b>' + commas(T) + '</b> ticks with a window of <b>' + commas(k)
+      + '</b>, the naive rescan burns <b>' + fmtOps(cs) + '</b> operations against <b>' + fmtOps(cf)
+      + '</b> for the rolling version &mdash; <b>' + ratio.toFixed(1) + '×</b> more work for an answer that agrees '
+      + 'to ' + (diff === 0 ? 'the last bit' : diff.toExponential(1)) + '. '
+      + 'Widen the window and the naive lane gets worse; the rolling lane never moves.';
   }
 
   function stop() {
     if (timer) { clearInterval(timer); timer = null; }
-    document.getElementById('mr-play').textContent = '▶ Play';
-  }
-  function step() {
-    var m = model();
-    if (round >= m.rounds) { stop(); return; }
-    round++;
-    draw();
-    if (round >= m.rounds) stop();
+    play.textContent = '▶ Play the session';
+    play.setAttribute('aria-pressed', 'false');
   }
 
-  document.getElementById('mr-step').addEventListener('click', function () { stop(); step(); });
-  document.getElementById('mr-play').addEventListener('click', function () {
-    if (timer) { stop(); return; }
-    if (round >= model().rounds) round = 0;
-    document.getElementById('mr-play').textContent = '■ Pause';
-    timer = setInterval(step, 240);
+  play.addEventListener('click', function () {
+    if (timer) { stop(); draw(); return; }
+    var n = +nS.value;
+    tCur = 0;
+    play.textContent = '⏸ Pause';
+    play.setAttribute('aria-pressed', 'true');
+    timer = setInterval(function () {
+      tCur += Math.max(1, Math.round(n / 60));
+      if (tCur >= n) { tCur = n; draw(); stop(); return; }
+      draw();
+    }, 40);
   });
-  document.getElementById('mr-reset').addEventListener('click', function () {
-    stop(); round = 0; draw();
-  });
-  slChunk.addEventListener('input', function () { stop(); round = 0; draw(); });
-  slWork.addEventListener('input', function () { stop(); round = 0; draw(); });
-  swTh.addEventListener('change', function () { stop(); round = 0; draw(); });
+  rst.addEventListener('click', function () { stop(); tCur = 0; draw(); });
+  kS.addEventListener('input', draw);
+  nS.addEventListener('input', function () { if (timer) { stop(); } draw(); });
   draw();
 })();
 
-
-/* ══ WIDGET 4 · columnar vs row storage ═══════════════════════════ */
+/* ══ WIDGET 4 · sustainable ticks/second and the tail ═════════════ */
 (function () {
-  var host = document.getElementById('cs-cols');
-  var svg = document.getElementById('cs-svg');
-  var swPush = document.getElementById('cs-push');
-  if (!host || !svg) return;
+  var svg = document.getElementById('tl-svg');
+  if (!svg) return;
+  var tabs = [document.getElementById('tl-t0'), document.getElementById('tl-t1'), document.getElementById('tl-t2')];
+  var dS = document.getElementById('tl-depth'), dV = document.getElementById('tl-depthv');
+  var rS = document.getElementById('tl-rate'), rV = document.getElementById('tl-ratev');
+  var shock = document.getElementById('tl-shock');
+  var eSvc = document.getElementById('tl-svc'), eCap = document.getElementById('tl-cap');
+  var eRho = document.getElementById('tl-rho'), eMean = document.getElementById('tl-mean');
+  var e50 = document.getElementById('tl-p50'), e95 = document.getElementById('tl-p95'), e99 = document.getElementById('tl-p99');
+  var note = document.getElementById('tl-note');
 
-  var q = document.getElementById('cs-query');
-  var warn = document.getElementById('cs-warn');
-  var selV = document.getElementById('cs-sel-v');
+  var NSOP = 40e-9;            /* seconds per elementary op */
+  var BUDGET = 1e-3;           /* 1 ms decision budget */
+  var impl = 2, burst = false;
 
-  var ROWS = 120e6;
-  var GROUPS = 8;            /* row groups in the Parquet file */
-  var MATCH = 1;             /* row groups that can contain symbol='AAPL' */
-  var BW = 550 * 1048576;    /* bytes per second of read bandwidth */
-
-  /* name, itemsize, zstd ratio */
-  var SCHEMA = [
-    { nm: 'ts',      b: 8, cr: 0.12, on: true },
-    { nm: 'symbol',  b: 1, cr: 0.03, on: false },
-    { nm: 'side',    b: 1, cr: 0.05, on: false },
-    { nm: 'close',   b: 8, cr: 0.62, on: true },
-    { nm: 'size',    b: 4, cr: 0.30, on: false },
-    { nm: 'bid',     b: 8, cr: 0.62, on: false },
-    { nm: 'ask',     b: 8, cr: 0.62, on: false },
-    { nm: 'bid_sz',  b: 4, cr: 0.30, on: false },
-    { nm: 'ask_sz',  b: 4, cr: 0.30, on: false },
-    { nm: 'ret',     b: 4, cr: 0.55, on: false },
-    { nm: 'ma20',    b: 4, cr: 0.55, on: false },
-    { nm: 'vol',     b: 4, cr: 0.55, on: false }
+  var OPS = [
+    function (n) { return n; },                                   /* linear scan */
+    function (n) { return 0.5 * n + Math.max(1, Math.log2(n)); }, /* sorted list */
+    function (n) { return Math.max(1, Math.log2(n)) + 2; }        /* heap + dict */
   ];
+  var NAMES = ['linear scan list', 'sorted list', 'heap + dict'];
 
-  var PER_ROW = SCHEMA.reduce(function (a, c) { return a + c.b; }, 0);      /* 58 B packed */
-  var CSV_PER_ROW = PER_ROW * 2.6 + 12;                                     /* text + delimiters */
-
-  var html = '';
-  SCHEMA.forEach(function (c, i) {
-    html += '<button class="colbtn" type="button" data-i="' + i + '" aria-pressed="' + (c.on ? 'true' : 'false') +
-      '" aria-label="Toggle the ' + c.nm + ' column in the SELECT list">' + c.nm +
-      ' <span class="w">' + c.b + 'B</span></button>';
-  });
-  host.innerHTML = html;
-
-  var btns = Array.prototype.slice.call(host.querySelectorAll('.colbtn'));
-  btns.forEach(function (b) {
-    b.addEventListener('click', function () {
-      var i = +b.dataset.i;
-      SCHEMA[i].on = !SCHEMA[i].on;
-      b.setAttribute('aria-pressed', SCHEMA[i].on ? 'true' : 'false');
-      draw();
-    });
-  });
-  document.getElementById('cs-narrow').addEventListener('click', function () {
-    SCHEMA.forEach(function (c, i) { c.on = (c.nm === 'ts' || c.nm === 'close'); sync(i); });
-    draw();
-  });
-  document.getElementById('cs-all').addEventListener('click', function () {
-    SCHEMA.forEach(function (c, i) { c.on = true; sync(i); });
-    draw();
-  });
-  function sync(i) { btns[i].setAttribute('aria-pressed', SCHEMA[i].on ? 'true' : 'false'); }
-  swPush.addEventListener('change', draw);
+  /* fixed-seed exponential sample bank, reused so the picture is reproducible */
+  var UNI = new Float64Array(5000);
+  (function () {
+    var r = mul32(31337), i;
+    for (i = 0; i < UNI.length; i++) UNI[i] = Math.max(1e-9, r());
+  })();
 
   function draw() {
-    var push = swPush.checked;
-    var sel = SCHEMA.filter(function (c) { return c.on; });
-    var frac = push ? MATCH / GROUPS : 1;
+    var n = +dS.value, rate = +rS.value;
+    dV.textContent = commas(n);
+    rV.textContent = commas(rate);
 
-    selV.textContent = sel.length + ' of ' + SCHEMA.length;
+    var ops = OPS[impl](n);
+    var S = ops * NSOP;
+    var cap = 1 / S;
+    var lam = rate * (burst ? 6 : 1);
+    var rho = lam * S;
+    var sat = rho >= 1;
+    var rhoE = Math.min(rho, 0.985);
+    var W = S / (1 - rhoE);
 
-    /* the query */
-    var cols = sel.length ? sel.map(function (c) { return c.nm; }).join(', ') : '/* nothing */';
-    q.innerHTML = '<span class="k">SELECT</span> ' + esc(cols) +
-      ' <span class="k">FROM</span> ticks <span class="k">WHERE</span> symbol = <span class="s">\'AAPL\'</span>' +
-      '<br/><span class="c"># ' + fmtCount(ROWS) + ' rows &middot; ' + SCHEMA.length + ' columns &middot; ' +
-      GROUPS + ' row groups' + (push ? ' &middot; pushdown ON' : ' &middot; pushdown OFF') + '</span>';
+    var p50 = Math.LN2 * W, p95 = Math.log(20) * W, p99 = Math.log(100) * W;
 
-    /* bytes */
-    var csvBytes = ROWS * CSV_PER_ROW;                 /* whole file, always */
-    var selPacked = sel.reduce(function (a, c) { return a + c.b; }, 0);
-    var pqBytes = ROWS * frac * sel.reduce(function (a, c) { return a + c.b * c.cr; }, 0);
-    var pqFull = ROWS * SCHEMA.reduce(function (a, c) { return a + c.b * c.cr; }, 0);
-    /* fraction of the columnar file the query actually touches */
-    var pct = pqFull > 0 ? pqBytes / pqFull * 100 : 0;
+    eSvc.textContent = fmtS(S);
+    eCap.textContent = cap >= 1e6 ? (cap / 1e6).toFixed(2) + 'M' : commas(cap);
+    eRho.textContent = (rho * 100).toFixed(rho < 10 ? 1 : 0) + '%';
+    eRho.className = 'v ' + (rho >= 0.9 ? 'bad' : (rho >= 0.6 ? 'warn' : 'ok'));
+    eMean.textContent = fmtS(W);
+    eMean.className = 'v ' + (W > BUDGET ? 'bad' : 'ok');
+    e50.textContent = fmtS(p50); e50.className = 'v ' + (p50 > BUDGET ? 'bad' : 'ok');
+    e95.textContent = fmtS(p95); e95.className = 'v ' + (p95 > BUDGET ? 'bad' : 'warn');
+    e99.textContent = fmtS(p99); e99.className = 'v ' + (p99 > BUDGET ? 'bad' : 'ok');
 
-    /* ── diagram ── */
+    /* histogram on a log-decade axis: 10 ns .. 1 s */
+    var L = 54, R = 14, TP = 18, B = 36, WD = 620 - L - R, H = 262 - TP - B;
+    var LO = -8, HI = 0, BINS = 96;
+    var counts = new Float64Array(BINS), i;
+    for (i = 0; i < UNI.length; i++) {
+      var x = -Math.log(UNI[i]) * W;
+      var lg = Math.log10(x);
+      if (lg < LO) lg = LO;
+      if (lg > HI) lg = HI - 1e-9;
+      var b = Math.floor((lg - LO) / (HI - LO) * BINS);
+      if (b >= 0 && b < BINS) counts[b] += 1;
+    }
+    var mxc = 1;
+    for (i = 0; i < BINS; i++) mxc = Math.max(mxc, counts[i]);
+
+    function px(sec) {
+      var lg = Math.log10(Math.max(1e-9, sec));
+      return L + Math.max(0, Math.min(1, (lg - LO) / (HI - LO))) * WD;
+    }
+
     var s = '';
-    var x0 = 22, x1 = 638, span = x1 - x0;
+    /* past-budget shading */
+    var bx = px(BUDGET);
+    s += '<rect x="' + bx.toFixed(1) + '" y="' + TP + '" width="' + Math.max(0, L + WD - bx).toFixed(1)
+       + '" height="' + H + '" fill="rgba(248,81,73,0.13)" />';
 
-    /* row-oriented: 3 rows of 12 interleaved cells, all read */
-    s += txt(x0, 14, 'ROW-ORIENTED  ·  ticks.csv', C.bad, 10, 'start', '700');
-    s += txt(x1, 14, 'every byte of every row crosses the bus', C.mute, 8.5, 'end');
-    var nr = 3, cw = span / SCHEMA.length, r, c2;
-    for (r = 0; r < nr; r++) {
-      var ry = 22 + r * 22;
-      for (c2 = 0; c2 < SCHEMA.length; c2++) {
-        var cx = x0 + c2 * cw;
-        var isSel = SCHEMA[c2].on;
-        s += rect(cx + 0.6, ry, cw - 1.2, 18, isSel ? C.a2 : 'rgba(248,81,73,0.20)',
-          ' rx="2" stroke="' + (isSel ? C.a3 : 'rgba(248,81,73,0.45)') + '" stroke-width="0.7"');
-        if (r === 0) s += txt(cx + cw / 2, ry + 12.5, SCHEMA[c2].nm.slice(0, 4), isSel ? '#0c1220' : '#f0b0ac', 7.5, 'middle', '600');
-      }
-      s += txt(x1 + 0, ry + 12.5, '', C.mute, 8);
+    /* decade gridlines */
+    var LBL = ['10ns', '100ns', '1µs', '10µs', '100µs', '1ms', '10ms', '100ms', '1s'];
+    for (i = 0; i <= 8; i++) {
+      var gx = L + i / 8 * WD;
+      s += '<line x1="' + gx.toFixed(1) + '" y1="' + TP + '" x2="' + gx.toFixed(1) + '" y2="' + (TP + H)
+         + '" stroke="' + C.line + '" stroke-width="1" />';
+      s += '<text x="' + gx.toFixed(1) + '" y="' + (TP + H + 15) + '" font-size="9" text-anchor="middle" fill="'
+         + C.mute + '">' + LBL[i] + '</text>';
     }
-    s += txt(x0, 106, 'all ' + SCHEMA.length + ' columns read · ' + fmtB(csvBytes) +
-      ' · no pruning, no statistics to skip on', 'rgba(240,176,172,0.95)', 9, 'start');
 
-    /* columnar: 12 stripes x 8 row groups */
-    s += txt(x0, 136, 'COLUMNAR  ·  ticks.parquet', C.ok, 10, 'start', '700');
-    s += txt(x1, 136, push ? 'reads selected stripes × matching row groups' : 'reads selected stripes, all row groups',
-      C.mute, 8.5, 'end');
-    var gy = 144, gh = 62, gStep = gh / GROUPS;
-    for (c2 = 0; c2 < SCHEMA.length; c2++) {
-      var sx = x0 + c2 * cw;
-      for (r = 0; r < GROUPS; r++) {
-        var hit = SCHEMA[c2].on && (!push || r === 2);
-        s += rect(sx + 0.6, gy + r * gStep, cw - 1.2, gStep - 0.6,
-          hit ? C.ok : C.p2, ' opacity="' + (hit ? 0.88 : 1) + '" stroke="' + C.line + '" stroke-width="0.4"');
-      }
-      s += rect(sx + 0.6, gy, cw - 1.2, gh, 'none',
-        ' stroke="' + (SCHEMA[c2].on ? C.ok : C.line2) + '" stroke-width="0.9" rx="2"');
-      s += txt(sx + cw / 2, gy + gh + 11, SCHEMA[c2].nm.slice(0, 4), SCHEMA[c2].on ? C.ok : C.mute, 7.5, 'middle',
-        SCHEMA[c2].on ? '700' : '400');
+    /* bars */
+    var bw = WD / BINS;
+    for (i = 0; i < BINS; i++) {
+      if (!counts[i]) continue;
+      var h = counts[i] / mxc * (H - 16);
+      var bxx = L + i * bw;
+      var over = (L + i * bw + bw / 2) >= bx;
+      s += '<rect x="' + bxx.toFixed(1) + '" y="' + (TP + H - h).toFixed(1) + '" width="'
+         + Math.max(1, bw - 0.6).toFixed(1) + '" height="' + h.toFixed(1) + '" fill="'
+         + (over ? C.bad : C.a2) + '" opacity="' + (over ? '0.85' : '0.72') + '" />';
     }
-    if (push) {
-      s += txt(x0 - 4, gy + 2 * gStep + gStep / 2 + 3, '', C.a3, 8, 'end');
-      s += txt(x1, gy + gh + 11, 'row group 3 of ' + GROUPS + ' matches symbol=\'AAPL\'', C.a3, 8.5, 'end');
+
+    /* percentile markers */
+    function mark(sec, col, lbl, dy) {
+      var x = px(sec);
+      s += '<line x1="' + x.toFixed(1) + '" y1="' + TP + '" x2="' + x.toFixed(1) + '" y2="' + (TP + H)
+         + '" stroke="' + col + '" stroke-width="1.5" />';
+      var anch = x > L + WD - 60 ? 'end' : 'start';
+      s += '<text x="' + (x + (anch === 'end' ? -4 : 4)).toFixed(1) + '" y="' + (TP + dy)
+         + '" font-size="9.5" text-anchor="' + anch + '" fill="' + col + '" font-weight="600">' + lbl + '</text>';
     }
-    s += txt(x0, 228, sel.length + ' of ' + SCHEMA.length + ' columns × ' +
-      (push ? MATCH + ' of ' + GROUPS + ' row groups' : 'all row groups') + ' · ' + fmtB(pqBytes) +
-      ' after zstd', 'rgba(167,223,178,0.95)', 9, 'start');
+    mark(p50, C.ok, 'p50 ' + fmtS(p50), 12);
+    mark(p95, C.warn, 'p95 ' + fmtS(p95), 26);
+    mark(p99, C.bad, 'p99 ' + fmtS(p99), 40);
+    s += '<line x1="' + bx.toFixed(1) + '" y1="' + TP + '" x2="' + bx.toFixed(1) + '" y2="' + (TP + H)
+       + '" stroke="' + C.a3 + '" stroke-width="1.3" stroke-dasharray="4 3" />';
+    s += '<text x="' + (bx - 5).toFixed(1) + '" y="' + (TP + H - 6) + '" font-size="9.5" text-anchor="end" fill="'
+       + C.a3 + '">1 ms budget</text>';
+    s += '<text x="' + L + '" y="' + (TP - 6) + '" font-size="9" fill="' + C.mute
+       + '" letter-spacing="1.1">RESPONSE TIME PER MESSAGE · ' + NAMES[impl].toUpperCase() + '</text>';
+    s += '<text x="' + (L + WD / 2) + '" y="' + (TP + H + 30) + '" font-size="9" text-anchor="middle" fill="'
+       + C.mute + '" letter-spacing="1.1">LATENCY · LOG SCALE</text>';
     svg.innerHTML = s;
 
-    /* ── stats ── */
-    document.getElementById('cs-s-csv').textContent = fmtB(csvBytes);
-    document.getElementById('cs-s-pq').textContent = fmtB(pqBytes);
-    var elPct = document.getElementById('cs-s-pct');
-    elPct.textContent = pct < 0.05 ? '<0.1%' : pct.toFixed(pct < 10 ? 1 : 0) + '%';
-    elPct.className = 'v ' + (pct < 12 ? 'ok' : (pct < 50 ? 'warn' : 'bad'));
-    document.getElementById('cs-s-tcsv').textContent = fmtS(csvBytes / BW);
-    document.getElementById('cs-s-tpq').textContent = fmtS(pqBytes / BW);
-    var sp = pqBytes > 0 ? csvBytes / pqBytes : 0;
-    var elSp = document.getElementById('cs-s-sp');
-    elSp.textContent = sel.length === 0 ? '—' : sp.toFixed(0) + '×';
-    elSp.className = 'v ' + (sp > 20 ? 'ok' : (sp > 4 ? 'warn' : 'bad'));
-
-    /* ── verdict ── */
-    var cls, msg;
-    if (sel.length === 0) {
-      cls = '';
-      msg = 'Select at least one column. <code>SELECT</code> nothing and you read nothing &mdash; which is fast, ' +
-        'but rarely useful.';
-    } else if (sel.length === SCHEMA.length) {
-      cls = 'mid';
-      msg = '<b><code>SELECT *</code> throws away most of the advantage.</b> Columnar storage still wins on ' +
-        'compression and typing (' + fmtB(pqFull) + ' versus ' + fmtB(csvBytes) +
-        '), but you have given up column pruning entirely. Naming your columns is the cheapest optimisation ' +
-        'in the whole pipeline.';
-    } else if (sp > 20) {
-      cls = 'cool';
-      msg = '<b>' + sp.toFixed(0) + '&times; less I/O.</b> ' + sel.length + ' of ' + SCHEMA.length +
-        ' columns' + (push ? ' intersected with ' + MATCH + ' of ' + GROUPS + ' row groups' : '') +
-        ' means ' + fmtB(pqBytes) + ' instead of ' + fmtB(csvBytes) + ' &mdash; ' +
-        fmtS(pqBytes / BW) + ' instead of ' + fmtS(csvBytes / BW) +
-        '. Run this in a sweep of 500 configurations and it is the difference between a day and a lunch break.';
+    var over99 = p99 > BUDGET, overMean = W > BUDGET;
+    note.className = 'warnbar ' + (sat || over99 ? 'hot' : 'cool');
+    if (sat) {
+      note.innerHTML = '<b>Saturated.</b> ' + commas(lam) + ' messages/second arriving against a capacity of <b>'
+        + commas(cap) + '</b>: utilisation is <b>' + (rho * 100).toFixed(0)
+        + '%</b>, the queue grows without bound and every quote you publish is stale. This is not a tuning problem, '
+        + 'it is the wrong data structure &mdash; switch to heap + dict and watch the service cost collapse.';
+    } else if (over99) {
+      note.innerHTML = 'The mean looks survivable at <b>' + fmtS(W) + '</b>, but the <b>p99 is ' + fmtS(p99)
+        + '</b> &mdash; past the 1 ms budget. One message in a hundred goes blind, and at utilisation <b>'
+        + (rho * 100).toFixed(0) + '%</b> those hundredths cluster into bursts. That is where you get picked off, '
+        + 'and it is invisible in the average.';
     } else {
-      cls = 'cool';
-      msg = '<b>' + sp.toFixed(0) + '&times; less I/O</b> reading ' + fmtB(pqBytes) + ' instead of ' +
-        fmtB(csvBytes) + '. Drop a column you do not need, or turn pushdown on, and watch it fall further.';
+      note.innerHTML = 'Comfortable: <b>' + fmtS(p99) + '</b> at the p99 against a 1 ms budget, utilisation <b>'
+        + (rho * 100).toFixed(1) + '%</b>, sustainable throughput <b>' + commas(cap)
+        + '</b> messages/second. Push the depth or fire the shock burst and find the edge before the market does.';
     }
-    warn.className = 'warnbar ' + cls;
-    warn.innerHTML = msg;
   }
 
-  draw();
+  function setImpl(i) {
+    impl = i;
+    tabs.forEach(function (t, j) { t.setAttribute('aria-selected', i === j ? 'true' : 'false'); });
+    draw();
+  }
+  tabs.forEach(function (t, j) { t.addEventListener('click', function () { setImpl(j); }); });
+  dS.addEventListener('input', draw);
+  rS.addEventListener('input', draw);
+  shock.addEventListener('click', function () {
+    burst = !burst;
+    shock.setAttribute('aria-pressed', burst ? 'true' : 'false');
+    shock.classList.toggle('on', burst);
+    draw();
+  });
+  setImpl(2);
 })();
 
-
-/* ══ CHECK YOURSELF · three questions ═════════════════════════════ */
+/* ══ Check-yourself quiz ══════════════════════════════════════════ */
 (function () {
   var qs = document.querySelectorAll('#check .q');
   Array.prototype.forEach.call(qs, function (q) {
