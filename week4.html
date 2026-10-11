@@ -737,7 +737,7 @@ aj[`sym`time; t; q]</pre>
     </div>
   </div>
   <p class="sub" style="margin-top:8px">q reads right to left, so <code>0.5*bid+ask</code> is half of (bid + ask).
-  kdb+ is commercial (with a free non-commercial edition); the course does not require it. The q above is there so
+  kdb+ is commercial; KX also offers KDB-X Community, free for personal and commercial use within limits (16 GB of RAM, one instance). The course does not require it. The q above is there so
   you can read it on a desk, not so you can run it tonight.</p>
 
   <h3 style="margin-top:24px">The landscape</h3>
@@ -806,44 +806,42 @@ pandas == DuckDB: True</pre>
 <!-- ══════════════ 5 · PARQUET ══════════════ -->
 <section id="parquet">
   <div class="kicker">Part 5</div>
-  <h2><span class="secnum">5</span>Columnar files: Parquet, DuckDB and Polars</h2>
-  <p class="lead">You do not need a database server to get kdb+'s three ideas. <b>Parquet</b> is an open file format
-  that stores a table by column, in chunks, with statistics in the footer. Put the files in folders named by
-  partition (<code>week=2/symbol=AAPL/</code>) and the folder tree <em>is</em> the partitioned database. DuckDB and
-  Polars then query the files in place: no load step, no server, nothing running when you are not asking.</p>
+  <h2><span class="secnum">5</span>A first look at Parquet</h2>
+  <p class="lead">Parquet is an open file format that stores a table <b>by column</b>, cut into row groups, with
+  statistics in the footer: kdb+'s column idea, in a file. DuckDB queries the files in place, with no load step and
+  no server. It is also what the backtester in Part 7 reads.</p>
 
   <div class="grid2" style="margin-top:14px">
     <div class="panel">
       <h4>Inside one file</h4>
       <ul class="plain" style="margin-top:6px">
-        <li><b>Row groups</b>: the table is cut into blocks of rows (4,096 in the lab's demo file, 32,768 in the warehouse).</li>
-        <li><b>Column chunks</b>: inside a row group, each column is stored on its own, encoded and compressed (zstd, snappy, gzip).</li>
+        <li><b>Row groups</b>: the table is cut into blocks of rows (4,096 in the lab's demo file).</li>
+        <li><b>Column chunks</b>: inside a row group, each column is stored on its own, encoded and compressed.</li>
         <li><b>Footer</b>: the schema, and for every column chunk its min, max and null count. A reader opens the footer first.</li>
-        <li><b>Dictionary encoding</b>: a column with few distinct values stores each value once and small integers per row. The trade table's <code>symbol</code> (10 values) drops from 36,388 bytes to 170; <code>trade_id</code> (all unique) gets <em>bigger</em>, so you choose per column.</li>
       </ul>
     </div>
     <div class="panel">
-      <h4>Three ways a query avoids work</h4>
+      <h4>How a query avoids work</h4>
       <ul class="plain" style="margin-top:6px">
-        <li><b>Partition pruning</b>: <code>symbol = 'AAPL'</code> opens one folder of ten.</li>
+        <li><b>Projection</b>: only the columns named are read and decompressed.</li>
         <li><b>Predicate pushdown</b>: <code>t BETWEEN 390 AND 460</code> is checked against each row group's min/max in the footer; groups that cannot match are never read. It only works because the file is sorted by tick.</li>
-        <li><b>Projection</b>: only the columns named are decompressed. Polars' plan for the lab's spread query reads 4 of 19 columns of one file.</li>
+        <li><b>Compression</b>: neighbouring values in a column are alike. The trade table's <code>symbol</code> (10 values) drops from 36,388 bytes to 170 with a dictionary.</li>
       </ul>
     </div>
   </div>
 
   <div class="stats" style="margin-top:16px">
     <div class="stat"><div class="sl">Session 2 JSONL</div><div class="sv">264,960,858 B</div></div>
+    <div class="stat"><div class="sl">SQLite, 4 indexes</div><div class="sv">51,875,840 B</div></div>
     <div class="stat"><div class="sl">Same tape, Parquet</div><div class="sv acc">6,740,873 B</div></div>
-    <div class="stat"><div class="sl">Ratio &#183; time</div><div class="sv ok">39.3&times; &#183; 3.3 s</div></div>
-    <div class="stat"><div class="sl">Book only</div><div class="sv">25.5 &#8594; 1.7 MB</div></div>
-    <div class="stat"><div class="sl">AAPL mid, every tick</div><div class="sv">2.1&#8211;2.7 s &#8594; 0.5&#8211;1.5 ms</div></div>
-    <div class="stat"><div class="sl">DuckDB lab queries</div><div class="sv">2&#8211;13 ms</div></div>
+    <div class="stat"><div class="sl">AAPL mid, every tick &#183; JSONL</div><div class="sv">2.1&#8211;2.7 s</div></div>
+    <div class="stat"><div class="sl">&#183; SQLite (Part 2)</div><div class="sv">3.7&#8211;4.2 ms</div></div>
+    <div class="stat"><div class="sl">&#183; Parquet</div><div class="sv ok">0.5&#8211;1.5 ms</div></div>
   </div>
-  <p class="sub" style="margin-top:8px">Be honest about the 39&times;: 82 % of the JSONL is leaderboard messages, and the
-  warehouse keeps ten fields per account rather than the full position maps. The fair comparison is the book, every
-  depth level kept: 25.5 MB of JSON to 1.7 MB. The query timings are "json.loads every line" against three Parquet
-  readers (pyarrow, DuckDB, Polars), best of several runs on one laptop; yours will differ, the ratio will not.</p>
+  <p class="sub" style="margin-top:8px">Converting the whole tape took 3.3 s and made it 39.3&times; smaller. Be honest
+  about that ratio: 82 % of the JSONL is leaderboard messages, and the Parquet tape keeps ten fields per account rather
+  than the full position maps. The fair comparison is the book, every depth level kept: 25.5 MB of JSON to 1.7 MB.
+  Timings are best of several runs on one laptop; yours will differ, the ratio will not.</p>
 
   <p style="margin-top:16px">Row groups, footer statistics and dictionary encoding in a dozen lines of pyarrow, on
   synthetic data so it runs anywhere:</p>
@@ -866,36 +864,21 @@ print(f&quot;read {got.num_rows:,} rows x {got.num_columns} of 3 columns&quot;)<
 symbol column: RLE_DICTIONARY, 0.39 bytes per value
 read 10,535 rows x 2 of 3 columns</pre>
 
-  <p style="margin-top:16px">And the lab's warehouse queried in place by both engines: average spread of AAPL and
-  MSFT in the fifteen ticks after the AAPL print. Same numbers from SQL and from a Polars lazy frame.</p>
-  <div class="codehd"><span>Python &#183; runs as shown, output pasted below</span><span>DuckDB and Polars over the warehouse</span></div><pre class="code hasout" data-lang="py">import duckdb, polars as pl
-path = &quot;/tmp/w4/tape.parquet/book_snapshot/**/*.parquet&quot;     # the lab&#x27;s warehouse
+  <p style="margin-top:16px">And the lab's Parquet tape queried in place with DuckDB: average spread of AAPL and
+  MSFT in the fifteen ticks after the AAPL print. One SQL statement over a folder of files.</p>
+  <div class="codehd"><span>Python &#183; runs as shown, output pasted below</span><span>DuckDB over the Parquet tape</span></div><pre class="code hasout" data-lang="py">import duckdb
+path = &quot;/tmp/w4/tape.parquet/book_snapshot/**/*.parquet&quot;     # the lab&#x27;s Parquet tape
 q = &quot;&quot;&quot;SELECT symbol, count(*) AS snaps, round(avg(1e4 * spread / mid), 1) AS spread_bp
        FROM read_parquet(&#x27;%s&#x27;, hive_partitioning = true)
        WHERE t BETWEEN 400 AND 414 AND symbol IN (&#x27;AAPL&#x27;, &#x27;MSFT&#x27;)
        GROUP BY symbol ORDER BY symbol&quot;&quot;&quot; % path
-print(duckdb.sql(q))
-lazy = (pl.scan_parquet(path, hive_partitioning=True)
-        .filter(pl.col(&quot;t&quot;).is_between(400, 414) &amp; pl.col(&quot;symbol&quot;).is_in([&quot;AAPL&quot;, &quot;MSFT&quot;]))
-        .group_by(&quot;symbol&quot;).agg(snaps=pl.len(), spread_bp=(1e4 * pl.col(&quot;spread&quot;) / pl.col(&quot;mid&quot;)).mean().round(1))
-        .sort(&quot;symbol&quot;))
-print(lazy.collect())</pre><pre class="out">┌─────────┬───────┬───────────┐
+print(duckdb.sql(q))</pre><pre class="out">┌─────────┬───────┬───────────┐
 │ symbol  │ snaps │ spread_bp │
 │ varchar │ int64 │  double   │
 ├─────────┼───────┼───────────┤
 │ AAPL    │    52 │     136.9 │
 │ MSFT    │    29 │       5.1 │
-└─────────┴───────┴───────────┘
-
-shape: (2, 3)
-┌────────┬───────┬───────────┐
-│ symbol ┆ snaps ┆ spread_bp │
-│ ---    ┆ ---   ┆ ---       │
-│ str    ┆ u32   ┆ f64       │
-╞════════╪═══════╪═══════════╡
-│ AAPL   ┆ 52    ┆ 136.9     │
-│ MSFT   ┆ 29    ┆ 5.1       │
-└────────┴───────┴───────────┘</pre>
+└─────────┴───────┴───────────┘</pre>
 
   <h3 style="margin-top:28px">Interactive &#183; row-group pruning on the real book file</h3>
   <p class="sub" style="margin-bottom:10px">All 55,375 book snapshots of the block in one Parquet file, 14 row groups. The
@@ -927,11 +910,6 @@ shape: (2, 3)
     </div>
   </div>
 
-  <div class="note" style="margin-top:14px"><b>When one machine is not enough.</b> A season of tapes is still small. A
-  desk's ten years of every venue is not: terabytes of the same Parquet files. <b>Spark</b> runs the same kind of query
-  across a cluster: each file or row group becomes a task, the planner pushes filters and projections into the scan
-  exactly as DuckDB does, and partial results are combined over the network. Same format, same pruning, more machines.
-  Week 6 goes there.</div>
 </section>
 
 <!-- ══════════════ 6 · LOGICAL VS REAL TIME ══════════════ -->
@@ -1153,7 +1131,7 @@ FIX  sig[t-1] * ret[t]  Sharpe -0.19</pre>
     <label id="sk-tools.sql-tick-store" style="--cc:#2e8b57"><input type="checkbox" value="tools.sql-tick-store" aria-describedby="skc-tools.sql-tick-store" /><span><span class="nm">Tick data in a relational database</span><span class="cn" id="skc-tools.sql-tick-store" style="display:block">You can write a SQL schema for trades, quotes and book snapshots with a composite (symbol, time) index, read a query plan to tell a search from a scan, and name the five reasons a row store struggles with tick history.</span></span><a class="pt" href="#sql">Parts 2, 3</a></label>
     <label id="sk-tools.column-store" style="--cc:#2e8b57"><input type="checkbox" value="tools.column-store" aria-describedby="skc-tools.column-store" /><span><span class="nm">Column stores &amp; time-series databases</span><span class="cn" id="skc-tools.column-store" style="display:block">You can explain why a column store reads only the columns a query names, describe kdb+&#x27;s in-memory plus date-partitioned splayed layout and its q-sql, and place TimescaleDB, QuestDB, InfluxDB, ArcticDB and DuckDB on that map.</span></span><a class="pt" href="#sqllimits">Parts 3, 4</a></label>
     <label id="sk-tools.as-of-join" style="--cc:#2e8b57"><input type="checkbox" value="tools.as-of-join" aria-describedby="skc-tools.as-of-join" /><span><span class="nm">The as-of join</span><span class="cn" id="skc-tools.as-of-join" style="display:block">You can match each trade to the last quote at or before it with aj in q, ASOF JOIN in DuckDB or merge_asof in pandas, choose the key and the direction on purpose, and explain why a forward match inside a backtest is look-ahead.</span></span><a class="pt" href="#sqllimits">Parts 3, 4</a></label>
-    <label id="sk-tools.parquet" style="--cc:#2e8b57"><input type="checkbox" value="tools.parquet" aria-describedby="skc-tools.parquet" /><span><span class="nm">Parquet, partitions &amp; predicate pushdown</span><span class="cn" id="skc-tools.parquet" style="display:block">You can convert a tape to partitioned Parquet, explain row groups, footer statistics, dictionary encoding and projection, query the files in place with DuckDB or Polars, and reuse them as a feature cache.</span></span><a class="pt" href="#parquet">Part 5</a></label>
+    <label id="sk-tools.parquet" style="--cc:#2e8b57"><input type="checkbox" value="tools.parquet" aria-describedby="skc-tools.parquet" /><span><span class="nm">Parquet: columns, row groups &amp; predicate pushdown</span><span class="cn" id="skc-tools.parquet" style="display:block">You can convert a tape to Parquet, explain how columns, row groups and the min/max statistics of each column chunk let a reader skip data, query the file in place with DuckDB, and by Week 6 partition it and reuse it as a feature cache.</span></span><a class="pt" href="#parquet">Part 5</a></label>
     <label id="sk-tools.headless-sim" style="--cc:#2e8b57"><input type="checkbox" value="tools.headless-sim" aria-describedby="skc-tools.headless-sim" /><span><span class="nm">A deterministic replay on the logical clock</span><span class="cn" id="skc-tools.headless-sim" style="display:block">You can replay a recorded tape or a seeded simulation in one process with no sockets, drive every decision from the logical clock instead of the machine&#x27;s, and prove it with the same fill digest at any replay speed.</span></span><a class="pt" href="#clocks">Parts 6, 7</a></label>
     <label id="sk-quant.look-ahead" style="--cc:#1f6f8b"><input type="checkbox" value="quant.look-ahead" aria-describedby="skc-quant.look-ahead" /><span><span class="nm">Look-ahead bias</span><span class="cn" id="skc-quant.look-ahead" style="display:block">You can find where a backtest used information that did not exist at decision time — an unlagged signal, a forward as-of match, a peek at the next book — fix it on the logical clock, and quantify how much of the edge was the leak.</span></span><a class="pt" href="#tsdb">Parts 4, 7</a></label>
     <label id="sk-quant.fill-simulation" style="--cc:#1f6f8b"><input type="checkbox" value="quant.fill-simulation" aria-describedby="skc-quant.fill-simulation" /><span><span class="nm">Fill simulation, costs &amp; latency</span><span class="cn" id="skc-quant.fill-simulation" style="display:block">You can fill a simulated order at the next tick against the recorded depth instead of the last price, charge the taker fee, and show how fees, latency in ticks and turnover move P&amp;L and drawdown.</span></span><a class="pt" href="#backtest">Parts 1, 6, 7</a></label>
@@ -1164,7 +1142,7 @@ FIX  sig[t-1] * ret[t]  Sharpe -0.19</pre>
 <section id="desk">
   <div class="kicker">The link with the job</div>
   <h2>Why this matters on a trading desk</h2>
-  <p>On a desk the research loop is only as fast as the question you can ask of the history. If every question means parsing a quarter of a gigabyte of JSON, you ask three a day and stop exploring; if it costs ten milliseconds, you ask a thousand and actually test the idea. That is why tick data lives in column stores, kdb+ on most bank and HFT desks and Parquet with DuckDB, Polars or Spark nearly everywhere else, while orders, positions and accounts stay in a relational database where transactions matter. Choosing the store by the shape of the work is a decision you will be asked to defend.</p>
+  <p>On a desk the research loop is only as fast as the question you can ask of the history. If every question means parsing a quarter of a gigabyte of JSON, you ask three a day and stop exploring; if it costs ten milliseconds, you ask a thousand and actually test the idea. That is why tick data lives in column stores, kdb+ on most bank and HFT desks and Parquet files queried in place nearly everywhere else, while orders, positions and accounts stay in a relational database where transactions matter. Choosing the store by the shape of the work is a decision you will be asked to defend.</p>
   <p>The as-of join is the most used and most abused operation in market-data research. Every fill analysis, every markout and every transaction-cost report matches events to the quote in force, and the key and direction decide whether the answer is honest. On the Session 2 tape, joining on the tick alone hands every AAPL trade in tick 400 a one-sided book recorded after it traded; joining forward is exactly right for a post-trade markout and exactly wrong inside a backtest. Write the definition down (the lab&#x27;s book_eot) and make every engine use it.</p>
   <p>Determinism is what turns a backtest into evidence. If the same tape and the same code can produce two P&amp;Ls, a parameter search is measuring your machine, and the fastest replay, the one you run a thousand times, is the one that lies most: on the AAPL slice the wall-clock exit made +902 at full speed against +505 for the honest run. Desks enforce this by injecting the clock into the strategy, replaying recorded production days through the live code path, and comparing fill digests in CI, so that any difference between replay and live is a real difference and not an accident of timing.</p>
   <p>Costs and latency are positions you hold whether you model them or not. At the arena&#x27;s 0.30 % taker fee, momentum lost 16,501 over the block through 1,187 fills, and the in-sample tuning chose the lookback that lost most out of sample. A latency of one tick decided whether event_ride caught the 36 shares offered at 197.18 during the AAPL ramp or found an empty ask side. Report P&amp;L net of fees against baselines, count the trials you ran, and treat latency as a number of ticks you measure, because your backtest will otherwise invent exactly the trades that pay.</p>
@@ -1196,7 +1174,7 @@ FIX  sig[t-1] * ret[t]  Sharpe -0.19</pre>
   <details class="iv"><summary><span class="lv w">warm-up</span><span>Row store or column store for five years of quotes, and why?</span></summary><div class="body"><p>A column store. The workload is append-only and reads a few columns of many rows in time order, such as the bid and ask of one symbol over a window. A column store reads only those columns, compresses each one well because the values are similar, and keeps data sorted by time within symbol so a window is a contiguous slice. A row store reads every column of every matching row and pays an index update on every insert. Orders, positions and accounts are the opposite workload, small and transactional, and belong in a relational row store such as Postgres.</p><a href="#sk-tools.column-store" data-skill="tools.column-store">Related skill: Column stores &amp; time-series databases</a></div></details>
   <details class="iv"><summary><span class="lv c">core</span><span>Design a SQL schema for trades, quotes and book snapshots. Which indexes, and what hurts first as it grows?</span></summary><div class="body"><p>One table per message type with typed columns: trades (seq, t, symbol, price, qty, aggressor), quotes (seq, t, symbol, bid, bid_qty, ask, ask_qty), and book snapshots with the depth in a child table keyed by (snapshot, side, level). Keep the event clock, the recording order and, separately, the wall-clock timestamp. Index (symbol, t), equality column first and range second, and check with the query plan that it searches rather than scans. What hurts first is the write path, since every insert updates every index, then the size of the exploded depth table and the cost of as-of joins written as correlated subqueries.</p><a href="#sk-tools.sql-tick-store" data-skill="tools.sql-tick-store">Related skill: Tick data in a relational database</a></div></details>
   <details class="iv"><summary><span class="lv c">core</span><span>What is an as-of join? Write it two ways and name a way it silently goes wrong.</span></summary><div class="body"><p>For each row on the left, take the last row on the right whose key is at or before it, usually by symbol: each trade gets the quote in force when it happened. In pandas it is merge_asof(trades, quotes, on=&#x27;time&#x27;, by=&#x27;symbol&#x27;, direction=&#x27;backward&#x27;); in DuckDB, trades ASOF JOIN quotes ON trades.symbol = quotes.symbol AND trades.time &gt;= quotes.time; in q, aj[`sym`time; trade; quote]. It goes wrong silently when the key is too coarse, so several quotes share a timestamp and an arbitrary one wins, when inputs are unsorted or the key dtypes differ, or when someone uses a forward match inside a backtest, which is look-ahead.</p><a href="#sk-tools.as-of-join" data-skill="tools.as-of-join">Related skill: The as-of join</a></div></details>
-  <details class="iv"><summary><span class="lv c">core</span><span>Your Parquet query filters on time and is still slow. What do you check?</span></summary><div class="body"><p>First whether the files are sorted by the filter column: predicate pushdown skips a row group only if its min/max statistics exclude the range, and a file sorted by symbol has every row group spanning the whole day. Then whether the partition layout matches the filter, so the reader can skip whole folders, and whether the query names only the columns it needs. Then row-group size, since huge groups prune coarsely and tiny ones bloat the footer, and the number of small files. Finally check the plan in DuckDB or Polars to see whether the filter and the projection were actually pushed into the scan.</p><a href="#sk-tools.parquet" data-skill="tools.parquet">Related skill: Parquet, partitions &amp; predicate pushdown</a></div></details>
+  <details class="iv"><summary><span class="lv c">core</span><span>Your Parquet query filters on time and is still slow. What do you check?</span></summary><div class="body"><p>First whether the files are sorted by the filter column: predicate pushdown skips a row group only if its min/max statistics exclude the range, and a file sorted by symbol has every row group spanning the whole day. Then whether the query names only the columns it needs, since projection is the other half of the saving. Then row-group size, since huge groups prune coarsely and tiny ones bloat the footer. Finally read the plan with EXPLAIN in DuckDB to see whether the filter and the projection were actually pushed into the Parquet scan.</p><a href="#sk-tools.parquet" data-skill="tools.parquet">Related skill: Parquet: columns, row groups &amp; predicate pushdown</a></div></details>
   <details class="iv"><summary><span class="lv c">core</span><span>How do you model fills and latency for a strategy that trades on scheduled news?</span></summary><div class="body"><p>Fill at the next tick, not the decision tick, against the book recorded at that moment, walking the depth up to the limit price and dropping or resting the remainder by order type; charge the taker fee on the notional. Treat latency as an integer number of ticks and test several values, because on a thin book around an announcement the result is lumpy: on the AAPL earnings ramp an order arriving one tick after the decision filled 36 shares, while zero or two ticks found no ask under the cap. Expect one-sided books and empty levels exactly when the news hits, and never assume the mid.</p><a href="#sk-quant.fill-simulation" data-skill="quant.fill-simulation">Related skill: Fill simulation, costs &amp; latency</a></div></details>
   <details class="iv"><summary><span class="lv s">senior</span><span>The same backtest on the same data gives a different P&amp;L on every run. How do you find the cause?</span></summary><div class="body"><p>Make the run reproducible enough to compare: record a digest of the fill list, rerun at two replay speeds and on two machines, and find the first fill that differs. The usual cause is a decision that reads the machine rather than the data: time.time(), datetime.now() or a sleep-based cooldown, so its length in market time depends on CPU speed. Others are unseeded randomness, iteration over an unordered container, threads racing on shared state, or parallel workers merging results in completion order. Fix it by handing the strategy the logical time and an injected clock, and keep the wall clock at the edges only.</p><a href="#sk-tools.headless-sim" data-skill="tools.headless-sim">Related skill: A deterministic replay on the logical clock</a></div></details>
   <details class="iv"><summary><span class="lv s">senior</span><span>A researcher shows you Sharpe 3 on tick data. How do you try to break it?</span></summary><div class="body"><p>Look for leaks first, because they are cheap to find: lag the signal by one tick and see whether the edge degrades a little or collapses, check every as-of join for its key and direction, and check that nothing reads restated or future reference data. Then the fill model: next-tick fills against recorded depth, the real fee schedule, latency in ticks, one-sided books. Then compare with baselines and count the trials behind the chosen parameters, and look at the out-of-sample block they never touched. Finally replay at two speeds and confirm the same fill digest, to rule out a wall-clock dependency.</p><a href="#sk-quant.look-ahead" data-skill="quant.look-ahead">Related skill: Look-ahead bias</a></div></details>
@@ -1207,8 +1185,8 @@ FIX  sig[t-1] * ret[t]  Sharpe -0.19</pre>
   <div class="kicker">Do the work</div>
   <h2>Lab, homework and the next week</h2>
   <p class="lead">The lab, the homework and the participation quizzes for this week are in the Week 4 module on Canvas.
-  Every script on this page runs as shown: the snippets need only Python with pandas, pyarrow, DuckDB and Polars;
-  the warehouse queries need the Session 2 tape converted to Parquet, which the lab does in its first step.</p>
+  Every script on this page runs as shown: the snippets need only Python with pandas, pyarrow and DuckDB;
+  the queries on the real tape need the Session 2 tape converted to Parquet, which the lab does in step 2.</p>
   <div class="nextgrid" style="margin-top:18px">
     <a class="nextcard" href="https://canvas.uchicago.edu/courses/74211/modules"><div class="nl">Canvas</div>
       <div class="nt">Week 4 module</div><div class="nd">Lab 4, HW 4, the participation quizzes and the Session 2 tape download.</div></a>
@@ -1806,7 +1784,7 @@ Engine.prototype.exitTick = function () {
     $("rgN").textContent = hit + " of 14"; $("rgN").className = "sv " + (hit <= 3 ? "ok" : hit >= 11 ? "bad" : "warn");
     $("rgB").textContent = bytes(b); $("rgP").textContent = (100 * b / total).toFixed(1) + " %";
     var m;
-    if (sort === "tick") m = sym ? "Sorted by tick, every row group holds every symbol (min AAPL, max TSLA), so the symbol filter prunes nothing here. The warehouse solves that with a folder per symbol instead (partition pruning)."
+    if (sort === "tick") m = sym ? "Sorted by tick, every row group holds every symbol (min AAPL, max TSLA), so the symbol filter prunes nothing here. The lab's Parquet tape solves that with a folder per symbol instead (partition pruning)."
       : "Sorted by tick, each row group covers about 200 ticks, so a " + (hi - lo + 1) + "-tick window touches " + (hit === 1 ? "one group" : hit + " groups") + "." + (lo === 390 && hi === 460 ? " This is the lab\u2019s \u201c2 of 14\u201d." : "");
     else m = sym ? "Sorted by symbol, each symbol's rows sit in one or two row groups, so the symbol filter prunes almost everything; the tick filter alone would not."
       : "Sorted by symbol, every row group spans almost the whole block in t, so the tick filter prunes nothing: same rows, same statistics machinery, wrong sort order.";
