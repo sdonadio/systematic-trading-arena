@@ -4,8 +4,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="icon" href="data:," />
-<title>Week 7 · Machine Learning Signals &amp; Model Ops — Systematic Trading Arena</title>
+<title>Week 6 · Big Data &amp; Distributed Computing — Systematic Trading Arena</title>
 <style>
+  /* ══ Reset & tokens ═══════════════════════════════════════════ */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root{
@@ -43,303 +44,397 @@
   body {
     background: var(--bg);
     color: var(--ink);
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    font-size: 14.5px;
-    line-height: 1.62;
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.65;
+    min-height: 100vh;
     -webkit-font-smoothing: antialiased;
   }
 
-  /* ── nav / footer (series components) ───────────────────────── */
+  .mono { font-family: var(--mono); }
+
+  a { color: var(--accent-3); }
+
+  /* ══ Top nav ══════════════════════════════════════════════════ */
   nav.top {
-    position: sticky; top: 0; z-index: 60;
-    display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
-    padding: 11px 22px;
-    background: rgba(15,17,21,0.93);
-    backdrop-filter: blur(9px);
-    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 40;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    padding: 11px 26px;
+    background: rgba(15,17,21,0.94);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
   }
-  nav.top > a {
-    color: var(--ink); font-weight: 700; font-size: 13.5px;
-    text-decoration: none; letter-spacing: -0.2px;
-    border-left: 3px solid var(--accent); padding-left: 10px;
+  nav.top::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2) 42%, transparent 82%);
+    opacity: 0.85; pointer-events: none;
   }
-  nav.top > a:hover { color: var(--accent-2); }
-  nav.top .crumbs { font-size: 12px; color: var(--muted); }
+  nav.top > a:first-child {
+    font-weight: 800; font-size: 14.5px; letter-spacing: -0.2px;
+    color: var(--ink); text-decoration: none;
+    padding-left: 12px; border-left: 3px solid var(--accent);
+  }
+  nav.top > a:first-child:hover { color: var(--accent-3); }
+  nav.top .crumbs {
+    font-size: 12px; color: var(--muted);
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
   nav.top .crumbs a { color: var(--muted); text-decoration: none; }
-  nav.top .crumbs a:hover { color: var(--ink); text-decoration: underline; }
-  nav.top .crumbs b { color: var(--ink); font-weight: 600; }
+  nav.top .crumbs a:hover { color: var(--accent-3); }
+  nav.top .crumbs b { color: var(--ink); font-weight: 700; }
 
-  footer {
-    margin-top: 40px; border-top: 1px solid var(--border);
-    padding: 26px 22px 40px; text-align: center;
-    font-size: 11.5px; color: var(--muted); background: var(--panel-2);
-  }
-  footer a { color: var(--accent-2); text-decoration: none; }
-  footer a:hover { text-decoration: underline; }
+  /* ══ Shell ════════════════════════════════════════════════════ */
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 26px; }
 
-  /* ── layout ─────────────────────────────────────────────────── */
-  main { max-width: 1180px; margin: 0 auto; padding: 0 22px; }
-  section { padding: 34px 0; border-top: 1px solid var(--border); }
+  section { padding: 40px 0 44px; border-top: 1px solid var(--line); }
   section:first-of-type { border-top: none; }
 
-  h1, h2, h3, h4 { letter-spacing: -0.4px; line-height: 1.24; }
-  h2 { font-size: 22px; font-weight: 700; }
-  h3 { font-size: 15px; font-weight: 700; }
-  p { margin-bottom: 11px; max-width: 78ch; }
-  p:last-child { margin-bottom: 0; }
-  a { color: var(--accent-2); }
-
-  .kicker {
-    display: inline-block; font-size: 9.5px; font-weight: 800;
-    letter-spacing: 1.6px; text-transform: uppercase;
-    color: var(--accent-2); padding: 3px 9px; border-radius: 4px;
-    background: rgba(var(--accent-rgb),0.16); border: 1px solid rgba(var(--accent-2-rgb),0.32);
-    margin-bottom: 10px;
+  .eyebrow {
+    font-size: 10.5px; font-weight: 800; letter-spacing: 2.2px;
+    text-transform: uppercase; color: var(--accent-2);
   }
-  .sec-head { margin-bottom: 14px; }
-  .sec-head p.lead { color: var(--muted); font-size: 13.5px; margin-top: 6px; }
+  h1 { font-size: clamp(28px, 4.4vw, 42px); font-weight: 800; letter-spacing: -1px; line-height: 1.12; }
+  h2 { font-size: 23px; font-weight: 750; letter-spacing: -0.4px; margin-top: 4px; }
+  h3 { font-size: 15px; font-weight: 700; letter-spacing: -0.1px; }
+  h4 { font-size: 12.5px; font-weight: 700; letter-spacing: 0.2px; color: var(--ink-dim); }
+  p  { color: var(--ink-dim); margin-top: 12px; max-width: 76ch; }
+  p.lead { font-size: 15.5px; color: var(--ink); }
+  p b, li b { color: var(--ink); font-weight: 650; }
+  .sub { color: var(--muted); font-size: 13px; margin-top: 8px; max-width: 82ch; }
 
-  code, .mono { font-family: var(--mono); }
-  p code, li code, td code {
-    font-size: 12px; color: var(--accent-2);
-    background: rgba(var(--accent-rgb),0.15); border: 1px solid rgba(var(--accent-2-rgb),0.2);
-    padding: 1px 5px; border-radius: 3px;
+  /* ══ Hero ═════════════════════════════════════════════════════ */
+  .hero {
+    padding: 54px 0 46px;
+    background:
+      radial-gradient(ellipse 820px 340px at 12% -30%, rgba(var(--accent-rgb),0.30), transparent 68%),
+      radial-gradient(ellipse 620px 260px at 92% 120%, rgba(var(--accent-2-rgb),0.10), transparent 70%);
+    border-bottom: 1px solid var(--line);
   }
+  .hero .promise {
+    margin-top: 14px; font-size: 16px; color: var(--ink); max-width: 74ch; font-weight: 500;
+  }
+  .willbe { list-style: none; margin-top: 22px; display: grid; gap: 9px; max-width: 78ch; }
+  .willbe li {
+    position: relative; padding-left: 26px; font-size: 13.5px; color: var(--ink-dim);
+  }
+  .willbe li::before {
+    content: ''; position: absolute; left: 6px; top: 8px;
+    width: 7px; height: 7px; border-radius: 2px;
+    background: var(--accent-2); box-shadow: 0 0 10px -1px var(--accent-2);
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 22px; }
+  .chip {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.6px; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 20px;
+    border: 1px solid var(--line-2); color: var(--muted);
+  }
+  .chip.hl { color: var(--accent-3); border-color: rgba(var(--accent-2-rgb),0.55); }
+
+  /* ══ Panels & grids ═══════════════════════════════════════════ */
+  .panel {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    overflow: hidden; margin-top: 22px;
+  }
+  .panel-head {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 10px 15px; border-bottom: 1px solid var(--line);
+    background: linear-gradient(90deg, rgba(var(--accent-rgb),0.16), transparent 62%), var(--panel-2);
+  }
+  .panel-head h3 { flex: 1; min-width: 180px; }
+  .panel-head .tag {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--muted); border: 1px solid var(--line-2); border-radius: 4px; padding: 2px 7px;
+  }
+  .panel-body { padding: 15px; }
+  .panel-note {
+    padding: 9px 15px; border-top: 1px solid var(--line);
+    background: var(--panel-2); font-size: 12px; color: var(--muted);
+  }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .grid-side { display: grid; grid-template-columns: 1.55fr 1fr; gap: 16px; }
+  .grid-side-l { display: grid; grid-template-columns: 1fr 1.55fr; gap: 16px; }
+
+  .box {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 13px 15px;
+  }
+  .box h4 { color: var(--accent-3); margin-bottom: 5px; }
+  .box p { margin-top: 4px; font-size: 12.5px; }
+
+  /* ══ Controls ═════════════════════════════════════════════════ */
+  .ctls {
+    display: flex; flex-wrap: wrap; gap: 14px 20px; align-items: flex-end;
+    padding: 13px 15px; border-bottom: 1px solid var(--line); background: var(--panel-2);
+  }
+  .ctl { display: flex; flex-direction: column; gap: 5px; min-width: 178px; flex: 1 1 178px; }
+  .ctl label {
+    font-size: 10.5px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase;
+    color: var(--muted); display: flex; justify-content: space-between; gap: 10px;
+  }
+  .ctl label .v { font-family: var(--mono); color: var(--accent-3); letter-spacing: 0; text-transform: none; }
+
+  input[type=range] {
+    -webkit-appearance: none; appearance: none; width: 100%; height: 22px;
+    background: transparent; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    height: 4px; border-radius: 3px; background: var(--line-2);
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; margin-top: -6px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--accent-2); border: 2px solid #f2e7e7;
+    box-shadow: 0 0 12px -2px var(--accent-2);
+  }
+  input[type=range]::-moz-range-track { height: 4px; border-radius: 3px; background: var(--line-2); }
+  input[type=range]::-moz-range-thumb {
+    width: 14px; height: 14px; border: 2px solid #f2e7e7; border-radius: 50%;
+    background: var(--accent-2);
+  }
+  input[type=range]:focus-visible { outline: 2px solid var(--accent-3); outline-offset: 3px; border-radius: 4px; }
+
+  .btn {
+    font-family: var(--sans); font-size: 12px; font-weight: 700;
+    padding: 7px 13px; border-radius: 7px; cursor: pointer;
+    background: var(--panel); color: var(--ink-dim);
+    border: 1px solid var(--line-2);
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .btn:hover { border-color: var(--accent-2); color: var(--ink); }
+  .btn:focus-visible { outline: 2px solid var(--accent-3); outline-offset: 2px; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fdf2f2; }
+  .btn.primary:hover { background: #2563eb; }
+  .btn[aria-pressed="true"], .btn.on {
+    background: rgba(var(--accent-rgb),0.34); border-color: var(--accent-2); color: #eaf2ff;
+  }
+  .btn:disabled { opacity: 0.42; cursor: not-allowed; }
+  .btnrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+  .tabs { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 1px solid var(--line); background: var(--panel-2); }
+  .tab {
+    flex: 1 1 auto; min-width: 120px; text-align: left;
+    padding: 10px 14px; cursor: pointer;
+    background: transparent; border: none; border-right: 1px solid var(--line);
+    border-bottom: 2px solid transparent;
+    color: var(--muted); font-family: var(--sans); font-size: 12.5px; font-weight: 700;
+  }
+  .tab .s { display: block; font-weight: 400; font-size: 11px; color: var(--ink-mute); margin-top: 1px; }
+  .tab:hover { color: var(--ink-dim); }
+  .tab[aria-selected="true"] {
+    color: var(--ink); border-bottom-color: var(--accent-2);
+    background: linear-gradient(180deg, rgba(var(--accent-rgb),0.20), transparent);
+  }
+  .tab:focus-visible { outline: 2px solid var(--accent-3); outline-offset: -3px; }
+
+  /* switches */
+  .sw { display: inline-flex; align-items: center; gap: 9px; cursor: pointer; font-size: 12.5px; color: var(--ink-dim); }
+  .sw input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .sw .track {
+    width: 36px; height: 19px; border-radius: 20px; flex-shrink: 0;
+    background: var(--line-2); border: 1px solid var(--line-2); position: relative; transition: background 0.18s;
+  }
+  .sw .track::after {
+    content: ''; position: absolute; top: 2px; left: 2px; width: 13px; height: 13px;
+    border-radius: 50%; background: var(--muted); transition: transform 0.18s, background 0.18s;
+  }
+  .sw input:checked + .track { background: rgba(var(--accent-rgb),0.55); border-color: var(--accent-2); }
+  .sw input:checked + .track::after { transform: translateX(17px); background: var(--accent-3); }
+  .sw input:focus-visible + .track { outline: 2px solid var(--accent-3); outline-offset: 2px; }
+
+  /* ══ Stats ════════════════════════════════════════════════════ */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); gap: 1px; background: var(--line); }
+  .stat { background: var(--panel-2); padding: 10px 13px; }
+  .stat .k { font-size: 9.5px; font-weight: 800; letter-spacing: 1.1px; text-transform: uppercase; color: var(--ink-mute); }
+  .stat .v { font-family: var(--mono); font-size: 17px; font-weight: 600; margin-top: 3px; color: var(--ink); }
+  .stat .v.ok { color: var(--ok); } .stat .v.bad { color: var(--bad); } .stat .v.warn { color: var(--warn); }
+  .stat .d { font-size: 10.5px; color: var(--ink-mute); margin-top: 1px; }
+
+  /* ══ Tables ═══════════════════════════════════════════════════ */
+  table.mini { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.mini th, table.mini td { padding: 6px 9px; border-bottom: 1px solid var(--line); text-align: left; }
+  table.mini th {
+    font-size: 9.5px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-mute);
+  }
+  table.mini td.num, table.mini th.num { text-align: right; font-family: var(--mono); }
+  table.mini tr.hl td { background: rgba(var(--accent-rgb),0.20); }
+  .tscroll { overflow-x: auto; }
+
+  /* ══ Code ═════════════════════════════════════════════════════ */
   pre.code {
     font-family: var(--mono); font-size: 11.5px; line-height: 1.62;
-    background: #0b0e13; border: 1px solid var(--border); border-radius: 8px;
-    padding: 12px 14px; overflow-x: auto; color: #cfd6dd;
-    white-space: pre; margin: 10px 0 0;
+    background: #0b0e14; border: 1px solid var(--line); border-radius: 9px;
+    padding: 12px 14px; overflow-x: auto; color: #dfe4ec; margin-top: 12px;
   }
-  pre.code b { color: var(--accent-2); font-weight: 600; }
-  pre.code i { color: #6e7681; font-style: normal; }
-  pre.code u { color: var(--ok); text-decoration: none; }
-
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
-  .grid2.narrow-right { grid-template-columns: 1.35fr 1fr; }
-  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-
-  /* ── widget shell ───────────────────────────────────────────── */
-  .widget {
-    background: var(--panel); border: 1px solid var(--border);
-    border-radius: 12px; padding: 16px 18px 18px; margin-top: 16px;
-  }
-  .widget.flat { background: var(--panel-2); }
-  .w-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-  .w-head h3 { color: var(--ink); }
-  .w-tag {
-    font-size: 9px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
-    color: var(--muted); border: 1px solid var(--border); border-radius: 10px; padding: 2px 8px;
-  }
-  .w-sub { font-size: 12.5px; color: var(--muted); margin: 6px 0 12px; max-width: 88ch; }
-  .w-note { font-size: 11.5px; color: var(--muted); margin-top: 11px; line-height: 1.6; }
-  .w-note b { color: var(--ink); font-weight: 600; }
-
-  .controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 4px 0 12px; }
-  .ctl { display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--muted); }
-  .ctl output, .ctl .val { font-family: var(--mono); font-size: 11.5px; color: var(--ink); min-width: 46px; }
-
-  button {
-    font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer;
-    color: var(--ink); background: transparent;
-    border: 1px solid var(--border); border-radius: 7px; padding: 6px 13px;
-    transition: border-color .18s, color .18s, background .18s;
-  }
-  button:hover:not(:disabled) { border-color: var(--accent-2); color: #fff; }
-  button:focus-visible, [tabindex]:focus-visible, input:focus-visible, summary:focus-visible {
-    outline: 2px solid var(--accent-2); outline-offset: 2px;
-  }
-  button:disabled { opacity: .38; cursor: not-allowed; }
-  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-  button.primary:hover:not(:disabled) { background: #2563eb; border-color: var(--accent-2); }
-  button.on { background: rgba(var(--accent-rgb),0.28); border-color: var(--accent-2); color: #fff; }
-  button.seg { border-radius: 0; margin-left: -1px; }
-  button.seg:first-of-type { border-radius: 7px 0 0 7px; margin-left: 0; }
-  button.seg:last-of-type { border-radius: 0 7px 7px 0; }
-
-  input[type=range] { accent-color: var(--accent-2); width: 130px; height: 18px; cursor: pointer; }
-  input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
-  select {
-    font-family: inherit; font-size: 12px; color: var(--ink); background: var(--panel-2);
-    border: 1px solid var(--border); border-radius: 7px; padding: 5px 8px; cursor: pointer;
+  pre.code .c { color: #6f757f; }
+  pre.code .k { color: var(--info); }
+  pre.code .s { color: #9ee6a4; }
+  pre.code .bad { color: var(--bad); }
+  pre.code .good { color: var(--ok); }
+  code {
+    font-family: var(--mono); font-size: 0.92em;
+    background: #0b0e14; border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px;
   }
 
-  svg.stage { width: 100%; height: auto; display: block; }
-  .svg-wrap {
-    background: var(--panel-2); border: 1px solid var(--border);
-    border-radius: 9px; padding: 10px; overflow: hidden;
-  }
+  /* ══ SVG / canvas ═════════════════════════════════════════════ */
+  svg.viz, canvas.viz { display: block; width: 100%; height: auto; }
+  svg text { font-family: var(--mono); }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; font-size: 11.5px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 13px; height: 3px; border-radius: 2px; background: var(--accent-2); display: inline-block; }
 
-  /* ── readouts, stats, logs, tables ──────────────────────────── */
-  .stats { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
-  .stat {
-    flex: 1 1 120px; background: var(--panel-2); border: 1px solid var(--border);
-    border-left: 2px solid var(--c, var(--muted)); border-radius: 7px; padding: 8px 11px;
-  }
-  .stat .lbl { font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
-  .stat .num { font-family: var(--mono); font-size: 17px; font-weight: 600; color: var(--c, var(--ink)); margin-top: 2px; }
-  .stat .sub { font-size: 10.5px; color: var(--muted); margin-top: 1px; }
-
-  .verdict {
-    margin-top: 12px; border-radius: 8px; padding: 10px 13px;
-    font-size: 12.5px; line-height: 1.62;
-    background: rgba(var(--accent-rgb),0.12); border: 1px solid rgba(var(--accent-2-rgb),0.3);
-  }
-  .verdict b { color: #fff; }
-  .verdict.ok   { background: rgba(63,185,80,0.10);  border-color: rgba(63,185,80,0.34); }
-  .verdict.warn { background: rgba(210,153,34,0.10); border-color: rgba(210,153,34,0.34); }
-  .verdict.bad  { background: rgba(248,81,73,0.10);  border-color: rgba(248,81,73,0.34); }
-
-  .log {
-    font-family: var(--mono); font-size: 11px; line-height: 1.75;
-    background: #0b0e13; border: 1px solid var(--border); border-radius: 8px;
-    padding: 9px 11px; height: 148px; overflow-y: auto; color: #b9c1c9;
-  }
-  .log div { white-space: pre-wrap; }
-  .log .t { color: #57606a; }
-  .log .g { color: var(--ok); }
-  .log .y { color: var(--warn); }
-  .log .r { color: var(--bad); }
-  .log .b { color: var(--sky); }
-
-  table.tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
-  table.tbl th {
-    text-align: left; font-size: 9px; font-weight: 800; letter-spacing: 1px;
-    text-transform: uppercase; color: var(--muted);
-    padding: 6px 8px; border-bottom: 1px solid var(--border);
-  }
-  table.tbl td {
-    padding: 6px 8px; border-bottom: 1px solid rgba(39,44,54,0.6);
-    font-family: var(--mono); font-size: 11.5px; color: var(--ink);
-  }
-  table.tbl td.name { font-family: inherit; }
-  table.tbl tr.hl td { background: rgba(var(--accent-rgb),0.16); }
-  table.tbl tr.bad td { background: rgba(248,81,73,0.10); }
-
-  .badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    font-size: 9.5px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase;
-    padding: 2px 8px; border-radius: 10px; border: 1px solid currentColor; white-space: nowrap;
-  }
-  .badge.ok { color: var(--ok); background: rgba(63,185,80,0.12); }
-  .badge.warn { color: var(--warn); background: rgba(210,153,34,0.12); }
-  .badge.bad { color: var(--bad); background: rgba(248,81,73,0.12); }
-  .badge.idle { color: var(--muted); background: rgba(154,160,166,0.1); }
-
-  /* ── hero ───────────────────────────────────────────────────── */
-  #hero { padding: 46px 0 34px; }
-  #hero .wk { font-family: var(--mono); font-size: 12px; letter-spacing: 3px; color: var(--accent-2); }
-  #hero h1 { font-size: clamp(27px, 4.4vw, 41px); font-weight: 800; margin-top: 8px; }
-  #hero h1 em { font-style: normal; color: var(--accent-2); }
-  #hero .promise { font-size: 15.5px; color: var(--ink); margin-top: 13px; max-width: 76ch; }
-  #hero ul.able { list-style: none; margin-top: 18px; display: grid; gap: 8px; grid-template-columns: repeat(3, 1fr); }
-  #hero ul.able li {
-    background: var(--panel); border: 1px solid var(--border); border-top: 2px solid var(--accent);
-    border-radius: 9px; padding: 11px 13px; font-size: 12.5px; color: var(--muted); line-height: 1.55;
-  }
-  #hero ul.able li b { display: block; color: var(--ink); font-size: 12px; margin-bottom: 3px; }
-
-  /* ── pitfalls ───────────────────────────────────────────────── */
+  /* ══ Pitfalls (accordion) ═════════════════════════════════════ */
   details.pit {
-    background: var(--panel); border: 1px solid var(--border);
-    border-left: 3px solid var(--bad); border-radius: 9px;
-    padding: 10px 14px; margin-bottom: 9px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    margin-top: 10px; overflow: hidden;
   }
+  details.pit + details.pit { margin-top: 8px; }
   details.pit summary {
-    cursor: pointer; font-size: 13.5px; font-weight: 600; color: var(--ink);
-    list-style: none; display: flex; align-items: baseline; gap: 9px;
+    cursor: pointer; list-style: none; padding: 12px 15px;
+    display: flex; align-items: flex-start; gap: 11px;
+    font-size: 13.5px; font-weight: 650; color: var(--ink);
   }
   details.pit summary::-webkit-details-marker { display: none; }
   details.pit summary::before {
-    content: '+'; font-family: var(--mono); color: var(--bad); font-weight: 700; flex-shrink: 0;
+    content: '+'; font-family: var(--mono); font-weight: 700; color: var(--accent-2);
+    width: 15px; flex-shrink: 0; text-align: center;
   }
   details.pit[open] summary::before { content: '\2212'; }
-  details.pit .body { font-size: 12.5px; color: var(--muted); margin-top: 9px; padding-left: 18px; }
-  details.pit .body b { color: var(--ink); }
-  details.pit .fix { margin-top: 8px; color: var(--ok); }
+  details.pit[open] summary { border-bottom: 1px solid var(--line); background: var(--panel-2); }
+  details.pit summary:focus-visible { outline: 2px solid var(--accent-3); outline-offset: -3px; }
+  details.pit .pit-body { padding: 12px 15px 14px 41px; }
+  details.pit .pit-body p { margin-top: 0; font-size: 12.5px; }
+  details.pit .pit-body p + p { margin-top: 9px; }
+  details.pit .fix { color: var(--ok); font-weight: 700; }
 
-  /* ── quiz ───────────────────────────────────────────────────── */
-  .q { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
-  .q .qn { font-size: 9.5px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; color: var(--accent-2); }
-  .q .qt { font-size: 13.5px; font-weight: 600; margin-top: 5px; }
-  .q .opts { display: grid; gap: 7px; margin-top: 11px; }
-  .q button.opt {
-    text-align: left; padding: 8px 12px; font-weight: 500; font-size: 12.5px;
-    background: var(--panel-2); border-radius: 7px; line-height: 1.5;
+  /* ══ Quiz ═════════════════════════════════════════════════════ */
+  .q { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 15px; margin-top: 14px; }
+  .q .qn { font-size: 10.5px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: var(--accent-2); }
+  .q .qt { font-size: 14px; font-weight: 650; margin-top: 5px; color: var(--ink); }
+  .opts { display: grid; gap: 7px; margin-top: 12px; }
+  .opt {
+    text-align: left; cursor: pointer; font-family: var(--sans); font-size: 13px;
+    padding: 9px 12px; border-radius: 8px; color: var(--ink-dim);
+    background: var(--panel-2); border: 1px solid var(--line);
+    display: flex; gap: 10px; align-items: flex-start;
   }
-  .q button.opt .k { font-family: var(--mono); color: var(--muted); margin-right: 8px; }
-  .q button.opt.right { border-color: var(--ok); color: #fff; background: rgba(63,185,80,0.13); }
-  .q button.opt.right .k { color: var(--ok); }
-  .q button.opt.wrong { border-color: var(--bad); color: #fff; background: rgba(248,81,73,0.12); }
-  .q button.opt.wrong .k { color: var(--bad); }
-  .q .fb { font-size: 12.5px; margin-top: 10px; display: none; line-height: 1.62; color: var(--muted); }
-  .q .fb.show { display: block; }
-  .q .fb b { color: var(--ink); }
+  .opt .ltr { font-family: var(--mono); font-weight: 700; color: var(--ink-mute); flex-shrink: 0; }
+  .opt:hover:not(.locked) { border-color: var(--accent-2); color: var(--ink); }
+  .opt:focus-visible { outline: 2px solid var(--accent-3); outline-offset: 2px; }
+  .opt.right { border-color: var(--ok); background: rgba(63,185,80,0.13); color: var(--ink); }
+  .opt.right .ltr { color: var(--ok); }
+  .opt.wrong { border-color: var(--bad); background: rgba(248,81,73,0.12); }
+  .opt.wrong .ltr { color: var(--bad); }
+  .fb { margin-top: 11px; padding: 10px 12px; border-radius: 8px; font-size: 12.5px; display: none; }
+  .fb.show { display: block; }
+  .fb.ok  { background: rgba(63,185,80,0.10); border: 1px solid rgba(63,185,80,0.4); color: #cfe9d2; }
+  .fb.no  { background: rgba(248,81,73,0.09); border: 1px solid rgba(248,81,73,0.38); color: #f0d5d3; }
+  .fb b { color: var(--ink); }
 
-  /* ── next ───────────────────────────────────────────────────── */
-  .nextgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+  /* ══ Next / links ═════════════════════════════════════════════ */
+  .nextgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin-top: 20px; }
   a.nextcard {
     display: block; text-decoration: none; color: inherit;
-    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
-    padding: 14px 16px; transition: border-color .18s, transform .18s;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 11px; padding: 15px 17px;
+    transition: border-color 0.18s, transform 0.18s;
   }
   a.nextcard:hover { border-color: var(--accent-2); transform: translateY(-2px); }
-  a.nextcard .lbl { font-size: 9.5px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; color: var(--accent-2); }
-  a.nextcard .ttl { font-size: 14px; font-weight: 700; margin-top: 4px; }
-  a.nextcard .dsc { font-size: 12px; color: var(--muted); margin-top: 4px; }
-  .weeknav { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
-  .weeknav a {
-    font-size: 12px; text-decoration: none; color: var(--muted);
-    border: 1px solid var(--border); border-radius: 20px; padding: 5px 14px;
-  }
-  .weeknav a:hover { border-color: var(--accent-2); color: var(--ink); }
+  a.nextcard .l { font-size: 10px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: var(--accent-2); }
+  a.nextcard .t { font-size: 15px; font-weight: 700; margin-top: 5px; color: var(--ink); }
+  a.nextcard .d { font-size: 12px; color: var(--muted); margin-top: 4px; }
 
-  /* ── responsive ─────────────────────────────────────────────── */
+  /* ══ Footer ═══════════════════════════════════════════════════ */
+  footer {
+    border-top: 1px solid var(--line); margin-top: 10px;
+    padding: 26px; text-align: center; font-size: 12px; color: var(--ink-mute);
+    background: var(--panel-2);
+  }
+  footer a { color: var(--accent-3); }
+
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* ══ Responsive ═══════════════════════════════════════════════ */
+  @media (max-width: 900px) {
+    .grid3 { grid-template-columns: 1fr 1fr; }
+  }
   @media (max-width: 720px) {
-    body { font-size: 14px; }
-    main { padding: 0 14px; }
-    .grid2, .grid2.narrow-right, .grid3, .nextgrid, #hero ul.able { grid-template-columns: minmax(0, 1fr); }
-    .stat { flex: 1 1 100%; }
-    nav.top { padding: 10px 14px; gap: 8px; }
-    input[type=range] { width: 100%; min-width: 120px; }
-    .ctl { flex: 1 1 100%; }
+    .wrap { padding: 0 16px; }
+    nav.top { padding: 10px 16px; gap: 8px; }
+    nav.top .crumbs { font-size: 11.5px; }
+    section { padding: 30px 0 32px; }
+    .grid2, .grid3, .grid-side, .grid-side-l { grid-template-columns: 1fr; }
+    h1 { font-size: 27px; }
+    h2 { font-size: 20px; }
+    .ctl { min-width: 100%; flex: 1 1 100%; }
+    .tab { min-width: 100%; border-right: none; }
   }
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation-duration: .001s !important; transition-duration: .001s !important; }
+    * { animation: none !important; transition: none !important; }
+    html { scroll-behavior: auto; }
   }
 
-  /* ── Week-7 specifics ───────────────────────────────────────── */
-  .feat-list { display: grid; gap: 6px; }
-  .feat-list label {
-    display: flex; align-items: flex-start; gap: 9px; cursor: pointer;
-    background: var(--panel-2); border: 1px solid var(--border); border-radius: 7px;
-    padding: 7px 10px; font-size: 12px; line-height: 1.45;
+  /* ══ page-local ═══════════════════════════════════════════════ */
+  .lane { display: grid; grid-template-columns: 132px 1fr 96px; gap: 10px; align-items: center; margin-top: 9px; }
+  .lane .nm { font-size: 11.5px; font-weight: 700; }
+  .lane .nm .s2 { display: block; font-weight: 400; font-size: 10px; color: var(--ink-mute); }
+  .lane .tr { height: 16px; border-radius: 8px; background: var(--panel-2); border: 1px solid var(--line); overflow: hidden; position: relative; }
+  .lane .fl { height: 100%; width: 0; border-radius: 8px 0 0 8px; transition: width 0.1s linear; }
+  .lane .tm { font-family: var(--mono); font-size: 11.5px; text-align: right; color: var(--ink); }
+  .warnbar {
+    margin-top: 12px; padding: 9px 12px; border-radius: 8px; font-size: 12px;
+    border: 1px solid var(--line-2); background: var(--panel-2); color: var(--muted);
   }
-  .feat-list label:hover { border-color: var(--accent-2); }
-  .feat-list label input { margin-top: 3px; flex-shrink: 0; }
-  .feat-list label .fn { font-family: var(--mono); font-size: 11.5px; color: var(--accent-2); }
-  .feat-list label .fd { color: var(--muted); font-size: 11px; display: block; }
-  .feat-list label.off { opacity: .62; }
+  .warnbar.hot { border-color: rgba(248,81,73,0.5); background: rgba(248,81,73,0.10); color: #f0d5d3; }
+  .warnbar.mid { border-color: rgba(210,153,34,0.5); background: rgba(210,153,34,0.09); color: #eddfc0; }
+  .warnbar.cool { border-color: rgba(63,185,80,0.4); background: rgba(63,185,80,0.09); color: #cfe9d2; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-family: var(--mono); font-size: 11.5px; margin-top: 4px; }
+  .kv .k2 { color: var(--ink-mute); }
+  .kv .v2 { color: var(--ink); text-align: right; }
 
-  .lifecycle { display: flex; gap: 0; flex-wrap: wrap; margin: 4px 0 12px; }
-  .lc-node {
-    flex: 1 1 130px; text-align: left; border-radius: 0; padding: 9px 11px;
-    border: 1px solid var(--border); margin-left: -1px; background: var(--panel-2);
+  /* dtype rows (widget 1) */
+  .dtrow {
+    display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center;
+    padding: 5px 0; border-bottom: 1px dotted var(--line);
   }
-  .lc-node:first-child { border-radius: 8px 0 0 8px; margin-left: 0; }
-  .lc-node:last-child { border-radius: 0 8px 8px 0; }
-  .lc-node .st { font-family: var(--mono); font-size: 9.5px; color: var(--muted); }
-  .lc-node .nm { font-size: 12.5px; font-weight: 700; margin-top: 2px; }
-  .lc-node.on { background: rgba(var(--accent-rgb),0.26); border-color: var(--accent-2); }
-  .lc-node.on .st { color: var(--accent-2); }
+  .dtrow:last-child { border-bottom: none; }
+  .dtrow .cn { font-family: var(--mono); font-size: 11.5px; color: var(--ink-dim); }
+  .dtrow .cn i { font-style: normal; color: var(--ink-mute); }
+  .dtrow .cn b { color: var(--accent-3); font-weight: 600; }
+
+  /* column chips (widget 4) */
+  .colgrid { display: flex; flex-wrap: wrap; gap: 6px; }
+  .colbtn {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    padding: 5px 9px; border-radius: 6px; cursor: pointer;
+    background: var(--panel); border: 1px solid var(--line-2); color: var(--ink-mute);
+  }
+  .colbtn:hover { border-color: var(--accent-2); color: var(--ink-dim); }
+  .colbtn:focus-visible { outline: 2px solid var(--accent-3); outline-offset: 2px; }
+  .colbtn[aria-pressed="true"] {
+    background: rgba(var(--accent-rgb),0.34); border-color: var(--accent-2); color: #eaf2ff;
+  }
+  .colbtn .w { color: var(--ink-mute); font-weight: 400; }
+  .colbtn[aria-pressed="true"] .w { color: var(--accent-3); }
+  .qbox {
+    font-family: var(--mono); font-size: 11.5px; line-height: 1.75;
+    background: #0b0e14; border: 1px solid var(--line); border-radius: 7px;
+    padding: 9px 11px; margin-top: 10px; color: #dfe4ec; overflow-x: auto;
+  }
+  .qbox .k { color: var(--info); }
+  .qbox .s { color: #9ee6a4; }
+  .qbox .c { color: var(--ink-mute); }
+
+  .oplog {
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+    max-height: 120px; overflow-y: auto; background: #0b0e14;
+    border: 1px solid var(--line); border-radius: 7px; padding: 8px 10px;
+  }
+  .oplog div { white-space: nowrap; }
+  .oplog b { color: var(--accent-3); font-weight: 600; }
+
   @media (max-width: 720px) {
-    .lc-node { flex: 1 1 100%; margin-left: 0; border-radius: 8px !important; margin-bottom: 4px; }
+    .lane { grid-template-columns: 92px 1fr 78px; gap: 7px; }
   }
-  .lc-detail { background: var(--panel-2); border: 1px solid var(--border); border-radius: 9px; padding: 12px 14px; }
-  .lc-detail h4 { font-size: 13.5px; }
-  .lc-detail .role { font-size: 11px; color: var(--accent-2); font-family: var(--mono); }
-  .lc-detail p { font-size: 12.5px; color: var(--muted); margin-top: 7px; }
-  .lc-detail .fail { font-size: 12px; color: var(--warn); margin-top: 7px; }
 
   /* ── mobile guard (identical on every page): single column under 720px,
         no horizontal overflow. Must stay last in the sheet. ───────────── */
@@ -358,1277 +453,1407 @@
 </head>
 <body>
 
-<nav class="top"><a href="index.html">Systematic Trading Arena</a><span class="crumbs"><a href="week6.html">&larr; Week 6</a> &middot; <b>Week 7 &middot; Machine Learning Signals &amp; Model Ops</b> &middot; <a href="week8.html">Week 8 &rarr;</a></span></nav>
+<nav class="top"><a href="index.html">Systematic Trading Arena</a><span class="crumbs"><a href="week5.html">&larr; Week 5</a> &middot; <b>Week 6 &middot; Big Data &amp; Distributed Computing</b> &middot; <a href="week7.html">Week 7 &rarr;</a></span></nav>
 
-<main>
-
-<!-- ══ HERO ══════════════════════════════════════════════════ -->
-<section id="hero">
-  <div class="wk">WEEK 7</div>
-  <h1>Machine Learning Signals &amp; <em>Model Ops</em></h1>
-  <p class="promise">A model is just another signal &mdash; a number your bot still has to size, risk-manage and route.
-  This week you learn to earn that number honestly: features known at time <code>t</code>, splits that respect time,
-  and a validated artifact that predicts inside your per-tick budget.</p>
-  <ul class="able">
-    <li><b>Build a feature matrix</b> from prices and the order book without leaking the future into a single column.</li>
-    <li><b>Validate walk-forward</b> and recognise the exact moment a backtest score stops being a measurement.</li>
-    <li><b>Operate a model</b>: persist it, load it once, predict in <code>on_tick</code>, and watch it drift.</li>
+<section id="hero" class="hero">
+ <div class="wrap">
+  <div class="eyebrow">Week 6 &middot; Scale</div>
+  <h1>Big Data &amp;<br/>Distributed Computing</h1>
+  <p class="promise">Think in columns and processes &mdash; so a strategy search takes minutes instead of hours, and your data fits before you rent a cluster.</p>
+  <ul class="willbe">
+    <li><b>You will be able to</b> size a dataset in memory and pick a storage layout &mdash; Parquet, downcast dtypes &mdash; before reaching for a cluster.</li>
+    <li><b>You will be able to</b> parallelise a backtest sweep with <code>ProcessPoolExecutor</code> and collect one metric per configuration.</li>
+    <li><b>You will be able to</b> design a feature pipeline that builds and caches offline, so <code>on_tick</code> does no heavy compute.</li>
   </ul>
+  <div class="chips">
+    <span class="chip hl">3 hours</span>
+    <span class="chip">memory wall</span>
+    <span class="chip">Parquet &middot; columnar</span>
+    <span class="chip">vectorisation</span>
+    <span class="chip">GIL &middot; processes</span>
+    <span class="chip">map&ndash;reduce</span>
+    <span class="chip">EXCHANGE_URLS</span>
+  </div>
+ </div>
 </section>
 
-<!-- ══ WHAT ══════════════════════════════════════════════════ -->
+<!-- ══════════════════════════════ WHAT ══════════════════════════════ -->
 <section id="what">
-  <div class="sec-head">
-    <span class="kicker">What is it?</span>
-    <h2>Supervised learning, pointed at the future</h2>
-    <p class="lead">Learn a mapping <code>f(X) &rarr; y</code> from historical examples. In trading, <code>X</code> is
-    everything you know <em>now</em>; <code>y</code> is the piece of the future you are predicting.</p>
-  </div>
+ <div class="wrap">
+  <div class="eyebrow">What is it?</div>
+  <h2>The bottleneck stops being ideas and becomes bytes</h2>
 
-  <div class="grid2 narrow-right">
-    <div>
-      <p>Every row of your dataset is one point in time. The features in that row must be computable from data that had
-      already printed at that instant &mdash; the last mid, the rolling volatility over the previous twenty ticks, the
-      current book imbalance. The label belongs to the future: the return from <code>t</code> to <code>t+h</code>, or
-      merely its sign.</p>
-      <p>Two label choices, two different jobs. <b>Classification</b> predicts direction and is robust &mdash; you can
-      size by the predicted probability. <b>Regression</b> predicts magnitude, is more informative, and is noisier and
-      harder. Either way the horizon <code>h</code> must match how long you actually intend to hold: a label about the
-      next 30 seconds cannot justify a position you keep for an hour.</p>
-      <p>The golden rule has one clause. <b>Every feature in <code>X</code> must be knowable at <code>t</code>.</b>
-      Anything else is leakage, and leakage does not look like a bug &mdash; it looks like a great model.</p>
-      <pre class="code"><i># one row per point-in-time observation</i>
-X = features known <b>AT</b> time t     <i># no future data!</i>
-y = label about t+h              <i># the horizon</i>
+  <p class="lead">Weeks 4 and 5 gave you a backtester and fast signals. One run, one symbol set, a DataFrame
+  that fits in RAM. That works &mdash; until it doesn't.</p>
 
-<i># classification  -&gt; sign of the next return</i>
-y = 1 <b>if</b> ret(t, t+h) &gt; 0 <b>else</b> 0
-<i># regression      -&gt; magnitude of the next return</i>
-y = ret(t, t+h)
+  <p>Two things break at the same time. <b>Feature pipelines explode in size:</b> rolling features across ten
+  symbols &times; months of ticks &times; a dozen transforms quickly exceeds a single pandas frame held in memory.
+  And <b>a real search is thousands of runs:</b> tuning a lookback or a threshold means re-running the backtest
+  across a grid &mdash; sequentially that is hours, in parallel it is minutes.</p>
 
-model.fit(X_train, y_train)
-y_hat = model.predict(X_now)     <i># -&gt; a signal</i></pre>
+  <p>So this week has exactly two skills: <b>store and stream data efficiently</b>, and <b>spread compute across
+  cores and machines</b>. Both are prerequisites for Week 7's machine learning, where training is only feasible
+  if your data is already cheap to read and your compute already fans out.</p>
+
+  <h3 style="margin-top:26px">The memory wall</h3>
+  <p>A DataFrame lives in RAM. pandas loads the whole frame plus overhead &mdash; often <b>2&ndash;10&times; the
+  file size</b> &mdash; and once your working set approaches physical memory, everything falls off a cliff. The OS
+  starts swapping to disk, which is roughly <b>1000&times; slower</b>. The symptoms are familiar: a
+  <code>MemoryError</code>, a machine grinding to a halt, a notebook that never returns. The dataset didn't
+  change. Your access pattern did.</p>
+
+  <div class="grid3" style="margin-top:18px">
+    <div class="box">
+      <h4>1 &middot; Store smaller</h4>
+      <p>Downcast <code>float64</code>&rarr;<code>float32</code>, <code>object</code>&rarr;<code>category</code>,
+      and write columnar Parquet instead of CSV text. Often this alone removes the problem.</p>
     </div>
-    <div>
-      <div class="widget" style="margin-top:0">
-        <div class="w-head"><h3>Why it is dangerous here</h3><span class="w-tag">low SNR</span></div>
-        <p class="w-sub">Three properties of market data that make ML in finance different from ML on images.</p>
-        <div class="stats" style="flex-direction:column">
-          <div class="stat" style="--c:var(--bad)">
-            <div class="lbl">Signal-to-noise</div>
-            <div class="num">~52%</div>
-            <div class="sub">Returns are mostly noise. A model at 52% out-of-sample can be excellent &mdash; or pure overfit. You cannot tell by looking at it.</div>
-          </div>
-          <div class="stat" style="--c:var(--warn)">
-            <div class="lbl">Non-stationarity</div>
-            <div class="num">drift</div>
-            <div class="sub">The data-generating process changes. Yesterday's edge decays and a model trained on it rots silently, still returning confident numbers.</div>
-          </div>
-          <div class="stat" style="--c:var(--violet)">
-            <div class="lbl">Feedback &amp; scarcity</div>
-            <div class="num">n&nbsp;small</div>
-            <div class="sub">Little independent data, and your own orders move the price. Backtests flatter; the live session collects.</div>
-          </div>
-        </div>
-        <div class="w-note"><b>Simple first.</b> Every W3&ndash;W6 signal is a baseline. ML has to beat it
-        <em>out-of-sample, after costs</em> to earn its place in your bot.</div>
-      </div>
+    <div class="box">
+      <h4>2 &middot; Process in chunks</h4>
+      <p>If it won't fit, don't load it all. Stream bounded pieces and reduce as you go: constant memory,
+      any file size.</p>
+    </div>
+    <div class="box">
+      <h4>3 &middot; Go out-of-core</h4>
+      <p>Spread the work over processes, then over machines. Last resort, not first &mdash; and only after
+      you have measured.</p>
     </div>
   </div>
 
-  <!-- WIDGET 1 -->
-  <div class="widget">
-    <div class="w-head"><span class="w-tag">Widget 1</span><h3>Feature-engineering playground</h3></div>
-    <p class="w-sub">A synthetic tick series for one symbol. Pick features, set the label horizon, and watch the design
-    matrix assemble. Click a row in the matrix to see which instant it was cut from.</p>
+  <p><b>Measure first.</b> <code>df.info(memory_usage='deep')</code> and <code>df.memory_usage()</code> tell you
+  what you actually hold. The widget below is that calculation, made draggable: pick a shape, pick dtypes, and
+  watch the bar cross the RAM line.</p>
 
-    <div class="grid2">
+  <!-- ── WIDGET 1 ─────────────────────────────────────────────── -->
+  <div class="panel">
+   <div class="panel-head">
+     <h3>The memory wall, as a calculator</h3>
+     <span class="tag">Widget 1 &middot; drag the shape, flip the dtypes</span>
+   </div>
+
+   <div class="ctls">
+     <div class="ctl">
+       <label for="mw-rows">Rows <span class="v" id="mw-rows-v">10,833,068</span></label>
+       <input type="range" id="mw-rows" min="0" max="48" value="31" step="1"
+              aria-label="Number of rows in the tick dataset, logarithmic scale" />
+     </div>
+     <div class="ctl">
+       <label for="mw-feat">Feature columns <span class="v" id="mw-feat-v">8</span></label>
+       <input type="range" id="mw-feat" min="0" max="34" value="8" step="1"
+              aria-label="Number of rolling feature columns added to the tick schema" />
+     </div>
+     <div class="ctl">
+       <label for="mw-ram">Machine RAM <span class="v" id="mw-ram-v">16 GB</span></label>
+       <input type="range" id="mw-ram" min="0" max="4" value="1" step="1"
+              aria-label="Physical memory available on the machine" />
+     </div>
+     <div class="ctl" style="flex:0 0 auto;min-width:auto">
+       <label>Presets</label>
+       <div class="btnrow">
+         <button class="btn" id="mw-wide" type="button">All float64 / object</button>
+         <button class="btn" id="mw-narrow" type="button">Downcast everything</button>
+       </div>
+     </div>
+   </div>
+
+   <div class="panel-body">
+    <div class="grid-side">
       <div>
-        <div class="controls">
-          <div class="ctl"><label for="w7-h">horizon h</label>
-            <input type="range" id="w7-h" min="1" max="12" step="1" value="5" aria-label="Label horizon in ticks" />
-            <output id="w7-h-out">5 ticks</output></div>
-          <div class="ctl">
-            <button id="w7-lbl-cls" class="seg on" aria-pressed="true">y = sign</button><button id="w7-lbl-reg" class="seg" aria-pressed="false">y = return</button>
-          </div>
-          <button id="w7-reseed">&#8635; New series</button>
+        <svg class="viz" id="mw-svg" viewBox="0 0 660 188" role="img"
+             aria-label="Horizontal bars comparing the in-memory pandas footprint, the Parquet file size and the CSV file size for the chosen dataset shape, against a vertical marker showing the machine's physical memory."></svg>
+        <div class="legend">
+          <span><i style="background:var(--accent-2)"></i> in RAM (pandas)</span>
+          <span><i style="background:#3fb950"></i> on disk (Parquet + zstd)</span>
+          <span><i style="background:#6f757f"></i> on disk (CSV text)</span>
+          <span><i style="background:#f85149;height:11px;width:2px"></i> physical RAM</span>
         </div>
-        <div class="svg-wrap">
-          <svg class="stage" id="w7-px" viewBox="0 0 720 250" role="img"
-               aria-label="Synthetic price series with the feature window and the label horizon highlighted"></svg>
-        </div>
-        <div class="w-note" id="w7-fx-note"></div>
+        <div class="warnbar" id="mw-warn">&nbsp;</div>
       </div>
+
       <div>
-        <div class="feat-list" id="w7-feats"></div>
-        <div class="stats">
-          <div class="stat" style="--c:var(--sky)"><div class="lbl">Matrix shape</div><div class="num" id="w7-shape">&mdash;</div><div class="sub" id="w7-shape-sub">usable rows &times; features</div></div>
-          <div class="stat" style="--c:var(--accent-2)"><div class="lbl">Rows per feature</div><div class="num" id="w7-dof">&mdash;</div><div class="sub">degrees of freedom you are spending</div></div>
+        <h4 style="margin-bottom:6px">Tick schema &mdash; pick a dtype per column</h4>
+        <div id="mw-cols"></div>
+        <div class="kv" style="margin-top:12px">
+          <span class="k2">bytes / row</span><span class="v2" id="mw-perrow">&mdash;</span>
+          <span class="k2">columns</span><span class="v2" id="mw-ncols">&mdash;</span>
+          <span class="k2">object overhead</span><span class="v2" id="mw-objov">&mdash;</span>
         </div>
-        <div style="overflow-x:auto;margin-top:12px">
-          <table class="tbl" id="w7-mat"></table>
-        </div>
-        <div class="verdict" id="w7-verdict"></div>
       </div>
     </div>
-    <div class="w-note"><b>Read the warm-up.</b> <code>vol_20</code> needs twenty prior returns and the label needs
-    <code>h</code> future ticks, so the first rows and the last <code>h</code> rows are unusable. Dropping them is
-    correct; quietly filling them is leakage. Features are cheap &mdash; labels are precious.</div>
+
+    <div class="stats" style="margin-top:16px;border:1px solid var(--line);border-radius:9px;overflow:hidden">
+      <div class="stat"><div class="k">Rows</div><div class="v" id="mw-s-rows">&mdash;</div><div class="d">ticks</div></div>
+      <div class="stat"><div class="k">In RAM</div><div class="v" id="mw-s-ram">&mdash;</div><div class="d">pandas frame + index</div></div>
+      <div class="stat"><div class="k">Of physical</div><div class="v" id="mw-s-pct">&mdash;</div><div class="d">before any copy</div></div>
+      <div class="stat"><div class="k">Parquet</div><div class="v" id="mw-s-pq">&mdash;</div><div class="d">columnar + zstd</div></div>
+      <div class="stat"><div class="k">CSV</div><div class="v" id="mw-s-csv">&mdash;</div><div class="d">row-oriented text</div></div>
+      <div class="stat"><div class="k">Saved</div><div class="v" id="mw-s-save">&mdash;</div><div class="d">vs all-wide dtypes</div></div>
+    </div>
+   </div>
+
+   <div class="panel-note">An <code>object</code> column does not store 8 bytes per row &mdash; it stores an
+   8-byte pointer <b>plus</b> a Python string object of roughly 60 bytes. That single choice is usually the
+   whole 2&ndash;10&times; overhead. <code>category</code> replaces it with a 1-byte code and one shared
+   dictionary. Parquet sizes assume zstd at per-dtype ratios; a real file will differ, the ordering will not.</div>
   </div>
+
+  <h3 style="margin-top:30px">Row versus columnar &mdash; CSV versus Parquet</h3>
+  <p>How bytes are laid out on disk decides how many of them you must read, and how well they compress.
+  <b>CSV</b> is row-oriented text: no types, no column pruning, huge on disk, and re-parsed from scratch every
+  time. <b>Parquet</b> is columnar, typed and compressed, so you read only the columns and row groups you
+  actually touch. Columns of similar values compress 5&ndash;20&times; under zstd or snappy.</p>
+  <p>The rule is simple: <b>CSV to exchange with humans, Parquet for anything you re-read.</b> You will feel the
+  difference in Widget 4.</p>
+
+  <div class="grid2" style="margin-top:6px">
+   <div>
+    <h4>pandas &mdash; eager</h4>
+    <pre class="code"><span class="c"># each line runs now, single-core, in RAM</span>
+df = pd.read_parquet(<span class="s">'ticks.parquet'</span>)
+out = (df[df.symbol == <span class="s">'AAPL'</span>]
+         .assign(ret=df.close.pct_change())
+         .groupby(<span class="s">'symbol'</span>).ret.std())</pre>
+   </div>
+   <div>
+    <h4>Polars &mdash; lazy</h4>
+    <pre class="code"><span class="c"># builds a plan, optimises it, runs multi-core</span>
+out = (pl.scan_parquet(<span class="s">'ticks.parquet'</span>)
+         .filter(pl.col(<span class="s">'symbol'</span>) == <span class="s">'AAPL'</span>)
+         .select(pl.col(<span class="s">'close'</span>).pct_change())
+         .collect())   <span class="c"># the plan runs HERE</span></pre>
+   </div>
+  </div>
+  <p class="sub">The course stack ships <b>numpy + pandas</b>; Polars is the big-data option, not a requirement.
+  pandas is eager, single-core and in-RAM &mdash; mature, universal, and fine below roughly 1&ndash;5 GB. Polars
+  builds a query plan, optimises it, runs multi-core and can stream larger-than-RAM. Pick pandas for interop and
+  small-to-medium data; pick Polars for wide scans, many gigabytes, and speed-critical pipelines.</p>
+ </div>
 </section>
 
-<!-- ══ HOW ═══════════════════════════════════════════════════ -->
+<!-- ══════════════════════════════ HOW ══════════════════════════════ -->
 <section id="how">
-  <div class="sec-head">
-    <span class="kicker">How does it work?</span>
-    <h2>Splitting in time is the whole discipline</h2>
-    <p class="lead">Fitting the model is one line. Everything that decides whether the number means anything happens in
-    how you cut the data &mdash; and in how many times you look.</p>
+ <div class="wrap">
+  <div class="eyebrow">How does it work?</div>
+  <h2>Vectorise, then chunk, then fan out across processes</h2>
+
+  <p class="lead">Three levers, in this order. Most people reach for the third first and wonder why a cluster
+  didn't help.</p>
+
+  <p><b>Lever one: stop looping in Python.</b> A Python-level <code>for</code> over a price series pays
+  interpreter overhead on every element &mdash; boxing, dispatch, bounds checks. numpy pushes the same arithmetic
+  into a typed C loop over contiguous memory and pays it once. <code>df.apply()</code> sits awkwardly in the
+  middle: it is a Python call per row wearing a vectorised costume.</p>
+
+  <!-- ── WIDGET 2 ─────────────────────────────────────────────── -->
+  <div class="panel">
+   <div class="panel-head">
+     <h3>The vectorisation race</h3>
+     <span class="tag">Widget 2 &middot; same arithmetic, three ways</span>
+   </div>
+
+   <div class="ctls">
+     <div class="ctl">
+       <label for="vz-n">Elements <span class="v" id="vz-n-v">977,808</span></label>
+       <input type="range" id="vz-n" min="0" max="44" value="28" step="1"
+              aria-label="Number of array elements to process, logarithmic scale" />
+     </div>
+     <div class="ctl" style="flex:0 0 auto;min-width:auto">
+       <label>Run the race</label>
+       <div class="btnrow">
+         <button class="btn primary" id="vz-run" type="button">&#9654; Run</button>
+         <button class="btn" id="vz-reset" type="button">&#8634; Reset</button>
+       </div>
+     </div>
+   </div>
+
+   <div class="panel-body">
+    <div class="grid-side">
+     <div>
+      <div class="lane">
+        <div class="nm" style="color:#f85149">Python <code>for</code><span class="s2">interpreted, per element</span></div>
+        <div class="tr"><div class="fl" id="vz-f0" style="background:#f85149"></div></div>
+        <div class="tm" id="vz-t0">&mdash;</div>
+      </div>
+      <div class="lane">
+        <div class="nm" style="color:#d29922"><code>df.apply()</code><span class="s2">a Python call per row</span></div>
+        <div class="tr"><div class="fl" id="vz-f1" style="background:#d29922"></div></div>
+        <div class="tm" id="vz-t1">&mdash;</div>
+      </div>
+      <div class="lane">
+        <div class="nm" style="color:#3fb950">numpy vectorised<span class="s2">one typed C loop</span></div>
+        <div class="tr"><div class="fl" id="vz-f2" style="background:#3fb950"></div></div>
+        <div class="tm" id="vz-t2">&mdash;</div>
+      </div>
+      <div class="warnbar" id="vz-warn">Press <b>Run</b>. All three lanes advance at the same speed on a shared
+      scale, so the lane that finishes first is genuinely faster.</div>
+     </div>
+
+     <div>
+      <pre class="code"><span class="c"># 1 · Python loop — interpreter per element</span>
+out = []
+<span class="k">for</span> i <span class="k">in</span> range(1, len(px)):
+    out.append(px[i] / px[i-1] - 1)
+
+<span class="c"># 2 · df.apply — still a Python call per row</span>
+df[<span class="s">'ret'</span>] = df.close.apply(f)
+
+<span class="c"># 3 · vectorised — one C loop, no Python</span>
+ret = px[1:] / px[:-1] - 1</pre>
+      <div class="kv" style="margin-top:10px">
+        <span class="k2">loop vs numpy</span><span class="v2" id="vz-sp0">&mdash;</span>
+        <span class="k2">apply vs numpy</span><span class="v2" id="vz-sp1">&mdash;</span>
+      </div>
+     </div>
+    </div>
+   </div>
+
+   <div class="panel-note">Modelled at <b>65 ns</b> per element for the Python loop, <b>22 ns</b> for
+   <code>apply</code>, and <b>0.9 ns</b> plus a fixed <b>12 &micro;s</b> of call overhead for numpy. Those
+   constants are illustrative but the shape is real: below a few thousand elements numpy's overhead dominates
+   and the loop is fine; above a million, the loop is a coffee break and above ten million it is a lunch break.</div>
   </div>
 
-  <p>Random shuffling is the default in every tutorial and it is catastrophic on a time series. Shuffle, and a row from
-  next Tuesday sits in your training set while its neighbour &mdash; nearly the same market state &mdash; sits in the
-  test set. The model does not learn structure; it learns to recognise its neighbours. Your test score becomes a
-  measurement of how similar adjacent ticks are, which is close to 100% and completely useless.</p>
+  <p style="margin-top:26px"><b>Lever two: bound your memory, not your file size.</b> If it won't fit, don't load
+  it all. Read a stream of chunks, reduce each one, and combine &mdash; constant memory for any file size. This is
+  a local map&ndash;reduce, and it is the same shape you will later run across processes and machines.</p>
 
-  <!-- WIDGET 2 -->
-  <div class="widget">
-    <div class="w-head"><span class="w-tag">Widget 2</span><h3>Leakage detector</h3></div>
-    <p class="w-sub">The same data, the same model, three ways of cutting it. Watch the <em>reported</em> test accuracy
-    move while the <em>live</em> accuracy does not.</p>
+  <pre class="code"><span class="c"># bounded pieces, streaming reduce → O(1) memory</span>
+total, n = 0.0, 0
+<span class="k">for</span> chunk <span class="k">in</span> pd.read_csv(<span class="s">'huge.csv'</span>, chunksize=1_000_000):
+    total += chunk[<span class="s">'volume'</span>].sum()   <span class="c"># MAP: reduce per chunk</span>
+    n     += len(chunk)
+<span class="k">print</span>(total / n)   <span class="c"># REDUCE: never held the full file in RAM</span></pre>
 
-    <div class="controls">
-      <div class="ctl">
-        <button id="w7-sp-rand" class="seg" aria-pressed="false">Random split</button><button id="w7-sp-time" class="seg on" aria-pressed="true">Split in time</button><button id="w7-sp-emb" class="seg" aria-pressed="false">Embargo + purge</button>
-      </div>
-      <div class="ctl"><label for="w7-train">train share</label>
-        <input type="range" id="w7-train" min="50" max="90" step="5" value="70" aria-label="Training share of the sample" />
-        <output id="w7-train-out">70%</output></div>
-      <div class="ctl"><label for="w7-emb">embargo</label>
-        <input type="range" id="w7-emb" min="0" max="12" step="1" value="5" aria-label="Embargo width in ticks" />
-        <output id="w7-emb-out">5 ticks</output></div>
+  <p><b>Lever three: use processes, not threads.</b> The GIL lets only one thread execute Python bytecode at a
+  time, so for CPU-bound work threads buy you nothing &mdash; they take turns. Separate processes have separate
+  interpreters and separate GILs, which is real parallelism. <code>ProcessPoolExecutor</code> is the clean stdlib
+  API; joblib's <code>Parallel/delayed</code> is the same idea in one line. The
+  <code>if __name__ == '__main__':</code> guard is mandatory, not stylistic: without it each spawned child
+  re-imports your module and re-launches the pool.</p>
+
+  <p>Map&ndash;reduce is the mental model behind all of it. <b>Map</b> applies the same function to each
+  independent piece &mdash; per symbol, per chunk, per parameter. <b>Reduce</b> combines the partials: a sum, a
+  concat, a best-Sharpe. The <b>shard key</b> is the split, and you choose it so the pieces are genuinely
+  independent. Backtests are the poster child: no run needs another, so speedup is near-linear. A stateful order
+  book is the counter-example &mdash; it cannot be sharded blindly, because the dependencies force coordination.</p>
+
+  <!-- ── WIDGET 3 ─────────────────────────────────────────────── -->
+  <div class="panel">
+   <div class="panel-head">
+     <h3>Chunk it, map it, reduce it</h3>
+     <span class="tag">Widget 3 &middot; step the pipeline, add workers</span>
+   </div>
+
+   <div class="ctls">
+     <div class="ctl">
+       <label for="mr-chunk">Chunk size <span class="v" id="mr-chunk-v">1,000,000</span></label>
+       <input type="range" id="mr-chunk" min="0" max="5" value="2" step="1"
+              aria-label="Rows per chunk read from the tick file" />
+     </div>
+     <div class="ctl">
+       <label for="mr-work">Workers <span class="v" id="mr-work-v">4</span></label>
+       <input type="range" id="mr-work" min="1" max="16" value="4" step="1"
+              aria-label="Number of parallel workers processing chunks" />
+     </div>
+     <div class="ctl" style="flex:0 0 auto;min-width:auto">
+       <label>Execution</label>
+       <label class="sw" style="margin-top:2px">
+         <input type="checkbox" id="mr-threads" aria-label="Use threads instead of processes, which serialises CPU-bound work behind the GIL" />
+         <span class="track"></span><span>threads, not processes</span>
+       </label>
+     </div>
+     <div class="ctl" style="flex:0 0 auto;min-width:auto">
+       <label>Pipeline</label>
+       <div class="btnrow">
+         <button class="btn" id="mr-step" type="button">Step &rarr;</button>
+         <button class="btn primary" id="mr-play" type="button">&#9654; Play</button>
+         <button class="btn" id="mr-reset" type="button">&#8634; Reset</button>
+       </div>
+     </div>
+   </div>
+
+   <div class="panel-body">
+    <svg class="viz" id="mr-svg" viewBox="0 0 660 300" role="img"
+         aria-label="A tick file split into chunks flowing into parallel worker lanes, each computing a partial sum, then into a single reduce box that combines the partials into a mean."></svg>
+
+    <div class="stats" style="margin-top:14px;border:1px solid var(--line);border-radius:9px;overflow:hidden">
+      <div class="stat"><div class="k">Chunks</div><div class="v" id="mr-s-chunks">&mdash;</div><div class="d">of 240 M rows</div></div>
+      <div class="stat"><div class="k">Peak memory</div><div class="v" id="mr-s-mem">&mdash;</div><div class="d">one chunk, constant</div></div>
+      <div class="stat"><div class="k">Sequential</div><div class="v" id="mr-s-seq">&mdash;</div><div class="d">one worker</div></div>
+      <div class="stat"><div class="k">Parallel</div><div class="v" id="mr-s-par">&mdash;</div><div class="d">wall clock</div></div>
+      <div class="stat"><div class="k">Speedup</div><div class="v" id="mr-s-sp">&mdash;</div><div class="d">vs sequential</div></div>
+      <div class="stat"><div class="k">Efficiency</div><div class="v" id="mr-s-eff">&mdash;</div><div class="d">speedup / workers</div></div>
     </div>
 
-    <div class="svg-wrap">
-      <svg class="stage" id="w7-split" viewBox="0 0 720 150" role="img"
-           aria-label="Time axis showing how the sample is divided into training and test blocks"></svg>
+    <div class="grid-side" style="margin-top:14px">
+      <div class="warnbar" id="mr-warn">&nbsp;</div>
+      <div class="oplog" id="mr-log"></div>
     </div>
+   </div>
 
-    <div class="grid2" style="margin-top:12px">
-      <div>
-        <div class="stats" style="margin-top:0">
-          <div class="stat" style="--c:var(--muted)"><div class="lbl">In-sample</div><div class="num" id="w7-acc-in">&mdash;</div><div class="sub">accuracy on the training block</div></div>
-          <div class="stat" style="--c:var(--warn)"><div class="lbl">Reported test</div><div class="num" id="w7-acc-test">&mdash;</div><div class="sub">the number you would put in your report</div></div>
-          <div class="stat" style="--c:var(--ok)"><div class="lbl">Live</div><div class="num" id="w7-acc-live">&mdash;</div><div class="sub">what the arena actually pays you for</div></div>
-        </div>
-        <div class="svg-wrap" style="margin-top:12px">
-          <svg class="stage" id="w7-gap" viewBox="0 0 720 118" role="img"
-               aria-label="Bar chart comparing reported test accuracy with live accuracy"></svg>
-        </div>
-      </div>
-      <div>
-        <pre class="code" id="w7-split-code"></pre>
-        <div class="verdict" id="w7-split-verdict"></div>
-      </div>
-    </div>
-    <div class="w-note"><b>Why the embargo.</b> A label at time <code>t</code> looks <code>h</code> ticks ahead, so rows
-    within <code>h</code> of the boundary see across the wall even under a clean chronological split. Purging those rows
-    costs you a handful of samples and buys you a number you can trust.</div>
+   <div class="panel-note">Modelled at <b>80 ns</b> per row of work, <b>0.35 s</b> of process start-up per worker
+   and <b>0.4 ms</b> to return each chunk's partial across the boundary. Notice three things: peak memory is one
+   chunk regardless of file size; efficiency <b>falls</b> as you add workers, because start-up is a fixed cost
+   parallelism cannot amortise away; and past a point more workers are <b>slower</b> &mdash; on this file, 16
+   workers lose to 8. Sixteen workers are never sixteen times faster.</div>
   </div>
 
-  <p>Once the wall is in the right place, one split is still not an evaluation &mdash; it is a single sample. Walk-forward
-  (rolling-origin) validation trains on the past, tests on the next unseen block, rolls forward and repeats. Every test
-  block is out-of-sample, which is exactly the situation your bot is in at every tick of the live session: it only ever
-  knows the past.</p>
+  <pre class="code"><span class="c"># scripts/param_sweep.py — one backtest per process</span>
+<span class="k">from</span> concurrent.futures <span class="k">import</span> ProcessPoolExecutor
+<span class="k">from</span> tests.sim_session <span class="k">import</span> SimSession
 
-  <!-- WIDGET 3 -->
-  <div class="widget">
-    <div class="w-head"><span class="w-tag">Widget 3</span><h3>Walk-forward validation animator</h3></div>
-    <p class="w-sub">Step the folds forward and collect the out-of-sample score of each test block. Then flip on a regime
-    shift and watch the expanding window &mdash; which never forgets &mdash; lose to the rolling one.</p>
+<span class="k">def</span> backtest(lookback):
+    fn = make_momentum(lookback)          <span class="c"># one signal_fn per config</span>
+    res = SimSession().run(n_ticks=2000, strategies=[(<span class="s">'m'</span>, fn)],
+                           symbols=[<span class="s">'AAPL'</span>, <span class="s">'TSLA'</span>], seed=7, verbose=<span class="k">False</span>)
+    <span class="k">return</span> lookback, sharpe(res.traders[0].pnl_curve)
 
-    <div class="controls">
-      <div class="ctl">
-        <button id="w7-wf-exp" class="seg on" aria-pressed="true">Expanding window</button><button id="w7-wf-roll" class="seg" aria-pressed="false">Rolling window</button>
-      </div>
-      <div class="ctl"><label for="w7-folds">folds</label>
-        <input type="range" id="w7-folds" min="3" max="8" step="1" value="5" aria-label="Number of walk-forward folds" />
-        <output id="w7-folds-out">5</output></div>
-      <label class="ctl"><input type="checkbox" id="w7-drift" /> regime shift at fold 3</label>
-      <button id="w7-wf-step">Step &rarr;</button>
-      <button id="w7-wf-play" class="primary">&#9654; Roll forward</button>
-      <button id="w7-wf-reset">&#8634; Reset</button>
-    </div>
+<span class="k">if</span> __name__ == <span class="s">'__main__'</span>:            <span class="good"># mandatory for multiprocessing</span>
+    <span class="k">with</span> ProcessPoolExecutor() <span class="k">as</span> pool:
+        <span class="k">for</span> lb, sr <span class="k">in</span> pool.map(backtest, [5, 10, 20, 40, 80]):
+            <span class="k">print</span>(f<span class="s">'lookback={lb:>3}  Sharpe={sr:6.2f}'</span>)</pre>
 
-    <div class="grid2 narrow-right">
-      <div class="svg-wrap">
-        <svg class="stage" id="w7-wf" viewBox="0 0 720 260" role="img"
-             aria-label="Walk-forward folds: training blocks followed by out-of-sample test blocks"></svg>
-      </div>
-      <div>
-        <div class="stats" style="margin-top:0;flex-direction:column">
-          <div class="stat" style="--c:var(--accent-2)"><div class="lbl">Mean OOS score</div><div class="num" id="w7-wf-mean">&mdash;</div><div class="sub">the only score worth reporting</div></div>
-          <div class="stat" style="--c:var(--warn)"><div class="lbl">Dispersion across folds</div><div class="num" id="w7-wf-sd">&mdash;</div><div class="sub">a good mean with huge spread is not an edge</div></div>
-        </div>
-        <div class="svg-wrap" style="margin-top:12px">
-          <svg class="stage" id="w7-wf-bars" viewBox="0 0 340 130" role="img" aria-label="Per-fold out-of-sample scores"></svg>
-        </div>
-        <div class="verdict" id="w7-wf-verdict">Roll the folds forward to collect out-of-sample scores.</div>
-      </div>
-    </div>
-    <div class="w-note"><b>In AlgoArena.</b> <code>tests/sim_session.py</code> runs the whole arena in one process with
-    no network, so a fold is one call: fit on <code>history[:train_end]</code>, then run the bot over the test block only
-    and read the out-of-sample P&amp;L. Same bot object you will ship &mdash; validate it honestly, then do not touch it.</div>
-  </div>
-
-  <!-- WIDGET 4 -->
-  <div class="widget">
-    <div class="w-head"><span class="w-tag">Widget 4</span><h3>Model-ops lifecycle</h3></div>
-    <p class="w-sub">Training is roughly 10% of the job. Click a stage to see what it owns, how it fails, and which line
-    of your bot it corresponds to.</p>
-
-    <div class="lifecycle" id="w7-lc" role="group" aria-label="Model lifecycle stages"></div>
-    <div class="grid2 narrow-right">
-      <div class="lc-detail" id="w7-lc-detail"></div>
-      <div>
-        <div class="controls" style="margin-top:0">
-          <div class="ctl"><label for="w7-age">weeks since training</label>
-            <input type="range" id="w7-age" min="0" max="12" step="1" value="0" aria-label="Weeks since the model was trained" />
-            <output id="w7-age-out">0</output></div>
-        </div>
-        <div class="svg-wrap">
-          <svg class="stage" id="w7-drift-svg" viewBox="0 0 340 150" role="img"
-               aria-label="Live accuracy decaying away from the backtest baseline as the model ages"></svg>
-        </div>
-        <div class="verdict" id="w7-drift-verdict"></div>
-      </div>
-    </div>
-  </div>
+  <p><b>And make it safe to re-run.</b> Distributed jobs retry, reorder and run out of process, so correctness
+  demands determinism. A task is <b>idempotent</b> when running it twice yields the same result and no
+  double-writes &mdash; key each output by a hash of its inputs. Pin the seed (<code>SimSession(seed=7)</code>),
+  pin data versions, pin dtypes. Keep workers <b>pure</b>: inputs in, output out, no shared mutable state and no
+  hidden globals. Dask and Ray extend exactly these ideas across many machines when one box is no longer enough.</p>
+ </div>
 </section>
 
-<!-- ══ WHY ═══════════════════════════════════════════════════ -->
+<!-- ══════════════════════════════ WHY ══════════════════════════════ -->
 <section id="why">
-  <div class="sec-head">
-    <span class="kicker">Why does it matter in trading?</span>
-    <h2>Accuracy is a vanity metric. Net, risk-adjusted P&amp;L is the score.</h2>
-    <p class="lead">A 55% classifier that flips every tick pays the spread endlessly and finishes the season below idle
-    cash. A 52% classifier that trades forty times pays for itself.</p>
+ <div class="wrap">
+  <div class="eyebrow">Why does it matter in trading?</div>
+  <h2>You cannot search a strategy space you cannot afford to run</h2>
+
+  <p class="lead">A single backtest answers one question. Research is a thousand questions &mdash; and the team
+  that can ask a thousand cheaply finds the edge that the team asking ten never sees.</p>
+
+  <p>Concretely: a month of arena ticks across ten symbols with a dozen features is tens of gigabytes as CSV and
+  a couple as Parquet. If every sweep re-parses the CSV, each configuration costs minutes of pure I/O before any
+  strategy logic runs. Cache the features to Parquet once and each configuration reads in seconds. That is the
+  difference between a grid of five lookbacks and a grid of five hundred.</p>
+
+  <p>The same logic runs in the live arena. AlgoArena is not one exchange &mdash; each Exchange team runs its own
+  WebSocket venue, and <code>EXCHANGE_URLS=ws://host:8765,ws://host:8766</code> lets one bot span them all
+  (<code>broker/config.py</code>, <code>trader/arb_trader.py</code>), while the teacher dashboard aggregates flow
+  and P&amp;L across venues into a single view. Meanwhile the headless sim is pure, in-process and network-free,
+  which is precisely why it fans out safely: one process per symbol set or per grid point, each with its seed
+  pinned.</p>
+
+  <!-- ── WIDGET 4 ─────────────────────────────────────────────── -->
+  <div class="panel">
+   <div class="panel-head">
+     <h3>Which bytes does your query actually read?</h3>
+     <span class="tag">Widget 4 &middot; click columns to build the query</span>
+   </div>
+
+   <div class="ctls">
+     <div class="ctl" style="flex:1 1 100%">
+       <label>Columns in the <code>SELECT</code> &mdash; click to toggle <span class="v" id="cs-sel-v">2 of 12</span></label>
+       <div class="colgrid" id="cs-cols"></div>
+     </div>
+     <div class="ctl" style="flex:0 0 auto;min-width:auto">
+       <label>Row-group skipping</label>
+       <label class="sw" style="margin-top:2px">
+         <input type="checkbox" id="cs-push" checked
+                aria-label="Enable predicate pushdown so Parquet skips row groups that cannot match the WHERE clause" />
+         <span class="track"></span><span>predicate pushdown</span>
+       </label>
+     </div>
+     <div class="ctl" style="flex:0 0 auto;min-width:auto">
+       <label>Presets</label>
+       <div class="btnrow">
+         <button class="btn" id="cs-narrow" type="button">ts + close</button>
+         <button class="btn" id="cs-all" type="button">SELECT *</button>
+       </div>
+     </div>
+   </div>
+
+   <div class="panel-body">
+    <div class="qbox" id="cs-query">&nbsp;</div>
+
+    <svg class="viz" id="cs-svg" viewBox="0 0 660 236" role="img"
+         aria-label="Two physical layouts of the same table: row-oriented storage where every column of every row is interleaved and must be read, and columnar storage where each column is a contiguous stripe divided into row groups, so only the selected stripes and matching row groups are read."></svg>
+
+    <div class="stats" style="margin-top:14px;border:1px solid var(--line);border-radius:9px;overflow:hidden">
+      <div class="stat"><div class="k">CSV read</div><div class="v bad" id="cs-s-csv">&mdash;</div><div class="d">whole file, always</div></div>
+      <div class="stat"><div class="k">Parquet read</div><div class="v ok" id="cs-s-pq">&mdash;</div><div class="d">pruned + compressed</div></div>
+      <div class="stat"><div class="k">Of the file</div><div class="v" id="cs-s-pct">&mdash;</div><div class="d">of ticks.parquet touched</div></div>
+      <div class="stat"><div class="k">CSV time</div><div class="v" id="cs-s-tcsv">&mdash;</div><div class="d">at 550 MB/s</div></div>
+      <div class="stat"><div class="k">Parquet time</div><div class="v" id="cs-s-tpq">&mdash;</div><div class="d">at 550 MB/s</div></div>
+      <div class="stat"><div class="k">Speedup</div><div class="v" id="cs-s-sp">&mdash;</div><div class="d">I/O only</div></div>
+    </div>
+
+    <div class="warnbar" id="cs-warn" style="margin-top:14px">&nbsp;</div>
+   </div>
+
+   <div class="panel-note">120 M ticks, 12 columns, 8 row groups, one symbol matching in one group. Row-oriented
+   text has no column pruning and no statistics to skip on, so a <code>WHERE</code> clause saves it nothing
+   &mdash; it still parses every byte. Columnar storage reads the intersection of the columns you named and the
+   row groups that could possibly match, then decompresses only those.</div>
   </div>
 
-  <p>The arena settles this argument with numbers. Every fill pays a taker fee or earns a maker rebate, every crossing of
-  the spread costs half of it, and the season leaderboard ranks risk-adjusted return &mdash; not raw P&amp;L. So the
-  question a model has to answer is never "is it accurate?" but "does its edge per trade survive the cost of the trades
-  it wants to make?"</p>
+  <p><b>Scaling up before scaling out.</b> A bigger box is simple &mdash; more RAM, more cores, no code change
+  &mdash; but there is a ceiling and the largest machines cost superlinearly. More boxes are near-unlimited, but
+  you must partition the work and coordinate the results. Start vertical: more RAM plus smaller dtypes plus
+  Parquet very often removes the problem outright. Reach for a cluster only when one machine genuinely cannot,
+  and in this course that means <code>ProcessPoolExecutor</code> across the cores you already own.</p>
 
-  <!-- WIDGET 5 -->
-  <div class="widget">
-    <div class="w-head"><span class="w-tag">Widget 5</span><h3>Does the edge survive the costs?</h3></div>
-    <p class="w-sub">Your model's statistical edge on the left; the arena's toll booth on the right. The equity curve is
-    the same signal, before and after costs.</p>
+  <pre class="code"><span class="c"># build features offline, cache once, read cheaply forever</span>
+PATH = <span class="s">'cache/features.parquet'</span>
 
-    <div class="controls">
-      <div class="ctl"><label for="w7-hit">hit rate</label>
-        <input type="range" id="w7-hit" min="46" max="60" step="0.5" value="53" aria-label="Model hit rate in percent" />
-        <output id="w7-hit-out">53.0%</output></div>
-      <div class="ctl"><label for="w7-payoff">avg win / avg loss</label>
-        <input type="range" id="w7-payoff" min="70" max="160" step="5" value="100" aria-label="Payoff ratio" />
-        <output id="w7-payoff-out">1.00</output></div>
-      <div class="ctl"><label for="w7-trades">trades / session</label>
-        <input type="range" id="w7-trades" min="10" max="400" step="10" value="60" aria-label="Trades per session" />
-        <output id="w7-trades-out">60</output></div>
-      <div class="ctl"><label for="w7-cost">cost / trade</label>
-        <input type="range" id="w7-cost" min="0" max="10" step="0.5" value="3" aria-label="Round-trip cost per trade in basis points" />
-        <output id="w7-cost-out">3.0 bp</output></div>
-    </div>
+<span class="k">def</span> features():
+    <span class="k">if</span> os.path.exists(PATH):
+        <span class="k">return</span> pd.read_parquet(PATH)     <span class="good"># seconds</span>
+    df = build_features()               <span class="bad"># minutes</span>
+    df.to_parquet(PATH)                 <span class="c"># pay it once</span>
+    <span class="k">return</span> df</pre>
 
-    <div class="grid2 narrow-right">
-      <div class="svg-wrap">
-        <svg class="stage" id="w7-eq" viewBox="0 0 720 260" role="img"
-             aria-label="Equity curves for the model signal gross and net of costs, against the momentum baseline"></svg>
-      </div>
-      <div>
-        <div class="stats" style="margin-top:0">
-          <div class="stat" style="--c:var(--sky)"><div class="lbl">Gross edge / trade</div><div class="num" id="w7-e-gross">&mdash;</div><div class="sub">expectancy before fees</div></div>
-          <div class="stat" style="--c:var(--bad)"><div class="lbl">Cost drag</div><div class="num" id="w7-e-cost">&mdash;</div><div class="sub">trades &times; cost, per session</div></div>
-        </div>
-        <div class="stats">
-          <div class="stat" style="--c:var(--ok)"><div class="lbl">Net session P&amp;L</div><div class="num" id="w7-e-net">&mdash;</div><div class="sub">what the ledger records</div></div>
-          <div class="stat" style="--c:var(--accent-2)"><div class="lbl">Sharpe-like</div><div class="num" id="w7-e-shp">&mdash;</div><div class="sub">mean / stdev of trade returns</div></div>
-        </div>
-        <div class="verdict" id="w7-e-verdict"></div>
-      </div>
-    </div>
-    <div class="w-note"><b>Turnover is a design parameter, not an accident.</b> Raise the confidence threshold in
-    <code>on_tick</code> and you trade less, pay less, and keep more of a smaller edge. Slower, surer signals win seasons
-    in this arena because the score divides by volatility.</div>
-  </div>
-
-  <div class="grid2">
-    <div class="widget">
-      <div class="w-head"><h3>Train offline &middot; load once &middot; predict in <code>on_tick</code></h3></div>
-      <p class="w-sub">The split that keeps you inside the latency budget: heavy work outside the loop, only
-      <code>predict()</code> inside it.</p>
-      <pre class="code"><i># team/trader.py</i>
-<b>import</b> joblib
-<b>from</b> arena <b>import</b> Trader, Signal
-
-<b>class</b> MLTrader(Trader):
-    <b>def</b> __init__(self):
-        self.model = joblib.load('model.pkl')   <u># load ONCE</u>
-
-    <b>def</b> on_tick(self, market, portfolio):
-        <b>for</b> sym <b>in</b> market.symbols():
-            px = market.prices(sym)
-            <b>if</b> len(px) &lt; 21: <b>continue</b>
-            X = features(px, market, sym)        <u># same fn as offline</u>
-            p = self.model.predict_proba([X])[0][1]
-            <b>if</b> p &gt; 0.60 <b>and</b> portfolio.can_buy(sym, 5, market.mid_price(sym)):
-                <b>return</b> Signal(symbol=sym, side='buy', quantity=5,
-                              price=market.best_ask(sym), confidence=p)
-        <b>return</b> None</pre>
-    </div>
-    <div class="widget">
-      <div class="w-head"><h3>The model replaces the signal, not the system</h3></div>
-      <p class="w-sub">Everything you built in W4&ndash;W6 stays exactly where it is.</p>
-      <table class="tbl">
-        <tr><th>Layer</th><th>W6 bot</th><th>W7 bot</th></tr>
-        <tr><td class="name">Signal</td><td>momentum rule</td><td style="color:var(--accent-2)">model.predict_proba</td></tr>
-        <tr><td class="name">Sizing</td><td>fixed 5 lots</td><td>scaled by confidence</td></tr>
-        <tr><td class="name">Risk</td><td>check_order()</td><td>unchanged</td></tr>
-        <tr><td class="name">Routing</td><td>best_ask()</td><td>unchanged</td></tr>
-        <tr><td class="name">Portfolio</td><td>cash + positions</td><td>unchanged</td></tr>
-      </table>
-      <div class="w-note"><b>Two equivalent seams.</b> Register a <code>signal_fn</code> in the plugin registry, or
-      subclass <code>arena.Trader</code> and implement <code>on_tick</code>. The engine calls whichever you registered.
-      This week also fires the season's second IPO &mdash; handle it in <code>on_ipo</code>.</div>
-    </div>
-  </div>
+  <p class="sub">The fastest computation is the one you don't repeat. Materialise expensive stages once and every
+  sweep afterwards reads the cached frame; <code>functools.lru_cache</code> covers the pure, repeated calls
+  in-process. This cached frame is exactly the <code>history</code> that your
+  <code>signal_fn(symbol, prices, history, book, portfolio)</code> consumes &mdash; built offline, so
+  <code>on_tick</code> does no heavy compute in the loop.</p>
+ </div>
 </section>
 
-<!-- ══ PITFALLS ══════════════════════════════════════════════ -->
+<!-- ══════════════════════════════ PITFALLS ══════════════════════════════ -->
 <section id="pitfalls">
-  <div class="sec-head">
-    <span class="kicker">Common mistakes</span>
-    <h2>Five ways to produce a beautiful, worthless model</h2>
-    <p class="lead">Every one of these has shipped in a real fund. Each expands.</p>
-  </div>
+ <div class="wrap">
+  <div class="eyebrow">Common mistakes</div>
+  <h2>Five ways this week goes wrong</h2>
+  <p>Every one of these has been submitted by a previous cohort, usually with the words "but it worked on the
+  sample".</p>
 
   <details class="pit">
-    <summary><span><code>train_test_split(shuffle=True)</code> on a time series</span></summary>
-    <div class="body">The tutorial default. Adjacent ticks are nearly identical, so a shuffled split puts a row's
-      near-twin on the other side of the wall. The model memorises neighbours and reports accuracy in the 70s and 80s.
-      <b>The tell:</b> a test score far above anything the literature reports for return prediction.
-      <div class="fix">Fix: cut by index, never by permutation &mdash; <code>X[:cut]</code> / <code>X[cut:]</code> &mdash;
-      and purge the <code>h</code> rows that straddle the boundary.</div></div>
+    <summary>Using threads for a CPU-bound sweep, then concluding parallelism doesn't help</summary>
+    <div class="pit-body">
+      <p>You swap the loop for a <code>ThreadPoolExecutor</code>, run sixteen backtests, and the wall clock
+      barely moves &mdash; sometimes it gets worse. The GIL lets only one thread execute Python bytecode at a
+      time, so your sixteen threads are taking turns on one core while paying context-switch and lock overhead
+      for the privilege. Threads are for <b>I/O</b>-bound waiting, which is why the arena's WebSocket code is
+      async and single-threaded.</p>
+      <p><span class="fix">The fix.</span> CPU-bound work goes in <code>ProcessPoolExecutor</code> &mdash;
+      separate interpreters, separate GILs, real cores. Toggle "threads, not processes" in Widget 3 to watch the
+      lanes serialise.</p>
+    </div>
   </details>
 
   <details class="pit">
-    <summary><span>A feature that quietly contains its own label</span></summary>
-    <div class="body">A rolling calculation centred instead of trailing, a column derived from the close of the bar you
-      are predicting, a "current session VWAP" that includes the future. Silent and fatal: the model looks brilliant
-      offline and random live. <b>The tell:</b> one feature dominates the importance ranking and the edge collapses the
-      instant you go live.
-      <div class="fix">Fix: for each feature ask "at exactly which timestamp could I have computed this?" Then compute
-      features with the same function offline and inside <code>on_tick</code> &mdash; one function, two callers.</div></div>
+    <summary>Forgetting the <code>if __name__ == '__main__':</code> guard</summary>
+    <div class="pit-body">
+      <p>Without the guard, every spawned child re-imports your module top to bottom &mdash; which re-creates
+      the pool, which spawns more children. On macOS and Windows, where the default start method is
+      <code>spawn</code> rather than <code>fork</code>, this is an immediate fork bomb or a
+      <code>RuntimeError</code> about starting a process before the current one finished bootstrapping.</p>
+      <p><span class="fix">The fix.</span> All pool creation and all top-level side effects live under the
+      guard. Anything a worker needs must be importable &mdash; module-level functions, not closures or lambdas,
+      because the arguments and the callable are pickled to cross the process boundary.</p>
+    </div>
   </details>
 
   <details class="pit">
-    <summary><span>Tuning on the test block (data snooping)</span></summary>
-    <div class="body">Try a hundred configurations, keep the best test score, report it. You have now fitted the test set;
-      its score is a maximum over noise, not a measurement. The published number is inflated by roughly the spread of
-      your hundred attempts. <b>The tell:</b> your best configuration is nowhere near your second best.
-      <div class="fix">Fix: tune on a validation block, look at the test block <em>once</em>, log every experiment you
-      ran, and deflate your Sharpe for the number of trials.</div></div>
+    <summary>Shipping giant objects to workers, so pickling costs more than the compute</summary>
+    <div class="pit-body">
+      <p>You pass the full 3 GB DataFrame as an argument to each of eight workers. Python serialises it eight
+      times, copies it across eight pipes, and deserialises it eight times &mdash; and your "parallel" job is
+      slower than the loop it replaced, while peak memory is now nine copies of the frame.</p>
+      <p><span class="fix">The fix.</span> Send <b>references, not payloads</b>. Pass a symbol, a file path or a
+      parameter, and let the worker read its own shard from Parquet. That is why the shard key in Widget 3 is a
+      chunk boundary and why the sweep passes a <code>lookback</code> integer, not a dataset.</p>
+    </div>
   </details>
 
   <details class="pit">
-    <summary><span>Feature mismatch between training and <code>on_tick</code></span></summary>
-    <div class="body">Offline you standardised with the full-sample mean and standard deviation; live you standardise with
-      a rolling one. Offline the imbalance used total depth; live it uses top-of-book. The model receives inputs it has
-      never seen and outputs confident nonsense. <b>The tell:</b> live predictions cluster at one extreme.
-      <div class="fix">Fix: persist the scaler and the feature list <em>with</em> the model, and assert the live feature
-      vector's length and order on the first tick.</div></div>
+    <summary>Non-idempotent writes that double-count on retry</summary>
+    <div class="pit-body">
+      <p>A worker appends its partial result to a shared CSV. The task times out, the framework retries it, and
+      now those rows are in the file twice. Your Sharpe is computed over a dataset that silently contains
+      duplicated trades, and nothing crashes &mdash; which is the worst kind of bug, because you will believe
+      the number.</p>
+      <p><span class="fix">The fix.</span> Key each output by a hash of its inputs and write to that path:
+      re-running overwrites rather than appends. Pin the seed so a retry reproduces the same numbers, and make
+      the reduce step tolerate seeing a partial twice.</p>
+    </div>
   </details>
 
   <details class="pit">
-    <summary><span>A model you cannot run inside a tick</span></summary>
-    <div class="body">A gradient-boosted forest of 2,000 trees, re-fitted every tick "to stay fresh", loading the pickle
-      inside <code>on_tick</code>. Your bot misses the market it correctly predicted, and W8's rate limits throttle the
-      backlog. <b>The tell:</b> your fills print at prices two ticks behind your signals.
-      <div class="fix">Fix: load once in <code>__init__</code>, time <code>predict()</code> against the per-tick budget
-      from W5, and prefer a small model you can actually run. A model you can't run live scores nothing.</div></div>
+    <summary>Renting a cluster before downcasting a dtype</summary>
+    <div class="pit-body">
+      <p>The frame doesn't fit, so the instinct is a distributed engine. But the frame is
+      <code>float64</code> everywhere and the symbol column is <code>object</code> &mdash; roughly 60 bytes per
+      row for a ticker that has ten possible values. Half the memory is Python string objects and the other
+      half is precision you do not have: your prices are quoted to the cent, not to sixteen significant digits.</p>
+      <p><span class="fix">The fix.</span> Measure with <code>df.info(memory_usage='deep')</code>, downcast to
+      <code>float32</code> and <code>category</code>, store Parquet, and re-measure. Widget 1 shows a typical
+      frame dropping back under the RAM line from those two changes alone &mdash; no cluster, no new code.</p>
+    </div>
   </details>
+ </div>
 </section>
 
-<!-- ══ CHECK ═════════════════════════════════════════════════ -->
+<!-- ══════════════════════════════ CHECK ══════════════════════════════ -->
 <section id="check">
-  <div class="sec-head">
-    <span class="kicker">Check yourself</span>
-    <h2>Three questions</h2>
-    <p class="lead">Instant feedback, no grading. Pick the answer you would defend in a demo.</p>
-  </div>
+ <div class="wrap">
+  <div class="eyebrow">Check yourself</div>
+  <h2>Three questions</h2>
+  <p class="sub">Instant feedback, nothing recorded. Pick the best answer.</p>
 
-  <div class="q" data-a="2">
+  <div class="q" data-q="1" data-why="Only one thread can execute Python bytecode at a time, so CPU-bound tasks in a thread pool take turns on a single core instead of running in parallel. Separate processes have separate interpreters and separate GILs, which is why ProcessPoolExecutor gives real speedup. Threads are still the right tool for I/O-bound waiting.">
     <div class="qn">Question 1</div>
-    <div class="qt">Your classifier reports 84% out-of-sample accuracy on next-tick direction for AAPL. What is the
-      single most likely explanation?</div>
-    <div class="opts">
-      <button class="opt"><span class="k">A</span>The feature set is unusually strong &mdash; ship it.</button>
-      <button class="opt"><span class="k">B</span>The model is under-regularised and needs a shallower tree.</button>
-      <button class="opt"><span class="k">C</span>The future leaked in &mdash; through a shuffled split or a feature computed with information from after <code>t</code>.</button>
-      <button class="opt"><span class="k">D</span>The horizon is too long for the label.</button>
+    <div class="qt">Your parameter sweep runs 16 CPU-bound backtests in a <code>ThreadPoolExecutor</code> on a
+    16-core machine and is no faster than a plain loop. What is the explanation?</div>
+    <div class="opts" role="group" aria-label="Question 1 options">
+      <button class="opt" type="button" data-ok="0"><span class="ltr">A</span><span>Sixteen threads is too many; thread pools only scale to about four workers before contention dominates.</span></button>
+      <button class="opt" type="button" data-ok="1"><span class="ltr">B</span><span>The GIL lets only one thread execute Python bytecode at a time, so the threads take turns on one core &mdash; CPU-bound work needs processes.</span></button>
+      <button class="opt" type="button" data-ok="0"><span class="ltr">C</span><span>The backtests are I/O bound, so the machine is waiting on disk rather than computing.</span></button>
     </div>
-    <div class="fb"><b>C.</b> Next-tick direction on a liquid name is close to a coin flip; the honest range is roughly
-      50&ndash;55%. An 84% is not a good model, it is a diagnostic: something on the other side of the wall got into
-      training. Check the split first, then hunt the feature.</div>
+    <div class="fb" role="status"></div>
   </div>
 
-  <div class="q" data-a="1">
+  <div class="q" data-q="2" data-why="Columnar storage lets you read only the columns the query names, so 2 of 20 columns is roughly a tenth of the bytes, and per-column compression plus row-group statistics cut it further. Row-oriented CSV interleaves every column of every row, so there is nothing to prune — a WHERE clause still parses the whole file.">
     <div class="qn">Question 2</div>
-    <div class="qt">You label with a horizon of <code>h = 10</code> ticks and split chronologically at 70%. Why is an
-      embargo still needed?</div>
-    <div class="opts">
-      <button class="opt"><span class="k">A</span>It isn't &mdash; a chronological split is already leak-free.</button>
-      <button class="opt"><span class="k">B</span>The last training rows have labels that reach 10 ticks into the test block, so they already contain test-period information.</button>
-      <button class="opt"><span class="k">C</span>It balances the class distribution across the two blocks.</button>
-      <button class="opt"><span class="k">D</span>It compensates for the transaction costs the backtest ignores.</button>
+    <div class="qt">A research query touches 2 of the 20 columns in a 40 GB tick dataset. Which change reduces
+    the bytes read the most?</div>
+    <div class="opts" role="group" aria-label="Question 2 options">
+      <button class="opt" type="button" data-ok="0"><span class="ltr">A</span><span>Gzip the CSV, so the file on disk is smaller.</span></button>
+      <button class="opt" type="button" data-ok="0"><span class="ltr">B</span><span>Add a <code>WHERE</code> clause to the CSV read so unmatched rows are skipped.</span></button>
+      <button class="opt" type="button" data-ok="1"><span class="ltr">C</span><span>Store it as columnar Parquet and pass <code>columns=[...]</code>, so only those two column stripes are read.</span></button>
     </div>
-    <div class="fb"><b>B.</b> The wall stops features, not labels. A label is <em>about</em> the future, so rows within
-      <code>h</code> of the cut straddle it. Purge those <code>h</code> rows and the boundary is genuinely sealed &mdash;
-      the cost is a handful of samples.</div>
+    <div class="fb" role="status"></div>
   </div>
 
-  <div class="q" data-a="3">
+  <div class="q" data-q="3" data-why="Chunked reading bounds memory at one chunk, so peak usage is set by chunksize and is independent of the file size — a 500 GB file streams in the same footprint as a 5 GB one. It does not make the total work smaller: you still touch every row, so wall-clock time still scales with the file.">
     <div class="qn">Question 3</div>
-    <div class="qt">Two bots, same walk-forward hit rate of 53%. Bot A trades 30 times a session, bot B trades 350 times.
-      Round-trip cost is 3 bp. Who ranks higher on the season leaderboard, and why?</div>
-    <div class="opts">
-      <button class="opt"><span class="k">A</span>Bot B &mdash; more trades means more chances for the edge to compound.</button>
-      <button class="opt"><span class="k">B</span>They tie: the same hit rate implies the same expectancy.</button>
-      <button class="opt"><span class="k">C</span>Bot B, because higher turnover lowers the volatility of its equity curve.</button>
-      <button class="opt"><span class="k">D</span>Bot A &mdash; a thin per-trade edge is consumed by 350 round trips of cost, and the leaderboard divides by volatility.</button>
+    <div class="qt">You replace <code>pd.read_csv(path)</code> with a loop over
+    <code>pd.read_csv(path, chunksize=1_000_000)</code> that sums one column. What have you actually bought?</div>
+    <div class="opts" role="group" aria-label="Question 3 options">
+      <button class="opt" type="button" data-ok="0"><span class="ltr">A</span><span>Less total work &mdash; the sum now costs O(chunksize) instead of O(rows).</span></button>
+      <button class="opt" type="button" data-ok="1"><span class="ltr">B</span><span>Constant peak memory set by <code>chunksize</code> and independent of file size &mdash; the same total work, in a bounded footprint.</span></button>
+      <button class="opt" type="button" data-ok="0"><span class="ltr">C</span><span>Automatic parallelism &mdash; pandas processes the chunks across cores.</span></button>
     </div>
-    <div class="fb"><b>D.</b> Expectancy is per trade and small; costs are per trade and certain. Multiply both by 350 and
-      the certain term wins. On top of that, <code>exchange/scoring.py</code> ranks return per unit of volatility with a
-      drawdown penalty, so the churn is punished twice.</div>
+    <div class="fb" role="status"></div>
   </div>
+ </div>
 </section>
 
-<!-- ══ NEXT ══════════════════════════════════════════════════ -->
+<!-- ══════════════════════════════ NEXT ══════════════════════════════ -->
 <section id="next">
-  <div class="sec-head">
-    <span class="kicker">Do the work</span>
-    <h2>This week's work</h2>
-    <p class="lead">Deliverable: a model integration plan plus the walk-forward evaluation checklist &mdash; features,
-    label, horizon, folds, one test look, measured <code>predict()</code> latency.</p>
-  </div>
+ <div class="wrap">
+  <div class="eyebrow">Take it further</div>
+  <h2>This week's work</h2>
+  <p class="sub">Deliverable: a <b>data-architecture sign-off</b> &mdash; your storage and parallelism plan &mdash;
+  plus a working parallel sweep. Graded 35 / 30 / 20 / 15: the sign-off covering columnar storage and caching, a
+  parallel backtest sweep that runs correctly and reproducibly with the seed pinned, a feature pipeline that
+  produces the <code>history</code> your <code>on_tick</code> consumes, and multi-venue connect via
+  <code>EXCHANGE_URLS</code> on a clean W6 branch.</p>
   <div class="nextgrid">
-    <a class="nextcard" href="https://github.com/sdonadio/algoarena-team-template">
-      <div class="lbl">Code</div>
-      <div class="ttl">Get the code</div>
-      <div class="dsc">Labs and homework live in your course&#8217;s LMS; the starter repo is public. Use it as a template, clone, <code>make install</code>.</div>
-    </a>
+      <a class="nextcard" href="https://github.com/sdonadio/algoarena-team-template">
+        <div class="l">Code</div>
+        <div class="t">Get the code</div>
+        <div class="d">Labs and homework live in your course&#8217;s LMS; the starter repo is public. Use it as a template, clone, <code>make install</code>.</div>
+      </a>
+    <a class="nextcard" href="week5.html">
+      <div class="l">Previous</div><div class="t">&larr; Week 5 &middot; Algorithmic Complexity &amp; Data Structures</div>
+      <div class="d">Big-O, the heap-plus-dict order book, and O(1) rolling statistics in the hot path.</div></a>
+    <a class="nextcard" href="week7.html">
+      <div class="l">Next</div><div class="t">Week 7 &middot; Machine Learning Signals &amp; Model Ops &rarr;</div>
+      <div class="d">Turn those cached features into a trained model, and serve predictions into <code>on_tick</code> without blocking the loop.</div></a>
   </div>
-  <div class="weeknav">
-    <a href="week6.html">&larr; Week 6 &middot; Big Data &amp; Distributed Computing</a>
-    <a href="index.html">All weeks</a>
-    <a href="week8.html">Week 8 &middot; CI/CD, Testing &amp; UI &rarr;</a>
-  </div>
+  <p class="sub" style="margin-top:18px">Reading before next class: <code>tests/sim_session.py</code> &mdash; the
+  <code>run()</code> API you fan out, and the <code>seed=</code> argument that makes every worker reproducible.
+  This week is the foundation for Week 7: training is only feasible if your data is already cheap to read and
+  your compute already spreads.</p>
+ </div>
 </section>
-
-</main>
 
 <footer>Systematic Trading Arena · an interactive companion for a 9-week systematic-trading course · <a href="https://github.com/sdonadio/systematic-trading-arena">Source</a></footer>
 
 <script>
-/* ══════════════════════════════════════════════════════════════
-   Systematic Trading Arena — shared page helpers
-   No dependencies, no network. Everything is drawn from data.
-   ══════════════════════════════════════════════════════════════ */
+'use strict';
+
+/* ══ shared helpers ═══════════════════════════════════════════════ */
+var C = {
+  ok:'#3fb950', warn:'#d29922', bad:'#f85149',
+  a1:'#3b82f6', a2:'#7cb0ff', a3:'#b9d4ff',
+  line:'#262b35', line2:'#333a47', p2:'#12151b', panel:'#181b22',
+  mute:'#6f757f', dim:'#c6c3bf', ink:'#e8e6e3', info:'#6cb6ff'
+};
+
+function commas(x) {
+  var s = String(Math.round(x)), o = '', c = 0, i;
+  for (i = s.length - 1; i >= 0; i--) {
+    o = s.charAt(i) + o; c++;
+    if (c % 3 === 0 && i > 0) o = ',' + o;
+  }
+  return o;
+}
+
+/* compact row counts: 240 M, 1.2 B */
+function fmtCount(n) {
+  if (n >= 1e9) return (n / 1e9).toFixed(n < 1e10 ? 2 : 1) + ' B';
+  if (n >= 1e6) return (n / 1e6).toFixed(n < 1e7 ? 1 : 0) + ' M';
+  if (n >= 1e3) return (n / 1e3).toFixed(0) + ' k';
+  return String(n);
+}
+
+/* bytes -> readable, fixed widths so the number does not jitter */
+function fmtB(b) {
+  if (b < 1024) return b.toFixed(0) + ' B';
+  if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
+  if (b < 1073741824) return (b / 1048576).toFixed(1) + ' MB';
+  if (b < 1.099511627776e12) return (b / 1073741824).toFixed(2) + ' GB';
+  return (b / 1.099511627776e12).toFixed(2) + ' TB';
+}
+
+/* nanoseconds -> readable */
+function fmtNs(ns) {
+  if (ns < 1000) return ns.toFixed(0) + ' ns';
+  if (ns < 1e6) return (ns / 1e3).toFixed(ns < 1e5 ? 1 : 0) + ' µs';
+  if (ns < 1e9) return (ns / 1e6).toFixed(ns < 1e8 ? 1 : 0) + ' ms';
+  if (ns < 6e10) return (ns / 1e9).toFixed(1) + ' s';
+  if (ns < 3.6e12) return (ns / 6e10).toFixed(1) + ' min';
+  if (ns < 8.64e13) return (ns / 3.6e12).toFixed(1) + ' h';
+  return (ns / 8.64e13).toFixed(1) + ' days';
+}
+
+/* seconds -> readable */
+function fmtS(s) { return fmtNs(s * 1e9); }
+
+function esc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/* tiny SVG builders */
+function rect(x, y, w, h, fill, extra) {
+  return '<rect x="' + x + '" y="' + y + '" width="' + Math.max(0, w) + '" height="' + h +
+    '" fill="' + fill + '"' + (extra || '') + '/>';
+}
+function txt(x, y, s, fill, size, anchor, weight) {
+  return '<text x="' + x + '" y="' + y + '" fill="' + fill + '" font-size="' + (size || 9.5) +
+    '"' + (anchor ? ' text-anchor="' + anchor + '"' : '') +
+    (weight ? ' font-weight="' + weight + '"' : '') + '>' + s + '</text>';
+}
+function line(x1, y1, x2, y2, stroke, extra) {
+  return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 +
+    '" stroke="' + stroke + '"' + (extra || '') + '/>';
+}
+
+
+/* ══ WIDGET 1 · the memory wall as a calculator ═══════════════════ */
 (function () {
-  'use strict';
+  var slRows = document.getElementById('mw-rows');
+  var slFeat = document.getElementById('mw-feat');
+  var slRam = document.getElementById('mw-ram');
+  var svg = document.getElementById('mw-svg');
+  var host = document.getElementById('mw-cols');
+  if (!slRows || !svg || !host) return;
 
-  var C = {
-    accent: '#3b82f6', accent2: '#7cb0ff', ink: '#e8e6e3', muted: '#9aa0a6',
-    dim: '#6e7681', ok: '#3fb950', warn: '#d29922', bad: '#f85149',
-    sky: '#58a6ff', violet: '#a78bfa', teal: '#2dd4bf',
-    border: '#272c36', panel: '#181b22', panel2: '#13161b'
-  };
-  var MONO = 'ui-monospace, Menlo, Consolas, monospace';
-  var SANS = 'system-ui, -apple-system, Segoe UI, sans-serif';
+  var vRows = document.getElementById('mw-rows-v');
+  var vFeat = document.getElementById('mw-feat-v');
+  var vRam = document.getElementById('mw-ram-v');
+  var warn = document.getElementById('mw-warn');
 
-  /* deterministic PRNG (mulberry32) — same seed, same picture */
-  function rng(seed) {
-    var s = seed >>> 0;
-    return function () {
-      s = (s + 0x6D2B79F5) >>> 0;
-      var t = s;
-      t = Math.imul(t ^ (t >>> 15), t | 1);
-      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
-  }
-  function gauss(r) {
-    var u = 0, v = 0;
-    while (u === 0) u = r();
-    while (v === 0) v = r();
-    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
-  }
+  var RAMS = [8, 16, 32, 64, 128];          /* GB */
+  var OBJ_OVERHEAD = 60;                     /* bytes per Python str in an object column */
 
-  function $(id) { return document.getElementById(id); }
-  function clear(el) { while (el && el.firstChild) el.removeChild(el.firstChild); }
-
-  /* add an SVG child: add(parent,'rect',{x:..}).
-     The namespace is inherited from the parent <svg>, so no URI literal is needed. */
-  function add(parent, tag, attrs, text) {
-    var e = document.createElementNS(parent.namespaceURI, tag), k;
-    if (attrs) for (k in attrs) { if (attrs[k] !== null && attrs[k] !== undefined) e.setAttribute(k, attrs[k]); }
-    if (text !== null && text !== undefined) e.textContent = text;
-    parent.appendChild(e);
-    return e;
-  }
-  /* label text: T(svg,x,y,'txt',{fill,size,anchor,mono,weight}) */
-  function T(parent, x, y, s, o) {
-    o = o || {};
-    return add(parent, 'text', {
-      x: x, y: y, fill: o.fill || C.muted,
-      'font-size': o.size || 9.5,
-      'font-family': o.mono === false ? SANS : MONO,
-      'font-weight': o.weight || 400,
-      'text-anchor': o.anchor || 'start',
-      opacity: o.opacity
-    }, s);
-  }
-  function path(parent, pts, attrs) {
-    var d = '', i;
-    for (i = 0; i < pts.length; i++) d += (i ? 'L' : 'M') + pts[i][0].toFixed(2) + ' ' + pts[i][1].toFixed(2);
-    var a = { d: d, fill: 'none', 'stroke-width': 1.6, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' };
-    for (var k in attrs) a[k] = attrs[k];
-    return add(parent, 'path', a);
-  }
-  function stdev(a) {
-    if (a.length < 2) return 0;
-    var m = 0, i;
-    for (i = 0; i < a.length; i++) m += a[i];
-    m /= a.length;
-    var v = 0;
-    for (i = 0; i < a.length; i++) v += (a[i] - m) * (a[i] - m);
-    return Math.sqrt(v / a.length);
-  }
-  function mean(a) { var m = 0, i; for (i = 0; i < a.length; i++) m += a[i]; return a.length ? m / a.length : 0; }
-  function pct(x, d) { return (x * 100).toFixed(d === undefined ? 1 : d) + '%'; }
-  function sgn(x, d) { return (x >= 0 ? '+' : '−') + Math.abs(x).toFixed(d === undefined ? 2 : d); }
-  function clampv(x, a, b) { return x < a ? a : (x > b ? b : x); }
-
-  /* segmented button groups: setSeg([btnA,btnB], idx) */
-  function setSeg(btns, idx) {
-    for (var i = 0; i < btns.length; i++) {
-      var on = i === idx;
-      btns[i].classList.toggle('on', on);
-      btns[i].setAttribute('aria-pressed', on ? 'true' : 'false');
-    }
-  }
-
-  /* ── MCQs: instant feedback, no grading ─────────────────────── */
-  function wireQuiz() {
-    var qs = document.querySelectorAll('.q');
-    Array.prototype.forEach.call(qs, function (q) {
-      var ans = parseInt(q.getAttribute('data-a'), 10);
-      var opts = q.querySelectorAll('button.opt');
-      var fb = q.querySelector('.fb');
-      Array.prototype.forEach.call(opts, function (b, i) {
-        b.addEventListener('click', function () {
-          if (q.getAttribute('data-done')) return;
-          q.setAttribute('data-done', '1');
-          opts[ans].classList.add('right');
-          if (i !== ans) b.classList.add('wrong');
-          if (fb) fb.classList.add('show');
-          Array.prototype.forEach.call(opts, function (o) { o.setAttribute('aria-disabled', 'true'); });
-        });
-      });
-    });
-  }
-
-  window.ARENA = {
-    C: C, MONO: MONO, SANS: SANS, rng: rng, gauss: gauss, $: $, clear: clear,
-    add: add, T: T, path: path, stdev: stdev, mean: mean, pct: pct, sgn: sgn,
-    clamp: clampv, setSeg: setSeg, wireQuiz: wireQuiz
-  };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wireQuiz);
-  else wireQuiz();
-})();
-
-/* ══════════════════════════════════════════════════════════════
-   WEEK 7 · Widget 1 — feature-engineering playground
-   ══════════════════════════════════════════════════════════════ */
-(function () {
-  'use strict';
-  var A = window.ARENA, C = A.C, N = 140;
-  var seed = 20250907, sel = 96, h = 5, cls = true, data = null;
-
-  function gen(sd) {
-    var r = A.rng(sd), px = [185], sp = [], bq = [], aq = [], i;
-    for (i = 1; i < N; i++) px.push(px[i - 1] * (1 + 0.00006 * Math.sin(i / 15) + 0.0019 * A.gauss(r)));
-    for (i = 0; i < N; i++) {
-      sp.push(0.015 + 0.05 * r());
-      bq.push(80 + Math.round(880 * r()));
-      aq.push(80 + Math.round(880 * r()));
-    }
-    return { px: px, sp: sp, bq: bq, aq: aq };
-  }
-  function rets(px, i, n) { var o = [], k; for (k = i - n + 1; k <= i; k++) o.push(px[k] / px[k - 1] - 1); return o; }
-
-  var FEATS = [
-    { nm: 'ret_1', dsc: 'return over the last tick', warm: 2, on: true,
-      f: function (d, i) { return d.px[i] / d.px[i - 1] - 1; },
-      fmt: function (v) { return A.sgn(v * 100, 3); } },
-    { nm: 'mom_10', dsc: 'momentum: price now vs 10 ticks ago', warm: 11, on: true,
-      f: function (d, i) { return d.px[i] / d.px[i - 10] - 1; },
-      fmt: function (v) { return A.sgn(v * 100, 3); } },
-    { nm: 'vol_20', dsc: 'volatility: stdev of the last 20 returns', warm: 21, on: true,
-      f: function (d, i) { return A.stdev(rets(d.px, i, 20)); },
-      fmt: function (v) { return (v * 100).toFixed(3); } },
-    { nm: 'spread_bp', dsc: '(ask − bid) / mid, in basis points', warm: 1, on: false,
-      f: function (d, i) { return d.sp[i] / d.px[i] * 10000; },
-      fmt: function (v) { return v.toFixed(1); } },
-    { nm: 'imbalance', dsc: '(bidQ − askQ) / (bidQ + askQ) — book pressure', warm: 1, on: true,
-      f: function (d, i) { return (d.bq[i] - d.aq[i]) / (d.bq[i] + d.aq[i]); },
-      fmt: function (v) { return A.sgn(v, 3); } }
+  /* the tick schema. wb = wide itemsize, nb = narrow itemsize.
+     cr = zstd compression ratio for that dtype (fraction of raw kept). */
+  var COLS = [
+    { id: 'ts',  nm: 'ts',     wide: 'datetime64[ns]', narrow: 'int32 (ms offset)', wb: 8, nb: 4, crw: 0.12, crn: 0.14, narrowOn: false },
+    { id: 'sym', nm: 'symbol', wide: 'object',         narrow: 'category',          wb: 8, nb: 1, crw: 0.06, crn: 0.03, narrowOn: false, obj: true },
+    { id: 'px',  nm: 'price',  wide: 'float64',        narrow: 'float32',           wb: 8, nb: 4, crw: 0.62, crn: 0.55, narrowOn: false },
+    { id: 'sz',  nm: 'size',   wide: 'int64',          narrow: 'int32',             wb: 8, nb: 4, crw: 0.30, crn: 0.32, narrowOn: false },
+    { id: 'bid', nm: 'bid',    wide: 'float64',        narrow: 'float32',           wb: 8, nb: 4, crw: 0.62, crn: 0.55, narrowOn: false },
+    { id: 'ask', nm: 'ask',    wide: 'float64',        narrow: 'float32',           wb: 8, nb: 4, crw: 0.62, crn: 0.55, narrowOn: false },
+    { id: 'ft',  nm: 'features[k]', wide: 'float64',   narrow: 'float32',           wb: 8, nb: 4, crw: 0.62, crn: 0.55, narrowOn: false, many: true }
   ];
 
-  function onFeats() { return FEATS.filter(function (f) { return f.on; }); }
-  function warmMax() { var w = 2, o = onFeats(), i; for (i = 0; i < o.length; i++) w = Math.max(w, o[i].warm); return w; }
-  function lo() { return warmMax() - 1; }
-  function hi() { return N - 1 - h; }
+  function rowsAt(i) { return Math.round(1e4 * Math.pow(5e4, i / 48)); }
 
-  function buildFeatList() {
-    var box = A.$('w7-feats');
-    A.clear(box);
-    FEATS.forEach(function (ft, i) {
-      var lab = document.createElement('label');
-      lab.className = ft.on ? '' : 'off';
-      var cb = document.createElement('input');
-      cb.type = 'checkbox'; cb.checked = ft.on;
-      cb.setAttribute('aria-label', 'include feature ' + ft.nm);
-      cb.addEventListener('change', function () {
-        ft.on = cb.checked; lab.className = ft.on ? '' : 'off'; render();
-      });
-      var sp = document.createElement('span');
-      sp.innerHTML = '<span class="fn">' + ft.nm + '</span><span class="fd">' + ft.dsc +
-        ' · needs ' + ft.warm + ' prior tick' + (ft.warm === 1 ? '' : 's') + '</span>';
-      lab.appendChild(cb); lab.appendChild(sp); box.appendChild(lab);
+  /* build the dtype rows once */
+  var html = '';
+  COLS.forEach(function (c) {
+    html += '<div class="dtrow">' +
+      '<span class="cn" id="mw-lbl-' + c.id + '"></span>' +
+      '<label class="sw"><input type="checkbox" id="mw-sw-' + c.id + '" ' +
+      'aria-label="Use the narrow dtype for the ' + c.nm + ' column" />' +
+      '<span class="track"></span></label>' +
+      '</div>';
+  });
+  host.innerHTML = html;
+
+  COLS.forEach(function (c) {
+    c.el = document.getElementById('mw-sw-' + c.id);
+    c.lbl = document.getElementById('mw-lbl-' + c.id);
+    c.el.addEventListener('change', function () { c.narrowOn = c.el.checked; draw(); });
+  });
+
+  document.getElementById('mw-wide').addEventListener('click', function () {
+    COLS.forEach(function (c) { c.narrowOn = false; c.el.checked = false; });
+    draw();
+  });
+  document.getElementById('mw-narrow').addEventListener('click', function () {
+    COLS.forEach(function (c) { c.narrowOn = true; c.el.checked = true; });
+    draw();
+  });
+
+  function measure(rows, nfeat, useNarrow) {
+    var perRow = 0, pqPerRow = 0, objOv = 0, ncols = 0;
+    COLS.forEach(function (c) {
+      var mult = c.many ? nfeat : 1;
+      if (mult === 0) return;
+      ncols += mult;
+      var narrow = useNarrow === null ? c.narrowOn : useNarrow;
+      var item = narrow ? c.nb : c.wb;
+      var cr = narrow ? c.crn : c.crw;
+      perRow += item * mult;
+      pqPerRow += item * cr * mult;
+      /* an object column also holds a Python str per row */
+      if (c.obj && !narrow) { objOv += OBJ_OVERHEAD * mult; }
     });
-  }
-
-  function drawChart() {
-    var svg = A.$('w7-px'); A.clear(svg);
-    var x0 = 40, x1 = 706, mn = Infinity, mx = -Infinity, i;
-    for (i = 0; i < N; i++) { if (data.px[i] < mn) mn = data.px[i]; if (data.px[i] > mx) mx = data.px[i]; }
-    var pad = (mx - mn) * 0.12; mn -= pad; mx += pad;
-    var X = function (i) { return x0 + (x1 - x0) * i / (N - 1); };
-    var Y = function (p) { return 152 - (p - mn) / (mx - mn) * 128; };
-
-    A.add(svg, 'line', { x1: x0, y1: 152, x2: x1, y2: 152, stroke: C.border });
-    var w = warmMax();
-    A.add(svg, 'rect', { x: X(Math.max(0, sel - w + 1)), y: 22, width: X(sel) - X(Math.max(0, sel - w + 1)),
-      height: 130, fill: C.sky, opacity: 0.10 });
-    A.add(svg, 'rect', { x: X(sel), y: 22, width: X(Math.min(N - 1, sel + h)) - X(sel), height: 130,
-      fill: C.warn, opacity: 0.13 });
-    A.T(svg, X(Math.max(0, sel - w + 1)) + 4, 34, 'feature window · ' + w + ' ticks', { fill: C.sky, size: 9 });
-    A.T(svg, X(sel) + 4, 148, 'label horizon h=' + h, { fill: C.warn, size: 9 });
-
-    var pts = [], k;
-    for (k = 0; k < N; k++) pts.push([X(k), Y(data.px[k])]);
-    A.path(svg, pts, { stroke: C.accent2, 'stroke-width': 1.5 });
-    A.add(svg, 'line', { x1: X(sel), y1: 22, x2: X(sel), y2: 152, stroke: C.ink, 'stroke-dasharray': '3 3', opacity: 0.75 });
-    A.add(svg, 'circle', { cx: X(sel), cy: Y(data.px[sel]), r: 3.6, fill: C.ink });
-    A.T(svg, X(sel), 18, 't = ' + sel, { fill: C.ink, size: 9.5, anchor: 'middle' });
-
-    var j = Math.min(N - 1, sel + h), fut = data.px[j] / data.px[sel] - 1;
-    A.add(svg, 'circle', { cx: X(j), cy: Y(data.px[j]), r: 3.2, fill: fut >= 0 ? C.ok : C.bad });
-    A.add(svg, 'line', { x1: X(sel), y1: Y(data.px[sel]), x2: X(j), y2: Y(data.px[j]),
-      stroke: fut >= 0 ? C.ok : C.bad, 'stroke-width': 1.4, 'stroke-dasharray': '2 2' });
-    A.T(svg, X(j) + 5, Y(data.px[j]) - 5, (cls ? 'y=' + (fut > 0 ? 1 : 0) : 'y=' + A.sgn(fut * 100, 3) + '%'),
-      { fill: fut >= 0 ? C.ok : C.bad, size: 10, weight: 700 });
-    A.T(svg, x0, 166, 'mid price', { fill: C.dim, size: 9 });
-
-    /* order-book imbalance strip */
-    A.add(svg, 'line', { x1: x0, y1: 212, x2: x1, y2: 212, stroke: C.border });
-    A.T(svg, x0, 190, 'order-book imbalance  (bidQ − askQ) / (bidQ + askQ)', { fill: C.dim, size: 9 });
-    for (k = 0; k < N; k++) {
-      var v = (data.bq[k] - data.aq[k]) / (data.bq[k] + data.aq[k]);
-      var hh = Math.abs(v) * 26;
-      A.add(svg, 'rect', { x: X(k) - 1.6, y: v >= 0 ? 212 - hh : 212, width: 3.2, height: Math.max(0.7, hh),
-        fill: v >= 0 ? C.sky : C.accent2, opacity: k === sel ? 1 : 0.42 });
-    }
-    A.T(svg, x1, 242, 'tick index', { fill: C.dim, size: 9, anchor: 'end' });
-  }
-
-  function drawMatrix() {
-    var tb = A.$('w7-mat'); A.clear(tb);
-    var on = onFeats(), i, k;
-    var hr = document.createElement('tr');
-    hr.innerHTML = '<th>t</th>' + on.map(function (f) { return '<th>' + f.nm + '</th>'; }).join('') + '<th>y</th>';
-    tb.appendChild(hr);
-    if (!on.length) {
-      var er = document.createElement('tr');
-      er.innerHTML = '<td colspan="2" style="color:var(--warn)">no features selected</td>';
-      tb.appendChild(er);
-      return;
-    }
-    var start = A.clamp(sel - 2, lo(), Math.max(lo(), hi() - 5));
-    for (i = start; i < Math.min(hi() + 1, start + 6); i++) {
-      var tr = document.createElement('tr');
-      if (i === sel) tr.className = 'hl';
-      var html = '<td>' + i + '</td>';
-      for (k = 0; k < on.length; k++) html += '<td>' + on[k].fmt(on[k].f(data, i)) + '</td>';
-      var fr = data.px[Math.min(N - 1, i + h)] / data.px[i] - 1;
-      html += '<td style="color:' + (fr >= 0 ? C.ok : C.bad) + '">' +
-        (cls ? (fr > 0 ? '1' : '0') : A.sgn(fr * 100, 3)) + '</td>';
-      tr.innerHTML = html;
-      tr.setAttribute('tabindex', '0');
-      tr.setAttribute('role', 'button');
-      tr.setAttribute('aria-label', 'inspect row at tick ' + i);
-      (function (ix) {
-        tr.addEventListener('click', function () { sel = ix; render(); });
-        tr.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sel = ix; render(); }
-        });
-      })(i);
-      tb.appendChild(tr);
-    }
-  }
-
-  function render() {
-    var on = onFeats();
-    sel = A.clamp(sel, lo(), Math.max(lo(), hi()));
-    A.$('w7-h-out').textContent = h + ' tick' + (h === 1 ? '' : 's');
-    drawChart(); drawMatrix();
-
-    var rows = Math.max(0, hi() - lo() + 1), cols = on.length;
-    A.$('w7-shape').textContent = cols ? rows + ' × ' + cols : '—';
-    A.$('w7-shape-sub').textContent = cols
-      ? 'dropped: ' + (warmMax() - 1) + ' warm-up + ' + h + ' horizon'
-      : 'usable rows × features';
-    var dof = cols ? rows / cols : 0;
-    A.$('w7-dof').textContent = cols ? dof.toFixed(0) : '—';
-
-    var v = A.$('w7-verdict');
-    if (!cols) {
-      v.className = 'verdict warn';
-      v.innerHTML = '<b>No features, no model.</b> Tick at least one box — and notice that every box you add shortens the usable history and spends degrees of freedom.';
-    } else if (dof >= 40) {
-      v.className = 'verdict ok';
-      v.innerHTML = '<b>' + dof.toFixed(0) + ' rows per feature.</b> Comfortable. A linear or regularised-linear model has enough evidence per coefficient to mean something.';
-    } else if (dof >= 15) {
-      v.className = 'verdict warn';
-      v.innerHTML = '<b>' + dof.toFixed(0) + ' rows per feature.</b> Thin. Regularise hard (ridge / lasso, shallow trees) and expect the fold-to-fold dispersion to be wide.';
-    } else {
-      v.className = 'verdict bad';
-      v.innerHTML = '<b>' + dof.toFixed(0) + ' rows per feature.</b> You are fitting noise. In low signal-to-noise data, adding a feature is a cost you must earn back out-of-sample.';
-    }
-
-    var note = A.$('w7-fx-note');
-    if (cols) {
-      var fr = data.px[Math.min(N - 1, sel + h)] / data.px[sel] - 1;
-      note.innerHTML = '<b>Row t = ' + sel + '.</b> ' +
-        on.map(function (f) { return f.nm + ' = ' + f.fmt(f.f(data, sel)); }).join(' · ') +
-        ' → y = <b>' + (cls ? (fr > 0 ? '1' : '0') : A.sgn(fr * 100, 3) + '%') + '</b>' +
-        ' (return over the next ' + h + ' ticks: ' + A.sgn(fr * 100, 3) + '%). ' +
-        'Every number on the left of the arrow was printed at or before t; the number on the right is the future you are trying to buy.';
-    } else {
-      note.textContent = '';
-    }
-  }
-
-  function init() {
-    if (!A.$('w7-px')) return;
-    data = gen(seed);
-    buildFeatList();
-    A.$('w7-h').addEventListener('input', function () { h = +this.value; render(); });
-    A.$('w7-reseed').addEventListener('click', function () { seed = (seed * 31 + 17) % 2147483647; data = gen(seed); render(); });
-    var bc = A.$('w7-lbl-cls'), br = A.$('w7-lbl-reg');
-    bc.addEventListener('click', function () { cls = true; A.setSeg([bc, br], 0); render(); });
-    br.addEventListener('click', function () { cls = false; A.setSeg([bc, br], 1); render(); });
-    render();
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
-})();
-
-/* ══════════════════════════════════════════════════════════════
-   WEEK 7 · Widget 2 — leakage detector
-   ══════════════════════════════════════════════════════════════ */
-(function () {
-  'use strict';
-  var A = window.ARENA, C = A.C;
-  var mode = 'time', share = 0.70, emb = 5, NB = 58, HZ = 10;
-
-  function accs() {
-    var honest = 0.505 + 0.020 * (share - 0.5) / 0.4;
-    var insample = 0.79 - 0.11 * (share - 0.5) / 0.4;
-    var reported;
-    if (mode === 'rand') reported = honest + 0.285 - 0.03 * (share - 0.5) / 0.4;
-    else if (mode === 'time') reported = honest + 0.021;
-    else reported = honest + 0.021 * Math.max(0, 1 - emb / HZ);
-    return { honest: honest, insample: insample, reported: reported };
-  }
-
-  function drawSplit() {
-    var svg = A.$('w7-split'); A.clear(svg);
-    var x0 = 12, x1 = 708, bw = (x1 - x0) / NB, y = 44, hgt = 40;
-    var trainN = Math.round(NB * share);
-    var embB = mode === 'emb' ? Math.min(trainN, Math.ceil(emb / HZ * 4)) : 0;
-    var r = A.rng(4242), i, kind, fill;
-
-    A.T(svg, x0, 20, 'time  ────────────────────────────────────────────────────────▶', { fill: C.dim, size: 10 });
-    for (i = 0; i < NB; i++) {
-      if (mode === 'rand') kind = r() < share ? 'tr' : 'te';
-      else if (i < trainN - embB) kind = 'tr';
-      else if (i < trainN) kind = 'pu';
-      else kind = 'te';
-      fill = kind === 'tr' ? C.accent : (kind === 'te' ? C.sky : C.warn);
-      A.add(svg, 'rect', { x: x0 + i * bw + 0.6, y: y, width: bw - 1.2, height: hgt, rx: 1.5,
-        fill: fill, opacity: kind === 'pu' ? 0.5 : 0.82 });
-    }
-    A.add(svg, 'rect', { x: x0, y: y, width: x1 - x0, height: hgt, fill: 'none', stroke: C.border, rx: 2 });
-
-    if (mode === 'rand') {
-      for (i = 3; i < NB - 3; i += 7) {
-        var cx = x0 + (i + 0.5) * bw;
-        A.path(svg, [[cx, y - 3], [cx + bw * 0.5, y - 14], [cx + bw, y - 3]],
-          { stroke: C.bad, 'stroke-width': 1.3, 'stroke-dasharray': '2 2' });
-      }
-      A.T(svg, x0 + 4, y - 20, 'every test block has a near-identical neighbour inside the training set',
-        { fill: C.bad, size: 10, weight: 700 });
-      A.T(svg, x1, y + hgt + 18, 'the model recognises neighbours, it does not predict', { fill: C.bad, size: 9.5, anchor: 'end' });
-    } else {
-      var wx = x0 + (trainN - embB) * bw;
-      A.add(svg, 'line', { x1: wx, y1: y - 12, x2: wx, y2: y + hgt + 10, stroke: C.ink, 'stroke-width': 1.4 });
-      A.T(svg, wx - 6, y - 16, 'the wall', { fill: C.ink, size: 10, anchor: 'end', weight: 700 });
-      if (embB > 0) {
-        A.T(svg, wx + 4, y - 16, 'purged: ' + emb + ' ticks of label horizon', { fill: C.warn, size: 10, weight: 700 });
-      } else if (mode === 'emb') {
-        A.T(svg, wx + 4, y - 16, 'embargo 0 — labels still reach across', { fill: C.bad, size: 10, weight: 700 });
-      } else {
-        A.T(svg, wx + 4, y - 16, 'labels with horizon h reach ' + HZ + ' ticks past the wall', { fill: C.warn, size: 10 });
-      }
-      A.T(svg, x0 + 4, y + hgt + 18, 'train: fit here only', { fill: C.accent2, size: 9.5 });
-      A.T(svg, x1, y + hgt + 18, 'test: look ONCE', { fill: C.sky, size: 9.5, anchor: 'end' });
-    }
-    var lg = [['train', C.accent], ['test', C.sky], ['purged', C.warn]];
-    for (i = 0; i < lg.length; i++) {
-      A.add(svg, 'rect', { x: x0 + i * 90, y: 128, width: 9, height: 9, rx: 2, fill: lg[i][1], opacity: 0.85 });
-      A.T(svg, x0 + i * 90 + 14, 136, lg[i][0], { fill: C.muted, size: 9.5 });
-    }
-  }
-
-  function drawGap() {
-    var svg = A.$('w7-gap'); A.clear(svg);
-    var a = accs(), x0 = 96, x1 = 640, s = function (v) { return x0 + (x1 - x0) * (v - 0.45) / 0.45; };
-    var rows = [['reported', a.reported, C.warn, 26], ['live', a.honest, C.ok, 62]];
-    A.add(svg, 'line', { x1: x0, y1: 12, x2: x0, y2: 92, stroke: C.border });
-    rows.forEach(function (rw) {
-      A.T(svg, x0 - 10, rw[3] + 12, rw[0], { fill: C.muted, size: 10, anchor: 'end' });
-      A.add(svg, 'rect', { x: x0, y: rw[3], width: Math.max(2, s(rw[1]) - x0), height: 17, rx: 2, fill: rw[2], opacity: 0.8 });
-      A.T(svg, s(rw[1]) + 7, rw[3] + 13, (rw[1] * 100).toFixed(1) + '%', { fill: rw[2], size: 11, weight: 700 });
-    });
-    var d = a.reported - a.honest;
-    if (d > 0.01) {
-      A.add(svg, 'line', { x1: s(a.honest), y1: 22, x2: s(a.honest), y2: 84, stroke: C.bad, 'stroke-dasharray': '3 3' });
-      A.add(svg, 'rect', { x: s(a.honest), y: 24, width: s(a.reported) - s(a.honest), height: 19, fill: C.bad, opacity: 0.16 });
-      A.T(svg, (s(a.honest) + s(a.reported)) / 2, 108, 'self-deception: ' + (d * 100).toFixed(1) + ' points',
-        { fill: C.bad, size: 10, anchor: 'middle', weight: 700 });
-    } else {
-      A.T(svg, x0, 108, 'reported ≈ live — the number is a measurement, not a hope', { fill: C.ok, size: 10 });
-    }
-    A.T(svg, x1 + 6, 92, '90%', { fill: C.dim, size: 9 });
-  }
-
-  var CODE = {
-    rand: '<i># WRONG — shuffles the future into the past</i>\ntrain, test = train_test_split(\n    X, y, shuffle=<b>True</b>, test_size=SHARE)\n\n<i># adjacent ticks are near-duplicates, so every</i>\n<i># test row has a twin in train</i>',
-    time: '<i># RIGHT — a hard wall in time</i>\ncut = int(len(X) * SHARE)\nX_train, y_train = X[:cut], y[:cut]\nX_test,  y_test  = X[cut:], y[cut:]\n\n<i># labels still look h ticks past the cut</i>',
-    emb: '<i># RIGHT + purged boundary</i>\ncut = int(len(X) * SHARE)\nX_train, y_train = X[:cut-EMB], y[:cut-EMB]\nX_test,  y_test  = X[cut:], y[cut:]\n\n<u># EMB rows straddling the wall are dropped</u>'
-  };
-
-  function render() {
-    var a = accs();
-    A.$('w7-train-out').textContent = (share * 100).toFixed(0) + '%';
-    A.$('w7-emb-out').textContent = emb + ' ticks';
-    A.$('w7-emb').disabled = mode !== 'emb';
-    A.$('w7-acc-in').textContent = (a.insample * 100).toFixed(1) + '%';
-    A.$('w7-acc-test').textContent = (a.reported * 100).toFixed(1) + '%';
-    A.$('w7-acc-live').textContent = (a.honest * 100).toFixed(1) + '%';
-    A.$('w7-split-code').innerHTML = CODE[mode]
-      .replace('SHARE', share.toFixed(2)).replace('SHARE', share.toFixed(2)).replace(/EMB/g, emb);
-    drawSplit(); drawGap();
-
-    var v = A.$('w7-split-verdict');
-    if (mode === 'rand') {
-      v.className = 'verdict bad';
-      v.innerHTML = '<b>Leaking.</b> The reported ' + (a.reported * 100).toFixed(1) + '% is a measurement of how similar ' +
-        'neighbouring ticks are — not of any edge. Live, the same model prints ' + (a.honest * 100).toFixed(1) +
-        '%. Nothing about the model changed; only the honesty of the split did.';
-    } else if (mode === 'time') {
-      v.className = 'verdict warn';
-      v.innerHTML = '<b>Almost clean.</b> The wall stops features but not labels: the last training rows carry a ' +
-        HZ + '-tick label that reaches into the test block, worth about 2 points of fake accuracy. Switch on the embargo.';
-    } else if (emb >= HZ) {
-      v.className = 'verdict ok';
-      v.innerHTML = '<b>Honest.</b> Embargo ≥ horizon, so no training label can see across the wall. ' +
-        (a.reported * 100).toFixed(1) + '% is what you should expect live — unglamorous, and yours to trade.';
-    } else {
-      v.className = 'verdict warn';
-      v.innerHTML = '<b>Partly purged.</b> ' + emb + ' ticks of embargo against a ' + HZ + '-tick horizon still lets ' +
-        'the tail of the training labels peek. Push the embargo to ' + HZ + '.';
-    }
-  }
-
-  function init() {
-    if (!A.$('w7-split')) return;
-    var b = [A.$('w7-sp-rand'), A.$('w7-sp-time'), A.$('w7-sp-emb')], ms = ['rand', 'time', 'emb'];
-    b.forEach(function (btn, i) {
-      btn.addEventListener('click', function () { mode = ms[i]; A.setSeg(b, i); render(); });
-    });
-    A.$('w7-train').addEventListener('input', function () { share = +this.value / 100; render(); });
-    A.$('w7-emb').addEventListener('input', function () { emb = +this.value; render(); });
-    render();
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
-})();
-
-/* ══════════════════════════════════════════════════════════════
-   WEEK 7 · Widget 3 — walk-forward validation animator
-   ══════════════════════════════════════════════════════════════ */
-(function () {
-  'use strict';
-  var A = window.ARENA, C = A.C;
-  var n = 5, mode = 'exp', drift = false, shown = 0, timer = null;
-
-  function scores() {
-    var r = A.rng(99), out = [], k, base;
-    for (k = 0; k < n; k++) {
-      base = 0.62 + 0.30 * (r() - 0.5);
-      if (drift && k >= 2) base -= (mode === 'exp') ? Math.min(1.45, 0.27 * (k - 1)) : (k === 2 ? 0.44 : 0.11);
-      out.push(base);
-    }
-    return out;
+    var raw = rows * perRow;
+    var inRam = rows * (perRow + objOv) + rows * 8;   /* + RangeIndex-free but pandas keeps an index */
+    /* CSV text: digits + separators, roughly 2.6x the packed binary width */
+    var csv = rows * (perRow * 2.6 + 14);
+    return { perRow: perRow, pqPerRow: pqPerRow, objOv: objOv, ncols: ncols,
+             raw: raw, inRam: inRam, pq: rows * pqPerRow, csv: csv };
   }
 
   function draw() {
-    var svg = A.$('w7-wf'); A.clear(svg);
-    var x0 = 64, x1 = 700, X = function (u) { return x0 + (x1 - x0) * u; };
-    var laneH = Math.min(26, 196 / n), sc = scores(), k;
-    A.T(svg, x0, 18, 'time  ──────────────────────────────────────────────▶', { fill: C.dim, size: 10 });
+    var rows = rowsAt(+slRows.value);
+    var nfeat = +slFeat.value;
+    var ramGB = RAMS[+slRam.value];
+    var ram = ramGB * 1073741824;
 
-    if (drift) {
-      var rx = X(3 / (n + 1));
-      A.add(svg, 'rect', { x: rx, y: 24, width: x1 - rx, height: 12 + n * laneH, fill: C.bad, opacity: 0.06 });
-      A.add(svg, 'line', { x1: rx, y1: 24, x2: rx, y2: 30 + n * laneH, stroke: C.bad, 'stroke-dasharray': '4 3' });
-      A.T(svg, rx + 5, 34, 'regime shift', { fill: C.bad, size: 9.5, weight: 700 });
+    vRows.textContent = commas(rows);
+    vFeat.textContent = String(nfeat);
+    vRam.textContent = ramGB + ' GB';
+
+    var m = measure(rows, nfeat, null);
+    var wideM = measure(rows, nfeat, false);
+
+    COLS.forEach(function (c) {
+      var on = c.narrowOn;
+      var w = on ? c.narrow : c.wide;
+      var b = on ? c.nb : c.wb;
+      var extra = (c.obj && !on) ? ' + ~' + OBJ_OVERHEAD + 'B str' : '';
+      var nmTxt = c.many ? 'features[' + nfeat + ']' : c.nm;
+      c.lbl.innerHTML = nmTxt + ' <i>&middot;</i> <b>' + w + '</b> <i>' + b + 'B' + extra + '</i>';
+    });
+
+    document.getElementById('mw-perrow').textContent = (m.perRow + m.objOv) + ' B';
+    document.getElementById('mw-ncols').textContent = m.ncols;
+    document.getElementById('mw-objov').textContent = m.objOv ? m.objOv + ' B/row' : 'none';
+
+    /* ── bars ── */
+    var W = 660, x0 = 96, x1 = 636;
+    var span = x1 - x0;
+    var top = Math.max(ram * 1.25, m.inRam * 1.06, m.csv * 1.02);
+    var sc = function (b) { return Math.max(1.5, span * (b / top)); };
+    var s = '';
+
+    /* grid */
+    var g, gv;
+    for (g = 0; g <= 4; g++) {
+      gv = top * g / 4;
+      s += line(x0 + span * g / 4, 20, x0 + span * g / 4, 150, C.line, ' stroke-width="1"');
+      s += txt(x0 + span * g / 4, 164, fmtB(gv), C.mute, 8.5, 'middle');
     }
 
-    for (k = 0; k < n; k++) {
-      var y = 40 + k * laneH, on = k < shown, op = on ? 1 : 0.22;
-      var ts = (k + 1) / (n + 1), te = (k + 2) / (n + 1);
-      var trs = mode === 'exp' ? 0 : Math.max(0, ts - 2 / (n + 1));
-      A.T(svg, 8, y + laneH * 0.62, 'fold ' + (k + 1), { fill: on ? C.ink : C.dim, size: 9.5 });
-      A.add(svg, 'rect', { x: X(trs), y: y, width: X(ts) - X(trs), height: laneH - 7, rx: 2,
-        fill: C.accent, opacity: 0.78 * op });
-      A.add(svg, 'rect', { x: X(ts), y: y, width: X(te) - X(ts), height: laneH - 7, rx: 2,
-        fill: C.sky, opacity: 0.85 * op });
-      if (k === 0) {
-        A.T(svg, X(trs) + 6, y + laneH * 0.55, 'train', { fill: '#fff', size: 9, opacity: op });
-        A.T(svg, X(ts) + 5, y + laneH * 0.55, 'test', { fill: '#05121f', size: 9, opacity: op, weight: 700 });
-      }
-      if (on) {
-        A.T(svg, X(te) + 8, y + laneH * 0.58, A.sgn(sc[k], 2),
-          { fill: sc[k] >= 0 ? C.ok : C.bad, size: 10.5, weight: 700 });
-      }
-    }
-    A.T(svg, x0, 42 + n * laneH + 16, mode === 'exp'
-      ? 'expanding window — every fold keeps all history, including regimes that are gone'
-      : 'rolling window — each fold forgets the distant past and re-learns the present',
-      { fill: C.muted, size: 10 });
-    A.T(svg, x0, 42 + n * laneH + 32, 'score of a fold = out-of-sample metric on its test block only',
-      { fill: C.dim, size: 9.5 });
-  }
+    var bars = [
+      { nm: 'in RAM', d: 'pandas', v: m.inRam, c: C.a2, y: 28 },
+      { nm: 'Parquet', d: 'zstd', v: m.pq, c: C.ok, y: 68 },
+      { nm: 'CSV', d: 'text', v: m.csv, c: C.mute, y: 108 }
+    ];
+    var over = m.inRam > ram;
+    bars.forEach(function (b) {
+      var col = (b.nm === 'in RAM' && over) ? C.bad : b.c;
+      s += rect(x0, b.y, sc(b.v), 26, col, ' rx="3" opacity="0.88"');
+      s += txt(x0 - 8, b.y + 17, b.nm, C.dim, 10.5, 'end', '700');
+      s += txt(x0 - 8, b.y + 27, b.d, C.mute, 8, 'end');
+      var lx = x0 + sc(b.v) + 7, anchor = 'start', lc = C.ink;
+      if (lx > x1 - 66) { lx = x0 + sc(b.v) - 7; anchor = 'end'; lc = '#0c1220'; }
+      s += txt(lx, b.y + 17, fmtB(b.v), lc, 10.5, anchor, '600');
+    });
 
-  function drawBars() {
-    var svg = A.$('w7-wf-bars'); A.clear(svg);
-    var sc = scores(), x0 = 30, x1 = 322, zy = 74, k;
-    var bw = (x1 - x0) / n;
-    A.add(svg, 'line', { x1: x0 - 6, y1: zy, x2: x1, y2: zy, stroke: C.border });
-    A.T(svg, 4, zy + 3, '0', { fill: C.dim, size: 9 });
-    A.T(svg, 4, 20, '+1.4', { fill: C.dim, size: 9 });
-    A.T(svg, 4, 118, '−1.0', { fill: C.dim, size: 9 });
-    for (k = 0; k < n; k++) {
-      var v = k < shown ? sc[k] : 0;
-      var hh = Math.abs(v) / 1.4 * 54;
-      A.add(svg, 'rect', { x: x0 + k * bw + 3, y: v >= 0 ? zy - hh : zy, width: bw - 6,
-        height: Math.max(k < shown ? 1.5 : 0, hh), rx: 1.5,
-        fill: v >= 0 ? C.ok : C.bad, opacity: k < shown ? 0.85 : 0.12 });
-      A.T(svg, x0 + k * bw + bw / 2, 128, String(k + 1), { fill: C.dim, size: 9, anchor: 'middle' });
+    /* RAM marker */
+    var rx = x0 + sc(ram);
+    if (ram <= top) {
+      s += line(rx, 16, rx, 152, C.bad, ' stroke-width="1.6" stroke-dasharray="4 3"');
+      s += txt(rx, 12, ramGB + ' GB physical RAM', C.bad, 9, rx > x1 - 120 ? 'end' : 'middle', '700');
     }
-    A.T(svg, x1, 12, 'per-fold OOS score', { fill: C.dim, size: 9, anchor: 'end' });
-  }
+    s += txt(x0 - 8, 178, 'bytes', C.mute, 8.5, 'end');
+    svg.innerHTML = s;
 
-  function render() {
-    A.$('w7-folds-out').textContent = String(n);
-    draw(); drawBars();
-    var sc = scores().slice(0, shown);
-    var m = A.mean(sc), sd = A.stdev(sc);
-    A.$('w7-wf-mean').textContent = shown ? A.sgn(m, 2) : '—';
-    A.$('w7-wf-sd').textContent = shown > 1 ? '±' + sd.toFixed(2) : '—';
-    var v = A.$('w7-wf-verdict');
-    if (!shown) {
-      v.className = 'verdict';
-      v.innerHTML = 'Step or roll the folds forward to collect out-of-sample scores.';
-    } else if (drift && mode === 'exp' && shown >= 3) {
-      v.className = 'verdict bad';
-      v.innerHTML = '<b>The expanding window is drowning.</b> It keeps averaging in a regime that no longer exists, so ' +
-        'each new fold scores worse than the last. A declining fold series is the signature of drift — not of bad luck.';
-    } else if (drift && mode === 'roll' && shown >= 3) {
-      v.className = 'verdict ok';
-      v.innerHTML = '<b>The rolling window absorbs the shock.</b> One bad fold at the break, then it re-learns the new ' +
-        'regime. That is the trade-off: less history, faster adaptation. Under drift, forgetting is a feature.';
-    } else if (shown > 1 && sd > 0.55 * Math.abs(m)) {
-      v.className = 'verdict warn';
-      v.innerHTML = '<b>Mean ' + A.sgn(m, 2) + ', dispersion ±' + sd.toFixed(2) + '.</b> A decent average with this much ' +
-        'spread is not an edge you can size — it is a coin flip with a good mood. Report both numbers, always.';
+    /* ── stats ── */
+    var pct = m.inRam / ram * 100;
+    var saved = wideM.inRam > 0 ? (1 - m.inRam / wideM.inRam) * 100 : 0;
+    document.getElementById('mw-s-rows').textContent = fmtCount(rows);
+    var elRam = document.getElementById('mw-s-ram');
+    elRam.textContent = fmtB(m.inRam);
+    elRam.className = 'v ' + (over ? 'bad' : (pct > 55 ? 'warn' : 'ok'));
+    var elPct = document.getElementById('mw-s-pct');
+    elPct.textContent = pct.toFixed(pct < 10 ? 1 : 0) + '%';
+    elPct.className = 'v ' + (over ? 'bad' : (pct > 55 ? 'warn' : 'ok'));
+    document.getElementById('mw-s-pq').textContent = fmtB(m.pq);
+    document.getElementById('mw-s-csv').textContent = fmtB(m.csv);
+    var elSave = document.getElementById('mw-s-save');
+    elSave.textContent = saved < 0.5 ? '—' : saved.toFixed(0) + '%';
+    elSave.className = 'v ' + (saved > 40 ? 'ok' : '');
+
+    /* ── verdict ── */
+    var cls, msg;
+    if (over) {
+      cls = 'hot';
+      msg = '<b>Over the wall.</b> ' + fmtB(m.inRam) + ' does not fit in ' + ramGB +
+        ' GB. pandas will try, the OS will swap to disk at roughly <b>1000&times; slower</b>, and you get a ' +
+        '<code>MemoryError</code> or a notebook that never returns. ' +
+        (m.objOv ? 'Start by making <code>symbol</code> a <code>category</code> &mdash; that object column alone costs ' +
+          m.objOv + ' B/row.' : 'Downcast the float columns, or read it in chunks.');
+    } else if (pct > 55) {
+      cls = 'mid';
+      msg = '<b>Fits, but the headroom is thin.</b> At ' + pct.toFixed(0) +
+        '% of physical memory you have no room for a copy &mdash; and <code>groupby</code>, <code>merge</code> ' +
+        'and <code>sort_values</code> all materialise one. The next operation is what kills you, not the load.';
     } else {
-      v.className = 'verdict ok';
-      v.innerHTML = '<b>Mean ' + A.sgn(m, 2) + ' across ' + shown + ' out-of-sample block' + (shown === 1 ? '' : 's') +
-        '.</b> Tight dispersion, no trend in the folds: this is the one number you may put in your report.';
+      cls = 'cool';
+      msg = '<b>Comfortable.</b> ' + fmtB(m.inRam) + ' in a ' + ramGB + ' GB machine (' +
+        pct.toFixed(pct < 10 ? 1 : 0) + '%) leaves room for intermediate copies. ' +
+        'On disk this is ' + fmtB(m.pq) + ' as Parquet versus ' + fmtB(m.csv) +
+        ' as CSV &mdash; ' + (m.csv / Math.max(1, m.pq)).toFixed(0) + '&times; smaller, and column-prunable.';
     }
-    A.$('w7-wf-step').disabled = shown >= n;
-    A.$('w7-wf-play').textContent = timer ? '❙❙ Pause' : '▶ Roll forward';
+    warn.className = 'warnbar ' + cls;
+    warn.innerHTML = msg;
   }
 
-  function stop() { if (timer) { clearInterval(timer); timer = null; } }
-
-  function init() {
-    if (!A.$('w7-wf')) return;
-    var be = A.$('w7-wf-exp'), br = A.$('w7-wf-roll');
-    be.addEventListener('click', function () { mode = 'exp'; A.setSeg([be, br], 0); render(); });
-    br.addEventListener('click', function () { mode = 'roll'; A.setSeg([be, br], 1); render(); });
-    A.$('w7-folds').addEventListener('input', function () {
-      n = +this.value; shown = Math.min(shown, n); stop(); render();
-    });
-    A.$('w7-drift').addEventListener('change', function () { drift = this.checked; render(); });
-    A.$('w7-wf-step').addEventListener('click', function () { stop(); if (shown < n) shown++; render(); });
-    A.$('w7-wf-reset').addEventListener('click', function () { stop(); shown = 0; render(); });
-    A.$('w7-wf-play').addEventListener('click', function () {
-      if (timer) { stop(); render(); return; }
-      if (shown >= n) shown = 0;
-      timer = setInterval(function () {
-        shown++;
-        if (shown >= n) { shown = n; stop(); }
-        render();
-      }, 620);
-      render();
-    });
-    render();
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  slRows.addEventListener('input', draw);
+  slFeat.addEventListener('input', draw);
+  slRam.addEventListener('input', draw);
+  draw();
 })();
 
-/* ══════════════════════════════════════════════════════════════
-   WEEK 7 · Widget 4 — model-ops lifecycle + drift monitor
-   ══════════════════════════════════════════════════════════════ */
-(function () {
-  'use strict';
-  var A = window.ARENA, C = A.C;
-  var age = 0, cur = 0;
 
-  var STAGES = [
-    { st: '01', nm: 'Train', code: 'model.fit(X_train, y_train)',
-      what: 'Offline, on your machine, on the training slice only. Heavy, slow, and never in the hot path. Fit the scaler here too — it is part of the model.',
-      fail: 'Failure mode: re-fitting inside on_tick "to stay fresh". You blow the per-tick budget and every tick trains on a different dataset.' },
-    { st: '02', nm: 'Validate', code: 'walk_forward(folds=5) → mean OOS',
-      what: 'Walk-forward folds, then exactly one look at the held-out test block. Report the mean and the dispersion, and log every configuration you tried.',
-      fail: 'Failure mode: tuning against the test block. After the second look it is a training set wearing a test set\'s name.' },
-    { st: '03', nm: 'Persist', code: "joblib.dump(model, 'model.pkl')",
-      what: 'Serialise the fitted model together with its feature list, its scaler and a version string. The artifact must be enough to reproduce a prediction byte for byte.',
-      fail: 'Failure mode: pickling the model but not the scaler or the column order. Live features arrive in a different order and the model answers confidently anyway.' },
-    { st: '04', nm: 'Serve', code: 'load in __init__ · predict in on_tick',
-      what: 'Load once when the bot starts; inside on_tick build features with the same function you used offline and call predict. Measure that call against the W5 latency budget.',
-      fail: 'Failure mode: loading the pickle per tick. Your bot is right about the market and late to it — the fill prints two ticks away.' },
-    { st: '05', nm: 'Monitor drift', code: 'live acc vs backtest · P&L vs sim',
-      what: 'Watch live hit rate, the distribution of each feature, and live P&L against the backtest. Decide the retraining trigger before the season starts, and version every model so you can roll back.',
-      fail: 'Failure mode: no baseline. If you never wrote down what healthy looks like, you cannot recognise the week it stopped working.' }
+/* ══ WIDGET 2 · the vectorisation race ════════════════════════════ */
+(function () {
+  var sl = document.getElementById('vz-n');
+  var vN = document.getElementById('vz-n-v');
+  var btnRun = document.getElementById('vz-run');
+  var btnReset = document.getElementById('vz-reset');
+  var warn = document.getElementById('vz-warn');
+  if (!sl || !btnRun) return;
+
+  var LANES = [
+    { nm: 'Python for loop', ns: 65, fixed: 0, col: C.bad },
+    { nm: 'df.apply()', ns: 22, fixed: 0, col: C.warn },
+    { nm: 'numpy vectorised', ns: 0.9, fixed: 12000, col: C.ok }
+  ];
+  var els = LANES.map(function (l, i) {
+    return { fl: document.getElementById('vz-f' + i), tm: document.getElementById('vz-t' + i) };
+  });
+
+  var DUR = 1250;   /* ms of animation for the slowest lane */
+  var raf = null, t0 = 0, running = false;
+
+  function nAt(i) { return Math.round(1e3 * Math.pow(5e4, i / 44)); }
+
+  function times(n) {
+    return LANES.map(function (l) { return l.fixed + n * l.ns; });
+  }
+
+  function stopAnim() {
+    if (raf) { cancelAnimationFrame(raf); raf = null; }
+    running = false;
+    btnRun.textContent = '▶ Run';
+  }
+
+  function paint(frac) {
+    /* frac in 0..1 of the slowest lane's duration */
+    var n = nAt(+sl.value);
+    var ts = times(n);
+    var tmax = Math.max.apply(null, ts);
+    ts.forEach(function (t, i) {
+      var own = t / tmax;                 /* this lane's share of the shared scale */
+      var w = Math.min(frac, own);        /* constant speed → shorter bar finishes sooner */
+      els[i].fl.style.width = (w * 100) + '%';
+      els[i].tm.textContent = (frac >= own) ? fmtNs(t) : '';
+    });
+    return { n: n, ts: ts, tmax: tmax };
+  }
+
+  function stats(r) {
+    document.getElementById('vz-sp0').textContent = (r.ts[0] / r.ts[2]).toFixed(0) + '× slower';
+    document.getElementById('vz-sp1').textContent = (r.ts[1] / r.ts[2]).toFixed(0) + '× slower';
+  }
+
+  function verdict(r) {
+    var n = r.n, loop = r.ts[0], np = r.ts[2];
+    var cls, msg;
+    if (n < 20000 && loop < np * 3) {
+      cls = 'mid';
+      msg = '<b>At n = ' + commas(n) + ' the loop is fine.</b> numpy\'s fixed ' + fmtNs(12000) +
+        ' of call overhead is most of its time, so vectorising buys you almost nothing. ' +
+        'This is the regime where readability wins &mdash; and where premature vectorising wastes your afternoon.';
+    } else if (loop > 6e10) {
+      cls = 'hot';
+      msg = '<b>' + fmtNs(loop) + ' in the Python loop.</b> That is not a slow function, it is a different ' +
+        'working day: ' + fmtNs(np) + ' vectorised, a <b>' + (loop / np).toFixed(0) +
+        '&times;</b> gap. A feature build at this size is the difference between an overnight job and a coffee break.';
+    } else {
+      cls = 'cool';
+      msg = '<b>' + (loop / np).toFixed(0) + '&times; faster vectorised</b> at n = ' + commas(n) +
+        ' &mdash; ' + fmtNs(loop) + ' down to ' + fmtNs(np) + '. <code>df.apply()</code> lands at ' +
+        fmtNs(r.ts[1]) + ': it looks vectorised but it is still a Python call per row.';
+    }
+    warn.className = 'warnbar ' + cls;
+    warn.innerHTML = msg;
+  }
+
+  function run() {
+    stopAnim();
+    running = true;
+    btnRun.textContent = '■ Stop';
+    t0 = performance.now();
+    (function frame(now) {
+      var frac = Math.min(1, (now - t0) / DUR);
+      var r = paint(frac);
+      if (frac >= 1) { stats(r); verdict(r); stopAnim(); return; }
+      raf = requestAnimationFrame(frame);
+    })(t0);
+  }
+
+  function reset() {
+    stopAnim();
+    var r = paint(0);
+    els.forEach(function (e) { e.tm.textContent = '—'; });
+    document.getElementById('vz-sp0').textContent = '—';
+    document.getElementById('vz-sp1').textContent = '—';
+    vN.textContent = commas(r.n);
+    warn.className = 'warnbar';
+    warn.innerHTML = 'Press <b>Run</b>. All three lanes advance at the same speed on a shared scale, so the ' +
+      'lane that finishes first is genuinely faster.';
+  }
+
+  btnRun.addEventListener('click', function () { if (running) { stopAnim(); } else { run(); } });
+  btnReset.addEventListener('click', reset);
+  sl.addEventListener('input', function () {
+    vN.textContent = commas(nAt(+sl.value));
+    reset();
+  });
+  reset();
+})();
+
+
+/* ══ WIDGET 3 · chunking + map-reduce pipeline ════════════════════ */
+(function () {
+  var slChunk = document.getElementById('mr-chunk');
+  var slWork = document.getElementById('mr-work');
+  var swTh = document.getElementById('mr-threads');
+  var svg = document.getElementById('mr-svg');
+  if (!slChunk || !svg) return;
+
+  var vChunk = document.getElementById('mr-chunk-v');
+  var vWork = document.getElementById('mr-work-v');
+  var warn = document.getElementById('mr-warn');
+  var log = document.getElementById('mr-log');
+
+  var TOTAL = 240e6;               /* rows in the tick file */
+  var BPR = 34;                    /* bytes per row in memory */
+  var NS_ROW = 80;                 /* ns of work per row (parse + reduce) */
+  var STARTUP = 0.35;              /* s per worker process */
+  var PICKLE = 0.0004;             /* s per chunk result across the boundary */
+  var CHUNKS = [250e3, 500e3, 1e6, 2e6, 4e6, 8e6];
+  var WCOL = ['#7cb0ff', '#b9d4ff', '#2f6fd0', '#a8c8f5', '#1e4e9c', '#dbe9ff'];
+
+  var round = 0, timer = null;
+
+  function model() {
+    var cs = CHUNKS[+slChunk.value];
+    var W = +slWork.value;
+    var threads = swTh.checked;
+    var active = threads ? 1 : W;
+    var chunks = Math.ceil(TOTAL / cs);
+    var rounds = Math.ceil(chunks / active);
+    var chunkS = cs * NS_ROW / 1e9;
+    var seq = chunks * chunkS;
+    var par = rounds * chunkS + (threads ? 0 : W * STARTUP) + chunks * PICKLE;
+    if (threads) par = seq + chunks * 0.0004;   /* GIL: no parallelism, just overhead */
+    return { cs: cs, W: W, threads: threads, active: active, chunks: chunks, rounds: rounds,
+             chunkS: chunkS, seq: seq, par: par, mem: cs * BPR };
+  }
+
+  function draw() {
+    var m = model();
+    vChunk.textContent = commas(m.cs);
+    vWork.textContent = String(m.W);
+    if (round > m.rounds) round = m.rounds;
+
+    var lanes = m.threads ? 1 : m.W;
+    var H = 116 + lanes * 19 + 34;
+    svg.setAttribute('viewBox', '0 0 660 ' + H);
+
+    var s = '';
+    var x0 = 78, x1 = 470, span = x1 - x0;
+
+    /* ── the file, split into chunks ── */
+    s += txt(x0 - 8, 30, 'ticks.csv', C.dim, 10, 'end', '700');
+    s += txt(x0 - 8, 41, fmtCount(TOTAL) + ' rows', C.mute, 8, 'end');
+    var segs = Math.min(m.chunks, 120);
+    var segW = span / segs;
+    var done = Math.min(m.chunks, round * m.active);
+    var i, segDone;
+    for (i = 0; i < segs; i++) {
+      /* map display segment -> chunk index */
+      var ci = Math.floor(i * m.chunks / segs);
+      segDone = ci < done;
+      var owner = ci % m.active;
+      s += rect(x0 + i * segW + 0.35, 18, Math.max(0.8, segW - 0.7), 26,
+        segDone ? WCOL[owner % WCOL.length] : C.p2,
+        segDone ? ' opacity="0.9"' : ' stroke="' + C.line + '" stroke-width="0.6"');
+    }
+    s += rect(x0, 18, span, 26, 'none', ' stroke="' + C.line2 + '" stroke-width="1" rx="2"');
+    s += txt(x0 + span / 2, 58, commas(m.chunks) + ' chunks of ' + commas(m.cs) + ' rows  ·  ' +
+      fmtB(m.mem) + ' held at a time', C.mute, 9, 'middle');
+
+    /* arrow: split -> map */
+    s += txt(x0 + span / 2, 78, 'SPLIT ↓  shard key = chunk boundary', C.a3, 9, 'middle', '700');
+
+    /* ── worker lanes ── */
+    var ly = 92, lh = 19;
+    var partials = [];
+    for (i = 0; i < lanes; i++) {
+      var mine = 0, k;
+      for (k = i; k < m.chunks; k += m.active) { if (k < done) mine++; }
+      var myTotal = 0;
+      for (k = i; k < m.chunks; k += m.active) { myTotal++; }
+      partials.push(mine);
+      var frac = myTotal ? mine / myTotal : 0;
+      var y = ly + i * lh;
+      var col = WCOL[i % WCOL.length];
+      s += txt(x0 - 8, y + 11, (m.threads ? 'thread' : 'w') + i, col, 9.5, 'end', '700');
+      s += rect(x0, y + 2, span, 13, C.p2, ' rx="6" stroke="' + C.line + '" stroke-width="0.7"');
+      s += rect(x0, y + 2, span * frac, 13, col, ' rx="6" opacity="0.85"');
+      s += txt(x1 + 8, y + 11, mine + '/' + myTotal, mine === myTotal && mine > 0 ? C.ok : C.mute, 9);
+      if (m.threads && i === 0) {
+        s += txt(x0 + span / 2, y + 11.5, 'GIL — one at a time', '#0c1220', 8.5, 'middle', '700');
+      }
+    }
+
+    /* ── reduce box ── */
+    var rx = 540, rw = 104;
+    var ry = 92, rh = Math.max(46, lanes * lh - 4);
+    s += rect(rx, ry, rw, rh, C.p2, ' rx="8" stroke="' + C.a2 + '" stroke-width="1.2"');
+    s += txt(rx + rw / 2, ry + 18, 'REDUCE', C.a3, 10, 'middle', '700');
+    var tot = partials.reduce(function (a, b) { return a + b; }, 0);
+    s += txt(rx + rw / 2, ry + 33, tot + ' partials', C.dim, 9.5, 'middle');
+    if (tot >= m.chunks && m.chunks > 0) {
+      s += txt(rx + rw / 2, ry + 47, 'mean = 4,182.6', C.ok, 9.5, 'middle', '700');
+    } else {
+      s += txt(rx + rw / 2, ry + 47, 'of ' + commas(m.chunks), C.mute, 9, 'middle');
+    }
+    /* connectors */
+    for (i = 0; i < lanes; i++) {
+      var cy = ly + i * lh + 8.5;
+      s += line(x1 + 34, cy, rx - 4, ry + rh / 2, C.line2, ' stroke-width="0.8" opacity="0.7"');
+    }
+
+    /* progress footer */
+    var fy = 92 + lanes * lh + 18;
+    s += txt(x0 - 8, fy, 'round', C.mute, 9, 'end', '700');
+    s += rect(x0, fy - 9, span, 11, C.p2, ' rx="5" stroke="' + C.line + '" stroke-width="0.7"');
+    s += rect(x0, fy - 9, span * (m.rounds ? round / m.rounds : 0), 11, C.a2, ' rx="5"');
+    s += txt(x1 + 8, fy, round + ' / ' + m.rounds, C.dim, 9.5);
+    svg.innerHTML = s;
+
+    /* ── stats ── */
+    document.getElementById('mr-s-chunks').textContent = commas(m.chunks);
+    document.getElementById('mr-s-mem').textContent = fmtB(m.mem);
+    document.getElementById('mr-s-seq').textContent = fmtS(m.seq);
+    document.getElementById('mr-s-par').textContent = fmtS(m.par);
+    var sp = m.seq / m.par;
+    var elSp = document.getElementById('mr-s-sp');
+    elSp.textContent = sp.toFixed(2) + '×';
+    elSp.className = 'v ' + (sp > 2.5 ? 'ok' : (sp > 1.15 ? 'warn' : 'bad'));
+    var eff = sp / m.W * 100;
+    var elEff = document.getElementById('mr-s-eff');
+    elEff.textContent = eff.toFixed(0) + '%';
+    elEff.className = 'v ' + (eff > 70 ? 'ok' : (eff > 40 ? 'warn' : 'bad'));
+
+    /* ── verdict ── */
+    var cls, msg;
+    if (m.threads) {
+      cls = 'hot';
+      msg = '<b>Threads do not help here.</b> Only one thread executes Python bytecode at a time, so ' +
+        m.W + ' threads take turns on one core: ' + fmtS(m.par) + ' versus ' + fmtS(m.seq) +
+        ' sequential. You pay switching overhead for zero parallelism. Switch it off &mdash; CPU-bound work ' +
+        'needs <code>ProcessPoolExecutor</code>.';
+    } else if (eff < 45) {
+      cls = 'mid';
+      msg = '<b>Diminishing returns.</b> ' + m.W + ' workers give only ' + sp.toFixed(2) +
+        '&times; &mdash; ' + eff.toFixed(0) + '% efficiency. ' + fmtS(m.W * STARTUP) +
+        ' of process start-up plus ' + fmtS(m.chunks * PICKLE) + ' of pickling are fixed costs that ' +
+        'parallelism cannot amortise. Bigger chunks mean fewer boundary crossings.';
+    } else {
+      cls = 'cool';
+      msg = '<b>' + sp.toFixed(2) + '&times; on ' + m.W + ' workers</b> (' + eff.toFixed(0) +
+        '% efficiency): ' + fmtS(m.seq) + ' down to ' + fmtS(m.par) +
+        '. Peak memory stays at <b>' + fmtB(m.mem) + '</b> &mdash; one chunk &mdash; no matter how large the ' +
+        'file grows. That is the whole point of chunking.';
+    }
+    warn.className = 'warnbar ' + cls;
+    warn.innerHTML = msg;
+
+    /* ── log ── */
+    var lg = '';
+    if (round === 0) {
+      lg = '<div>ready · ' + commas(m.chunks) + ' chunks, ' +
+        (m.threads ? '1 effective lane (GIL)' : m.W + ' processes') + '</div>';
+    } else {
+      var shown = 0;
+      for (i = round; i >= 1 && shown < 8; i--, shown++) {
+        var from = (i - 1) * m.active, to = Math.min(m.chunks, i * m.active);
+        lg += '<div>round <b>' + i + '</b> · map chunks ' + from + '–' + (to - 1) +
+          ' · ' + (to - from) + ' partial' + (to - from === 1 ? '' : 's') +
+          ' · +' + fmtS(m.chunkS) + '</div>';
+      }
+      if (round >= m.rounds) {
+        lg = '<div><b>reduce</b> · ' + commas(m.chunks) + ' partials → mean · ' +
+          fmtS(m.par) + ' wall</div>' + lg;
+      }
+    }
+    log.innerHTML = lg;
+  }
+
+  function stop() {
+    if (timer) { clearInterval(timer); timer = null; }
+    document.getElementById('mr-play').textContent = '▶ Play';
+  }
+  function step() {
+    var m = model();
+    if (round >= m.rounds) { stop(); return; }
+    round++;
+    draw();
+    if (round >= m.rounds) stop();
+  }
+
+  document.getElementById('mr-step').addEventListener('click', function () { stop(); step(); });
+  document.getElementById('mr-play').addEventListener('click', function () {
+    if (timer) { stop(); return; }
+    if (round >= model().rounds) round = 0;
+    document.getElementById('mr-play').textContent = '■ Pause';
+    timer = setInterval(step, 240);
+  });
+  document.getElementById('mr-reset').addEventListener('click', function () {
+    stop(); round = 0; draw();
+  });
+  slChunk.addEventListener('input', function () { stop(); round = 0; draw(); });
+  slWork.addEventListener('input', function () { stop(); round = 0; draw(); });
+  swTh.addEventListener('change', function () { stop(); round = 0; draw(); });
+  draw();
+})();
+
+
+/* ══ WIDGET 4 · columnar vs row storage ═══════════════════════════ */
+(function () {
+  var host = document.getElementById('cs-cols');
+  var svg = document.getElementById('cs-svg');
+  var swPush = document.getElementById('cs-push');
+  if (!host || !svg) return;
+
+  var q = document.getElementById('cs-query');
+  var warn = document.getElementById('cs-warn');
+  var selV = document.getElementById('cs-sel-v');
+
+  var ROWS = 120e6;
+  var GROUPS = 8;            /* row groups in the Parquet file */
+  var MATCH = 1;             /* row groups that can contain symbol='AAPL' */
+  var BW = 550 * 1048576;    /* bytes per second of read bandwidth */
+
+  /* name, itemsize, zstd ratio */
+  var SCHEMA = [
+    { nm: 'ts',      b: 8, cr: 0.12, on: true },
+    { nm: 'symbol',  b: 1, cr: 0.03, on: false },
+    { nm: 'side',    b: 1, cr: 0.05, on: false },
+    { nm: 'close',   b: 8, cr: 0.62, on: true },
+    { nm: 'size',    b: 4, cr: 0.30, on: false },
+    { nm: 'bid',     b: 8, cr: 0.62, on: false },
+    { nm: 'ask',     b: 8, cr: 0.62, on: false },
+    { nm: 'bid_sz',  b: 4, cr: 0.30, on: false },
+    { nm: 'ask_sz',  b: 4, cr: 0.30, on: false },
+    { nm: 'ret',     b: 4, cr: 0.55, on: false },
+    { nm: 'ma20',    b: 4, cr: 0.55, on: false },
+    { nm: 'vol',     b: 4, cr: 0.55, on: false }
   ];
 
-  function drawDrift() {
-    var svg = A.$('w7-drift-svg'); A.clear(svg);
-    var x0 = 34, x1 = 328, y0 = 18, y1 = 112;
-    var Y = function (a) { return y1 - (a - 0.44) / 0.12 * (y1 - y0); };
-    var X = function (w) { return x0 + (x1 - x0) * w / 12; };
-    var live = function (w) { return 0.548 - 0.0081 * w; };
+  var PER_ROW = SCHEMA.reduce(function (a, c) { return a + c.b; }, 0);      /* 58 B packed */
+  var CSV_PER_ROW = PER_ROW * 2.6 + 12;                                     /* text + delimiters */
 
-    A.add(svg, 'line', { x1: x0, y1: y1, x2: x1, y2: y1, stroke: C.border });
-    A.add(svg, 'line', { x1: x0, y1: y0, x2: x0, y2: y1, stroke: C.border });
-    A.add(svg, 'line', { x1: x0, y1: Y(0.548), x2: x1, y2: Y(0.548), stroke: C.sky, 'stroke-dasharray': '4 3', opacity: 0.8 });
-    A.T(svg, x0 + 4, Y(0.548) - 5, 'backtest 54.8%', { fill: C.sky, size: 9 });
-    A.add(svg, 'rect', { x: x0, y: Y(0.51), width: x1 - x0, height: y1 - Y(0.51), fill: C.bad, opacity: 0.08 });
-    A.add(svg, 'line', { x1: x0, y1: Y(0.51), x2: x1, y2: Y(0.51), stroke: C.bad, 'stroke-dasharray': '3 3' });
-    A.T(svg, x1, Y(0.51) + 11, 'retrain trigger 51%', { fill: C.bad, size: 9, anchor: 'end' });
+  var html = '';
+  SCHEMA.forEach(function (c, i) {
+    html += '<button class="colbtn" type="button" data-i="' + i + '" aria-pressed="' + (c.on ? 'true' : 'false') +
+      '" aria-label="Toggle the ' + c.nm + ' column in the SELECT list">' + c.nm +
+      ' <span class="w">' + c.b + 'B</span></button>';
+  });
+  host.innerHTML = html;
 
-    var pts = [], w;
-    for (w = 0; w <= age; w += 0.25) pts.push([X(w), Y(live(w))]);
-    if (pts.length < 2) pts.push([X(0) + 0.6, Y(live(0))]);
-    A.path(svg, pts, { stroke: C.accent2, 'stroke-width': 1.8 });
-    A.add(svg, 'circle', { cx: X(age), cy: Y(live(age)), r: 3.4, fill: live(age) < 0.51 ? C.bad : C.ok });
-    A.T(svg, 4, Y(0.548) + 3, '55%', { fill: C.dim, size: 8.5 });
-    A.T(svg, 4, y1 + 3, '44%', { fill: C.dim, size: 8.5 });
-    A.T(svg, x1, y1 + 14, 'weeks since training', { fill: C.dim, size: 9, anchor: 'end' });
-    A.T(svg, x0, y1 + 14, 'live hit rate', { fill: C.accent2, size: 9 });
-  }
-
-  function render() {
-    var box = A.$('w7-lc');
-    A.clear(box);
-    STAGES.forEach(function (s, i) {
-      var b = document.createElement('button');
-      b.className = 'lc-node' + (i === cur ? ' on' : '');
-      b.setAttribute('aria-pressed', i === cur ? 'true' : 'false');
-      b.innerHTML = '<div class="st">' + s.st + (i < STAGES.length - 1 ? ' ▸' : ' ⟲') + '</div><div class="nm">' + s.nm + '</div>';
-      b.addEventListener('click', function () { cur = i; render(); });
-      box.appendChild(b);
+  var btns = Array.prototype.slice.call(host.querySelectorAll('.colbtn'));
+  btns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      var i = +b.dataset.i;
+      SCHEMA[i].on = !SCHEMA[i].on;
+      b.setAttribute('aria-pressed', SCHEMA[i].on ? 'true' : 'false');
+      draw();
     });
-    var s = STAGES[cur];
-    A.$('w7-lc-detail').innerHTML =
-      '<h4>' + s.st + ' · ' + s.nm + '</h4>' +
-      '<div class="role">' + s.code + '</div>' +
-      '<p>' + s.what + '</p>' +
-      '<div class="fail">' + s.fail + '</div>';
+  });
+  document.getElementById('cs-narrow').addEventListener('click', function () {
+    SCHEMA.forEach(function (c, i) { c.on = (c.nm === 'ts' || c.nm === 'close'); sync(i); });
+    draw();
+  });
+  document.getElementById('cs-all').addEventListener('click', function () {
+    SCHEMA.forEach(function (c, i) { c.on = true; sync(i); });
+    draw();
+  });
+  function sync(i) { btns[i].setAttribute('aria-pressed', SCHEMA[i].on ? 'true' : 'false'); }
+  swPush.addEventListener('change', draw);
 
-    A.$('w7-age-out').textContent = String(age);
-    drawDrift();
-    var acc = 0.548 - 0.0081 * age, v = A.$('w7-drift-verdict');
-    if (acc < 0.51) {
-      v.className = 'verdict bad';
-      v.innerHTML = '<b>Drift detected at week ' + age + '.</b> Live hit rate ' + (acc * 100).toFixed(1) +
-        '% has crossed the trigger. Retrain on recent data, or fall back to the W6 rule-based signal — do not keep sizing on a dead model.';
-    } else if (acc < 0.525) {
-      v.className = 'verdict warn';
-      v.innerHTML = '<b>Decaying.</b> ' + (acc * 100).toFixed(1) + '% live against a 54.8% backtest. Still profitable, ' +
-        'but the gap is the alarm: check whether the feature distributions moved before you blame the market.';
-    } else {
-      v.className = 'verdict ok';
-      v.innerHTML = '<b>Healthy.</b> ' + (acc * 100).toFixed(1) + '% live, in line with the backtest. This is what you ' +
-        'must write down <em>now</em> — the baseline you will compare against during the incident.';
+  function draw() {
+    var push = swPush.checked;
+    var sel = SCHEMA.filter(function (c) { return c.on; });
+    var frac = push ? MATCH / GROUPS : 1;
+
+    selV.textContent = sel.length + ' of ' + SCHEMA.length;
+
+    /* the query */
+    var cols = sel.length ? sel.map(function (c) { return c.nm; }).join(', ') : '/* nothing */';
+    q.innerHTML = '<span class="k">SELECT</span> ' + esc(cols) +
+      ' <span class="k">FROM</span> ticks <span class="k">WHERE</span> symbol = <span class="s">\'AAPL\'</span>' +
+      '<br/><span class="c"># ' + fmtCount(ROWS) + ' rows &middot; ' + SCHEMA.length + ' columns &middot; ' +
+      GROUPS + ' row groups' + (push ? ' &middot; pushdown ON' : ' &middot; pushdown OFF') + '</span>';
+
+    /* bytes */
+    var csvBytes = ROWS * CSV_PER_ROW;                 /* whole file, always */
+    var selPacked = sel.reduce(function (a, c) { return a + c.b; }, 0);
+    var pqBytes = ROWS * frac * sel.reduce(function (a, c) { return a + c.b * c.cr; }, 0);
+    var pqFull = ROWS * SCHEMA.reduce(function (a, c) { return a + c.b * c.cr; }, 0);
+    /* fraction of the columnar file the query actually touches */
+    var pct = pqFull > 0 ? pqBytes / pqFull * 100 : 0;
+
+    /* ── diagram ── */
+    var s = '';
+    var x0 = 22, x1 = 638, span = x1 - x0;
+
+    /* row-oriented: 3 rows of 12 interleaved cells, all read */
+    s += txt(x0, 14, 'ROW-ORIENTED  ·  ticks.csv', C.bad, 10, 'start', '700');
+    s += txt(x1, 14, 'every byte of every row crosses the bus', C.mute, 8.5, 'end');
+    var nr = 3, cw = span / SCHEMA.length, r, c2;
+    for (r = 0; r < nr; r++) {
+      var ry = 22 + r * 22;
+      for (c2 = 0; c2 < SCHEMA.length; c2++) {
+        var cx = x0 + c2 * cw;
+        var isSel = SCHEMA[c2].on;
+        s += rect(cx + 0.6, ry, cw - 1.2, 18, isSel ? C.a2 : 'rgba(248,81,73,0.20)',
+          ' rx="2" stroke="' + (isSel ? C.a3 : 'rgba(248,81,73,0.45)') + '" stroke-width="0.7"');
+        if (r === 0) s += txt(cx + cw / 2, ry + 12.5, SCHEMA[c2].nm.slice(0, 4), isSel ? '#0c1220' : '#f0b0ac', 7.5, 'middle', '600');
+      }
+      s += txt(x1 + 0, ry + 12.5, '', C.mute, 8);
     }
+    s += txt(x0, 106, 'all ' + SCHEMA.length + ' columns read · ' + fmtB(csvBytes) +
+      ' · no pruning, no statistics to skip on', 'rgba(240,176,172,0.95)', 9, 'start');
+
+    /* columnar: 12 stripes x 8 row groups */
+    s += txt(x0, 136, 'COLUMNAR  ·  ticks.parquet', C.ok, 10, 'start', '700');
+    s += txt(x1, 136, push ? 'reads selected stripes × matching row groups' : 'reads selected stripes, all row groups',
+      C.mute, 8.5, 'end');
+    var gy = 144, gh = 62, gStep = gh / GROUPS;
+    for (c2 = 0; c2 < SCHEMA.length; c2++) {
+      var sx = x0 + c2 * cw;
+      for (r = 0; r < GROUPS; r++) {
+        var hit = SCHEMA[c2].on && (!push || r === 2);
+        s += rect(sx + 0.6, gy + r * gStep, cw - 1.2, gStep - 0.6,
+          hit ? C.ok : C.p2, ' opacity="' + (hit ? 0.88 : 1) + '" stroke="' + C.line + '" stroke-width="0.4"');
+      }
+      s += rect(sx + 0.6, gy, cw - 1.2, gh, 'none',
+        ' stroke="' + (SCHEMA[c2].on ? C.ok : C.line2) + '" stroke-width="0.9" rx="2"');
+      s += txt(sx + cw / 2, gy + gh + 11, SCHEMA[c2].nm.slice(0, 4), SCHEMA[c2].on ? C.ok : C.mute, 7.5, 'middle',
+        SCHEMA[c2].on ? '700' : '400');
+    }
+    if (push) {
+      s += txt(x0 - 4, gy + 2 * gStep + gStep / 2 + 3, '', C.a3, 8, 'end');
+      s += txt(x1, gy + gh + 11, 'row group 3 of ' + GROUPS + ' matches symbol=\'AAPL\'', C.a3, 8.5, 'end');
+    }
+    s += txt(x0, 228, sel.length + ' of ' + SCHEMA.length + ' columns × ' +
+      (push ? MATCH + ' of ' + GROUPS + ' row groups' : 'all row groups') + ' · ' + fmtB(pqBytes) +
+      ' after zstd', 'rgba(167,223,178,0.95)', 9, 'start');
+    svg.innerHTML = s;
+
+    /* ── stats ── */
+    document.getElementById('cs-s-csv').textContent = fmtB(csvBytes);
+    document.getElementById('cs-s-pq').textContent = fmtB(pqBytes);
+    var elPct = document.getElementById('cs-s-pct');
+    elPct.textContent = pct < 0.05 ? '<0.1%' : pct.toFixed(pct < 10 ? 1 : 0) + '%';
+    elPct.className = 'v ' + (pct < 12 ? 'ok' : (pct < 50 ? 'warn' : 'bad'));
+    document.getElementById('cs-s-tcsv').textContent = fmtS(csvBytes / BW);
+    document.getElementById('cs-s-tpq').textContent = fmtS(pqBytes / BW);
+    var sp = pqBytes > 0 ? csvBytes / pqBytes : 0;
+    var elSp = document.getElementById('cs-s-sp');
+    elSp.textContent = sel.length === 0 ? '—' : sp.toFixed(0) + '×';
+    elSp.className = 'v ' + (sp > 20 ? 'ok' : (sp > 4 ? 'warn' : 'bad'));
+
+    /* ── verdict ── */
+    var cls, msg;
+    if (sel.length === 0) {
+      cls = '';
+      msg = 'Select at least one column. <code>SELECT</code> nothing and you read nothing &mdash; which is fast, ' +
+        'but rarely useful.';
+    } else if (sel.length === SCHEMA.length) {
+      cls = 'mid';
+      msg = '<b><code>SELECT *</code> throws away most of the advantage.</b> Columnar storage still wins on ' +
+        'compression and typing (' + fmtB(pqFull) + ' versus ' + fmtB(csvBytes) +
+        '), but you have given up column pruning entirely. Naming your columns is the cheapest optimisation ' +
+        'in the whole pipeline.';
+    } else if (sp > 20) {
+      cls = 'cool';
+      msg = '<b>' + sp.toFixed(0) + '&times; less I/O.</b> ' + sel.length + ' of ' + SCHEMA.length +
+        ' columns' + (push ? ' intersected with ' + MATCH + ' of ' + GROUPS + ' row groups' : '') +
+        ' means ' + fmtB(pqBytes) + ' instead of ' + fmtB(csvBytes) + ' &mdash; ' +
+        fmtS(pqBytes / BW) + ' instead of ' + fmtS(csvBytes / BW) +
+        '. Run this in a sweep of 500 configurations and it is the difference between a day and a lunch break.';
+    } else {
+      cls = 'cool';
+      msg = '<b>' + sp.toFixed(0) + '&times; less I/O</b> reading ' + fmtB(pqBytes) + ' instead of ' +
+        fmtB(csvBytes) + '. Drop a column you do not need, or turn pushdown on, and watch it fall further.';
+    }
+    warn.className = 'warnbar ' + cls;
+    warn.innerHTML = msg;
   }
 
-  function init() {
-    if (!A.$('w7-lc')) return;
-    A.$('w7-age').addEventListener('input', function () { age = +this.value; render(); });
-    render();
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  draw();
 })();
 
-/* ══════════════════════════════════════════════════════════════
-   WEEK 7 · Widget 5 — does the edge survive the costs?
-   ══════════════════════════════════════════════════════════════ */
+
+/* ══ CHECK YOURSELF · three questions ═════════════════════════════ */
 (function () {
-  'use strict';
-  var A = window.ARENA, C = A.C;
-  var p = 0.53, payoff = 1.0, T = 60, cost = 3.0, L = 10;
-
-  function metrics() {
-    var W = L * payoff;
-    var edge = p * W - (1 - p) * L;
-    var win = W - cost, loss = -L - cost;
-    var m = p * win + (1 - p) * loss;
-    var vr = p * (win - m) * (win - m) + (1 - p) * (loss - m) * (loss - m);
-    var sd = Math.sqrt(vr);
-    return { W: W, edge: edge, m: m, sd: sd, net: T * m, drag: T * cost,
-      shp: sd > 0 ? m / sd * Math.sqrt(T) : 0, base: 30 * (2.0 - cost) };
-  }
-
-  function draw(mt) {
-    var svg = A.$('w7-eq'); A.clear(svg);
-    var r = A.rng(31337), gross = [0], net = [0], i, o;
-    for (i = 1; i <= T; i++) {
-      o = r() < p ? mt.W : -L;
-      gross.push(gross[i - 1] + o);
-      net.push(net[i - 1] + o - cost);
-    }
-    var mn = 0, mx = 0;
-    for (i = 0; i <= T; i++) {
-      mn = Math.min(mn, net[i], gross[i]); mx = Math.max(mx, net[i], gross[i]);
-    }
-    mn = Math.min(mn, mt.base); mx = Math.max(mx, mt.base);
-    var padv = Math.max(8, (mx - mn) * 0.14); mn -= padv; mx += padv;
-    var x0 = 52, x1 = 700, y0 = 20, y1 = 214;
-    var X = function (i) { return x0 + (x1 - x0) * i / T; };
-    var Y = function (v) { return y1 - (v - mn) / (mx - mn) * (y1 - y0); };
-
-    A.add(svg, 'line', { x1: x0, y1: Y(0), x2: x1, y2: Y(0), stroke: C.border });
-    A.add(svg, 'line', { x1: x0, y1: y0, x2: x0, y2: y1, stroke: C.border });
-    A.T(svg, x0 - 6, Y(0) + 3, '0', { fill: C.dim, size: 9, anchor: 'end' });
-    A.T(svg, x0 - 6, y0 + 8, (mx).toFixed(0) + ' bp', { fill: C.dim, size: 9, anchor: 'end' });
-    A.T(svg, x0 - 6, y1, (mn).toFixed(0) + ' bp', { fill: C.dim, size: 9, anchor: 'end' });
-
-    A.add(svg, 'line', { x1: x0, y1: Y(0), x2: X(30 > T ? T : 30), y2: Y(mt.base * Math.min(1, T / 30)),
-      stroke: C.muted, 'stroke-width': 1.4, 'stroke-dasharray': '5 4' });
-    A.T(svg, X(Math.min(30, T)) + 6, Y(mt.base * Math.min(1, T / 30)) - 4, 'W6 momentum baseline',
-      { fill: C.muted, size: 9 });
-
-    var pg = [], pn = [];
-    for (i = 0; i <= T; i++) { pg.push([X(i), Y(gross[i])]); pn.push([X(i), Y(net[i])]); }
-    A.path(svg, pg, { stroke: C.sky, 'stroke-width': 1.4, 'stroke-dasharray': '4 3', opacity: 0.9 });
-    A.path(svg, pn, { stroke: net[T] >= 0 ? C.ok : C.bad, 'stroke-width': 2 });
-    A.add(svg, 'circle', { cx: X(T), cy: Y(net[T]), r: 3.4, fill: net[T] >= 0 ? C.ok : C.bad });
-    A.T(svg, x1, Y(gross[T]) - 8, 'gross ' + A.sgn(gross[T], 0) + ' bp', { fill: C.sky, size: 10, anchor: 'end' });
-    A.T(svg, x1, Y(net[T]) + (net[T] >= gross[T] ? -8 : 16), 'net ' + A.sgn(net[T], 0) + ' bp',
-      { fill: net[T] >= 0 ? C.ok : C.bad, size: 10.5, anchor: 'end', weight: 700 });
-    A.T(svg, x0, y1 + 22, 'trade number  →  ' + T + ' trades this session', { fill: C.dim, size: 9.5 });
-    A.T(svg, x1, y1 + 22, 'P&L in basis points of capital', { fill: C.dim, size: 9.5, anchor: 'end' });
-  }
-
-  function render() {
-    A.$('w7-hit-out').textContent = (p * 100).toFixed(1) + '%';
-    A.$('w7-payoff-out').textContent = payoff.toFixed(2);
-    A.$('w7-trades-out').textContent = String(T);
-    A.$('w7-cost-out').textContent = cost.toFixed(1) + ' bp';
-    var mt = metrics();
-    draw(mt);
-    A.$('w7-e-gross').textContent = A.sgn(mt.edge, 2) + ' bp';
-    A.$('w7-e-cost').textContent = '−' + mt.drag.toFixed(0) + ' bp';
-    A.$('w7-e-net').textContent = A.sgn(mt.net, 0) + ' bp';
-    A.$('w7-e-shp').textContent = mt.shp.toFixed(2);
-
-    var v = A.$('w7-e-verdict');
-    if (mt.net <= 0) {
-      v.className = 'verdict bad';
-      v.innerHTML = '<b>Pure alpha in the backtest, pure cost live.</b> The gross curve climbs and the net curve sinks: ' +
-        'a ' + A.sgn(mt.edge, 2) + ' bp edge cannot pay a ' + cost.toFixed(1) + ' bp toll. Either find a bigger edge or trade far less often.';
-    } else if (mt.net < mt.base) {
-      v.className = 'verdict warn';
-      v.innerHTML = '<b>Positive, but beaten by the baseline.</b> ' + A.sgn(mt.net, 0) + ' bp against the W6 momentum ' +
-        'rule\'s ' + mt.base.toFixed(0) + ' bp. A model that does not beat the simple signal out-of-sample has not earned its place in the bot.';
-    } else if (mt.shp < 1) {
-      v.className = 'verdict warn';
-      v.innerHTML = '<b>Profitable, thin.</b> ' + A.sgn(mt.net, 0) + ' bp at a Sharpe-like ' + mt.shp.toFixed(2) +
-        '. The season score divides by volatility, so this ranks below a steadier book with the same P&L. Raise the confidence threshold and cut turnover.';
-    } else {
-      v.className = 'verdict ok';
-      v.innerHTML = '<b>The edge survives.</b> ' + A.sgn(mt.net, 0) + ' bp net at a Sharpe-like ' + mt.shp.toFixed(2) +
-        ', past the ' + mt.base.toFixed(0) + ' bp baseline. Note how quickly this dies if you drag turnover up — the toll is per trade, the edge is not.';
-    }
-  }
-
-  function init() {
-    if (!A.$('w7-eq')) return;
-    A.$('w7-hit').addEventListener('input', function () { p = +this.value / 100; render(); });
-    A.$('w7-payoff').addEventListener('input', function () { payoff = +this.value / 100; render(); });
-    A.$('w7-trades').addEventListener('input', function () { T = +this.value; render(); });
-    A.$('w7-cost').addEventListener('input', function () { cost = +this.value; render(); });
-    render();
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  var qs = document.querySelectorAll('#check .q');
+  Array.prototype.forEach.call(qs, function (q) {
+    var fb = q.querySelector('.fb');
+    var opts = Array.prototype.slice.call(q.querySelectorAll('.opt'));
+    opts.forEach(function (o) {
+      o.addEventListener('click', function () {
+        if (q.dataset.done === '1') return;
+        q.dataset.done = '1';
+        var right = o.dataset.ok === '1';
+        opts.forEach(function (x) {
+          x.classList.add('locked');
+          if (x.dataset.ok === '1') x.classList.add('right');
+        });
+        if (!right) o.classList.add('wrong');
+        fb.className = 'fb show ' + (right ? 'ok' : 'no');
+        fb.innerHTML = '<b>' + (right ? 'Correct.' : 'Not quite.') + '</b> ' + q.dataset.why;
+      });
+    });
+  });
 })();
 </script>
 </body>
