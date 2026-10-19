@@ -306,6 +306,22 @@
   .seg button:focus-visible{outline:2px solid var(--accent-2);outline-offset:-2px}
 
 
+
+  /* Part 1 · live system to backtester */
+  .lbrow{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+  .lbbox{border:1px solid var(--line);border-radius:10px;padding:8px 9px;background:var(--panel2);font-size:12px;line-height:1.35;
+    transition:border-color .25s,background .25s,box-shadow .25s;min-height:96px;position:relative}
+  .lbbox .lr{font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--dim)}
+  .lbbox .ln{font-weight:650;color:var(--ink);margin:3px 0 2px;font-size:12.5px}
+  .lbbox .lt{font-size:10.5px;font-family:var(--mono);color:var(--muted);word-break:break-word}
+  .lbbox.sim{border-color:var(--accent);background:rgba(var(--accent-rgb),.13)}
+  .lbbox.same{border-color:var(--ok)}
+  .lbbox.active{box-shadow:0 0 0 2px var(--warn)}
+  .lbtag{display:block;margin-bottom:3px;font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--accent-2)}
+  .lbbox.same .lbtag{color:var(--ok)}
+  .lbwire td.n{white-space:nowrap}
+  .lbwire tr.lbsw td{background:rgba(var(--accent-rgb),.10)}
+  @media(max-width:900px){.lbrow{grid-template-columns:repeat(2,minmax(0,1fr))}}
   /* narrative layer: acts, bridges */
   .acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-top:20px}
   .act{display:block;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-decoration:none;color:inherit}
@@ -446,6 +462,74 @@
     <div class="st"><div class="sn">5</div><div class="sh">Accounting</div><div class="sd">Cash, positions, fees; mark to the mid every tick.</div></div>
     <div class="st"><div class="sn">6</div><div class="sh">Metrics</div><div class="sd">P&amp;L, drawdown, fills, in-sample vs out-of-sample, a digest of the fills.</div></div>
   </div>
+
+  <h3 style="margin-top:24px">Interactive &#183; turn a live trading system into a backtester</h3>
+  <p class="sub" style="margin-bottom:10px">A backtester is not a different program. It is the live trading system with its
+  <b>plumbing swapped</b>: the strategy and the accounting stay exactly as they are, and everything that touches the outside
+  world (the feed, the clock, the socket to the venue, the venue itself, the dashboard) is replaced by a stand-in that reads a
+  recording. Press <b>Swap next component</b> to replace them one at a time, then <b>Next call</b> to run the backtester one
+  function call at a time on the four-tick tape of the code below.</p>
+  <div class="panel">
+    <div class="row" style="margin-bottom:10px">
+      <span class="sub">1 &middot; convert</span>
+      <button class="btn primary" id="lbSwap" type="button">Swap next component &#8594;</button>
+      <button class="btn" id="lbAll" type="button">Swap all</button>
+      <button class="btn" id="lbBack" type="button">&#8634; Back to live</button>
+      <span class="pill" id="lbMode">live trading system</span>
+    </div>
+    <div class="lbrow" id="lbRow" role="group" aria-label="Components of the system"></div>
+    <div class="tablewrap" style="margin-top:12px"><table class="t lbwire" id="lbWire">
+      <thead><tr><th>component</th><th>live system wiring</th><th>backtester wiring</th></tr></thead><tbody></tbody></table></div>
+    <p class="sub" id="lbSay" style="margin-top:8px;min-height:40px"></p>
+
+    <div class="row" style="margin:14px 0 8px">
+      <span class="sub">2 &middot; run</span>
+      <button class="btn primary" id="lbNext" type="button">Next call &#8594;</button>
+      <button class="btn" id="lbTick" type="button">Run tick</button>
+      <button class="btn" id="lbRun" type="button">Run all</button>
+      <button class="btn" id="lbReset" type="button">&#8634; Reset run</button>
+      <span class="pill" id="lbWhere">tick 1 of 4, call 1 of 7</span>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="sl">Tick</div><div class="sv" id="lbT">&#8212;</div></div>
+      <div class="stat"><div class="sl">Bid / ask</div><div class="sv" id="lbBA">&#8212;</div></div>
+      <div class="stat"><div class="sl">Cash</div><div class="sv" id="lbCash">10,000.00</div></div>
+      <div class="stat"><div class="sl">Position</div><div class="sv" id="lbPos">0</div></div>
+      <div class="stat"><div class="sl">Pending order</div><div class="sv" id="lbPend">none</div></div>
+      <div class="stat"><div class="sl">Equity</div><div class="sv acc" id="lbEq">&#8212;</div></div>
+    </div>
+    <div class="lab" style="margin-top:12px">Calls, in order (same seven every tick)</div>
+    <div class="evlog" id="lbLog" aria-live="polite"></div>
+    <p class="sub" id="lbEnd" style="margin-top:8px;min-height:20px"></p>
+
+    <div class="row" style="margin:14px 0 8px">
+      <span class="sub">3 &middot; repeat it</span>
+      <button class="btn primary" id="lbDetOk" type="button">Run it 6 times</button>
+      <button class="btn" id="lbDetBad" type="button">Run it 6 times with a machine-dependent fill delay</button>
+    </div>
+    <div class="tablewrap"><table class="t" id="lbDet">
+      <thead><tr><th>run</th><th>fill delay</th><th>fills</th><th>P&amp;L</th><th>digest of the fills</th></tr></thead><tbody></tbody></table></div>
+    <p class="sub" id="lbDetMsg" style="margin-top:8px;min-height:40px"></p>
+  </div>
+  <div class="panel" style="margin-top:14px">
+    <h4>A backtest must be deterministic</h4>
+    <p class="sub" style="margin-top:4px">Same tape plus same code must give the same fills and the same P&amp;L, on any machine,
+    on any day, at any replay speed. A backtest that changes when you run it twice is not measuring the strategy; it is measuring the
+    machine. Everything the strategy decides on comes from the tape and the logical clock, and every stand-in is a pure function of them.</p>
+    <ul style="margin:6px 0 0 18px">
+      <li><b>Reproduce a bug.</b> A surprising fill can be replayed until you find the cause.</li>
+      <li><b>Compare two strategies.</b> The difference is the strategy, not the run.</li>
+      <li><b>Search parameters.</b> A thousand runs are only comparable if each is repeatable.</li>
+      <li><b>Test it.</b> Store the fills digest of a known run and fail the build if it changes: the digest in this page is that check.</li>
+    </ul>
+    <p class="sub" style="margin-top:8px">Sources of non-determinism to hunt down: <code>time.time()</code> in a decision (Part 6),
+    unseeded randomness, the iteration order of a set, a thread race, reading files in a different order, a fill delay measured in
+    wall time. Where randomness is wanted (random latency, queue position) the backtester owns the generator and seeds it per run.</p>
+  </div>
+  <div class="note" style="margin-top:14px"><b>The test of a good backtester:</b> the strategy file cannot tell which of the two
+  it is running in. It is handed <code>book</code>, <code>now</code> and <code>portfolio</code>, and it returns orders. Five
+  components were swapped, two did not change, and the same seven calls happen every tick. Everything that follows in this
+  page (the tape, the clock, the fills, the checks) is about making those five stand-ins honest.</div>
 
   <div class="grid2" style="margin-top:18px">
     <div class="panel">
@@ -1641,6 +1725,163 @@ Engine.prototype.exitTick = function () {
   for (var k = 0; k < this.plans.length; k++) if (this.plans[k].exitAt !== undefined) return this.plans[k].exitAt;
   return this.lastExit;
 };
+
+/* ════════════════════════════════════════════════════════════════
+   Part 1 · from a live trading system to a backtester, one call at a time
+   (same four ticks, fee and strategy as the dozen-line snippet: P&L -6.04)
+   ════════════════════════════════════════════════════════════════ */
+(function () {
+  var C = [
+    { id: "feed", role: "where events come from", live: "Exchange feed", lt: "ws.recv()", sim: "Tape reader", st: "tape.next()",
+      lw: "feed = WebSocketFeed(url)", sw: "feed = TapeReader(\"ticks.parquet\")",
+      why: "The feed is the first thing to swap: the tape hands the strategy the same events, at the pace you choose." },
+    { id: "clock", role: "what time it is", live: "Wall clock", lt: "time.time()", sim: "Logical clock", st: "now = t",
+      lw: "clock = WallClock()", sw: "clock = LogicalClock()",
+      why: "Time is the second swap. The strategy is told the time; it never asks the machine (Part 6)." },
+    { id: "strat", role: "decides", live: "Your strategy", lt: "on_tick(now, book, pf)", sim: "Your strategy", st: "on_tick(now, book, pf)", same: true,
+      lw: "strategy = Strategy()", sw: "strategy = Strategy()          # unchanged",
+      why: "The strategy does not change. That is the point of the exercise." },
+    { id: "gw", role: "where orders go", live: "Socket to the venue", lt: "ws.send(orders)", sim: "Simulated gateway", st: "delay(orders, 1 tick)",
+      lw: "gateway = SocketGateway(ws)", sw: "gateway = SimGateway(latency_ticks=1)",
+      why: "An order sent at t reaches the venue during t + 1. Latency becomes a number of ticks." },
+    { id: "venue", role: "who fills you", live: "The real exchange", lt: "(it matches you)", sim: "Fill model", st: "fill(order, book, fee)",
+      lw: "# the venue is the real exchange", sw: "venue = FillModel(fee=0.003)",
+      why: "No one fills you in a replay. The fill model walks the recorded depth and charges the taker fee." },
+    { id: "pf", role: "what you own", live: "Portfolio", lt: "apply(fills)", sim: "Portfolio", st: "apply(fills)", same: true,
+      lw: "portfolio = Portfolio(cash)", sw: "portfolio = Portfolio(cash)    # unchanged",
+      why: "Accounting is the same arithmetic live or simulated: cash and position move with the fills." },
+    { id: "mon", role: "how you judge it", live: "Live dashboard", lt: "dashboard.show(pf)", sim: "Metrics", st: "mark(pf, mid)",
+      lw: "monitor = Dashboard()", sw: "monitor = Metrics()",
+      why: "Instead of watching a screen, you keep the equity curve and compute P&L, drawdown and a digest at the end." }
+  ];
+  var ORDER = ["feed", "clock", "gw", "venue", "mon"];            /* swap order; strat and pf never change */
+  var k = 0;
+  var row = $("lbRow"), wire = $("lbWire").querySelector("tbody");
+  function isSim(c) { return !c.same && ORDER.indexOf(c.id) < k; }
+  function renderMap() {
+    var h = "", w = "";
+    C.forEach(function (c) {
+      var sim = isSim(c), cls = "lbbox" + (c.same ? " same" : sim ? " sim" : "");
+      h += "<div class=\"" + cls + "\" id=\"lb-" + c.id + "\"><span class=\"lbtag\">" + (c.same ? "unchanged" : sim ? "stand-in" : "live") + "</span>" +
+        "<div class=\"lr\">" + c.role + "</div><div class=\"ln\">" + (sim ? c.sim : c.live) + "</div><div class=\"lt\">" + esc(sim ? c.st : c.lt) + "</div></div>";
+      w += "<tr" + (sim ? " class=\"lbsw\"" : "") + "><td class=\"n\">" + c.role + "</td><td><code>" + esc(c.lw) + "</code></td><td><code>" + esc(sim || c.same ? c.sw : "— not swapped yet —") + "</code></td></tr>";
+    });
+    row.innerHTML = h; wire.innerHTML = w;
+    $("lbMode").textContent = k === 0 ? "live trading system" : k === ORDER.length ? "backtester" : "half-converted: " + k + " of " + ORDER.length + " swapped";
+    var last = k ? C.filter(function (c) { return c.id === ORDER[k - 1]; })[0] : null;
+    $("lbSay").textContent = last ? "Swapped " + last.live.toLowerCase() + " for " + last.sim.toLowerCase() + ". " + last.why :
+      "This is the live system you would run on Friday: a feed, a clock, your strategy, a socket to the venue, the venue, your portfolio and a dashboard. Five of the seven touch the outside world.";
+    $("lbSwap").disabled = k >= ORDER.length;
+    markActive();
+  }
+  /* the run: same seven calls every tick, values from the dozen-line snippet */
+  var TAPE = [[1, 100.0, 100.2], [2, 100.4, 100.6], [3, 101.0, 101.2], [4, 100.6, 100.8]], FEE = 0.003;
+  var CALLS = [
+    { box: "feed",  live: "book = await ws.recv()",                 sim: "t, bid, ask = tape.next()" },
+    { box: "clock", live: "now = time.time()",                       sim: "now = t" },
+    { box: "venue", live: "# the exchange matches your old order", sim: "fills = fill_model.fill(pending, book, fee)" },
+    { box: "pf",    live: "portfolio.apply(fills)",                  sim: "portfolio.apply(fills)" },
+    { box: "strat", live: "orders = strategy.on_tick(now, book, portfolio)", sim: "orders = strategy.on_tick(now, book, portfolio)" },
+    { box: "gw",    live: "ws.send(orders)",                         sim: "pending = delay(orders, 1 tick)" },
+    { box: "mon",   live: "dashboard.show(portfolio)",               sim: "metrics.mark(portfolio, mid)" }
+  ];
+  var S;
+  function fresh() { S = { i: 0, c: 0, cash: 10000, pos: 0, pending: [], fills: [], orders: [], curve: [], done: false, log: "" }; }
+  function money(x) { return fmt(x, 2); }
+  function markActive() {
+    var ids = C.map(function (c) { return c.id; });
+    ids.forEach(function (id) { var e = $("lb-" + id); if (e) e.classList.remove("active"); });
+    if (S && !S.done) { var e = $("lb-" + CALLS[S.c].box); if (e) e.classList.add("active"); }
+  }
+  function stepCall() {
+    if (S.done) return;
+    var t = TAPE[S.i], tt = t[0], bid = t[1], ask = t[2], mid = (bid + ask) / 2, res, c = S.c;
+    if (c === 0) res = "(" + tt + ", " + bid.toFixed(1) + ", " + ask.toFixed(1) + ")";
+    else if (c === 1) res = "now = " + tt;
+    else if (c === 2) {
+      S.fills = S.pending.map(function (o) { var px = o[0] === "buy" ? ask : bid; return [o[0], o[1], px]; });
+      res = S.fills.length ? S.fills.map(function (f) { return f[0] + " " + f[1] + " @ " + f[2].toFixed(1) + (f[0] === "buy" ? " (lifts the ask)" : " (hits the bid)") + ", fee " + (f[1] * f[2] * FEE).toFixed(2); }).join("; ") : "no order due";
+    } else if (c === 3) {
+      S.fills.forEach(function (f) { var sg = f[0] === "buy" ? 1 : -1; S.cash -= sg * f[1] * f[2] + f[1] * f[2] * FEE; S.pos += sg * f[1]; });
+      res = S.fills.length ? "cash " + money(S.cash) + ", position " + (S.pos > 0 ? "+" : "") + S.pos : "nothing to apply";
+    } else if (c === 4) {
+      S.orders = tt === 1 ? [["buy", 10]] : tt === 3 ? [["sell", 10]] : [];
+      res = S.orders.length ? "[" + S.orders[0][0] + " " + S.orders[0][1] + "]" : "[]";
+    } else if (c === 5) {
+      S.pending = S.orders; res = S.pending.length ? "queued: arrives during t" + (tt + 1) : "nothing to send";
+    } else {
+      var eq = S.cash + S.pos * mid; S.curve.push(eq); res = "equity " + money(eq) + " (mid " + mid.toFixed(1) + ")";
+    }
+    var sim = k === ORDER.length;
+    var line = "<span class=\"tk\">t" + tt + " #" + (c + 1) + "</span> " + (k >= 0 ? "<span class=\"lv-live\">live:</span> <code>" + esc(CALLS[c].live) + "</code> &nbsp;&#8594;&nbsp; <span class=\"lv-sim\">backtest:</span> <code>" + esc(CALLS[c].sim) + "</code> &nbsp;=&nbsp; <b>" + esc(res) + "</b>" : "");
+    $("lbLog").insertAdjacentHTML("beforeend", "<div class=\"ev\">" + line + "</div>");
+    $("lbLog").scrollTop = $("lbLog").scrollHeight;
+    S.c++; if (S.c === CALLS.length) { S.c = 0; S.i++; }
+    if (S.i === TAPE.length) { S.done = true; S.i = TAPE.length - 1; S.c = CALLS.length - 1; finish(); }
+    stats(t);
+  }
+  function finish() {
+    var dd = 0, pk = -1e9; S.curve.forEach(function (e) { if (e > pk) pk = e; if (pk - e > dd) dd = pk - e; });
+    $("lbEnd").innerHTML = "<b>metrics.report()</b> &rarr; P&amp;L " + sgn(S.curve[S.curve.length - 1] - 10000, 2) + ", max drawdown " + money(dd) +
+      ", ticks " + S.curve.length + ". The same numbers as the dozen-line snippet below, because it is the same loop with the stages named.";
+    markActive();
+  }
+  function stats(t) {
+    var tt = S.done ? TAPE.length : S.i + 1;
+    var cur = TAPE[Math.min(S.done ? TAPE.length - 1 : S.i, TAPE.length - 1)];
+    $("lbT").textContent = "t" + cur[0]; $("lbBA").textContent = cur[1].toFixed(1) + " / " + cur[2].toFixed(1);
+    $("lbCash").textContent = money(S.cash); $("lbPos").textContent = (S.pos > 0 ? "+" : "") + S.pos;
+    $("lbPend").textContent = S.pending.length ? S.pending[0][0] + " " + S.pending[0][1] : "none";
+    $("lbEq").textContent = S.curve.length ? money(S.curve[S.curve.length - 1]) : "—";
+    $("lbWhere").textContent = S.done ? "run finished" : "tick " + (S.i + 1) + " of 4, call " + (S.c + 1) + " of 7";
+    $("lbNext").disabled = S.done; $("lbTick").disabled = S.done; $("lbRun").disabled = S.done;
+    markActive();
+  }
+  function reset() { fresh(); $("lbLog").innerHTML = ""; $("lbEnd").textContent = ""; stats(); }
+  $("lbSwap").addEventListener("click", function () { if (k < ORDER.length) { k++; renderMap(); } });
+  $("lbAll").addEventListener("click", function () { k = ORDER.length; renderMap(); });
+  $("lbBack").addEventListener("click", function () { k = 0; renderMap(); });
+  $("lbNext").addEventListener("click", stepCall);
+  $("lbTick").addEventListener("click", function () { var i0 = S.i; do { stepCall(); } while (!S.done && S.i === i0); });
+  $("lbRun").addEventListener("click", function () { while (!S.done) stepCall(); });
+  $("lbReset").addEventListener("click", reset);
+  /* determinism: run the whole backtest as a pure function, several times */
+  function fnv(str) { var h = 0x811c9dc5; for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return ("00000000" + h.toString(16)).slice(-8); }
+  function backtest(latFn) {
+    var cash = 10000, pos = 0, pend = [], fills = [], last = 0, lats = [];
+    TAPE.forEach(function (tk) {
+      var t = tk[0], bid = tk[1], ask = tk[2], mid = (bid + ask) / 2, still = [];
+      pend.forEach(function (o) {
+        if (o.due <= t) { var px = o.side === "buy" ? ask : bid, sg = o.side === "buy" ? 1 : -1; cash -= sg * o.q * px + o.q * px * FEE; pos += sg * o.q; fills.push(o.side + o.q + "@" + px.toFixed(1) + "t" + t); }
+        else still.push(o);
+      });
+      pend = still;
+      var ord = t === 1 ? ["buy", 10] : t === 3 ? ["sell", 10] : null;
+      if (ord) { var lat = latFn(); lats.push(lat); pend.push({ side: ord[0], q: ord[1], due: t + lat }); }
+      last = cash + pos * mid;
+    });
+    return { pnl: last - 10000, fills: fills, lats: lats, digest: fnv(fills.join("|")) };
+  }
+  function detRun(random) {
+    var rows = "", seen = {};
+    for (var r = 1; r <= 6; r++) {
+      var res = backtest(random ? function () { return Math.random() < 0.5 ? 1 : 2; } : function () { return 1; });
+      seen[res.digest + "|" + res.pnl.toFixed(2)] = 1;
+      rows += "<tr><td class=\"n\">" + r + "</td><td>" + res.lats.join(", ") + " tick" + (res.lats.length > 1 ? "s" : "") + "</td><td>" + res.fills.length + "</td><td>" + sgn(res.pnl, 2) + "</td><td><code>" + res.digest + "</code></td></tr>";
+    }
+    $("lbDet").querySelector("tbody").innerHTML = rows;
+    var n = Object.keys(seen).length;
+    $("lbDetMsg").textContent = random ?
+      "Here the fill delay is measured on the machine (1 or 2 ticks, as a loaded laptop might deliver it): " + n + " different result" + (n > 1 ? "s" : "") + " in six runs of the same tape and the same strategy. Press it again and the numbers change. That backtest cannot be debugged, compared or tested." :
+      "Six runs, " + (n === 1 ? "one P&L and one digest" : n + " results") + ". Same tape, same code, same fills. This is what determinism looks like: you can run it a thousand times and the number does not move.";
+  }
+  $("lbDetOk").addEventListener("click", function () { detRun(false); });
+  $("lbDetBad").addEventListener("click", function () { detRun(true); });
+  fresh(); renderMap(); stats();
+  window.__w4 = window.__w4 || {};
+  window.__w4.det = function (rand) { return backtest(rand ? function () { return Math.random() < 0.5 ? 1 : 2; } : function () { return 1; }); };
+  window.__w4.lb = function () { var save = S; fresh(); var n = 0; while (!S.done && n < 100) { stepCall(); n++; } var r = { calls: n, pnl: S.curve[S.curve.length - 1] - 10000, curve: S.curve.slice() }; S = save; $("lbLog").innerHTML = ""; $("lbEnd").textContent = ""; reset(); return r; };
+})();
 
 /* ════════════════════════════════════════════════════════════════
    Part 1 · the backtest stepper
