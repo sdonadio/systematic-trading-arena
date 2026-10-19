@@ -305,6 +305,18 @@
   .seg button[aria-pressed="true"]{background:rgba(var(--accent-rgb),.35);color:#fff}
   .seg button:focus-visible{outline:2px solid var(--accent-2);outline-offset:-2px}
 
+  /* Part 8 · mistakes lab */
+  .tgls{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px;margin-bottom:12px}
+  .tgl{display:flex;gap:9px;align-items:flex-start;background:var(--panel2);border:1px solid var(--line);border-radius:9px;
+    padding:9px 11px;cursor:pointer;font-size:13px;line-height:1.35}
+  .tgl input{margin-top:3px;accent-color:var(--bad);flex:none}
+  .tgl b{display:block;font-size:12.5px;color:var(--ink)}
+  .tgl span span{color:var(--muted);font-size:12px}
+  .tgl:has(input:checked){border-color:var(--bad);background:rgba(248,81,73,.08)}
+  .tgl:focus-within{outline:2px solid var(--accent-2);outline-offset:1px}
+  .mkt td,.mkt th{vertical-align:top}
+  .mkt td.n{white-space:nowrap}
+
   /* checklist */
   .ck{display:grid;gap:8px}
   .ck label{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:10px;align-items:start;background:var(--panel);
@@ -380,7 +392,7 @@
   </ul>
   <div class="row" style="margin-top:22px">
     <span class="pill acc">Every number from the Session 2 tape &#183; Fri Oct 9 &#183; 264,960,858 bytes</span>
-    <span class="pill">7 parts &#183; 7 interactive widgets</span>
+    <span class="pill">8 parts &#183; 8 interactive widgets</span>
     <span class="pill">Checklist, desk notes and interview questions at the end</span>
   </div>
   <nav class="toc" aria-label="On this page">
@@ -391,6 +403,7 @@
     <a href="#parquet"><b>5</b>Parquet</a>
     <a href="#clocks"><b>6</b>Logical vs real time</a>
     <a href="#backtester"><b>7</b>The backtester</a>
+    <a href="#mistakes"><b>8</b>What flatters a backtest</a>
     <a href="#skills"><b>&#10003;</b>Checklist</a>
     <a href="#desk"><b>$</b>On a trading desk</a>
     <a href="#interview"><b>?</b>Interview</a>
@@ -1115,6 +1128,91 @@ FIX  sig[t-1] * ret[t]  Sharpe -0.19</pre>
   <pre class="code" data-lang="sh">grep -nE 'time\.time|monotonic|datetime\.now' team/*.py      # or wherever your bot lives</pre>
   <p class="sub">Every hit inside a decision path (entry, exit, cooldown, "once a minute") is a backtest that depends on your
   CPU. Hits at the edges (socket timeouts, reconnect backoff, heartbeats, log lines, pacing a replay) are fine.</p>
+</section>
+
+<!-- ══════════════ PART 8 · WHAT FLATTERS A BACKTEST ══════════════ -->
+<section id="mistakes">
+  <div class="kicker">Part 8</div>
+  <h2><span class="secnum">8</span>Six ways a backtest flatters you, and how to avoid each one</h2>
+  <p class="lead">None of these is an arithmetic error. Each one produces a curve that is internally consistent, plausible
+  and wrong. The lab below runs one deliberately boring strategy on 40 simulated stocks that have <b>no edge at all</b>
+  (random walks, zero drift). The honest answer is therefore &ldquo;it loses about what it pays in costs&rdquo;. Switch the
+  mistakes on one at a time and watch the curve become something you would be proud to show.</p>
+
+  <h3 style="margin-top:20px">Interactive &#183; switch the mistakes on</h3>
+  <p class="sub" style="margin-bottom:10px">Rule: hold a stock while its price is above its 40-bar moving average, otherwise
+  hold cash; equal weight across names; 750 bars; one fixed seed, so everyone sees the same market. The green line is the
+  honest backtest. The red line is what you report with the mistakes you switched on; look-ahead is so large that it flattens the honest line against the zero axis, which is the point: it makes everything else look like noise. The dashed line at bar 375 splits the
+  sample into the half you may tune on and the half you must not touch.</p>
+  <div class="panel">
+    <div class="tgls" role="group" aria-label="Mistakes to switch on">
+      <label class="tgl"><input type="checkbox" id="mkLa" /><span><b>1 &middot; Look-ahead</b><span>Trade on today&#8217;s close with a signal that already contains it (no <code>shift(1)</code>).</span></span></label>
+      <label class="tgl"><input type="checkbox" id="mkCo" /><span><b>2 &middot; Free trading</b><span>Fill at the price you saw, with no spread, fee or impact.</span></span></label>
+      <label class="tgl"><input type="checkbox" id="mkSu" /><span><b>3 &middot; Survivorship</b><span>Test only the names that are still listed today; delisted losers are not in the data.</span></span></label>
+      <label class="tgl"><input type="checkbox" id="mkTu" /><span><b>4 &middot; Tune and test on the same data</b><span>Try 40 lookbacks, keep the best one on the first half, and look at the curve.</span></span></label>
+      <label class="tgl"><input type="checkbox" id="mkCh" /><span><b>5 &middot; Cherry-pick the window</b><span>Report the best 250 bars as &ldquo;the backtest&rdquo;.</span></span></label>
+    </div>
+    <div class="grid2">
+      <div class="ctl"><label for="mkC">Honest cost per position change <b id="mkCV">10 bp</b></label><input type="range" id="mkC" min="0" max="30" step="1" value="10" /></div>
+      <div class="ctl" style="align-content:end;justify-items:start"><button type="button" id="mkReset" style="border:1px solid var(--line);background:var(--panel2);color:var(--muted);font-family:var(--mono);font-size:11.5px;padding:7px 12px;border-radius:8px;cursor:pointer">clear all mistakes</button></div>
+    </div>
+    <div class="row" style="gap:16px;margin-bottom:6px;font-size:12px"><span style="color:#3fb950">&#9632; honest backtest</span><span id="mkLeg" style="color:#f85149;visibility:hidden">&#9632; what you would report</span><span style="color:var(--muted)">&#9474; dashed line: tune on the left, never touch the right</span></div>
+    <div class="svgwrap"><svg id="mkSvg" viewBox="0 0 640 240" role="img" aria-label="Cumulative return of the honest backtest and of the backtest with the selected mistakes"></svg></div>
+    <div class="stats" style="margin-top:12px">
+      <div class="stat"><div class="sl">Reported return</div><div class="sv" id="mkTot">&#8212;</div></div>
+      <div class="stat"><div class="sl">Honest return</div><div class="sv" id="mkHon">&#8212;</div></div>
+      <div class="stat"><div class="sl">Sharpe (reported)</div><div class="sv" id="mkSh">&#8212;</div></div>
+      <div class="stat"><div class="sl">Max drawdown</div><div class="sv" id="mkDD">&#8212;</div></div>
+      <div class="stat"><div class="sl">First half (tuned)</div><div class="sv" id="mkIS">&#8212;</div></div>
+      <div class="stat"><div class="sl">Second half (untouched)</div><div class="sv" id="mkOOS">&#8212;</div></div>
+    </div>
+    <p class="sub" id="mkMsg" style="margin-top:8px;min-height:44px"></p>
+    <h4 style="margin-top:14px">Each mistake on its own</h4>
+    <div class="tablewrap"><table class="t mkt" id="mkTab">
+      <thead><tr><th>switched on alone</th><th>reported return</th><th>vs honest</th><th>Sharpe</th><th>second half</th></tr></thead>
+      <tbody></tbody></table></div>
+    <p class="sub" style="margin-top:6px">Returns are the sum of the average daily return across names, in percent of capital.
+    The market is simulated, so the numbers are a demonstration of the mechanism, not an estimate of anything real.</p>
+  </div>
+
+  <h3 style="margin-top:28px">The list, and what to do about each one</h3>
+  <div class="tablewrap"><table class="t mkt">
+    <thead><tr><th>mistake</th><th>what it looks like</th><th>why it happens</th><th>how to avoid it</th></tr></thead>
+    <tbody>
+      <tr><td class="n">1 &middot; Look-ahead bias</td><td>A Sharpe far too good for a simple rule (2 to 5 on one instrument, much higher on a diversified book); the curve is smooth and the drawdowns are tiny.</td>
+        <td>A decision at time <code>t</code> uses data stamped after <code>t</code>: today&#8217;s close, a revised figure, tomorrow&#8217;s open, today&#8217;s index membership.</td>
+        <td>Lag every feature by one bar (<code>shift(1)</code>). Prefer an event-driven loop that only hands the strategy the market as of <code>now</code>. For each input name the moment it became knowable. Test: delay the signal one more bar; a real edge degrades a little, a leak collapses.</td></tr>
+      <tr><td class="n">2 &middot; Free trading</td><td>Edge exists but disappears live; the more trades, the bigger the gap.</td>
+        <td>Fills at the last price ignore the spread, the fee, the queue and the depth; every round trip pays them twice.</td>
+        <td>A buy lifts the ask, a sell hits the bid, a large order walks the book. Charge the venue&#8217;s fees. Report net, plus turnover, and re-run at double the cost: if the edge dies, it was never there.</td></tr>
+      <tr><td class="n">3 &middot; Survivorship bias</td><td>&ldquo;Buy the dip&rdquo; works on every stock, forever.</td>
+        <td>The names that went bankrupt, were delisted or acquired are missing from the data you loaded.</td>
+        <td>Use a dataset with dead tickers, each present only for the dates it traded, and with the delisting return included. Build the universe as it was known on each date.</td></tr>
+      <tr><td class="n">4 &middot; Tuning and testing on the same data</td><td>A large gap between the first (tuned) half and the second half; the best parameter moves when you shift the window.</td>
+        <td>With 40 settings you keep the luckiest draw, which fits the noise of that sample.</td>
+        <td>Few parameters with an economic reason. Choose on an earlier period, then test once on a later one you never looked at; roll it forward (walk-forward). Count every variant you tried and raise the bar accordingly.</td></tr>
+      <tr><td class="n">5 &middot; Cherry-picked window</td><td>One impressive stretch presented as the whole story.</td>
+        <td>Any strategy has a best quarter; choosing the dates after seeing the result is selection bias.</td>
+        <td>Fix the period, the symbols and the metrics before you run. Report the whole sample and the worst stretch, not the best.</td></tr>
+      <tr><td class="n">6 &middot; One regime, one path</td><td>Great average, awful in one year; works only in one volatility regime.</td>
+        <td>Markets change; a long average hides that the edge lived in one window. One historical path is one draw.</td>
+        <td>Break the P&amp;L down by period and by regime; add a stress period; size for a regime you have not seen. (Not in the lab above: it needs real history.)</td></tr>
+    </tbody></table></div>
+
+  <div class="panel" style="margin-top:14px">
+    <h4>Before you believe a curve</h4>
+    <ul style="margin:6px 0 0 18px">
+      <li>Can I name the moment each input became knowable? (look-ahead)</li>
+      <li>Is the P&amp;L net of fees, spread and depth, and does it survive twice the cost? (free trading)</li>
+      <li>Is every name that existed on that date in the data, including the ones that died? (survivorship)</li>
+      <li>Did I choose the parameters on data I then tested on, and how many did I try? (tuning)</li>
+      <li>Did I choose the dates before seeing the result, and do I show the worst stretch? (cherry-picking, regimes)</li>
+      <li>Would a baseline (hold, do nothing) do about as well? A result is only meaningful next to its baselines.</li>
+    </ul>
+    <p class="sub" style="margin-top:8px">The arena&#8217;s event-driven backtester removes the first one by construction (the strategy is handed the
+    market as of <code>t</code>, and the lab has to plant the bug), charges the recorded depth plus the 0.30 % fee for the second, and keeps the
+    in-sample/out-of-sample split from Part 7 for the fourth. The other three are still on you.</p>
+  </div>
 </section>
 
 <!-- ══════════════ CHECKLIST ══════════════ -->
@@ -1952,6 +2050,140 @@ Engine.prototype.exitTick = function () {
   render();
   window.__w4 = window.__w4 || {};
   window.__w4.la = function (Lb) { var S = series(Lb, 0); return { bug: st(S.bug), fix: st(S.fix), hold: st(S.hold) }; };
+})();
+
+/* ════════════════════════════════════════════════════════════════
+   Part 8 · mistakes lab: 40 simulated zero-drift stocks, 750 bars
+   ════════════════════════════════════════════════════════════════ */
+(function () {
+  var N = 40, TT = 750, VOL = 0.02, SPLIT = 375, THR = 0.45, WIN = 250, L0 = 40;
+  function rngf(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  var rnd = rngf(20261023);
+  function gauss() { var u = 1 - rnd(), v = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+  var P = [], R = [], PS = [], DIE = [], i, t;
+  for (i = 0; i < N; i++) {
+    var p = [100], r = [0], die = -1;
+    for (t = 1; t < TT; t++) {
+      var rr = VOL * gauss() - VOL * VOL / 2;           /* zero expected drift in price */
+      var q = p[t - 1] * (1 + rr); p.push(q); r.push(q / p[t - 1] - 1);
+      if (die < 0 && q < THR * 100) die = t;             /* delisted when it falls below 45 % of its start */
+    }
+    var ps = [0]; for (t = 0; t < TT; t++) ps.push(ps[t] + p[t]);
+    P.push(p); R.push(r); PS.push(ps); DIE.push(die);
+  }
+  var dead = DIE.filter(function (d) { return d >= 0; }).length;
+  var sigCache = {};
+  function sig(i, L) {
+    var k = i * 1000 + L; if (sigCache[k]) return sigCache[k];
+    var s = new Uint8Array(TT);
+    for (var t = L - 1; t < TT; t++) s[t] = P[i][t] * L > PS[i][t + 1] - PS[i][t + 1 - L] ? 1 : 0;
+    return sigCache[k] = s;
+  }
+  function series(L, lag, cost, surv) {
+    var acc = new Array(TT).fill(0), cnt = 0;
+    for (var i = 0; i < N; i++) {
+      if (surv && DIE[i] >= 0) continue;
+      cnt++;
+      var sg = sig(i, L), end = DIE[i] >= 0 ? DIE[i] : TT - 1, prev = 0, r = R[i];
+      for (var t = 1; t <= end; t++) {
+        var s = t - lag >= L - 1 ? sg[t - lag] : 0;
+        acc[t] += s * r[t] - Math.abs(s - prev) * cost / 1e4; prev = s;
+      }
+    }
+    for (var t2 = 0; t2 < TT; t2++) acc[t2] /= cnt;
+    return acc;
+  }
+  function sum(a, lo, hi) { var c = 0; for (var t = lo; t < hi; t++) c += a[t]; return c; }
+  function bestL(lag, cost, surv) {
+    var best = 5, bv = -1e9;
+    for (var L = 5; L <= 200; L += 5) { var v = sum(series(L, lag, cost, surv), 1, SPLIT); if (v > bv) { bv = v; best = L; } }
+    return best;
+  }
+  function stats(a, lo, hi) {
+    var m = 0, v = 0, n = hi - lo, c = 0, pk = 0, dd = 0, t;
+    for (t = lo; t < hi; t++) m += a[t]; m /= n;
+    for (t = lo; t < hi; t++) { v += (a[t] - m) * (a[t] - m); c += a[t]; if (c > pk) pk = c; if (pk - c > dd) dd = pk - c; }
+    v /= (n - 1);
+    return { tot: c * 100, sh: v > 0 ? m / Math.sqrt(v) * Math.sqrt(252) : 0, dd: dd * 100 };
+  }
+  function bestWindow(a) {
+    var best = 1, bv = -1e9;
+    for (var s0 = 1; s0 + WIN <= TT; s0 += 5) { var v = sum(a, s0, s0 + WIN); if (v > bv) { bv = v; best = s0; } }
+    return best;
+  }
+  function run(f, cost) {            /* f: {la, nc, su, tu, ch}; returns the reported series and numbers */
+    var c = f.nc ? 0 : cost, lag = f.la ? 0 : 1, L = f.tu ? bestL(lag, c, f.su) : L0;
+    var a = series(L, lag, c, f.su), w0 = f.ch ? bestWindow(a) : 1, w1 = f.ch ? w0 + WIN : TT;
+    var st = stats(a, w0, w1);
+    return { a: a, L: L, w0: w0, w1: w1, tot: st.tot, sh: st.sh, dd: st.dd,
+             is: sum(a, 1, SPLIT) * 100, oos: sum(a, SPLIT, TT) * 100 };
+  }
+  var NAMES = [["la", "1 · look-ahead"], ["nc", "2 · free trading"], ["su", "3 · survivorship"], ["tu", "4 · tune and test on the same data"], ["ch", "5 · cherry-picked window"]];
+  var tabCache = {};
+  function table(cost, hon) {
+    if (tabCache[cost]) return tabCache[cost];
+    var rows = NAMES.map(function (n) { var f = {}; f[n[0]] = true; var r = run(f, cost); return { name: n[1], r: r }; });
+    var all = run({ la: 1, nc: 1, su: 1, tu: 1, ch: 1 }, cost);
+    return tabCache[cost] = { rows: rows, all: all };
+  }
+  var svg = $("mkSvg"), W = 640, H = 240, Lm = 48, Rm = 16, TOP = 14, B = 24;
+  function cum(a) { var c = 0; return a.map(function (x) { c += x; return c * 100; }); }
+  function flags() { return { la: $("mkLa").checked, nc: $("mkCo").checked, su: $("mkSu").checked, tu: $("mkTu").checked, ch: $("mkCh").checked }; }
+  function cls(el, v, good) { el.className = "sv " + (v > 0 ? (good ? "ok" : "") : "bad"); }
+  function render() {
+    var cost = +$("mkC").value; $("mkCV").textContent = cost + " bp";
+    var f = flags(), any = f.la || f.nc || f.su || f.tu || f.ch;
+    var hon = run({}, cost), cur = any ? run(f, cost) : hon;
+    var ch = cum(hon.a), cc = cum(cur.a);
+    var all = ch.concat(cc), lo = Math.min(0, Math.min.apply(null, all)), hi = Math.max(0, Math.max.apply(null, all));
+    var pad = (hi - lo) * 0.08 || 1; lo -= pad; hi += pad;
+    function X(t) { return Lm + (W - Lm - Rm) * t / (TT - 1); }
+    function Y(v) { return TOP + (H - TOP - B) * (1 - (v - lo) / (hi - lo)); }
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    for (var g = 0; g <= 4; g++) {
+      var v = lo + (hi - lo) * g / 4;
+      svg.appendChild(mk("line", { x1: Lm, x2: W - Rm, y1: Y(v), y2: Y(v), stroke: "#1e222b" }));
+      svg.appendChild(T(Lm - 5, Y(v) + 3, v.toFixed(0) + "%", 9, "#6f757f", "end"));
+    }
+    svg.appendChild(mk("line", { x1: Lm, x2: W - Rm, y1: Y(0), y2: Y(0), stroke: "#333a47" }));
+    [0, 250, 500, 749].forEach(function (t) { svg.appendChild(T(X(t), H - 7, "bar " + t, 9, "#6f757f", t === 0 ? "start" : t === 749 ? "end" : "middle")); });
+    if (f.ch) svg.appendChild(mk("rect", { x: X(cur.w0), y: TOP, width: X(cur.w1) - X(cur.w0), height: H - TOP - B, fill: "#f85149", opacity: 0.12 }));
+    svg.appendChild(mk("line", { x1: X(SPLIT), x2: X(SPLIT), y1: TOP, y2: H - B, stroke: "#9aa0a6", "stroke-dasharray": "4 3" }));
+    svg.appendChild(T(X(SPLIT) - 4, TOP + 10, "tune here", 9, "#9aa0a6", "end"));
+    svg.appendChild(T(X(SPLIT) + 4, TOP + 10, "never touch", 9, "#9aa0a6"));
+    function line(a, col, w, op) {
+      var d = a.map(function (y, j) { return (j ? "L" : "M") + X(j).toFixed(1) + " " + Y(y).toFixed(1); }).join(" ");
+      svg.appendChild(mk("path", { d: d, fill: "none", stroke: col, "stroke-width": w, opacity: op }));
+    }
+    line(ch, "#3fb950", any ? 1.6 : 2.4, 1);
+    if (any) line(cc, "#f85149", 2.4, 1);
+    $("mkLeg").style.visibility = any ? "visible" : "hidden";
+    $("mkTot").textContent = sgn(cur.tot, 1) + " %"; $("mkTot").className = "sv " + (cur.tot > hon.tot + 5 && any ? "bad" : "");
+    $("mkHon").textContent = sgn(hon.tot, 1) + " %";
+    $("mkSh").textContent = sgn(cur.sh, 2);
+    $("mkDD").textContent = fmt(cur.dd, 1) + " %";
+    $("mkIS").textContent = sgn(cur.is, 1) + " %"; $("mkOOS").textContent = sgn(cur.oos, 1) + " %";
+    $("mkOOS").className = "sv " + (any && cur.oos < cur.is - 10 ? "bad" : "");
+    var on = NAMES.filter(function (n) { return f[n[0]]; }).map(function (n) { return n[1]; });
+    var msg;
+    if (!any) msg = "No mistakes switched on. These stocks have no edge, so the honest result is about minus the cost of trading: " + sgn(hon.tot, 1) + " % over 750 bars at " + cost + " bp per position change, with a Sharpe of " + sgn(hon.sh, 2) + ". This is what the backtest should say.";
+    else msg = "Switched on: " + on.join(", ") + ". Reported " + sgn(cur.tot, 1) + " % (Sharpe " + sgn(cur.sh, 2) + ") against an honest " + sgn(hon.tot, 1) + " %. The market has no edge, so every point above the green line is a mistake in the test, not money." +
+      (f.tu ? " Tuned lookback: " + cur.L + " bars (the honest run uses 40). Compare the two halves: the first was fitted, the second was not." : "") +
+      (f.su ? " " + dead + " of " + N + " names were delisted and are missing from this run." : "");
+    $("mkMsg").textContent = msg;
+    var T8 = table(cost), body = $("mkTab").querySelector("tbody"), h = "";
+    T8.rows.forEach(function (r) {
+      h += "<tr><td class=\"n\">" + esc(r.name) + (r.name.indexOf("tune") > -1 ? " (L=" + r.r.L + ")" : "") + "</td><td>" + sgn(r.r.tot, 1) + " %</td><td>" + sgn(r.r.tot - hon.tot, 1) + " pts</td><td>" + sgn(r.r.sh, 2) + "</td><td>" + sgn(r.r.oos, 1) + " %</td></tr>";
+    });
+    h += "<tr><td class=\"n\"><b>all five together</b></td><td><b>" + sgn(T8.all.tot, 1) + " %</b></td><td><b>" + sgn(T8.all.tot - hon.tot, 1) + " pts</b></td><td><b>" + sgn(T8.all.sh, 2) + "</b></td><td><b>" + sgn(T8.all.oos, 1) + " %</b></td></tr>";
+    body.innerHTML = h;
+  }
+  ["mkLa", "mkCo", "mkSu", "mkTu", "mkCh"].forEach(function (id) { $(id).addEventListener("change", render); });
+  $("mkC").addEventListener("input", render);
+  $("mkReset").addEventListener("click", function () { ["mkLa", "mkCo", "mkSu", "mkTu", "mkCh"].forEach(function (id) { $(id).checked = false; }); render(); });
+  render();
+  window.__w4 = window.__w4 || {};
+  window.__w4.mk = function (f, cost) { var r = run(f || {}, cost === undefined ? 10 : cost); return { tot: r.tot, sh: r.sh, dd: r.dd, is: r.is, oos: r.oos, L: r.L, dead: dead }; };
 })();
 
 /* ════════════════════════════════════════════════════════════════
