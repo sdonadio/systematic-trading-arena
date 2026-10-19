@@ -305,6 +305,18 @@
   .seg button[aria-pressed="true"]{background:rgba(var(--accent-rgb),.35);color:#fff}
   .seg button:focus-visible{outline:2px solid var(--accent-2);outline-offset:-2px}
 
+
+  /* narrative layer: acts, bridges */
+  .acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-top:20px}
+  .act{display:block;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-decoration:none;color:inherit}
+  .act:hover{border-color:var(--accent)}
+  .act .an{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent-2)}
+  .act .aq{font-size:14px;font-weight:650;color:var(--ink);margin:4px 0 4px;line-height:1.3}
+  .act .ad{font-size:12.5px;color:var(--muted);line-height:1.4}
+  .act .ap{font-size:11px;font-family:var(--mono);color:var(--dim);margin-top:6px}
+  .bridge{margin-top:22px;padding:10px 14px;border-left:3px solid var(--accent);background:rgba(var(--accent-rgb),.07);
+    border-radius:0 8px 8px 0;font-size:13.5px;color:var(--muted)}
+  .bridge b{color:var(--ink)}
   /* Part 8 · mistakes lab */
   .tgls{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px;margin-bottom:12px}
   .tgl{display:flex;gap:9px;align-items:flex-start;background:var(--panel2);border:1px solid var(--line);border-radius:9px;
@@ -395,6 +407,12 @@
     <span class="pill">8 parts &#183; 8 interactive widgets</span>
     <span class="pill">Checklist, desk notes and interview questions at the end</span>
   </div>
+  <div class="acts" aria-label="The story of this page in four acts">
+    <a class="act" href="#backtest"><div class="an">Act I &#183; the idea</div><div class="aq">What is a backtest?</div><div class="ad">A replay loop over a recording: data in, orders out, fills and fees, a curve at the end.</div><div class="ap">Part 1</div></a>
+    <a class="act" href="#sql"><div class="an">Act II &#183; the tape</div><div class="aq">Where does the recording live?</div><div class="ad">SQL first, why it runs out, column stores and plain Parquet files: how fast you can read a tape.</div><div class="ap">Parts 2&#8211;5</div></a>
+    <a class="act" href="#clocks"><div class="an">Act III &#183; the clock</div><div class="aq">What time is it inside a replay?</div><div class="ad">Logical vs real time: sleeps, timers and timeouts must run on the tape&#8217;s clock, not the machine&#8217;s.</div><div class="ap">Part 6</div></a>
+    <a class="act" href="#backtester"><div class="an">Act IV &#183; the verdict</div><div class="aq">Can I believe the curve?</div><div class="ad">Run the Parquet backtester, then switch on the mistakes that make a curve lie and learn to avoid them.</div><div class="ap">Parts 7&#8211;8</div></a>
+  </div>
   <nav class="toc" aria-label="On this page">
     <a href="#backtest"><b>1</b>What a backtest is</a>
     <a href="#sql"><b>2</b>SQL storage</a>
@@ -412,7 +430,7 @@
 
 <!-- ══════════════ 1 · WHAT A BACKTEST IS ══════════════ -->
 <section id="backtest">
-  <div class="kicker">Part 1</div>
+  <div class="kicker">Act I &#183; Part 1</div>
   <h2><span class="secnum">1</span>What a backtest is, how it works, what it is for</h2>
   <p class="lead">A backtest answers one question: <em>if this strategy had been running during that recording,
   what would it have done and what would it have earned?</em> It never touches a market. It reads recorded
@@ -519,11 +537,13 @@ print(f&quot;P&amp;L {curve[-1] - 10_000:+.2f}  max drawdown {dd:.2f}  ticks {le
   change (same digest), only the P&amp;L, by the traded notional times the fee. The strategy also has a fee gate:
   it skips an event whose designed edge, (overshoot &#8722; &#189;) &times; 6.2 % = 4.96 %, does not beat two taker
   fees, so it would stand aside only above a 2.48 % fee.</div>
+
+  <p class="bridge"><b>Next, Act II.</b> The loop needs data to read. Where do you keep a day of ticks so that a backtest can read it fast? Start with the tool everyone knows: a SQL database.</p>
 </section>
 
 <!-- ══════════════ 2 · SQL ══════════════ -->
 <section id="sql">
-  <div class="kicker">Part 2</div>
+  <div class="kicker">Act II &#183; Part 2</div>
   <h2><span class="secnum">2</span>A backtest needs data: start with a relational database</h2>
   <p class="lead">The venue's recording is one JSON line per message: book snapshots, trades, acks, cancels,
   rejects, session events, leaderboards, all mixed together in one 265 MB file. To ask it anything you must
@@ -608,11 +628,13 @@ rows:   686</pre>
   AAPL event window at t400 drops from 10.4 ms to 0.02 ms. It does not help "AAPL mid at every tick" (3.7 ms
   without, 4.2 ms with), because that query reads every AAPL row anyway. Compare that question with the JSONL
   (264,960,858 bytes, 2.1&#8211;2.7 s) and, in Part 5, Parquet (6,740,873 bytes, 0.5&#8211;1.5 ms).</div>
+
+  <p class="bridge"><b>Next.</b> SQL worked on a day of data. What happens when you ask it for five years of ticks? Part 3 lists exactly where it runs out.</p>
 </section>
 
 <!-- ══════════════ 3 · WHY SQL IS TOO LIMITED ══════════════ -->
 <section id="sqllimits">
-  <div class="kicker">Part 3</div>
+  <div class="kicker">Act II &#183; Part 3</div>
   <h2><span class="secnum">3</span>Why SQL is too limited for tick data</h2>
   <p class="lead">The index fixed the lookup. It did not fix the shape of the work. A backtest and most research
   queries read <em>a few columns of many rows in time order</em>, and they arrive as a firehose of appends. A
@@ -694,11 +716,13 @@ for row in db.execute(asof):
   reference data, the leaderboard: small, updated row by row, needing transactions. That is OLTP, and Postgres is
   excellent at it. Market-data history is OLAP: append-only, read by column and by time. Different shape, different
   store.</div>
+
+  <p class="bridge"><b>Next.</b> If rows are the problem, store by column. Part 4 shows kdb+/q and its descendants; Part 5 shows the same idea as plain files.</p>
 </section>
 
 <!-- ══════════════ 4 · TIME-SERIES DATABASES ══════════════ -->
 <section id="tsdb">
-  <div class="kicker">Part 4</div>
+  <div class="kicker">Act II &#183; Part 4</div>
   <h2><span class="secnum">4</span>Time-series databases: kdb+/q and its descendants</h2>
   <p class="lead">Banks and trading firms met these limits in the 1990s and answered with a different machine:
   <b>kdb+</b>, a column store with its own language, <b>q</b>. It is still the reference for tick data on most
@@ -814,11 +838,13 @@ pandas == DuckDB: True</pre>
   write down. The lab's <code>book_eot</code> view keeps the last snapshot of each (symbol, tick) by <code>seq</code>,
   and every as-of join on <code>t</code> goes through it, so DuckDB, Polars and pandas return the same numbers. Without
   it, AAPL's up to 17 snapshots inside one tick let each engine pick a different one, silently.</div>
+
+  <p class="bridge"><b>Next.</b> You do not need a server to store by column: Parquet files do it, and the backtester in Part 7 reads them.</p>
 </section>
 
 <!-- ══════════════ 5 · PARQUET ══════════════ -->
 <section id="parquet">
-  <div class="kicker">Part 5</div>
+  <div class="kicker">Act II &#183; Part 5</div>
   <h2><span class="secnum">5</span>A first look at Parquet</h2>
   <p class="lead">Parquet is an open file format that stores a table <b>by column</b>, cut into row groups, with
   statistics in the footer: kdb+'s column idea, in a file. DuckDB queries the files in place, with no load step and
@@ -923,11 +949,13 @@ print(duckdb.sql(q))</pre><pre class="out">┌─────────┬─�
     </div>
   </div>
 
+
+  <p class="bridge"><b>Next, Act III.</b> The tape is stored. Now the replay needs a clock. Is the time the machine reads the same as the time the market lived?</p>
 </section>
 
 <!-- ══════════════ 6 · LOGICAL VS REAL TIME ══════════════ -->
 <section id="clocks">
-  <div class="kicker">Part 6</div>
+  <div class="kicker">Act III &#183; Part 6</div>
   <h2><span class="secnum">6</span>Logical time vs real time</h2>
   <p class="lead">Every line of the tape carries two clocks. <b>Event time</b> is when something happened in the
   market's own order of events. <b>Processing time</b> is when some machine got around to writing it down. Streaming
@@ -1028,11 +1056,98 @@ speed   1: exit on ticks t415, on time.time() t416</pre>
     one run each, Python 3.13, polars 2.0.0. The logical-clock column is identical at every speed; the other one is not,
     and the fastest replay, the one you would run a thousand times in a parameter search, looks best.</p>
   </div>
+
+  <h3 style="margin-top:28px">Timeouts: three seconds of which clock?</h3>
+  <p>The exit timer above is one kind of time-based decision. The most common one in a trading system is the <b>timeout</b>:
+  &ldquo;cancel the order if it has not filled in 3 seconds&rdquo;, &ldquo;re-quote after 500 ms&rdquo;, &ldquo;give up on the
+  request after 2 s&rdquo;. Live, 3 seconds means 3 seconds of market time because the market and the machine share one clock.
+  In a replay they do not. If the timer reads <code>time.time()</code>, a replay at 5&times; makes &ldquo;3 seconds&rdquo; last
+  <b>15 seconds of market time</b>, and at full speed it never fires at all. The backtest then keeps orders alive far longer than
+  the live bot would and books fills the live bot never gets. Run it slower than real time and the opposite happens: orders are
+  cancelled too early. Either way the result depends on the machine.</p>
+  <div class="note"><b>The rule.</b> A timeout inside the decision path is a <em>scheduled event on the logical clock</em>: put
+  &ldquo;fire at <code>now + 3.0</code>&rdquo; in a queue and let the replay loop release it when the tape&#8217;s time passes it.
+  Real timeouts stay real only where a real socket is involved (a connect timeout, a heartbeat).</div>
+  <div class="codehd"><span>Python &#183; runs as shown, output pasted below</span><span>the same 3 s timeout on two clocks</span></div><pre class="code hasout" data-lang="py">import heapq
+class SimClock:
+    &quot;&quot;&quot;Logical time. A timer fires when the clock is advanced past it, never because the machine was slow.&quot;&quot;&quot;
+    def __init__(self):
+        self.now, self._q, self._n = 0.0, [], 0
+    def call_later(self, delay, fn):
+        self._n += 1
+        heapq.heappush(self._q, (self.now + delay, self._n, fn))
+    def advance_to(self, t):                       # called once per tick with the tape's timestamp
+        while self._q and self._q[0][0] &lt;= t:
+            due, _, fn = heapq.heappop(self._q)
+            self.now = due
+            fn()
+        self.now = t
+
+ts = [0.0, 1.0, 2.16, 3.35, 4.48, 5.48, 6.48, 7.58, 8.72, 9.87]
+ts += [10.52, 11.68, 12.8, 13.86, 14.58, 15.78, 16.87, 17.97, 18.56, 19.58]
+FILL = 6                                           # the book becomes marketable at t406
+for speed in (float(&quot;inf&quot;), 5, 1):
+    clock, log, alive = SimClock(), [], [True]
+    def timeout():                                 # &quot;cancel if not filled within 3 s&quot;
+        alive[0] = False; log.append(f&quot;cancelled by timer at t{400 + i}&quot;)
+    clock.call_later(3.0, timeout)
+    for i, sec in enumerate(ts):
+        clock.advance_to(sec)                      # the clock moves with the tape, not with the CPU
+        if i == FILL and alive[0]:
+            log.append(&quot;FILLED at t406&quot;)
+    print(f&quot;speed {speed:&gt;3}: simulated-time timeout -&gt; {log[0]}&quot;)
+def wall_timeout(speed, timeout=3.0):
+    for i, sec in enumerate(ts):
+        if sec / speed + 0.0003 * i &gt;= timeout:    # time.time() - sent &gt;= 3.0
+            return f&quot;cancelled at t{400 + i}&quot;
+        if i == FILL:
+            return &quot;FILLED at t406&quot;
+for speed in (float(&quot;inf&quot;), 5, 1):
+    print(f&quot;speed {speed:&gt;3}: time.time() timeout     -&gt; {wall_timeout(speed)}&quot;)</pre><pre class="out">speed inf: simulated-time timeout -> cancelled by timer at t403
+speed   5: simulated-time timeout -> cancelled by timer at t403
+speed   1: simulated-time timeout -> cancelled by timer at t403
+speed inf: time.time() timeout     -> FILLED at t406
+speed   5: time.time() timeout     -> FILLED at t406
+speed   1: time.time() timeout     -> cancelled at t403</pre>
+  <p class="sub">The order is sent at t400 and the book becomes marketable at t406 (6.48 s into the tape; an illustration on the real tick
+  timestamps). On the simulated clock the timer fires at t403 at every speed and the order is cancelled before it could fill, as it
+  would be live. On <code>time.time()</code>, the fast replays fill it. Try other timeouts and speeds:</p>
+
+  <h3 style="margin-top:20px">Interactive &#183; one timeout, two clocks</h3>
+  <div class="panel">
+    <div class="row" style="margin-bottom:12px">
+      <span class="sub">Replay speed</span>
+      <div class="seg" id="toSpeed" role="group" aria-label="Replay speed"><button type="button" data-v="inf" aria-pressed="false">&#8734;</button><button type="button" data-v="20" aria-pressed="false">20&times;</button><button type="button" data-v="5" aria-pressed="true">5&times;</button><button type="button" data-v="2" aria-pressed="false">2&times;</button><button type="button" data-v="1" aria-pressed="false">1&times;</button><button type="button" data-v="0.5" aria-pressed="false">0.5&times;</button></div>
+    </div>
+    <div class="ctl"><label for="toT">Timeout <b id="toTV">3.0 s</b></label><input type="range" id="toT" min="0.5" max="12" step="0.5" value="3" /></div>
+    <div class="svgwrap"><svg id="toSvg" viewBox="0 0 640 150" role="img" aria-label="Where a timeout fires on the simulated clock and on the wall clock, against the moment the order could fill"></svg></div>
+    <div class="stats" style="margin-top:12px">
+      <div class="stat"><div class="sl">Simulated-time timer</div><div class="sv" id="toL">&#8212;</div></div>
+      <div class="stat"><div class="sl">time.time() timer</div><div class="sv" id="toW">&#8212;</div></div>
+      <div class="stat"><div class="sl">Wall timeout in market time</div><div class="sv acc" id="toM">&#8212;</div></div>
+    </div>
+    <p class="sub" id="toMsg" style="margin-top:8px;min-height:44px"></p>
+    <div class="tablewrap" style="margin-top:8px"><table class="t" id="toTab">
+      <thead><tr><th>speed</th><th>simulated-time timer</th><th>time.time() timer</th></tr></thead><tbody></tbody></table></div>
+  </div>
+
+  <div class="panel" style="margin-top:14px">
+    <h4>How to keep time-based logic honest</h4>
+    <ul style="margin:6px 0 0 18px">
+      <li><b>Inject the clock.</b> The strategy receives <code>now</code> (or a <code>Clock</code> object) and never calls <code>time.time()</code> or <code>datetime.now()</code> in a decision.</li>
+      <li><b>Schedule, do not sleep.</b> <code>call_later(3.0, cancel)</code> puts an event in a heap keyed by logical time; the replay loop releases due events before it hands over the next tick.</li>
+      <li><b>asyncio:</b> <code>asyncio.sleep</code> and <code>wait_for</code> count loop time, which is the wall clock. In a simulation, drive your own scheduler (or a loop with a fake clock) instead of awaiting real seconds.</li>
+      <li><b>Convert once, at the edge.</b> A live bot&#8217;s &ldquo;3 s&rdquo; is a number of logical seconds; the connection to the venue is where real time legitimately appears.</li>
+      <li><b>Test it.</b> Run the same tape at two speeds and assert the fills and the digest are identical. If they differ, something in a decision path reads the machine&#8217;s clock.</li>
+    </ul>
+  </div>
+
+  <p class="bridge"><b>Next, Act IV.</b> You now have the loop, the tape and the clock. Part 7 puts them together and reads the numbers; Part 8 asks whether the numbers are lying.</p>
 </section>
 
 <!-- ══════════════ 7 · BACK TO THE BACKTESTER ══════════════ -->
 <section id="backtester">
-  <div class="kicker">Part 7</div>
+  <div class="kicker">Act IV &#183; Part 7</div>
   <h2><span class="secnum">7</span>Back to the backtester: Parquet in, one clock, honest numbers out</h2>
   <p class="lead">Put the pieces together. The lab's <code>backtest_parquet.py</code> reads the Parquet tape with Polars
   (2,827 ticks and 50,751 book snapshots load in a few hundred milliseconds) and runs Part 1's loop once per tick
@@ -1128,11 +1243,13 @@ FIX  sig[t-1] * ret[t]  Sharpe -0.19</pre>
   <pre class="code" data-lang="sh">grep -nE 'time\.time|monotonic|datetime\.now' team/*.py      # or wherever your bot lives</pre>
   <p class="sub">Every hit inside a decision path (entry, exit, cooldown, "once a minute") is a backtest that depends on your
   CPU. Hits at the edges (socket timeouts, reconnect backoff, heartbeats, log lines, pacing a replay) are fine.</p>
+
+  <p class="bridge"><b>Next.</b> You have a number. Part 8 switches on the mistakes that make a backtest look better than it is.</p>
 </section>
 
 <!-- ══════════════ PART 8 · WHAT FLATTERS A BACKTEST ══════════════ -->
 <section id="mistakes">
-  <div class="kicker">Part 8</div>
+  <div class="kicker">Act IV &#183; Part 8</div>
   <h2><span class="secnum">8</span>Six ways a backtest flatters you, and how to avoid each one</h2>
   <p class="lead">None of these is an arithmetic error. Each one produces a curve that is internally consistent, plausible
   and wrong. The lab below runs one deliberately boring strategy on 40 simulated stocks that have <b>no edge at all</b>
@@ -1965,6 +2082,66 @@ Engine.prototype.exitTick = function () {
   seg("ckSpeed", function (v) { speed = v; render(); });
   seg("ckMode", function (v) { mode = v; render(); });
   render();
+})();
+
+/* ════════════════════════════════════════════════════════════════
+   Part 6 · one timeout on two clocks (real tick timestamps t400-t419)
+   ════════════════════════════════════════════════════════════════ */
+(function () {
+  var TS = [0.0, 1.0, 2.16, 3.35, 4.48, 5.48, 6.48, 7.58, 8.72, 9.87, 10.52, 11.68, 12.8, 13.86, 14.58, 15.78, 16.87, 17.97, 18.56, 19.58];
+  var FILL = 6, speed = 5;
+  function fire(T, S) {                       /* first tick where the timer has reached T, or -1 */
+    for (var i = 0; i < TS.length; i++) {
+      var now = S === Infinity ? 0.0003 * i : TS[i] / S + 0.0003 * i;
+      if (now >= T) return i;
+    }
+    return -1;
+  }
+  function logicalFire(T) { for (var i = 0; i < TS.length; i++) if (TS[i] >= T) return i; return -1; }
+  function outcome(fi) { return fi >= 0 && fi <= FILL ? { s: "cancelled at t" + (400 + fi), bad: false } : { s: "FILLED at t406", bad: true }; }
+  var svg = $("toSvg"), W = 640, H = 150, L = 20, R = 20, AX = 92, MAXT = 19.58;
+  function X(t) { return L + (W - L - R) * t / MAXT; }
+  function mark(x, col, label, ly, dash, anchor) {
+    svg.appendChild(mk("line", { x1: x, x2: x, y1: 26, y2: AX, stroke: col, "stroke-width": 2, "stroke-dasharray": dash || "" }));
+    svg.appendChild(T(x + (anchor === "end" ? -4 : 4), ly, label, 10, col, anchor || "start"));
+  }
+  function render() {
+    var T0 = +$("toT").value; $("toTV").textContent = T0.toFixed(1) + " s";
+    var S = speed, lf = logicalFire(T0), wf = fire(T0, S);
+    var lo = outcome(lf), wo = outcome(wf);
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    svg.appendChild(mk("line", { x1: L, x2: W - R, y1: AX, y2: AX, stroke: "#333a47" }));
+    TS.forEach(function (t, i) { svg.appendChild(mk("circle", { cx: X(t), cy: AX, r: i === FILL ? 4 : 2.4, fill: i === FILL ? "#3fb950" : "#6f757f" })); });
+    svg.appendChild(T(X(0), AX + 16, "t400 (order sent)", 9, "#9aa0a6", "start"));
+    svg.appendChild(T(X(MAXT), AX + 16, "t419", 9, "#9aa0a6", "end"));
+    svg.appendChild(T(X(TS[FILL]), AX + 30, "t406: book marketable, the order could fill", 9, "#3fb950", "middle"));
+    var tl = lf >= 0 ? TS[lf] : null;
+    if (tl !== null) mark(X(tl), "#58a6ff", "simulated timer t" + (400 + lf), 20, "", tl > MAXT * 0.7 ? "end" : "start");
+    var tw = S === Infinity ? null : T0 * S;
+    if (wf >= 0) mark(X(TS[wf]), "#f85149", "time.time() timer t" + (400 + wf), 38, "5 3", TS[wf] > MAXT * 0.7 ? "end" : "start");
+    else svg.appendChild(T(W - R, 38, "time.time() timer: never fires on this tape →", 10, "#f85149", "end"));
+    $("toL").textContent = lo.s; $("toL").className = "sv";
+    $("toW").textContent = wo.s; $("toW").className = "sv " + (wo.bad ? "bad" : "ok");
+    $("toM").textContent = S === Infinity ? "never" : (T0 * S).toFixed(1) + " s";
+    var msg = "A " + T0.toFixed(1) + " s timeout on the simulated clock fires at the first tick at or after " + T0.toFixed(1) + " s of tape time, " + (lf >= 0 ? "t" + (400 + lf) : "after t419") + ", whatever the replay speed. ";
+    if (S === Infinity) msg += "On time.time(), a full-speed replay finishes before the timer ever expires, so the order stays alive for the whole tape. ";
+    else msg += "On time.time() at " + S + "×, " + T0.toFixed(1) + " s of wall time is " + (T0 * S).toFixed(1) + " s of market time. ";
+    if (wo.bad !== lo.bad) msg += wo.bad ? "The live bot would have cancelled first, but the backtest keeps the order and books a fill that would never have happened." : "The live bot would have been filled, but the backtest cancels too early and misses a real fill.";
+    else if (wo.s !== lo.s) msg += "Both miss the fill, but the cancel lands on a different tick.";
+    else msg += "Same outcome here, because this timeout and speed happen to line up. Move the slider or the speed and they will part.";
+    $("toMsg").textContent = msg;
+    var h = "";
+    [Infinity, 20, 10, 5, 2, 1, 0.5].forEach(function (sp) {
+      var a = outcome(logicalFire(T0)), b = outcome(fire(T0, sp));
+      h += "<tr><td class=\"n\">" + (sp === Infinity ? "∞" : sp + "×") + "</td><td>" + a.s + "</td><td style=\"color:var(" + (b.s === a.s ? "--ok" : "--bad") + ")\">" + b.s + "</td></tr>";
+    });
+    $("toTab").querySelector("tbody").innerHTML = h;
+  }
+  seg("toSpeed", function (v) { speed = v === "inf" ? Infinity : +v; render(); });
+  $("toT").addEventListener("input", render);
+  render();
+  window.__w4 = window.__w4 || {};
+  window.__w4.to = function (T, S) { return { logical: outcome(logicalFire(T)).s, wall: outcome(fire(T, S === "inf" ? Infinity : S)).s }; };
 })();
 
 /* ════════════════════════════════════════════════════════════════
