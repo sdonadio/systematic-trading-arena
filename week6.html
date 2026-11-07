@@ -410,6 +410,8 @@
   .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-family: var(--mono); font-size: 11.5px; margin-top: 4px; }
   .kv .k2 { color: var(--ink-mute); }
   .kv .v2 { color: var(--ink); text-align: right; }
+  #kn-tbl td, #kn-tbl th { white-space: nowrap; }
+  @media (max-width: 720px) { #gr-svg { min-width: 520px; } }
   @media (max-width: 720px) {
     .bigo-grid { grid-template-columns: 1fr; }
     .lane { grid-template-columns: 84px 1fr 76px; gap: 7px; }
@@ -443,6 +445,7 @@
     <li><b>You will be able to</b> profile your bot with <code>cProfile</code> and name the one function that dominates the run.</li>
     <li><b>You will be able to</b> convert an O(n)-per-tick statistic into O(1) rolling state with a <code>deque</code> and Welford's method.</li>
     <li><b>You will be able to</b> defend a complexity claim with a sound microbenchmark &mdash; warm up, repeat, take the minimum.</li>
+    <li><b>You will be able to</b> turn an exponential recursion into a cached or tabulated one, and pick Dijkstra or Bellman-Ford for a routing or arbitrage question.</li>
   </ul>
   <div class="chips">
     <span class="chip hl">3 hours</span>
@@ -452,6 +455,7 @@
     <span class="chip">Welford O(1)</span>
     <span class="chip">shared/orderbook.py</span>
     <span class="chip">p99 tail latency</span>
+    <span class="chip">DP &middot; Dijkstra &middot; Bellman-Ford</span>
   </div>
  </div>
 </section>
@@ -854,6 +858,252 @@
       <p><b>3. Bind methods to locals</b> in a tight loop to skip the attribute lookup.</p>
       <p><b>4. Vectorise batch maths</b> with numpy where it fits &mdash; batches, not per-tick scalars.</p>
       <p><b>5. Then stop.</b> Do not tune cold code.</p>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section id="dp">
+ <div class="wrap">
+  <div class="eyebrow">Going further &middot; dynamic programming &amp; shortest paths</div>
+  <h2>Do each sub-problem once, and treat the market as a graph</h2>
+  <p class="lead">A slow algorithm is often a fast one that <b>forgets what it already worked out</b>. When a problem
+  breaks into smaller problems and the <i>same</i> small problems keep coming back, you can solve each one once and
+  remember the answer. That is <b>dynamic programming</b>. The second half of this part changes the data structure
+  instead: a market is a <b>graph</b>, and two classic algorithms answer two different trading questions on it.</p>
+
+  <h3 style="margin-top:26px">Overlapping sub-problems and memoisation</h3>
+  <p>Naive Fibonacci is the textbook case. <code>fib(n)</code> calls <code>fib(n-1)</code> and <code>fib(n-2)</code>,
+  and both of those call <code>fib(n-2)</code>'s children again. The call tree has about
+  <span class="mono">1.6<sup>n</sup></span> nodes: exact count <span class="mono">calls(n) = 2&middot;fib(n+1) &minus; 1</span>.
+  There are only <span class="mono">n+1</span> <i>distinct</i> sub-problems, so there are two ways to stop the repeat.
+  <b>Bottom-up</b> keeps just the last two values and walks up: O(n) time, O(1) memory.
+  <b>Top-down with a cache</b> (<code>@lru_cache</code>) keeps the readable recursive code and stores each answer:
+  O(n) time, O(n) memory. Both work only because the answer to a sub-problem never changes.</p>
+
+  <div class="panel">
+   <div class="panel-head">
+     <h3>Three ways to compute fib(n)</h3>
+     <span class="tag">Widget 5 &middot; drag n</span>
+   </div>
+   <div class="ctls">
+     <div class="ctl">
+       <label for="fb-n">n <span class="v" id="fb-nv">20</span></label>
+       <input type="range" id="fb-n" min="1" max="40" step="1" value="20" aria-label="Fibonacci index n" />
+     </div>
+     <div class="ctl" style="flex:0 0 auto;min-width:auto">
+       <label>Check the formula</label>
+       <div class="btnrow"><button class="btn" id="fb-run">Run the naive version</button></div>
+     </div>
+   </div>
+   <div class="panel-body">
+    <div class="stats" style="border:1px solid var(--line);border-radius:9px;overflow:hidden">
+      <div class="stat"><div class="k">fib(n)</div><div class="v" id="fb-val">&mdash;</div><div class="d">same answer, all three</div></div>
+      <div class="stat"><div class="k">naive calls</div><div class="v bad" id="fb-calls">&mdash;</div><div class="d">2&middot;fib(n+1) &minus; 1</div></div>
+      <div class="stat"><div class="k">iterative steps</div><div class="v ok" id="fb-it">&mdash;</div><div class="d">O(n) time, O(1) memory</div></div>
+      <div class="stat"><div class="k">memo entries</div><div class="v warn" id="fb-memo">&mdash;</div><div class="d">n + 1 cached values</div></div>
+    </div>
+    <div class="lane">
+      <div class="nm" style="color:var(--bad)">naive</div>
+      <div class="tr"><div class="fl" id="fb-fill-a" style="width:0%;background:linear-gradient(90deg,#8f2b26,var(--bad))"></div></div>
+      <div class="tm" id="fb-t-a">&mdash;</div>
+    </div>
+    <div class="lane">
+      <div class="nm" style="color:var(--ok)">iterative</div>
+      <div class="tr"><div class="fl" id="fb-fill-b" style="width:0%;background:linear-gradient(90deg,#1f7a33,var(--ok))"></div></div>
+      <div class="tm" id="fb-t-b">&mdash;</div>
+    </div>
+    <div class="lane">
+      <div class="nm" style="color:var(--warn)">lru_cache</div>
+      <div class="tr"><div class="fl" id="fb-fill-c" style="width:0%;background:linear-gradient(90deg,#8a6616,var(--warn))"></div></div>
+      <div class="tm" id="fb-t-c">&mdash;</div>
+    </div>
+    <div class="warnbar" id="fb-note"></div>
+   </div>
+   <div class="panel-note">Bars are on a <b>log scale</b> of calls or steps; the time column charges the page's flat
+   <b>40 ns per operation</b>. The call count is exact, the time is a guess. On one laptop, <span class="mono">n = 30</span>
+   measured 80 ms recursive, 0.0012 ms iterative and 0.0050 ms <code>lru_cache</code> (cold); a warm cached call is
+   about 0.1 &micro;s. The cache has a limit the other two do not: <code>fib_memo(5000)</code> from cold raises
+   <code>RecursionError</code> (1,000 frames), while the iterative version handles it without effort.</div>
+  </div>
+<pre class="code"><span class="c"># 1. naive: reads like the maths, O(1.6^n) time</span>
+<span class="k">def</span> fib_recursive(n):
+    <span class="k">return</span> n <span class="k">if</span> n &lt; <span class="s">2</span> <span class="k">else</span> fib_recursive(n-<span class="s">1</span>) + fib_recursive(n-<span class="s">2</span>)
+
+<span class="c"># 2. iterative: keep the last two values, O(n) time, O(1) memory</span>
+<span class="k">def</span> fib_iterative(n):
+    a, b = <span class="s">0</span>, <span class="s">1</span>
+    <span class="k">for</span> _ <span class="k">in</span> range(n): a, b = b, a + b
+    <span class="k">return</span> a
+
+<span class="c"># 3. the SAME recursion as (1) plus one decorator: O(n) time, O(n) memory</span>
+@lru_cache(maxsize=<span class="k">None</span>)
+<span class="k">def</span> fib_memo(n):
+    <span class="k">return</span> n <span class="k">if</span> n &lt; <span class="s">2</span> <span class="k">else</span> fib_memo(n-<span class="s">1</span>) + fib_memo(n-<span class="s">2</span>)</pre>
+
+  <h3 style="margin-top:30px">The knapsack: choosing trade ideas under a capital budget</h3>
+  <p>The same idea earns its keep on a real allocation problem. You have a capital budget and a list of trade ideas,
+  each with a <b>capital need</b> and an <b>expected profit</b>, and each is all-or-nothing. Which subset has the
+  highest expected profit without exceeding the budget? This is the <b>0/1 knapsack</b>. The recursion is "skip this
+  idea, or take it if it fits, and keep the better" &mdash; <span class="mono">O(2<sup>n</sup>)</span> as written, because
+  the sub-problem <i>(which idea am I on, how much capital is left)</i> repeats. Cache on that pair, or fill a table
+  one idea at a time, and the cost becomes <span class="mono">O(n&middot;W)</span> for a budget of <span class="mono">W</span> units.</p>
+  <p>Notice what <span class="mono">W</span> is: not the number of ideas, but the <b>size of the budget in the unit you
+  chose</b>. That is <b>pseudo-polynomial</b>. Count capital in $10 instead of $1,000 and
+  <span class="mono">W</span> is 100&times; larger, so the table and the run time are too. A greedy
+  shortcut (rank by profit per dollar, fill until it no longer fits) is O(n log n), but it can strand capital that a better
+  combination would have used.</p>
+
+  <div class="panel">
+   <div class="panel-head">
+     <h3>Capital allocation: DP optimum vs greedy by ratio</h3>
+     <span class="tag">Widget 6 &middot; drag the budget</span>
+   </div>
+   <div class="ctls">
+     <div class="ctl">
+       <label for="kn-b">Capital budget <span class="v" id="kn-bv">$200k</span></label>
+       <input type="range" id="kn-b" min="10" max="265" step="5" value="200" aria-label="Capital budget in thousands of dollars" />
+     </div>
+     <div class="ctl" style="flex:0 0 auto;min-width:auto">
+       <label>Capital measured in</label>
+       <div class="btnrow" role="group" aria-label="Capital unit">
+         <button class="btn on" id="kn-u1000" aria-pressed="true">$1,000</button>
+         <button class="btn" id="kn-u100" aria-pressed="false">$100</button>
+         <button class="btn" id="kn-u10" aria-pressed="false">$10</button>
+       </div>
+     </div>
+   </div>
+   <div class="panel-body">
+    <div class="grid-side-l">
+     <div>
+      <div class="tscroll">
+       <table class="mini" id="kn-tbl">
+        <thead><tr><th>idea</th><th class="num">capital</th><th class="num">exp. profit</th><th class="num">$ per $1k</th><th>DP</th><th>greedy</th></tr></thead>
+        <tbody></tbody>
+       </table>
+      </div>
+     </div>
+     <div>
+      <div class="stats" style="border:1px solid var(--line);border-radius:9px;overflow:hidden">
+        <div class="stat"><div class="k">DP optimum</div><div class="v ok" id="kn-dp">&mdash;</div><div class="d" id="kn-dpd">&mdash;</div></div>
+        <div class="stat"><div class="k">greedy</div><div class="v warn" id="kn-gr">&mdash;</div><div class="d" id="kn-grd">&mdash;</div></div>
+        <div class="stat"><div class="k">left on the table</div><div class="v bad" id="kn-gap">&mdash;</div><div class="d">DP &minus; greedy</div></div>
+      </div>
+      <div class="stats" style="margin-top:12px;border:1px solid var(--line);border-radius:9px;overflow:hidden">
+        <div class="stat"><div class="k">W (budget units)</div><div class="v" id="kn-w">&mdash;</div><div class="d" id="kn-wd">&mdash;</div></div>
+        <div class="stat"><div class="k">table cells n&times;W</div><div class="v" id="kn-cells">&mdash;</div><div class="d" id="kn-cellsd">&mdash;</div></div>
+      </div>
+      <div class="warnbar" id="kn-note"></div>
+     </div>
+    </div>
+   </div>
+   <div class="panel-note">Eight ideas from the course generator (<span class="mono">trade_ideas(8)</span>, capital in $1,000 units).
+   The DP walks the capital downward for each idea so no idea is used twice, then a choice table recovers
+   <i>which</i> ideas were taken. Measured on one laptop with 100 ideas: 0.82 ms at W = 250 ($1,000 units), 10.3 ms at
+   W = 2,500 ($100) and 99.5 ms at W = 25,000 ($10): the run time follows W, not the number of ideas.</div>
+  </div>
+
+  <h3 style="margin-top:30px">Shortest paths: Dijkstra for routing, Bellman-Ford for arbitrage</h3>
+  <p>Put venues, instruments or currencies at the nodes and the cost of a hop on the edges. Two questions come up.
+  <b>&ldquo;What is the cheapest way from A to B?&rdquo;</b> is smart order routing: fees plus the slippage a slow hop
+  costs you, in basis points. <b>Dijkstra</b> answers it in <span class="mono">O((V+E) log V)</span> using a binary heap
+  and the same lazy-deletion trick as the order book: always settle the cheapest unsettled node, and never look at it again.</p>
+  <p>That last clause is the catch. Once a node is settled, Dijkstra treats its cost as final &mdash; true only if
+  <b>every edge cost is &ge; 0</b>. Add a hop that pays you a rebate bigger than the fee and the settled cost can be
+  beaten later; Dijkstra does not notice. <b>Bellman-Ford</b> relaxes every edge <span class="mono">V&minus;1</span> times,
+  accepts negative costs, and costs <span class="mono">O(V&middot;E)</span>. A pass number <span class="mono">V</span> that still
+  improves something proves a <b>negative cycle</b>. Trade a to b at rate <span class="mono">r</span> and take
+  <span class="mono">w = &minus;log r</span>: a loop multiplies your money by the product of the rates, which is above 1
+  exactly when the weights sum below 0. An <b>arbitrage is a negative cycle</b>.</p>
+
+  <div class="panel">
+   <div class="panel-head">
+     <h3>Cheapest route to a fill, and the rebate that fools Dijkstra</h3>
+     <span class="tag">Widget 7 &middot; toggle the rebate edge</span>
+   </div>
+   <div class="ctls">
+     <label class="sw"><input type="checkbox" id="gr-reb" /><span class="track"></span><span>house &rarr; venue_A pays a <b>&minus;12 bp</b> rebate</span></label>
+   </div>
+   <div class="panel-body">
+    <div class="grid-side">
+     <div>
+       <div class="svgwrap"><svg class="viz" id="gr-svg" viewBox="0 0 620 262" aria-label="Routing graph with nodes gateway, dark pool, venue A, house and fill. Edges carry costs in basis points. The Dijkstra route and the Bellman-Ford route are highlighted."></svg></div>
+       <div class="legend">
+         <span><i style="background:var(--accent-2)"></i> Bellman-Ford route (always right)</span>
+         <span><i style="background:var(--warn)"></i> Dijkstra route when it differs</span>
+         <span><i style="background:var(--ok)"></i> rebate edge (&minus; cost)</span>
+       </div>
+     </div>
+     <div>
+       <div class="stats" style="border:1px solid var(--line);border-radius:9px;overflow:hidden">
+         <div class="stat"><div class="k">Dijkstra</div><div class="v warn" id="gr-d">&mdash;</div><div class="d" id="gr-dp">&mdash;</div></div>
+         <div class="stat"><div class="k">Bellman-Ford</div><div class="v ok" id="gr-b">&mdash;</div><div class="d" id="gr-bp">&mdash;</div></div>
+       </div>
+       <div class="warnbar" id="gr-note"></div>
+     </div>
+    </div>
+   </div>
+   <div class="panel-note">Costs in basis points: gateway&rarr;house 15, gateway&rarr;venue_A 6, gateway&rarr;dark_pool 2,
+   dark_pool&rarr;venue_A 3, dark_pool&rarr;house 14, venue_A&rarr;fill 4, house&rarr;fill 0.5. With the rebate on, the
+   best route is gateway&rarr;house&rarr;venue_A&rarr;fill = 15 &minus; 12 + 4 = 7 bp, but Dijkstra has already settled
+   venue_A at 5 bp through the dark pool before it examines the house.</div>
+  </div>
+
+  <div class="panel">
+   <div class="panel-head">
+     <h3>Arbitrage is a negative cycle</h3>
+     <span class="tag">Widget 8 &middot; one stale quote</span>
+   </div>
+   <div class="ctls">
+     <label class="sw"><input type="checkbox" id="fx-stale" /><span class="track"></span><span>GBP/EUR quote is <b>60 bp too high</b> (stale)</span></label>
+   </div>
+   <div class="panel-body">
+    <div class="grid-side-l">
+     <div>
+      <div class="tscroll">
+       <table class="mini" id="fx-tbl">
+        <thead><tr><th>from \ to</th><th class="num">USD</th><th class="num">EUR</th><th class="num">JPY</th><th class="num">GBP</th></tr></thead>
+        <tbody></tbody>
+       </table>
+      </div>
+     </div>
+     <div>
+      <div class="stats" style="border:1px solid var(--line);border-radius:9px;overflow:hidden">
+        <div class="stat"><div class="k">Bellman-Ford says</div><div class="v" id="fx-res">&mdash;</div><div class="d" id="fx-cyc">&mdash;</div></div>
+        <div class="stat"><div class="k">gain around the loop</div><div class="v" id="fx-gain">&mdash;</div><div class="d">before fees</div></div>
+      </div>
+      <div class="warnbar" id="fx-note"></div>
+     </div>
+    </div>
+   </div>
+   <div class="panel-note">Quotes come from consistent USD values (EUR 1.0860, JPY 0.006614, GBP 1.2658) with a 2 bp
+   spread taken on each hop, so every loop loses money until one quote goes stale. A detected loop is not a guaranteed
+   profit: fees, the size available at those prices and your latency decide whether it is still there when you trade.</div>
+  </div>
+
+  <div class="grid2" style="margin-top:22px">
+    <div class="box">
+      <h4>Cost of the two, measured</h4>
+      <div class="tscroll">
+       <table class="mini">
+        <thead><tr><th class="num">V</th><th class="num">E</th><th class="num">Dijkstra ms</th><th class="num">Bellman-Ford ms</th></tr></thead>
+        <tbody>
+          <tr><td class="num">200</td><td class="num">1,966</td><td class="num">0.18</td><td class="num">34.9</td></tr>
+          <tr><td class="num">400</td><td class="num">3,953</td><td class="num">0.41</td><td class="num">155.9</td></tr>
+          <tr class="hl"><td class="num">800</td><td class="num">7,954</td><td class="num">0.89</td><td class="num">635.7</td></tr>
+        </tbody>
+       </table>
+      </div>
+      <p>One laptop. Doubling V (and E) roughly doubles Dijkstra and quadruples Bellman-Ford.</p>
+    </div>
+    <div class="box">
+      <h4>Where you meet these in trading</h4>
+      <p><b>Dynamic programming:</b> allocating a capital or risk budget across discrete ideas; optimal execution
+      schedules; any recursion over <i>(step, state)</i> that revisits the same state.</p>
+      <p><b>Dijkstra:</b> smart order routing, the cheapest network path between data centres, converting a position
+      through the cheapest chain of instruments.</p>
+      <p><b>Bellman-Ford:</b> triangular FX and crypto loops, an ETF against its basket, the same stock on two venues at
+      two prices &mdash; and a consistency check on your own marks, where a negative cycle is a bug.</p>
     </div>
   </div>
  </div>
@@ -1772,6 +2022,307 @@ function esc(s) {
     draw();
   });
   setImpl(2);
+})();
+
+/* ══ WIDGET 5 · three ways to compute fib(n) ══════════════════════ */
+(function () {
+  var sl = document.getElementById('fb-n');
+  if (!sl) return;
+  var NSOP = 40;
+
+  function fibv(n) { var a = 0, b = 1, i; for (i = 0; i < n; i++) { var t = a + b; a = b; b = t; } return a; }
+  function setLane(id, tid, ops, maxOps) {
+    var f = Math.log10(1 + ops) / Math.log10(1 + maxOps);
+    document.getElementById('fb-fill-' + id).style.width = (Math.max(0.02, f) * 100).toFixed(1) + '%';
+    document.getElementById('fb-t-' + id).textContent = fmtNs(ops * NSOP);
+  }
+  function draw() {
+    var n = +sl.value;
+    var calls = 2 * fibv(n + 1) - 1;
+    document.getElementById('fb-nv').textContent = n;
+    document.getElementById('fb-val').textContent = commas(fibv(n));
+    document.getElementById('fb-calls').textContent = commas(calls);
+    document.getElementById('fb-it').textContent = commas(n);
+    document.getElementById('fb-memo').textContent = commas(n + 1);
+    setLane('a', 'a', calls, calls); setLane('b', 'b', n, calls); setLane('c', 'c', 2 * n - 1 > 0 ? 2 * n - 1 : 1, calls);
+    var note = document.getElementById('fb-note');
+    note.className = 'warnbar ' + (calls > 25000 ? 'hot' : 'cool');
+    note.innerHTML = 'At <b>n = ' + n + '</b> the naive version makes <b>' + commas(calls) + '</b> calls to solve <b>'
+      + (n + 1) + '</b> distinct problems: <b>' + commas(calls / (n + 1)) + '&times;</b> redundant work. The memoised version makes about '
+      + commas(2 * n - 1) + ' calls (each new value once, plus one cache hit).';
+  }
+  sl.addEventListener('input', draw);
+  document.getElementById('fb-run').addEventListener('click', function () {
+    var n = Math.min(+sl.value, 30), cnt = 0;
+    function f(k) { cnt++; return k < 2 ? k : f(k - 1) + f(k - 2); }
+    f(n);
+    var note = document.getElementById('fb-note');
+    note.className = 'warnbar ' + (cnt === 2 * fibv(n + 1) - 1 ? 'cool' : 'hot');
+    note.innerHTML = 'Ran it for <b>n = ' + n + '</b> and counted: <b>' + commas(cnt) + '</b> calls &mdash; formula says '
+      + commas(2 * fibv(n + 1) - 1) + '. ' + (cnt === 2 * fibv(n + 1) - 1 ? 'They match.' : 'Mismatch.')
+      + (+sl.value > 30 ? ' (Capped at n = 30 so the page stays responsive.)' : '');
+  });
+  draw();
+})();
+
+/* ══ WIDGET 6 · knapsack: DP vs greedy ════════════════════════════ */
+(function () {
+  var sl = document.getElementById('kn-b');
+  if (!sl) return;
+  var W = [20, 42, 39, 13, 28, 43, 35, 45];            /* capital, $1,000 units: trade_ideas(8) */
+  var V = [415, 895, 1091, 238, 563, 525, 832, 895];   /* expected profit, $ */
+  var N = W.length, scale = 1, tb = document.querySelector('#kn-tbl tbody');
+  var units = { 'kn-u1000': 1, 'kn-u100': 10, 'kn-u10': 100 };
+
+  function dp(cap) {
+    var keep = [], best = [], c, i;
+    for (c = 0; c <= cap; c++) best.push(0);
+    for (i = 0; i < N; i++) {
+      var row = [];
+      for (c = 0; c <= cap; c++) row.push(false);
+      for (c = cap; c >= W[i]; c--) {
+        if (best[c - W[i]] + V[i] > best[c]) { best[c] = best[c - W[i]] + V[i]; row[c] = true; }
+      }
+      keep.push(row);
+    }
+    var chosen = [], cc = cap;
+    for (i = N - 1; i >= 0; i--) if (keep[i][cc]) { chosen.push(i); cc -= W[i]; }
+    return { value: best[cap], chosen: chosen };
+  }
+  function greedy(cap) {
+    var order = W.map(function (_, i) { return i; }).sort(function (a, b) { return V[b] / W[b] - V[a] / W[a]; });
+    var left = cap, tot = 0, chosen = [];
+    order.forEach(function (i) { if (W[i] <= left) { left -= W[i]; tot += V[i]; chosen.push(i); } });
+    return { value: tot, chosen: chosen };
+  }
+  function usd(x) { return '$' + commas(x); }
+  function sum(a, arr) { return a.reduce(function (s, i) { return s + arr[i]; }, 0); }
+
+  function draw() {
+    var cap = +sl.value;
+    document.getElementById('kn-bv').textContent = '$' + cap + 'k';
+    var d = dp(cap), g = greedy(cap), i, h = '';
+    for (i = 0; i < N; i++) {
+      var inD = d.chosen.indexOf(i) >= 0, inG = g.chosen.indexOf(i) >= 0;
+      h += '<tr' + (inD ? ' class="hl"' : '') + '><td class="mono">' + String.fromCharCode(65 + i) + '</td><td class="num">$' + W[i]
+        + 'k</td><td class="num">' + usd(V[i]) + '</td><td class="num">' + (V[i] / W[i]).toFixed(1) + '</td><td>'
+        + (inD ? '<b style="color:var(--ok)">take</b>' : '<span style="color:var(--ink-mute)">&mdash;</span>') + '</td><td>'
+        + (inG ? '<b style="color:var(--warn)">take</b>' : '<span style="color:var(--ink-mute)">&mdash;</span>') + '</td></tr>';
+    }
+    tb.innerHTML = h;
+    var capD = sum(d.chosen, W), capG = sum(g.chosen, W);
+    document.getElementById('kn-dp').textContent = usd(d.value);
+    document.getElementById('kn-dpd').textContent = '$' + capD + 'k of $' + cap + 'k used';
+    document.getElementById('kn-gr').textContent = usd(g.value);
+    document.getElementById('kn-grd').textContent = '$' + capG + 'k of $' + cap + 'k used';
+    document.getElementById('kn-gap').textContent = usd(d.value - g.value);
+    var Wu = cap * scale;
+    document.getElementById('kn-w').textContent = commas(Wu);
+    document.getElementById('kn-wd').textContent = 'budget in $' + commas(1000 / scale) + ' units';
+    document.getElementById('kn-cells').textContent = commas(N * Wu);
+    document.getElementById('kn-cellsd').textContent = scale === 1 ? 'baseline' : scale + '× the work of $1,000 units';
+    var note = document.getElementById('kn-note');
+    if (d.value > g.value) {
+      note.className = 'warnbar hot';
+      note.innerHTML = 'Greedy by ratio strands <b>$' + (cap - capG) + 'k</b> of capital and leaves <b>' + usd(d.value - g.value)
+        + '</b> of expected profit behind. The DP finds the better <i>combination</i>, not just the better ratios.';
+    } else {
+      note.className = 'warnbar';
+      note.innerHTML = 'At this budget greedy happens to match the DP. Drag the budget around: it does not always (try $200k).';
+    }
+  }
+  sl.addEventListener('input', draw);
+  Object.keys(units).forEach(function (id) {
+    document.getElementById(id).addEventListener('click', function () {
+      scale = units[id];
+      Object.keys(units).forEach(function (o) {
+        var b = document.getElementById(o);
+        b.classList.toggle('on', o === id); b.setAttribute('aria-pressed', o === id ? 'true' : 'false');
+      });
+      draw();
+    });
+  });
+  draw();
+})();
+
+/* ══ WIDGET 7 · routing: Dijkstra vs Bellman-Ford ═════════════════ */
+(function () {
+  var svg = document.getElementById('gr-svg');
+  var cb = document.getElementById('gr-reb');
+  if (!svg || !cb) return;
+  var POS = { gateway: [62, 130], dark_pool: [215, 42], venue_A: [400, 130], house: [330, 222], fill: [560, 130] };
+  var BASE = [
+    ['gateway', 'house', 15, 0.42], ['gateway', 'venue_A', 6, 0.30], ['gateway', 'dark_pool', 2, 0.5],
+    ['dark_pool', 'venue_A', 3, 0.5], ['dark_pool', 'house', 14, 0.30], ['venue_A', 'fill', 4, 0.5],
+    ['house', 'fill', 0.5, 0.55]
+  ];
+  var REB = ['house', 'venue_A', -12, 0.5];
+
+  function graphOf(edges) {
+    var g = {};
+    Object.keys(POS).forEach(function (k) { g[k] = {}; });
+    edges.forEach(function (e) { g[e[0]][e[1]] = e[2]; });
+    return g;
+  }
+  function dijkstra(g, src) {
+    var dist = {}, prev = {}, done = {}, heap = [[0, src]];
+    dist[src] = 0;
+    while (heap.length) {
+      heap.sort(function (a, b) { return a[0] - b[0]; });
+      var t = heap.shift(), d = t[0], u = t[1];
+      if (done[u]) continue;
+      done[u] = true;
+      Object.keys(g[u]).forEach(function (v) {
+        if (done[v]) return;
+        var nd = d + g[u][v];
+        if (dist[v] === undefined || nd < dist[v]) { dist[v] = nd; prev[v] = u; heap.push([nd, v]); }
+      });
+    }
+    return { dist: dist, prev: prev };
+  }
+  function bellman(g, src) {
+    var nodes = Object.keys(g), dist = {}, prev = {}, i;
+    nodes.forEach(function (n) { dist[n] = Infinity; });
+    dist[src] = 0;
+    for (i = 0; i < nodes.length - 1; i++) {
+      nodes.forEach(function (u) {
+        if (dist[u] === Infinity) return;
+        Object.keys(g[u]).forEach(function (v) {
+          if (dist[u] + g[u][v] < dist[v]) { dist[v] = dist[u] + g[u][v]; prev[v] = u; }
+        });
+      });
+    }
+    return { dist: dist, prev: prev };
+  }
+  function route(prev, dst) {
+    var p = [dst];
+    while (prev[p[p.length - 1]] !== undefined) p.push(prev[p[p.length - 1]]);
+    return p.reverse();
+  }
+  function pairs(p) { var s = {}, i; for (i = 0; i < p.length - 1; i++) s[p[i] + '>' + p[i + 1]] = 1; return s; }
+  function bp(x) { return (Math.round(x * 10) / 10).toFixed(1) + ' bp'; }
+
+  function draw() {
+    var edges = BASE.slice();
+    if (cb.checked) edges.push(REB);
+    var g = graphOf(edges);
+    var D = dijkstra(g, 'gateway'), B = bellman(g, 'gateway');
+    var pd = route(D.prev, 'fill'), pb = route(B.prev, 'fill');
+    var sd = pairs(pd), sb = pairs(pb), differ = pd.join() !== pb.join();
+
+    var s = '<defs>';
+    ['m0:#6f757f', 'mb:#7cb0ff', 'md:#d29922', 'mg:#3fb950'].forEach(function (m) {
+      var p = m.split(':');
+      s += '<marker id="gr-' + p[0] + '" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="' + p[1] + '"/></marker>';
+    });
+    s += '</defs>';
+    var labels = '';
+    edges.forEach(function (e) {
+      var a = POS[e[0]], b = POS[e[1]], k = e[0] + '>' + e[1];
+      var neg = e[2] < 0, inB = sb[k], inD = sd[k];
+      /* shorten the line so arrowheads clear the node discs */
+      var dx = b[0] - a[0], dy = b[1] - a[1], L = Math.sqrt(dx * dx + dy * dy), r = 27;
+      var x1 = a[0] + dx / L * r, y1 = a[1] + dy / L * r, x2 = b[0] - dx / L * (r + 3), y2 = b[1] - dy / L * (r + 3);
+      var col = inB ? C.a2 : (inD ? C.warn : (neg ? C.ok : C.mute));
+      var mk = inB ? 'mb' : (inD ? 'md' : (neg ? 'mg' : 'm0'));
+      var w = (inB || inD) ? 2.8 : 1.3;
+      s += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1)
+        + '" stroke="' + col + '" stroke-width="' + w + '"' + (inD && !inB ? ' stroke-dasharray="6 4"' : '') + ' marker-end="url(#gr-' + mk + ')"/>';
+      var t = e[3], lx = x1 + (x2 - x1) * t, ly = y1 + (y2 - y1) * t;
+      var txt = (neg ? '' : '') + e[2];
+      labels += '<rect x="' + (lx - 17) + '" y="' + (ly - 8) + '" width="34" height="15" rx="4" fill="' + C.panel + '" stroke="' + (neg ? C.ok : C.line2) + '"/>'
+        + '<text x="' + lx + '" y="' + (ly + 3.5) + '" font-size="10" text-anchor="middle" fill="' + (neg ? C.ok : C.dim) + '">' + txt + '</text>';
+    });
+    s += labels;
+    Object.keys(POS).forEach(function (n) {
+      var p = POS[n];
+      s += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="25" fill="' + C.p2 + '" stroke="' + (pb.indexOf(n) >= 0 ? C.a2 : C.line2) + '" stroke-width="' + (pb.indexOf(n) >= 0 ? 2 : 1.2) + '"/>'
+        + '<text x="' + p[0] + '" y="' + (p[1] + 3.5) + '" font-size="8.5" text-anchor="middle" fill="' + C.ink + '">' + n.replace('_', ' ') + '</text>';
+    });
+    s += '<text x="8" y="254" font-size="9.5" fill="' + C.mute + '" letter-spacing="1.2">EDGE COST IN BASIS POINTS</text>';
+    svg.innerHTML = s;
+
+    document.getElementById('gr-d').textContent = bp(D.dist.fill);
+    document.getElementById('gr-dp').textContent = pd.join(' → ');
+    document.getElementById('gr-b').textContent = bp(B.dist.fill);
+    document.getElementById('gr-bp').textContent = pb.join(' → ');
+    var note = document.getElementById('gr-note');
+    if (differ) {
+      note.className = 'warnbar hot';
+      note.innerHTML = '<b>Dijkstra is wrong by ' + bp(D.dist.fill - B.dist.fill) + '.</b> It settled venue_A at 5 bp via the dark pool and never revisited it, so it never priced the cheaper way in through the house\'s rebate. Bellman-Ford relaxes every edge repeatedly and finds ' + bp(B.dist.fill) + '.';
+    } else {
+      note.className = 'warnbar cool';
+      note.innerHTML = 'All costs are &ge; 0, so Dijkstra is exact: both algorithms agree on <b>' + bp(D.dist.fill) + '</b>. Switch on the rebate edge.';
+    }
+  }
+  cb.addEventListener('change', draw);
+  draw();
+})();
+
+/* ══ WIDGET 8 · arbitrage = negative cycle (Bellman-Ford on -log r) ═ */
+(function () {
+  var cb = document.getElementById('fx-stale');
+  if (!cb) return;
+  var CUR = ['USD', 'EUR', 'JPY', 'GBP'];
+  var USD = { USD: 1.0, EUR: 1.0860, JPY: 0.006614, GBP: 1.2658 };
+
+  function rates(stale) {
+    var r = {};
+    CUR.forEach(function (a) {
+      r[a] = {};
+      CUR.forEach(function (b) { if (a !== b) r[a][b] = USD[a] / USD[b] * (1 - 0.0002); });
+    });
+    if (stale) r.GBP.EUR *= 1.0060;
+    return r;
+  }
+  function arb(r) {
+    var nodes = CUR, edges = [], dist = {}, prev = {}, last = null, i, k;
+    nodes.forEach(function (a) { dist[a] = 0; Object.keys(r[a]).forEach(function (b) { edges.push([a, b, -Math.log(r[a][b])]); }); });
+    for (i = 0; i < nodes.length; i++) {
+      last = null;
+      for (k = 0; k < edges.length; k++) {
+        var e = edges[k];
+        if (dist[e[0]] + e[2] < dist[e[1]] - 1e-12) { dist[e[1]] = dist[e[0]] + e[2]; prev[e[1]] = e[0]; last = e[1]; }
+      }
+      if (last === null) return null;
+    }
+    for (i = 0; i < nodes.length; i++) last = prev[last];
+    var cyc = [last], n = prev[last];
+    while (n !== last) { cyc.push(n); n = prev[n]; }
+    cyc.push(last);
+    return cyc.reverse();
+  }
+  function draw() {
+    var r = rates(cb.checked), cyc = arb(r), h = '';
+    CUR.forEach(function (a) {
+      h += '<tr><td class="mono">' + a + '</td>';
+      CUR.forEach(function (b) {
+        if (a === b) { h += '<td class="num" style="color:var(--ink-mute)">&mdash;</td>'; return; }
+        var hot = cyc && cyc.some(function (x, i) { return i < cyc.length - 1 && x === a && cyc[i + 1] === b; });
+        h += '<td class="num"' + (hot ? ' style="background:rgba(var(--accent-rgb),0.30);color:var(--ink)"' : '') + '>' + r[a][b].toPrecision(5) + '</td>';
+      });
+      h += '</tr>';
+    });
+    document.querySelector('#fx-tbl tbody').innerHTML = h;
+    var res = document.getElementById('fx-res'), note = document.getElementById('fx-note');
+    if (cyc) {
+      var gain = 1, i;
+      for (i = 0; i < cyc.length - 1; i++) gain *= r[cyc[i]][cyc[i + 1]];
+      res.textContent = 'cycle found'; res.className = 'v ok';
+      document.getElementById('fx-cyc').textContent = cyc.join(' → ');
+      document.getElementById('fx-gain').textContent = '×' + gain.toFixed(5) + ' (' + ((gain - 1) * 1e4 >= 0 ? '+' : '') + ((gain - 1) * 1e4).toFixed(1) + ' bp)';
+      note.className = 'warnbar hot';
+      note.innerHTML = 'The sum of &minus;log(rate) around <b>' + cyc.join(' &rarr; ') + '</b> is negative: a round trip returns more than you started with. One stale quote created it, and it will not last.';
+    } else {
+      res.textContent = 'no arbitrage'; res.className = 'v';
+      document.getElementById('fx-cyc').textContent = 'no negative cycle';
+      document.getElementById('fx-gain').textContent = 'every loop loses';
+      note.className = 'warnbar cool';
+      note.innerHTML = 'The V-th pass improves nothing, so there is no negative cycle: every loop loses at least the spread. Mark the GBP/EUR quote stale.';
+    }
+  }
+  cb.addEventListener('change', draw);
+  draw();
 })();
 
 /* ══ Check-yourself quiz ══════════════════════════════════════════ */
