@@ -416,6 +416,38 @@
   .card { background: var(--panel-2); border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px; font-size: 12px; color: var(--ink-dim); }
   .card h4 { color: var(--accent-3); margin-bottom: 3px; }
   .card .ex { font-family: var(--mono); font-size: 10.5px; color: var(--ink-mute); margin-top: 5px; }
+  /* ── guided explanations (every widget) ── */
+  p.why {
+    margin-top: 12px; padding: 10px 14px; border-radius: 9px; max-width: none;
+    background: var(--panel-2); border: 1px solid var(--line); border-left: 3px solid var(--accent-2);
+    font-size: 13.5px; color: var(--ink-dim);
+  }
+  p.why b:first-child { color: var(--accent-3); }
+  .guide {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line);
+    border-top: 1px solid var(--line);
+  }
+  .guide > div { background: var(--panel-2); padding: 12px 15px 13px; }
+  .guide h4 {
+    font-size: 10px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; margin-bottom: 5px;
+  }
+  .guide .g-see h4 { color: var(--accent-2); }
+  .guide .g-try h4 { color: var(--warn); }
+  .guide .g-notice h4 { color: var(--teal); }
+  .guide .g-rem h4 { color: var(--ok); }
+  .guide p { margin-top: 0; font-size: 12.5px; max-width: none; }
+  .guide p + p { margin-top: 6px; }
+  .guide ol { margin: 0 0 0 18px; font-size: 12.5px; color: var(--ink-dim); }
+  .guide ol li { margin-top: 3px; padding-left: 2px; }
+  .guide ol li::marker { color: var(--warn); font-family: var(--mono); font-weight: 700; }
+  .guide .g-rem { background: linear-gradient(90deg, rgba(63,185,80,0.07), transparent 70%), var(--panel-2); }
+  .guide .g-rem p.say-it { color: var(--ink); font-weight: 550; }
+  .guide .g-bot { color: #bfe8c6; }
+  .guide .g-bot b { color: #bfe8c6; }
+  .pcheck { margin-top: 24px; }
+  .pcheck h3 { margin-bottom: 4px; }
+  .pcheck .sub { margin-top: 2px; }
+  @media (max-width: 720px) { .guide { grid-template-columns: minmax(0,1fr); } }
 
   /* ── P0 ── */
   button.card.p0-uc { text-align: left; cursor: pointer; font-family: var(--sans); transition: border-color 0.15s, background 0.15s; }
@@ -529,6 +561,10 @@
  <div class="wrap">
   <div class="eyebrow">Part 0 &middot; Why machine learning in trading</div>
   <h2>ML sharpens the signal, never the system</h2>
+  <p class="why"><b>Why this part exists.</b> Weeks 1&ndash;7 built a bot that runs: a gateway, a book, a signal,
+  orders, an OMS, fast data. This week adds machine learning to that bot, so the first question is where it goes and what it
+  is allowed to change. The answer sets the rule for every later part: a model is kept only if the strategy gets better.
+  Part 1 then asks what kind of learning fits the question you have.</p>
   <p class="lead">A trading bot is a pipeline: ticks come in through the gateway, update the book, feed a signal,
   become orders, and are tracked by the OMS. Machine learning swaps one or two boxes &mdash; the signal, sometimes the
   execution model &mdash; and leaves the plumbing, the risk checks and the fees exactly where they were. That is why it
@@ -559,6 +595,27 @@
      <div class="say" id="p0-say" aria-live="polite"></div>
    </div>
    <div class="panel-note">Green lamps: the box is unchanged. Blue: the box is learned. Gateway, book, OMS and fees never are.</div>
+   <div class="guide">
+    <div class="g-see"><h4>What you are looking at</h4>
+     <p>Six boxes are the six parts of your bot: gateway in, book, signal, execution, OMS, gateway out. Blue dots are ticks;
+     after the signal box they become decisions (green buy, red sell, grey nothing), and after execution they become orders.
+     The strip at the bottom is the last 46 decisions; a bar's height is the size.</p></div>
+    <div class="g-try"><h4>Try this</h4><ol>
+     <li>Leave <b>Rule-based signal</b> on and watch the decision strip: every bar is full height or flat.</li>
+     <li>Click <b>ML signal</b>. A <code>model v3</code> cartridge docks into the signal box; only that lamp turns blue.</li>
+     <li>Watch the strip fill with bars of different heights: size now follows <code>p(up)</code>.</li>
+     <li>Click <b>ML signal + ML execution</b>. A second cartridge (<code>cost v1</code>) docks into execution.</li>
+     <li>Click each use-case card under the machine and see which box it lights.</li>
+    </ol></div>
+    <div class="g-notice"><h4>What to notice</h4>
+     <p>In every mode, four of the six lamps stay green. The gateway, the book, the OMS and the fees do not change when you add
+     a model. Five of the six use cases plug into the signal box; execution cost goes into execution, anomaly detection into
+     risk and the OMS.</p></div>
+    <div class="g-rem"><h4>Remember</h4>
+     <p class="say-it">ML replaces or sharpens one box, the signal and sometimes the execution model, never the system around
+     it. A model is judged on the same P&amp;L after fees as the rule it replaces.</p>
+     <p class="g-bot"><b>In your bot:</b> the model lives behind <code>signal()</code>; everything else in your trader stays as it is.</p></div>
+   </div>
   </div>
 
   <div class="panel">
@@ -578,6 +635,28 @@
      <div class="say" id="p0-eq-say" aria-live="polite"></div>
    </div>
    <div class="panel-note">500 trades, &plusmn;1 per trade before costs. The grey band is what a coin flip does 90% of the time.</div>
+   <div class="guide">
+    <div class="g-see"><h4>What you are looking at</h4>
+     <p>Three gauges are the three dangers. The dashed blue line is the backtest, what your notebook promised over 500
+     trades of &plusmn;1. The solid line is the same model live, after drift and feedback. The grey band is where 90% of
+     strategies with no edge at all end up: pure luck.</p></div>
+    <div class="g-try"><h4>Try this</h4><ol>
+     <li>Start at 53% hit rate. Read the callout: 1.3&sigma; from a coin, and the line stays inside the grey band.</li>
+     <li>Drag <b>Signal-to-noise</b> to 58%. Now it is 3.6&sigma;; the backtest climbs out of the band to +116.</li>
+     <li>Keep 58% and drag <b>Drift</b> to the right (90). The live line bends flat: +28 against +116.</li>
+     <li>Put drift back near 15 and drag <b>Feedback</b> to 90. The live line ends at &minus;76.</li>
+     <li>Set drift and feedback to 0 and press <b>Re-roll the luck</b> a few times: same hit rate, different curves.</li>
+    </ol></div>
+    <div class="g-notice"><h4>What to notice</h4>
+     <p>A 52&ndash;53% hit rate over 500 trades is 0.9&ndash;1.3&sigma; from a coin: you cannot tell it from luck. Even a real
+     58% edge loses most of its value live if the market drifts away from the training period (+116 becomes +28), and turns
+     negative when your own trading moves the price against you (&minus;76).</p></div>
+    <div class="g-rem"><h4>Remember</h4>
+     <p class="say-it">Three reasons ML is dangerous in trading: the signal-to-noise ratio is low, markets are not
+     stationary so models rot, and your trades feed back into prices. Budget as much time for catching yourself cheating as
+     for fitting.</p>
+     <p class="g-bot"><b>In your bot:</b> count your trades before you trust a hit rate, and watch it live (Part 7).</p></div>
+   </div>
   </div>
 
   <div class="bot"><b>What this changes in your bot:</b> one box &mdash; <code>signal()</code>, maybe the execution model &mdash; and it stays only if it beats your rule on P&amp;L after fees, out-of-sample. Spend as much time catching yourself cheating as fitting.</div>
@@ -585,6 +664,19 @@
     <span class="chip hl">signal &middot; execution &middot; risk</span>
     <span class="chip">pipeline</span><span class="chip">signal-to-noise</span><span class="chip">non-stationarity</span>
     <span class="chip">drift</span><span class="chip">feedback &middot; impact</span><span class="chip">baseline</span>
+  </div>
+  <div class="pcheck">
+   <h3>Check yourself</h3>
+   <p class="sub">Answer in your head, then click to reveal.</p>
+   <details class="pit"><summary>You replace your momentum rule with a gradient-boosting model. Which parts of the bot change?</summary>
+    <div class="pit-body"><p>Only the signal box: features in, a probability out, a size from it. The gateway, the book, the
+    order logic, the OMS and the fees stay the same, and the model is judged on the same P&amp;L after fees.</p></div></details>
+   <details class="pit"><summary>Your model hits 52% on 500 trades. Is that an edge?</summary>
+    <div class="pit-body"><p>Not yet. 52% over 500 trades is about 0.9&sigma; from a coin flip; a strategy with no edge does
+    that often. You need more trades, or a larger edge, before the number means anything.</p></div></details>
+   <details class="pit"><summary>Name the three reasons ML is dangerous in trading.</summary>
+    <div class="pit-body"><p>Low signal-to-noise (small edges hide in luck), non-stationarity (the market drifts away from
+    the training data, so models rot), and feedback (your own trades move the price and erode the edge).</p></div></details>
   </div>
  </div>
 </section>
@@ -594,6 +686,10 @@
  <div class="wrap">
   <div class="eyebrow">Part 1 &middot; Supervised vs unsupervised</div>
   <h2>Labels or no labels</h2>
+  <p class="why"><b>Why this part exists.</b> Part 0 put the model inside the signal box. Before you build one, you
+  have to say what question it answers. If you have an answer for every past row (did the price move, did the order fill),
+  you learn to predict it: supervised. If you only have the states, you learn their structure: unsupervised. Part 2 then
+  builds the columns of X that both kinds of model eat.</p>
   <p class="lead">Supervised learning needs an answer for every row: features <b>X</b> known at time <i>t</i>, a label
   <b>y</b> about <i>t&nbsp;+&nbsp;h</i>, and a model that maps one to the other &mdash; a class (up/down, fill/no fill) or a
   number (return, cost). Unsupervised learning has only X and looks for structure: regimes, common factors, the one
@@ -636,6 +732,30 @@
      <div class="say" id="p1-say" aria-live="polite"></div>
    </div>
    <div class="panel-note">Simulated states. Supervised label: did the mid move more than 10 bp in the next 20 ticks? Unsupervised: the same X, no y.</div>
+   <div class="guide">
+    <div class="g-see"><h4>What you are looking at</h4>
+     <p>Each dot is one moment of the market, placed by its realized volatility (across) and its spread (up). In supervised
+     mode, amber dots are moments after which the price moved more than 10 bp in 20 ticks, blue ones are quiet, and the white
+     dashed line is a logistic classifier being fitted. In unsupervised mode the colours are gone; diamonds are k-means
+     centres, and the console on the right shows the timeline (X only, no y), the inertia per step and the elbow curve.</p></div>
+    <div class="g-try"><h4>Try this</h4><ol>
+     <li>In <b>Supervised</b>, watch the line tilt and the log-loss trace flatten. It stops at iteration 400 with training accuracy 82%.</li>
+     <li>Press <b>Fit again from zero</b> and watch it again: the line starts flat and swings into place in the first 60 iterations.</li>
+     <li>Switch to <b>Unsupervised</b>. Press <b>Step</b> slowly: one press assigns dots to the nearest centre, the next moves each centre to its dots.</li>
+     <li>Keep pressing until the console says <b>converged</b> (6 assignments for k = 3). Then try k = 2 and k = 5, and look at the elbow chart.</li>
+     <li>Turn on <b>PCA axes</b>, then <b>Anomalies</b>.</li>
+    </ol></div>
+    <div class="g-notice"><h4>What to notice</h4>
+     <p>The classifier needs the answers; k-means never sees them and still finds three groups (calm, trending, stressed).
+     Raising k always lowers the within-cluster distance (57% down at k = 3, 71% at k = 5), so that number cannot pick k; the
+     elbow bends at k = 3. PC1 explains 88% of the variance because vol and spread rise together. The ringed dots sit far from
+     every centre: a wide quote in a calm market is a broken bot, not a regime.</p>
+     <p>The 82% is in-sample: it is measured on the dots the line was fitted on.</p></div>
+    <div class="g-rem"><h4>Remember</h4>
+     <p class="say-it">Supervised learning maps X at time t to a label y about t + h, either a class or a number.
+     Unsupervised learning has only X and finds structure in it: clusters (regimes), factors (PCA) and outliers (anomalies).</p>
+     <p class="g-bot"><b>In your bot:</b> a supervised model gives a signal; a regime cluster or an anomaly flag decides which rule trades, or whether to stop.</p></div>
+   </div>
   </div>
 
   <div class="cards">
@@ -653,6 +773,19 @@
     <span class="chip">classification</span><span class="chip">regression</span><span class="chip">k-means</span>
     <span class="chip">PCA</span><span class="chip">anomaly detection</span><span class="chip">regimes</span><span class="chip">RL (not here)</span>
   </div>
+  <div class="pcheck">
+   <h3>Check yourself</h3>
+   <p class="sub">Answer in your head, then click to reveal.</p>
+   <details class="pit"><summary>You want to predict whether your resting bid fills within 5 ticks. Supervised or unsupervised, and which kind?</summary>
+    <div class="pit-body"><p>Supervised classification. X is what you know when you post (spread, queue, imbalance); y is
+    fill or no fill in the next 5 ticks, which you can read off past tapes.</p></div></details>
+   <details class="pit"><summary>Why can't the within-cluster distance tell you how many regimes there are?</summary>
+    <div class="pit-body"><p>It always falls when you add clusters; with one cluster per point it is zero. Look for where it
+    stops falling fast (the elbow), and check that the clusters mean something in trading terms.</p></div></details>
+   <details class="pit"><summary>Give one arena use of unsupervised learning.</summary>
+    <div class="pit-body"><p>Cluster sessions into calm and stressed regimes and switch rules; use PCA to find the common
+    "market" factor in the ten symbols; flag your own bot when its quotes are far from every normal state.</p></div></details>
+  </div>
  </div>
 </section>
 
@@ -661,6 +794,10 @@
  <div class="wrap">
   <div class="eyebrow">Part 2 &middot; Technical indicators</div>
   <h2>The feature factory, and why the parameters explode</h2>
+  <p class="why"><b>Why this part exists.</b> Part 1 said a supervised model maps features X at time <i>t</i> to a label
+  about <i>t&nbsp;+&nbsp;h</i>. This part is about X: the columns you build from prices and the book. Indicators are the
+  classical features, and each one hides windows and thresholds you choose. Count them honestly and you see why Part 4 (too
+  many dimensions) and Part 5 (overfitting) are coming, and why a better strategy starts with fewer, chosen features.</p>
   <p class="lead">Indicators are the classical, hand-made features: averages, momentum, RSI, bands, VWAP distance,
   book imbalance. Every one of them has a window and a threshold, and every window is a parameter you chose.
   Multiply by symbols and by the model's own knobs and you are fitting thousands of numbers to a few hundred
@@ -705,6 +842,22 @@
    </div>
    <div class="panel-note">Simulated, seeded path (one symbol). Every slider you touched is one more number the backtest
    was fitted with &mdash; the counter in the top-right corner is already counting them.</div>
+   <div class="guide">
+    <div class="g-see"><h4>What you are looking at</h4>
+     <p>One simulated price path scrolls to the left. The lines on the price are moving averages (SMA, EMA), Bollinger bands and VWAP; the two strips underneath are RSI and order-book imbalance. The housing on the right shows the value of each indicator at <i>t</i>, the number your <code>on_tick</code> would see now. <b>KNOBS SET</b> counts the parameters you chose.</p></div>
+    <div class="g-try"><h4>Try this</h4><ol>
+     <li>Leave the defaults (SMA, EMA, RSI, book imbalance). The label above the buttons reads <b>7 parameters chosen, 1 symbol</b>.</li>
+     <li>Turn on <b>Bollinger</b> and <b>VWAP</b>. The count goes to <b>10</b>: Bollinger alone adds a window and a width.</li>
+     <li>Press <b>Pause</b>, then drag <b>SMA window</b> from 20 to 5 and then to 120. Watch the line go from hugging the price to lagging far behind it.</li>
+     <li>Drag <b>Bollinger width k</b> from 2.0&sigma; to 1.0&sigma;. The price touches the bands far more often.</li>
+     <li>Drag <b>RSI window</b> from 14 to 3. RSI swings between its extremes; at 50 it barely leaves the middle.</li>
+    </ol></div>
+    <div class="g-notice"><h4>What to notice</h4>
+     <p>The same price gives a different feature for every window you pick. A short SMA is noisy and reacts fast; a long one is smooth and late. The band width decides how often a &ldquo;band touch&rdquo; signal fires. None of these choices is given by the market: each one is a number you fitted, even if you fitted it by eye. Ten knobs on one symbol is already ten.</p></div>
+    <div class="g-rem"><h4>Remember</h4>
+     <p class="say-it">An indicator is a hand-made feature with parameters: a window, and usually a threshold. Every parameter you pick by looking at the backtest is a parameter you fitted.</p>
+     <p class="g-bot"><b>In your bot:</b> write down every window and threshold you use, and count them.</p></div>
+   </div>
   </div>
 
   <!-- ── WIDGET 2 · parameter explosion ── -->
@@ -738,6 +891,21 @@
    </div>
    <div class="panel-note">Independent observations assumed: 2,000 non-overlapping labels. &ldquo;Luck&rdquo; is the expected best
    annualised Sharpe among that many zero-edge trials, &radic;(2&nbsp;ln&nbsp;trials) &mdash; what a search finds when there is nothing to find.</div>
+   <div class="guide">
+    <div class="g-see"><h4>What you are looking at</h4>
+     <p>The hopper on the left holds the indicators. Each one drops into a machine whose three gears multiply it by the windows, the thresholds and the symbols you try. Column names like <code>rsi_14&middot;NVDA</code> come out on the belt. Three odometers count feature columns, the parameters of the model on top, and the trials a search would run. The gauge compares columns with the 2,000 independent observations assumed; <b>LUCK</b> is the Sharpe a search finds when there is nothing to find.</p></div>
+    <div class="g-try"><h4>Try this</h4><ol>
+     <li>Read the defaults in the callout: <b>1,800 columns</b> = 10 indicators &times; 20 windows &times; 9 symbols, <b>0.90 per independent observation</b>, <b>27,000 trials</b>, luck Sharpe near <b>4.5</b>.</li>
+     <li>Switch <b>Model on top</b> from Logistic to <b>MLP</b>. Trials go to <b>291,600</b> and the luck Sharpe to <b>5.0</b>; the model-parameters odometer jumps from 1,801 to about 29,000.</li>
+     <li>Set the model back to Logistic. Drag <b>Windows per indicator</b> to 30, <b>Thresholds per rule</b> to 12 and <b>Symbols</b> to 12: <b>3,600 columns</b>, <b>1.80</b> per observation, <b>216,000 trials</b>.</li>
+     <li>Now go small: switch off all indicators but three in the hopper, then set 5 windows, 2 thresholds, 1 symbol. The callout reads <b>15 columns</b>, <b>150 trials</b>, luck near <b>3.2</b>.</li>
+    </ol></div>
+    <div class="g-notice"><h4>What to notice</h4>
+     <p>The counts multiply, they do not add: one extra symbol or one extra window multiplies every column. At the defaults you have almost one column per independent observation, so a model can fit almost anything. The luck number grows slowly, as &radic;(2&nbsp;ln&nbsp;trials), but it never stops: with 27,000 trials a strategy with no edge is expected to show a Sharpe near 4.5 in the search. Even 150 trials buy a luck Sharpe of 3.2.</p></div>
+    <div class="g-rem"><h4>Remember</h4>
+     <p class="say-it">Indicators &times; windows &times; thresholds &times; symbols, plus the model's own parameters and its hyperparameter grid, quickly gives more columns than independent observations. The best result of a large search is mostly luck unless it survives data it never saw.</p>
+     <p class="g-bot"><b>In your bot:</b> keep the number of features and trials small, and report how many you tried, not just the best one.</p></div>
+   </div>
   </div>
 
   <!-- ── WIDGET 3 · O(1) rolling ── -->
@@ -757,6 +925,20 @@
    </div>
    <div class="panel-note">Week 6, applied: keep a running sum (and sum of squares) and a deque; SMA, Bollinger, VWAP, realised vol
    all update in two operations per tick, whatever the window.</div>
+   <div class="guide">
+    <div class="g-see"><h4>What you are looking at</h4>
+     <p>A row of prices, with a bracket marking the last <i>n</i> of them: the rolling window. Each tick a new price enters with a <b>+</b> and the oldest leaves with a <b>&minus;</b>. Two lanes count the work: <b>RECOMPUTE</b> sums all <i>n</i> values again each tick; <b>RUNNING SUM</b> keeps <code>s</code> and does <code>s += new &minus; old</code>.</p></div>
+    <div class="g-try"><h4>Try this</h4><ol>
+     <li>Leave the window at 12 and press <b>Step one tick</b> ten times. Recompute spends 12 operations per tick, the running sum 2.</li>
+     <li>Drag <b>Window n</b> to 30 (the counters reset). Step again: recompute now costs 30 per tick, the running sum still 2.</li>
+     <li>Drag the window to 3 and compare: 3 against 2. The gain only shows on long windows.</li>
+    </ol></div>
+    <div class="g-notice"><h4>What to notice</h4>
+     <p>Both lanes produce the same moving average. The cost of recomputing grows with the window; the running sum costs 2 operations per tick whatever <i>n</i> is. With 1,800 columns, many of them on long windows, that difference decides whether <code>on_tick</code> fits in its budget (Part 7).</p></div>
+    <div class="g-rem"><h4>Remember</h4>
+     <p class="say-it">A rolling mean, variance, VWAP or realized vol can be updated in O(1) per tick: keep a running sum (and a sum of squares) and a deque, add the new value, drop the old one.</p>
+     <p class="g-bot"><b>In your bot:</b> compute features incrementally in <code>on_tick</code>; never recompute a whole window.</p></div>
+   </div>
   </div>
 
   <div class="bot"><b>What this changes in your bot:</b> fewer, chosen features computed in O(1) inside <code>on_tick</code> &mdash;
@@ -767,6 +949,16 @@
     <span class="chip">book imbalance</span><span class="chip">parameter vs hyperparameter</span><span class="chip hl">multiple testing</span>
     <span class="chip">O(1) rolling update</span>
   </div>
+  <div class="pcheck">
+   <h3>Check yourself</h3>
+   <p class="sub">Answer in your head, then click to reveal.</p>
+   <details class="pit"><summary>You try 4 indicators, 10 windows each, 3 thresholds, on 9 symbols. How many feature columns and how many rules do you search?</summary>
+    <div class="pit-body"><p>4 &times; 10 &times; 9 = 360 columns, and 360 &times; 3 = 1,080 threshold rules, before any model grid. The best of 1,080 zero-edge rules still shows a good-looking Sharpe.</p></div></details>
+   <details class="pit"><summary>Your teammate picked the SMA window by looking at the backtest. Is that window a parameter?</summary>
+    <div class="pit-body"><p>Yes. Any number chosen by looking at results was fitted to those results. It counts toward your parameters and your trials, even if no optimiser touched it.</p></div></details>
+   <details class="pit"><summary>Why does a 200-tick rolling mean not need 200 additions per tick?</summary>
+    <div class="pit-body"><p>Keep the running sum: add the new price, subtract the one that left the window. Two operations per tick, whatever the window length.</p></div></details>
+  </div>
  </div>
 </section>
 
@@ -775,6 +967,9 @@
  <div class="wrap">
   <div class="eyebrow">Part 3 &middot; The data / ML pipeline</div>
   <h2>Nine stations, and a leak at every one</h2>
+  <p class="why"><b>Why this part exists.</b> Part 2 built the features. This part runs them through the whole pipeline, from
+  the hypothesis to the number you report. Each station can let the future into the past, and a leak does not look like a bug: it looks
+  like a great model that loses on Friday. Once the pipeline is honest, Part 4 asks how many features that honest pipeline can afford.</p>
   <p class="lead">Hypothesis first, then data, cleaning, scaling, merging, splitting, training, one look at the test set,
   and an evaluation in the units the leaderboard pays. Every station can quietly let the future in, and a leak never
   looks like a bug: it looks like a great model. The machine below starts with five leaks switched on &mdash; find them and fix them.</p>
@@ -797,6 +992,22 @@
    </div>
    <div class="panel-note">Scores are illustrative: the &ldquo;live&rdquo; hit rate is what a zero-edge market pays; every point the
    backtest reports above it is borrowed from the future.</div>
+   <div class="guide">
+    <div class="g-see"><h4>What you are looking at</h4>
+     <p>Nine stations are the nine steps of a research pipeline: ideation, data, cleaning, standardize, merge, cross-val, train, test, evaluate. Red stations are broken (leaking); packets turn red after passing one. The panel under the machine shows what goes wrong at the selected station. The gauge is the leak detector; the two boxes compare the hit rate the backtest reports with what Friday pays.</p></div>
+    <div class="g-try"><h4>Try this</h4><ol>
+     <li>Read the start: <b>5 of 9 stations leaking</b>, the backtest reports <b>72.5%</b> against <b>51.0%</b> live, leak detector at 67%.</li>
+     <li>Click station 6, <b>CROSS-VAL</b>, and flip the switch to fix it. The backtest drops to <b>63.5%</b>.</li>
+     <li>Click station 5, <b>MERGE</b>, and fix it too. The backtest drops to <b>57.5%</b>; 3 stations are still leaking.</li>
+     <li>Click the other red stations (cleaning, standardize, test) one by one, read what goes wrong, and fix each.</li>
+     <li>Press <b>Break all</b>: 9 of 9 leaking, <b>80.5%</b> reported. Press <b>Fix all</b>: 51.0% against 51.0%.</li>
+    </ol></div>
+    <div class="g-notice"><h4>What to notice</h4>
+     <p>The live number never moves: it is what a market with no edge pays, 51%. Every point the backtest shows above it came from the future. The two largest leaks are a shuffled cross-validation (9 points) and a merge that picks up a later row (6 points); the scaler fit on all data and the test set opened 30 times are smaller but just as real. The scores are illustrative weights; the failures are the real ones.</p></div>
+    <div class="g-rem"><h4>Remember</h4>
+     <p class="say-it">A leak makes a backtest look better and live trading no better. Check every station: hypothesis first, clean, scale on train only, merge as-of backward, split in time with purge and embargo, tune on validation, open the test set once, evaluate in P&amp;L after fees.</p>
+     <p class="g-bot"><b>In your bot:</b> when the backtest is much better than live, look for a leak before you look for a better model.</p></div>
+   </div>
   </div>
 
   <!-- ── WIDGET 2 · the same predictions, three report cards ── -->
@@ -824,6 +1035,23 @@
      <div class="say" id="p3-met-say" aria-live="polite">&nbsp;</div>
    </div>
    <div class="panel-note">Baselines first: &ldquo;always up&rdquo; and the momentum rule are in every card. A model that does not beat them on the trading card has not made the strategy better.</div>
+   <div class="guide">
+    <div class="g-see"><h4>What you are looking at</h4>
+     <p>One model, 500 test ticks, one set of predictions. The three buttons grade those same predictions three ways. <b>Classification</b>: confusion matrix, ROC curve, accuracy, precision, recall, F1, ROC-AUC, log-loss. <b>Regression</b>: predicted against realised return, MSE, RMSE, MAE, R&sup2;. <b>Trading</b>: equity after costs for the model, always-up and a momentum rule, with hit rate, P&amp;L, Sharpe, turnover and drawdown.</p></div>
+    <div class="g-try"><h4>Try this</h4><ol>
+     <li>On <b>Classification</b>, read the defaults: accuracy <b>55.6%</b> against 48.6% for always-up, precision 54.2%, recall 55.6%, AUC 0.575, log-loss 0.6891.</li>
+     <li>Drag <b>Decision threshold</b> to 0.60: precision rises to <b>60.0%</b>, recall falls to <b>22.2%</b>. Drag it to 0.40: precision 50.6%, recall 85.6%. AUC and log-loss do not move.</li>
+     <li>Click <b>Regression</b>. R&sup2; is <b>3.2%</b>; RMSE is 5.73 bp against 5.83 bp for predicting the mean.</li>
+     <li>Click <b>Trading</b>. At 0.5 bp per position change the model makes <b>+128 bp</b> against +53 for momentum, with 479 units of turnover.</li>
+     <li>Drag <b>Cost per position change</b> to 1.0 bp: the model now loses, <b>&minus;111 bp</b> against about 0 for the best baseline. At 1.5 bp it is &minus;351.</li>
+     <li>Keep 1.5 bp and drag <b>Trade only if |p &minus; 0.5| &gt;</b> from 0.04 to 0.15: the loss shrinks to <b>&minus;54 bp</b>. Trading less helps; it does not make it win.</li>
+    </ol></div>
+    <div class="g-notice"><h4>What to notice</h4>
+     <p>The same predictions can look good (55.6% accuracy, a hit rate of 57.7%), weak (R&sup2; of 3.2%) and losing (&minus;111 bp at 1 bp cost) depending on the card. Moving the threshold trades precision against recall; it does not change AUC or log-loss, which judge the probabilities. Only the trading card counts fees and turnover, and only it tells you whether the strategy got better.</p></div>
+    <div class="g-rem"><h4>Remember</h4>
+     <p class="say-it">Pick metrics that match the decision: classification metrics for the probabilities, regression metrics for the size of the move, and P&amp;L after costs, Sharpe, turnover and drawdown against a baseline for the strategy.</p>
+     <p class="g-bot"><b>In your bot:</b> report every model against always-up and your momentum rule, after fees, with its turnover.</p></div>
+   </div>
   </div>
 
   <!-- ── WIDGET 3 · the leakage gap ── -->
@@ -844,6 +1072,21 @@
    </div>
    <div class="panel-note">Features: past returns over 10, 20 and 40 ticks; label: sign of the next h ticks; model: 7-nearest neighbours.
    Neighbouring rows share almost all of both, so a shuffle puts the answer in the training set. Set h&nbsp;=&nbsp;1 and the gap closes.</div>
+   <div class="guide">
+    <div class="g-see"><h4>What you are looking at</h4>
+     <p>A random walk of 1,000 ticks: there is nothing to predict. The same 7-nearest-neighbour model is scored three ways. The coloured strips show which rows each scheme puts in training (blue) and test (amber): <b>shuffled 5-fold</b> mixes them, the <b>time split</b> cuts at 70%, and <b>walk-forward</b> moves forward with an embargo gap. The bars are the three accuracies; the dots are earlier walks.</p></div>
+    <div class="g-try"><h4>Try this</h4><ol>
+     <li>Read the default walk (h = 20): shuffled K-fold <b>63.9%</b>, time split <b>51.0%</b>, walk-forward <b>50.0%</b>. A 13-point gap.</li>
+     <li>Press <b>Re-draw the walk</b> four times. Shuffled stays between about 60% and 67%; the time-based scores stay near 46&ndash;55%.</li>
+     <li>Drag <b>Label horizon h</b> to 40: shuffled reaches <b>69.3%</b>, a 15-point gap.</li>
+     <li>Drag it to 1: shuffled <b>52.6%</b>, time split 50.7%, walk-forward 49.2%. The gap closes.</li>
+    </ol></div>
+    <div class="g-notice"><h4>What to notice</h4>
+     <p>The walk has no edge, so any honest score is about 50%. Neighbouring rows share almost the same rolling features and almost the same forward label; a shuffle puts the neighbour of every test row in the training set, and k-NN simply looks it up. The longer the label horizon, the more the labels overlap and the bigger the fake edge. With h = 1 there is little overlap and the gap disappears.</p></div>
+    <div class="g-rem"><h4>Remember</h4>
+     <p class="say-it">Random K-fold lies on time series: overlapping features and labels leak across the split. Use a time split or walk-forward, and purge or embargo at least the label horizon between training and test.</p>
+     <p class="g-bot"><b>In your bot:</b> validate with <code>TimeSeriesSplit(gap=h)</code> or walk-forward, never a shuffled split.</p></div>
+   </div>
   </div>
 
   <div class="bot"><b>What this changes in your bot:</b> only a number earned through this pipeline &mdash; scaled on train,
@@ -854,6 +1097,16 @@
     <span class="chip">precision &middot; recall &middot; F1</span><span class="chip">ROC-AUC &middot; log-loss</span><span class="chip">RMSE &middot; R&sup2;</span>
     <span class="chip">Sharpe &middot; turnover &middot; drawdown</span><span class="chip">baseline</span>
   </div>
+  <div class="pcheck">
+   <h3>Check yourself</h3>
+   <p class="sub">Answer in your head, then click to reveal.</p>
+   <details class="pit"><summary>You standardise your features with a scaler fitted on the whole dataset, then split 70/30 in time. What leaked?</summary>
+    <div class="pit-body"><p>The mean and standard deviation of the test period went into the training features. Fit the scaler on the training rows only and apply it forward.</p></div></details>
+   <details class="pit"><summary>Your label is the sign of the next 20 ticks. Why do you need a gap between the training and test blocks?</summary>
+    <div class="pit-body"><p>The last 20 training rows have labels that reach into the test block. Purge or embargo at least 20 rows at the boundary so no training label overlaps the test period.</p></div></details>
+   <details class="pit"><summary>Your model has 55% accuracy and beats always-up. Can it still lose money?</summary>
+    <div class="pit-body"><p>Yes. Accuracy ignores fees, turnover and the size of the moves. In the widget the same predictions make +128 bp at 0.5 bp per change and lose 111 bp at 1 bp. Judge it on P&amp;L after costs against a baseline.</p></div></details>
+  </div>
  </div>
 </section>
 
@@ -862,6 +1115,10 @@
  <div class="wrap">
   <div class="eyebrow">Part 4 &middot; The curse of dimensionality</div>
   <h2>More columns, emptier space</h2>
+  <p class="why"><b>Why this part exists.</b> Part 2 showed how fast the columns multiply; Part 3 built a pipeline
+  that measures a model honestly. This part explains why many columns hurt even in an honest pipeline: the data gets thin
+  in every direction. It gives you three tools to cut the columns back &mdash; shrinkage, PCA and LDA &mdash; so the model
+  learns signal, not noise. Part 5 then shows the same problem from the model side: overfitting.</p>
   <p class="lead">Every indicator column from Part 2 is one more dimension. In high dimensions the volume moves to the
   skin, every point is about as far from every other, and the data needed to fill the space grows exponentially &mdash;
   while a season of arena history stays small and noisy. Three remedies: shrink the coefficients, rotate to the few
@@ -889,6 +1146,27 @@
    </div>
    <div class="panel-note">A nearest-neighbour or kernel model needs &ldquo;near&rdquo; to mean something. Past twenty
    columns it barely does, and no tape is long enough to fill the space back in.</div>
+   <div class="guide">
+    <div class="g-see"><h4>What you are looking at</h4>
+     <p>Each column of your feature matrix is one axis. The left drawing is a cube in d dimensions with its outer 5% skin in
+     red. The middle radar is 200 random points seen from one query point: the rings mark the nearest and the farthest. The
+     right tower is how many rows you need to keep 10 rows in every small cube, on a log scale, next to the size of real tapes.</p></div>
+    <div class="g-try"><h4>Try this</h4><ol>
+     <li>Start at <b>d = 1</b>: the skin holds 10% of the line, nearest/farthest is 0.00, you need 1e2 rows.</li>
+     <li>Drag <b>Dimensions d</b> to 3: 27% in the skin, ratio 0.08, 1e4 rows.</li>
+     <li>Drag to <b>10</b>: 65% in the skin, ratio 0.37, 1e11 rows. Watch the two rings on the radar close in.</li>
+     <li>Drag to <b>50</b>: 99% in the skin, ratio 0.64, 1e51 rows.</li>
+     <li>Press <b>Re-draw 200 points</b> at d = 50: the points move, the ratio stays about the same.</li>
+    </ol></div>
+    <div class="g-notice"><h4>What to notice</h4>
+     <p>At 10 columns most of the volume is already at the edge, and the nearest point is 0.37 of the farthest one, so
+     &ldquo;close&rdquo; stops meaning much. The rows needed grow by ten for every column you add: 1e11 at d = 10 is far more
+     than any arena tape. The data does not change; the space around it gets empty.</p></div>
+    <div class="g-rem"><h4>Remember</h4>
+     <p class="say-it">In high dimensions the volume sits on the skin, distances concentrate (nearest and farthest become alike) and the
+     sample needed grows exponentially with the number of features. With a small, noisy sample, every extra column costs you.</p>
+     <p class="g-bot"><b>In your bot:</b> keep the feature list short, and be most careful with models that rely on distances (k-NN, RBF kernels).</p></div>
+   </div>
   </div>
 
   <div class="panel">
@@ -909,6 +1187,28 @@
    </div>
    <div class="panel-note">Ridge shrinks every coefficient and shares the weight between correlated twins; lasso sets
    some exactly to zero (feature selection); elastic net does both. Choose &lambda; on later data, never on the test set.</div>
+   <div class="guide">
+    <div class="g-see"><h4>What you are looking at</h4>
+     <p>Eight bars are the eight coefficients of a linear model fitted on 40 rows; only three features really matter
+     and they come in correlated pairs. White ticks are the true values, the dashed ghost is the fit with no penalty, and a lamp
+     goes out when a coefficient hits exactly zero. The two charts below are the coefficient paths across &lambda; and the
+     error on 400 later rows.</p></div>
+    <div class="g-try"><h4>Try this</h4><ol>
+     <li>Keep <b>Ridge &middot; L2</b> and drag <b>Penalty &lambda;</b> from 0.001 to 0.316: all bars shrink, all 8 stay non-zero.</li>
+     <li>Read the callout: MSE on later rows goes from 5.51 (barely penalised) to a best of 5.45 at &lambda; = 0.049.</li>
+     <li>Drag &lambda; to 3.2: MSE jumps to 8.88 &mdash; the real signal is being shrunk too.</li>
+     <li>Click <b>Lasso &middot; L1</b> and set &lambda; = 0.316: only 5 of 8 coefficients are left; lamps go out.</li>
+     <li>At &lambda; = 3.2 lasso keeps 0 of 8. Then try <b>Elastic net</b> at 0.316: 6 of 8 survive.</li>
+    </ol></div>
+    <div class="g-notice"><h4>What to notice</h4>
+     <p>A small penalty helps on new data (ridge 5.51 &rarr; 5.45, lasso best 5.23 at &lambda; = 0.115) because it stops the
+     model from chasing noise in 40 rows. Ridge spreads weight across correlated twins and never zeroes them; lasso picks one
+     and drops the rest. Too much penalty kills the signal: MSE climbs to 12.83, the error of predicting nothing.</p></div>
+    <div class="g-rem"><h4>Remember</h4>
+     <p class="say-it">Regularisation trades a little bias for less variance. Ridge (L2) shrinks every coefficient; lasso (L1) sets some
+     exactly to zero, so it also selects features; elastic net mixes both. &lambda; is chosen on later data, never on the test set.</p>
+     <p class="g-bot"><b>In your bot:</b> fit your logistic or linear model with a penalty, and choose its strength by walk-forward validation.</p></div>
+   </div>
   </div>
 
   <div class="panel">
@@ -932,6 +1232,27 @@
    </div>
    <div class="panel-note">PCA is feature <b>extraction</b> without labels: it keeps variance, which may be noise. LDA is
    supervised: it keeps separation. Lasso, by contrast, is feature <b>selection</b>: it keeps original columns.</div>
+   <div class="guide">
+    <div class="g-see"><h4>What you are looking at</h4>
+     <p>Each dot is a market state described by two features, coloured by its class: calm, trending, stressed. The bright
+     line is the chosen axis. The two histograms on the right are the same states squashed onto one number: on the PCA axis
+     and on the LDA axis, each with the accuracy of a rule that picks the nearest class mean.</p></div>
+    <div class="g-try"><h4>Try this</h4><ol>
+     <li>Keep <b>PCA (unsupervised)</b>. The axis follows the long direction of the cloud.</li>
+     <li>Read the callout: 79% of the variance, but only 40% of states labelled correctly (chance is 33%).</li>
+     <li>Press <b>Project onto the axis</b> and watch the three colours pile on top of each other.</li>
+     <li>Click <b>LDA (uses the labels)</b>: the axis turns across the cloud; 90% are labelled correctly.</li>
+     <li>Press <b>New cloud</b> a few times and compare the two accuracies each time.</li>
+    </ol></div>
+    <div class="g-notice"><h4>What to notice</h4>
+     <p>The direction with the most variance is not the direction that tells the classes apart. PCA never looks at the
+     labels, so it keeps the spread (79%) and loses the separation (40%). LDA uses the labels and keeps one number that
+     still separates the classes (90%).</p></div>
+    <div class="g-rem"><h4>Remember</h4>
+     <p class="say-it">PCA is unsupervised feature extraction: it keeps the directions of largest variance, which may be noise. LDA is
+     supervised: it keeps the directions that separate the classes. Lasso, by contrast, selects original columns.</p>
+     <p class="g-bot"><b>In your bot:</b> if you compress features with PCA, check on later data that the components still predict your label.</p></div>
+   </div>
   </div>
 
   <div class="panel">
@@ -947,6 +1268,25 @@
    </div>
    <div class="panel-note">Ten correlated columns, about three independent ones: the market, then a chips-vs-platforms
    spread. Three components can stand in for ten raw returns.</div>
+   <div class="guide">
+    <div class="g-see"><h4>What you are looking at</h4>
+     <p>The left chart is the scree plot: the share of the variance of 10 simulated arena returns carried by each
+     principal component, with the cumulative share as the dashed line. The right chart shows the loadings of the selected
+     component on each symbol: that set of weights is a portfolio, an eigen-portfolio.</p></div>
+    <div class="g-try"><h4>Try this</h4><ol>
+     <li>Read the scree plot: PC1 61%, PC2 12%, PC3 5%, PC4 4%; the rest are small.</li>
+     <li>Keep <b>PC1</b>: every loading is positive and about equal &mdash; all long, the market.</li>
+     <li>Click <b>PC2</b>: NVDA, TSLA, AMD and INTC are positive, the others negative &mdash; chips vs platforms.</li>
+     <li>Click <b>PC3</b> and see a smaller, third spread.</li>
+    </ol></div>
+    <div class="g-notice"><h4>What to notice</h4>
+     <p>Ten correlated return columns carry about three independent pieces of information: together PC1 to PC3 hold
+     about 78% of the variance. The first one is the market factor. A model fed the ten raw returns is mostly fitting the same
+     factor ten times.</p></div>
+    <div class="g-rem"><h4>Remember</h4>
+     <p class="say-it">PCA rotates correlated columns into uncorrelated components ordered by variance (the scree plot). On returns, the
+     first component is the market and the next ones are sector spreads: a few components can stand in for many columns.</p></div>
+   </div>
   </div>
 
   <div class="bot"><b>What this changes in your bot:</b> fewer, standardised features and a penalty chosen on later
@@ -963,6 +1303,16 @@
     <span class="chip">LDA</span>
     <span class="chip">selection vs extraction</span>
   </div>
+  <div class="pcheck">
+   <h3>Check yourself</h3>
+   <p class="sub">Answer in your head, then click to reveal.</p>
+   <details class="pit"><summary>You add 30 indicator columns to a k-nearest-neighbour model trained on one season of ticks. Why does it get worse?</summary>
+    <div class="pit-body"><p>With 30 dimensions the points are almost equally far from each other, so the &ldquo;nearest&rdquo; neighbours are not really near, and one season is far too small to fill the space. The extra columns add distance noise, not information.</p></div></details>
+   <details class="pit"><summary>Ridge or lasso: which one can drop a feature completely, and why does that matter?</summary>
+    <div class="pit-body"><p>Lasso (L1): its penalty sets some coefficients exactly to zero, so it also selects features. Ridge (L2) only shrinks them. A model with fewer features is cheaper in <code>on_tick</code> and easier to check.</p></div></details>
+   <details class="pit"><summary>PCA finds an axis with 79% of the variance. Why can it still be useless for predicting the regime?</summary>
+    <div class="pit-body"><p>PCA ignores the labels. The direction with the most variance can be noise or a factor that has nothing to do with the class; LDA, which uses the labels, can separate the classes on a direction with less variance.</p></div></details>
+  </div>
  </div>
 </section>
 
@@ -971,6 +1321,10 @@
  <div class="wrap">
   <div class="eyebrow">Part 5 &middot; Linear models and their limits</div>
   <h2>Watch a model memorise the noise</h2>
+  <p class="why"><b>Why this part exists.</b> Part 4 showed that thin data cannot support many columns. This part
+  shows the same thing inside one model: give a linear model more flexibility and it starts to learn the noise. Linear and
+  logistic regression are the first rung of the ladder and the baseline every later model must beat. Part 6 then climbs to
+  non-linear models, with the same overfitting knob on each.</p>
   <p class="lead">Linear models are the first rung: least squares has a closed form, t-stats and an R&sup2; you can
   explain, and logistic regression turns a score into a probability you can size a position with. Their knob is
   flexibility. Drag the degree: error on the training points always falls, error on new points turns around &mdash; that
@@ -1008,6 +1362,29 @@
    </div>
    <div class="panel-note">Faint curves are the same degree fitted to earlier noise samples: their spread is the
    variance of the model. Ridge keeps the degree but taxes the coefficients &mdash; watch the bars shrink and the wiggle calm down.</div>
+   <div class="guide">
+    <div class="g-see"><h4>What you are looking at</h4>
+     <p>White dots are 15 training points around a smooth curve (dashed); hollow dots are 60 new points the model never
+     sees. The blue line is a polynomial fit of the chosen degree; faint red curves are the same degree fitted to earlier noise
+     samples. Bars show the size of the coefficients; the lower charts are train and test error against the degree and
+     against the ridge &lambda;.</p></div>
+    <div class="g-try"><h4>Try this</h4><ol>
+     <li>Start at <b>degree 3</b>: train RMSE 0.329, test 0.357, close to the noise level 0.32. R&sup2; 0.81 in-sample, 0.76 out.</li>
+     <li>Drag <b>Polynomial degree</b> to 8: train falls to 0.277, test rises to 0.411.</li>
+     <li>Drag to <b>12</b> and watch the test curve turn up while the train curve keeps falling: train 0.113, test 5.83.</li>
+     <li>Press <b>Re-sample the noise</b> three times at degree 12: the faint red fits jump around (test went 6.07, 1.87, 2.03 in one run).</li>
+     <li>Stay at 12 and drag <b>Ridge &lambda;</b> to 7e-2: test drops to 0.43. Push it to 1e+0: both errors rise again (0.64 and 0.71).</li>
+    </ol></div>
+    <div class="g-notice"><h4>What to notice</h4>
+     <p>Training error can only fall as the degree grows; it reaches 0.000 at degree 15, where 16 parameters pass through
+     15 points. Test error has a U: lowest at degree 3, then up to 5.83 at 12 and 38 at 15. In-sample R&sup2; climbs to 1.00
+     while out-of-sample R&sup2; goes below &minus;10. Ridge keeps the high degree but taxes the coefficients and brings test
+     error back down; too much ridge under-fits.</p></div>
+    <div class="g-rem"><h4>Remember</h4>
+     <p class="say-it">Overfitting is when the model fits the noise of the training sample: train error keeps falling, error on new data
+     turns up. Choose the flexibility (degree, &lambda;) on later data, and never report in-sample R&sup2; as your result.</p>
+     <p class="g-bot"><b>In your bot:</b> count parameters against rows, and pick the knob by walk-forward, not by the training score.</p></div>
+   </div>
   </div>
 
   <div class="panel">
@@ -1028,6 +1405,28 @@
    </div>
    <div class="panel-note">Size with the probability, not the label: a calibrated 0.58 means about 58 of 100 such ticks went
    up. Moving &tau; trades precision for recall; it does not create edge.</div>
+   <div class="guide">
+    <div class="g-see"><h4>What you are looking at</h4>
+     <p>The blue curve is a sigmoid: a logistic regression that turns a score into p(up) for 240 ticks. Ticks that went
+     up are at the top, down at the bottom; red rings are mistakes. The vertical line is the threshold &tau;. On the right: the
+     confusion matrix with precision, recall and F1, and the reliability diagram (predicted probability vs how often the tick
+     really went up).</p></div>
+    <div class="g-try"><h4>Try this</h4><ol>
+     <li>At <b>&tau; = 0.50</b>: 124 buy signals, precision 66%, recall 68%, accuracy 67%.</li>
+     <li>Drag <b>Decision threshold &tau;</b> to 0.30: 196 buys, recall 93%, precision 57%.</li>
+     <li>Drag to 0.70: 41 buys, precision 78%, recall 27%.</li>
+     <li>Back to 0.50, click <b>Over-confident</b>: accuracy is still 67%, but log-loss rises from 0.611 to 0.777 and calibration error from 0.048 to 0.186. The bars leave the diagonal.</li>
+     <li>Click <b>Under-confident</b>: log-loss 0.638, calibration error 0.096.</li>
+    </ol></div>
+    <div class="g-notice"><h4>What to notice</h4>
+     <p>Moving &tau; only trades precision for recall; it does not create edge. The three probability versions rank the ticks
+     the same way, so accuracy at 0.5 is the same 67%, but only the fitted one says the truth: when it says 0.6, about 60% go
+     up. Log-loss and the reliability diagram see the difference; accuracy does not.</p></div>
+    <div class="g-rem"><h4>Remember</h4>
+     <p class="say-it">Logistic regression outputs a probability through a sigmoid and is fitted by minimising log-loss. The threshold sets
+     the precision/recall trade-off; calibration decides whether the probability can be used for sizing.</p>
+     <p class="g-bot"><b>In your bot:</b> size positions with a calibrated probability, and check calibration on later data before you trust it.</p></div>
+   </div>
   </div>
 
   <div class="panel">
@@ -1052,6 +1451,25 @@
    </div>
    <div class="panel-note">A linear model can only use structure you hand it as a column. Either you engineer the
    interaction, or you climb to a model that finds it (Part 6) &mdash; and pay in variance.</div>
+   <div class="guide">
+    <div class="g-see"><h4>What you are looking at</h4>
+     <p>Two features, two classes, and a logistic regression trained live by gradient descent. The square is the model's
+     probability map with its boundary line. The charts show log-loss and accuracy per epoch, and the gauge shows the current
+     accuracy. The switch adds one engineered column to the same linear model.</p></div>
+    <div class="g-try"><h4>Try this</h4><ol>
+     <li>Keep <b>XOR (interaction)</b> and let it train: the best straight line reaches about 51%.</li>
+     <li>Press <b>Retrain</b>: the line moves, the accuracy stays near a coin flip.</li>
+     <li>Turn on <b>add the missing feature</b> (x&#8321;&middot;x&#8322;): the same linear model reaches 93%.</li>
+     <li>Click <b>Rings (calm inside, wild outside)</b> with the switch off: 55%. Turn it on (x&#8321;&sup2;+x&#8322;&sup2;): 100%.</li>
+    </ol></div>
+    <div class="g-notice"><h4>What to notice</h4>
+     <p>In XOR the class depends on whether the two features agree in sign: an interaction. No single line separates
+     the quadrants, so the best line is about 51%. Rings need a circle, and a line gets 55%. One extra column (the product,
+     or the distance from the centre) makes both problems linear again.</p></div>
+    <div class="g-rem"><h4>Remember</h4>
+     <p class="say-it">A linear model only sees the structure you give it as columns. For interactions and non-linear shapes, either
+     engineer the feature or use a non-linear model, which pays for that flexibility in variance.</p></div>
+   </div>
   </div>
 
   <div class="bot"><b>What this changes in your bot:</b> start with a regularised linear or logistic model on a few
@@ -1070,6 +1488,16 @@
     <span class="chip">calibration</span>
     <span class="chip">interactions &middot; XOR</span>
   </div>
+  <div class="pcheck">
+   <h3>Check yourself</h3>
+   <p class="sub">Answer in your head, then click to reveal.</p>
+   <details class="pit"><summary>Training RMSE keeps falling from degree 1 to degree 15. Which degree do you keep?</summary>
+    <div class="pit-body"><p>The one where error on later data is lowest (degree 3 here, test RMSE 0.357), or the simplest one close to it. Training error always falls with more flexibility, so it cannot choose the degree.</p></div></details>
+   <details class="pit"><summary>You move the threshold from 0.5 to 0.7. Precision goes up. Did the model get better?</summary>
+    <div class="pit-body"><p>No. The model and its ranking are the same; you just trade fewer signals (lower recall) for more precise ones. Edge comes from better probabilities, not from moving the cut.</p></div></details>
+   <details class="pit"><summary>Your two features are momentum and imbalance, and up-moves happen when both have the same sign. Why does logistic regression fail, and what is the cheapest fix?</summary>
+    <div class="pit-body"><p>That is an interaction (XOR): no straight line separates it, so the model stays near 50%. The cheapest fix is a product column, momentum &times; imbalance; then the same linear model can learn it.</p></div></details>
+  </div>
  </div>
 </section>
 
@@ -1078,6 +1506,11 @@
  <div class="wrap">
   <div class="eyebrow">Part 6 &middot; Non-linear models</div>
   <h2>Same data, eight boundaries</h2>
+  <p class="why"><b>Why this part exists.</b> Part 5 ended on data a straight line cannot separate: XOR stays near
+  50&ndash;60% for any logistic model. Non-linear models bend the boundary, but each one brings a new knob that can
+  memorise noise, and a higher cost per prediction. This part shows the boundary each model draws, its knob, and the
+  rule for climbing: move up a rung only when the test score says so. Part 7 then puts the winner inside
+  <code>on_tick</code>.</p>
   <p class="lead">When a line is not enough, a model has to bend the boundary: boxes (trees), a vote of boxes (forests),
   a chain of small corrections (boosting), a margin in a lifted space (SVM), or a learned stack of curves (a neural
   network). Every one of them has a knob that trades a too-simple fit for memorised noise. Turn it, watch the
@@ -1140,6 +1573,30 @@
    trees on log-loss, an SMO-trained SVM, a 2&times;16 tanh network with Adam. In Python use scikit-learn:
    <code>DecisionTreeClassifier</code>, <code>RandomForestClassifier</code>, <code>HistGradientBoostingClassifier</code>
    (the fast boosting, no xgboost needed), <code>SVC</code>, <code>MLPClassifier</code>.</div>
+   <div class="guide">
+    <div class="g-see"><h4>What you are looking at</h4>
+     <p>The map is a two-feature market state; filled dots are the 210 training points, hollow dots the 90 test points the
+     model never sees. The colour is the model's probability and the white line its boundary (p = 0.5). On the right: train
+     and test gauges, the gap, the &micro;s per prediction, test and train accuracy against the knob, and a learning curve.</p></div>
+    <div class="g-try"><h4>Try this</h4><ol>
+     <li>On <b>Moons</b>, start with <b>Logistic</b>: 86% train, 91% test. One line, three weights.</li>
+     <li>Click <b>Tree</b> (depth 4: 93% test), then drag <b>Max depth</b> to 12: 100% train, 92% test. The boxes now chase single points.</li>
+     <li>Click <b>Forest</b>: 12 trees at depth 8 give 96% test. Drag <b>Trees</b> to 1: 92%. Averaging is what helped.</li>
+     <li>Click <b>Boosting</b> and drag <b>Rounds</b> from 50 to 150: train goes 95% &rarr; 100%, test 94% &rarr; 92%. Read where test loss bottoms out (round 29).</li>
+     <li>Click <b>SVM RBF</b>, set <b>Gamma</b> to 100 and <b>C</b> to 1000: 100% train, 82% test, 180 support vectors ringed.</li>
+     <li>Switch to <b>XOR</b> and click <b>Logistic</b> (57% test), then <b>MLP</b>: it bends the boundary, and the callout reports its gap.</li>
+    </ol></div>
+    <div class="g-notice"><h4>What to notice</h4>
+     <p>Train accuracy only goes up as you turn a knob toward more flexibility; test accuracy rises, peaks, then falls. The
+     gap between them is the memorised noise: 18 points for the RBF SVM at C 1000 and &gamma; 100. The &micro;s readout grows
+     with flexibility too: a few hundredths of a &micro;s for a line, a microsecond or more for a kernel SVM that keeps every
+     support vector. (Timings are measured in your browser and vary by machine.)</p></div>
+    <div class="g-rem"><h4>Remember</h4>
+     <p class="say-it">Every non-linear model has an overfitting knob: tree depth, number of boosting rounds and learning
+     rate, C and &gamma; for an SVM, epochs and hidden units for a network. Choose it on held-out later data, never on
+     training accuracy.</p>
+     <p class="g-bot"><b>In your bot:</b> fix the knob by walk-forward validation, and check the prediction cost against your per-tick budget.</p></div>
+   </div>
   </div>
 
   <div class="panel">
@@ -1159,6 +1616,28 @@
    <div class="panel-note">Same data, same split, same features for every row. A rung earns its place only if it beats
    every rung below it on the <b>test</b> column by more than a point &mdash; and on arena data, by more than its extra
    cost in microseconds and in things that can break.</div>
+   <div class="guide">
+    <div class="g-see"><h4>What you are looking at</h4>
+     <p>Each step of the staircase is a rung, from the cheapest model to the most expensive: a one-feature rule (the stand-in
+     for your momentum rule), logistic, tree, forest and boosting, SVM, MLP. Each rung shows its test accuracy and a lamp:
+     green if it beats every rung below by more than a point, red if not. The table holds the same runs, with the gap, the
+     &micro;s per prediction and the model size.</p></div>
+    <div class="g-try"><h4>Try this</h4><ol>
+     <li>On <b>Moons</b>, press <b>Run all eight</b> and wait about 15 seconds while the table fills.</li>
+     <li>Read up the ladder: rule 84%, logistic 91%, tree 93%, forest 96% on test. Each lamp turns green.</li>
+     <li>Read the rungs above the forest: boosting 94%, RBF SVM 93%, MLP 92%. They do not beat it.</li>
+     <li>In the table, compare size and &micro;s: the forest is 12 trees and about 520 nodes; logistic is 3 weights.</li>
+     <li>Switch to <b>XOR</b>, press <b>Run all eight</b> again, and see which rung now wins.</li>
+    </ol></div>
+    <div class="g-notice"><h4>What to notice</h4>
+     <p>The most complex model is not the winner. On moons the forest tops out at 96%; the MLP, the most flexible model, gets
+     92%. On XOR the rule and the line are stuck near 56&ndash;57% and every bending model beats them, so the climb is
+     justified there. A rung that costs more and does not beat the one below has no place in the bot.</p></div>
+    <div class="g-rem"><h4>Remember</h4>
+     <p class="say-it">Start simple and move up the ladder only when the next model beats the current one out-of-sample, by
+     more than its extra cost. Keep the rung below as the fallback.</p>
+     <p class="g-bot"><b>In your bot:</b> the baseline rule stays in the code; the model has to beat it on P&amp;L after fees to replace it.</p></div>
+   </div>
   </div>
 
   <div class="panel">
@@ -1181,6 +1660,26 @@
    </div>
    <div class="panel-note">An SVM never builds the lifted coordinates: the kernel <code>K(x, x&prime;)</code> computes their
    dot product directly. RBF is the same move into infinitely many dimensions; &gamma; sets how local each bump is.</div>
+   <div class="guide">
+    <div class="g-see"><h4>What you are looking at</h4>
+     <p>Left: the input space, two features where no straight line separates the classes. Right: the same points with a
+     third coordinate computed from the first two (z = x&#8321;&middot;x&#8322; for XOR, z = x&#8321;&sup2;+x&#8322;&sup2;
+     for circles). In that lifted space a flat plane separates them; seen back in 2-D, the plane is a curve.</p></div>
+    <div class="g-try"><h4>Try this</h4><ol>
+     <li>With <b>XOR</b> selected, look at the left map: blue and orange sit in opposite corners. No line splits them.</li>
+     <li>Press <b>Lift</b> and watch the points rise to z = x&#8321;&middot;x&#8322;: one class goes up, the other down.</li>
+     <li>Watch the plane at z = 0 slide between them, then look at the boundary it draws back in 2-D.</li>
+     <li>Switch to <b>Circles</b> and press <b>Lift</b> again: the inner ring stays low, the outer ring rises.</li>
+    </ol></div>
+    <div class="g-notice"><h4>What to notice</h4>
+     <p>One extra feature made a linear separator work. That is all a kernel does: the SVM computes dot products in the
+     lifted space through <code>K(x, x&prime;)</code> without building the coordinates. The RBF kernel lifts into infinitely
+     many dimensions, which is why a large &gamma; in the gallery could wrap a bump around single points.</p></div>
+    <div class="g-rem"><h4>Remember</h4>
+     <p class="say-it">The kernel trick: a linear model in a lifted feature space is a non-linear model in the original
+     space, and the kernel computes the lifted dot product directly.</p>
+     <p class="g-bot"><b>In your bot:</b> if you know the interaction (for example the product of two signals), add it as a column and keep a linear model.</p></div>
+   </div>
   </div>
 
   <div class="bot"><b>What this changes in your bot:</b> climb from the rule you already trade to the simplest model
@@ -1199,6 +1698,20 @@
     <span class="chip">&micro;s per prediction</span>
     <span class="chip">model ladder</span>
   </div>
+  <div class="pcheck">
+   <h3>Check yourself</h3>
+   <p class="sub">Answer in your head, then click to reveal.</p>
+   <details class="pit"><summary>A tree at depth 12 scores 100% on train and 92% on test. A tree at depth 4 scores 93% on test. Which do you keep, and why?</summary>
+    <div class="pit-body"><p>Depth 4. Test accuracy is the same or better, the rules are short enough to read, and the 8-point
+    train/test gap at depth 12 is memorised noise that will not repeat on new data.</p></div></details>
+   <details class="pit"><summary>Why does a random forest usually beat a single deep tree?</summary>
+    <div class="pit-body"><p>Each tree is trained on a bootstrap sample with random features, so their errors differ.
+    Averaging many of them cancels much of that noise while keeping the bends. In the gallery: 1 tree 92%, 12 trees 96% on test.
+    The points each bootstrap left out also give a free validation score, the OOB accuracy.</p></div></details>
+   <details class="pit"><summary>Your MLP beats logistic regression by 0.5 points on test but costs 20 times more per prediction. What do you ship?</summary>
+    <div class="pit-body"><p>Logistic regression. Half a point is inside the noise of one test set, and the model has to beat the
+    rung below by more than its extra cost. Move up the ladder only when the gain is clear, out-of-sample, after fees.</p></div></details>
+  </div>
  </div>
 </section>
 
@@ -1207,6 +1720,7 @@
  <div class="wrap">
   <div class="eyebrow">Part 7 &middot; From model to bot</div>
   <h2>Load once, predict every tick, watch it rot</h2>
+  <p class="why"><b>Why this part exists.</b> Part 6 ended with a model that beats the rung below it out-of-sample. That is still a notebook result. This part puts the model inside <code>on_tick</code>, where it must load once, answer within the tick, survive a missing file, and keep beating the baseline after fees while the market changes. Part 8 then adds a new kind of input: text.</p>
   <p class="lead">A model only helps when it runs inside <code>on_tick</code>: loaded once at start-up, fed features
   updated in O(1), and answered within the tick's budget. When the file is missing, the bot keeps trading on the baseline
   rule. Once it is live, the market changes under it, so you watch its hit rate and retrain when the alarm goes off.</p>
@@ -1266,6 +1780,24 @@
         self.trade(self.risk.size(side, tick))</pre>
    </div>
    <div class="panel-note">Budget = the time until the next tick. Measure <code>predict()</code> with <code>time.perf_counter_ns()</code> on one row, not on a batch: a 500-tree forest is fast per batch and slow per call.</div>
+   <div class="guide">
+    <div class="g-see"><h4>What you are looking at</h4>
+     <p>Ticks enter at <b>IN</b> and pass four stations: <b>FEATURES</b> (rolling state), <b>PREDICT</b> (the model), <b>SIZE/RISK</b> and <b>ORDER</b>. The <code>__init__</code> vault above loads the model file once; the <b>Loads</b> stat counts it. The bar at the bottom is one tick&rsquo;s time in &micro;s, split by station, against the red budget line: the time until the next tick.</p></div>
+    <div class="g-try"><h4>Try this</h4><ol>
+     <li>Leave <b>logistic</b> selected and read the bar: about 21 &micro;s per tick, 4.2% of the 500 &micro;s budget. <b>Loads</b> stays at 1.</li>
+     <li>Click <b>forest 500</b>. The bar grows to about 439 &micro;s (88%) and the callout says <b>Tight</b>.</li>
+     <li>Drag <b>Per-tick budget</b> down to 300 &micro;s. The forest is now over budget: ticks queue in red at the entrance and <b>Late / dropped</b> climbs.</li>
+     <li>Click <b>retrain in on_tick</b>. One tick now costs about 250 ms, hundreds of times the budget; almost every tick is dropped.</li>
+     <li>Back on <b>logistic</b>, switch on <b>artifact missing / corrupt</b>. The lamp turns amber, ticks route through <b>BASELINE</b>, and <b>Fallback</b> counts up while the bot keeps trading.</li>
+     <li>Switch on <b>features recomputed O(n)</b>. Features alone now cost 180 &micro;s instead of 3.</li>
+    </ol></div>
+    <div class="g-notice"><h4>What to notice</h4>
+     <p>The model is one cost among four. A light model uses a few percent of the budget; a 500-tree forest called one row at a time uses most of it, and any slow tick makes the next ones wait on a stale book. Calling <code>fit()</code> inside the loop is never affordable. A missing file costs nothing if the code falls back to the rule: the bot trades, it does not crash.</p></div>
+    <div class="g-rem"><h4>Remember</h4>
+     <p class="say-it">Load the model once in <code>__init__</code>, update features in O(1), call <code>predict</code> on one row within the per-tick budget, and fall back to the baseline rule when the artifact is missing. Never train inside the trading loop.</p>
+     <p class="g-bot"><b>In your bot:</b> measure <code>predict()</code> on one row with <code>time.perf_counter_ns()</code> and keep the <code>try/except</code> around <code>joblib.load</code> shown above.</p>
+    </div>
+   </div>
   </div>
 
   <!-- ── WIDGET 2 · drift monitor + P&L race ── -->
@@ -1306,6 +1838,24 @@
      <div class="say" id="p7-say2" aria-live="polite">&nbsp;</div>
    </div>
    <div class="panel-note">The leaderboard scores the right-hand chart, not the hit rate. Dec 4: there are learnable patterns in the flow of the house desk&#8217;s trades, and a history dataset to train on. Bring a model that beats your baseline here, after fees.</div>
+   <div class="guide">
+    <div class="g-see"><h4>What you are looking at</h4>
+     <p>Top left: the simulated market, regime A in blue, regime B in violet after the change. Below it: the model&rsquo;s hit rate over its last 80 trades, with the 50% coin line in red and green marks where it retrained. Bottom left: the <b>RETRAIN</b> lamp and the model version. Right: P&amp;L after fees of the model (blue) and the momentum baseline (amber) racing over 600 steps.</p></div>
+    <div class="g-try"><h4>Try this</h4><ol>
+     <li>Let the first session run. At step 300 the regime changes by itself and the band turns violet.</li>
+     <li>Watch the hit rate fall under 50%. About ten steps later the alarm fires; 20 steps after that the model retrains (<b>Retrains</b> = 1, model v4).</li>
+     <li>At the end, read the stats: at 1.0 bp the model finishes about +727 bp against +352 bp for the baseline, after two retrains.</li>
+     <li>Switch <b>auto-retrain</b> off and press <b>Play</b>: the same market replays. Now the model ends about &minus;526 bp against +352.</li>
+     <li>Switch auto-retrain back on, drag <b>Fee per unit traded</b> to 3.0 bp and press <b>Play</b> again. The model ends about &minus;463 bp, the baseline +142.</li>
+     <li>Press <b>New session</b> for a different market; the numbers change, the pattern does not.</li>
+    </ol></div>
+    <div class="g-notice"><h4>What to notice</h4>
+     <p>The model was right in regime A and wrong in regime B: the relationship it learned flipped sign. Without retraining, it gives back its whole lead after step 300. With retraining it keeps winning, but only while fees are small: it changes position far more often than the baseline (about 595 bp of fees against 105 at 1 bp), so at 3 bp the turnover eats the edge and the simple rule wins.</p></div>
+    <div class="g-rem"><h4>Remember</h4>
+     <p class="say-it">Monitor a live model on its rolling hit rate, retrain on a schedule or on an alarm, and judge it only on P&amp;L after fees against the baseline. A better hit rate with more turnover can still be a worse strategy.</p>
+     <p class="g-bot"><b>In your bot:</b> Dec 4: there are learnable patterns in the flow of the house desk&rsquo;s trades. Train on the history dataset, then compare against your baseline after fees, here.</p>
+    </div>
+   </div>
   </div>
 
   <div class="bot"><b>What this changes in your bot:</b> the model loads once in <code>__init__</code>, predicts in
@@ -1317,6 +1867,16 @@
     <span class="chip">concept drift</span><span class="chip">rolling hit rate</span><span class="chip">retrain cadence</span>
     <span class="chip">P&amp;L after fees</span><span class="chip">baseline</span>
   </div>
+  <div class="pcheck">
+   <h3>Check yourself</h3>
+   <p class="sub">Answer in your head, then click to reveal.</p>
+   <details class="pit"><summary>Your 500-tree forest takes 420 &micro;s per call and ticks arrive every 300 &micro;s. What happens, and what do you do?</summary>
+    <div class="pit-body"><p>Every tick waits behind the previous one, the queue grows and ticks are dropped or acted on late. Use a lighter model, or check that the forest really beats the light one after fees; do not call it per row in the loop.</p></div></details>
+   <details class="pit"><summary>The model file is missing on Friday morning. What should your bot do?</summary>
+    <div class="pit-body"><p>Catch the load error in <code>__init__</code>, set the model to <code>None</code>, and trade the baseline rule. A bot that crashes earns nothing; a bot on its fallback still trades.</p></div></details>
+   <details class="pit"><summary>Your live hit rate has been under 50% for 12 trades in a row. Retrain inside <code>on_tick</code>?</summary>
+    <div class="pit-body"><p>No. Retraining takes milliseconds to seconds and the loop has microseconds. Retrain offline on recent data, save a new versioned file, and reload it between ticks or between sessions.</p></div></details>
+  </div>
  </div>
 </section>
 
@@ -1325,6 +1885,7 @@
  <div class="wrap">
   <div class="eyebrow">Part 8 &middot; Unstructured data</div>
   <h2>From a headline to a feature</h2>
+  <p class="why"><b>Why this part exists.</b> Parts 1&ndash;7 used numbers: prices, the book, trades. Much of what moves a price arrives as text first. This part turns a headline into one more column, with the same rules as before: stamp it with the time you received it, merge it as-of, test it with an event study, and keep it only if it makes the strategy better. After this part, the close and the Dec 4 block, where the whole pipeline runs on the flow of the house desk&rsquo;s trades.</p>
   <p class="lead">Text is not a feature until a pipeline makes it one. Each headline is stamped with the time you
   <em>received</em> it, its source, tickers and topic, and duplicates are dropped. Then it gets a sentiment score, is merged
   as-of onto prices, checked with an event study, and turned into a decaying number per symbol that your signal can read.</p>
@@ -1354,6 +1915,23 @@
      <div class="say" id="p8-say" aria-live="polite">&nbsp;</div>
    </div>
    <div class="panel-note">Lexicon = count words from a finance list (Loughran&ndash;McDonald style): cheap, transparent, blind to &ldquo;no&rdquo;, &ldquo;but&rdquo; and phrases. The transformer box stands in for a model that reads the whole sentence: <code>distilbert-SST2</code> on your laptop, FinBERT in production.</div>
+   <div class="guide">
+    <div class="g-see"><h4>What you are looking at</h4>
+     <p>Headline cards ride the belt from <b>RAW TEXT</b> through <b>TAG</b>, where each gets its received time, source, ticker and topic; duplicates fall into the bin. Each card is then scored twice: <b>LEXICON</b> counts positive and negative words, the <b>TRANSFORMER</b> box reads the whole sentence. The <b>AS-OF MERGE</b> funnel writes the result onto the chart of the next panel.</p></div>
+    <div class="g-try"><h4>Try this</h4><ol>
+     <li>Let the feed run at <b>1&times;</b> and read the banner: the lexicon words are coloured in the headline.</li>
+     <li>Watch the TAG readout: received time is publish time plus a feed delay of 2&ndash;5 ticks.</li>
+     <li>Wait for a duplicate (the same story from a second source two ticks later). It drops into the bin and the <b>dups</b> counter goes up.</li>
+     <li>Wait for a disagreement, e.g. &ldquo;Meta loss narrows as ad revenue recovers&rdquo;: the lexicon says NEU, the transformer POS. The callout turns amber.</li>
+     <li>Press <b>Skip to the close</b> to run all 40 headlines at once, then <b>Restart</b> to watch it again.</li>
+    </ol></div>
+    <div class="g-notice"><h4>What to notice</h4>
+     <p>Over the 40 headlines the lexicon gets about 31 right and the transformer about 38. The lexicon fails on phrases (&ldquo;cuts costs&rdquo;, &ldquo;loss narrows&rdquo;), negation and &ldquo;but&rdquo;; the sentence model handles most of them and still misses two hard ones. Duplicates are not more news: counted twice they would double the signal.</p></div>
+    <div class="g-rem"><h4>Remember</h4>
+     <p class="say-it">Text becomes a feature through a pipeline: metadata (time received, source, ticker, topic, duplicates dropped), then a sentiment score. A lexicon is cheap and transparent but misses phrases and negation; a transformer reads the sentence and costs more.</p>
+     <p class="g-bot"><b>In your bot:</b> score each headline once, when it arrives, outside the hot path, and keep only the number.</p>
+    </div>
+   </div>
   </div>
 
   <!-- ── WIDGET 2 · merge, event study, feature ── -->
@@ -1387,6 +1965,23 @@
      <div class="say" id="p8-say2" aria-live="polite">&nbsp;</div>
    </div>
    <div class="panel-note">The move between <em>published</em> and <em>received</em> was never yours: someone faster traded it. An event study stamped at publish time looks better than anything your bot can earn.</div>
+   <div class="guide">
+    <div class="g-see"><h4>What you are looking at</h4>
+     <p>The price of the selected symbol, with a marker for each headline at the time it was received, coloured by the chosen scorer. Below it, the decayed sentiment feature: each headline adds its score, and the sum halves every <b>half-life</b> ticks. On the right, the event study: the average move from 5 ticks before to 20 ticks after positive, neutral and negative headlines.</p></div>
+    <div class="g-try"><h4>Try this</h4><ol>
+     <li>With <b>transformer</b> selected, read the callout: positive minus negative is about +66 bp over the next 20 ticks.</li>
+     <li>Click <b>lexicon</b>: about +64 bp, but 13 headlines are called neutral, so fewer events carry a signal.</li>
+     <li>Switch on <b>stamp at publish time (wrong)</b>. Red arrows move the markers back and the spread jumps to about +135 bp.</li>
+     <li>Switch it off. Drag <b>Feature half-life</b> from 2 to 80 ticks and watch the feature line go from short spikes to a slow wave.</li>
+     <li>Click through a few symbols: the markers always sit at or after the publish time, never before.</li>
+    </ol></div>
+    <div class="g-notice"><h4>What to notice</h4>
+     <p>The prices react at publish time, before your feed delivers the headline. Stamped at received time, the event study shows only the part of the move still ahead of you (+66 bp); stamped at publish time, it also counts the jump that happened before you could read it (+135 bp). That extra half is a leak, the same mistake as the merge station in Part 3. The half-life is a parameter like any window in Part 2: choose it on validation data, not on the test set.</p></div>
+    <div class="g-rem"><h4>Remember</h4>
+     <p class="say-it">Merge news as-of on the time you received it, never the time it was published, and test it with an event study after fees. The usable feature is a decayed sentiment per symbol, updated in O(1).</p>
+     <p class="g-bot"><b>In your bot:</b> keep one number per symbol, <code>s = s * 0.5 ** (dt / half_life) + score</code>, and read it in <code>on_tick</code>.</p>
+    </div>
+   </div>
   </div>
 
   <!-- ── WIDGET 3 · fine-tuning ── -->
@@ -1419,6 +2014,23 @@
      <div class="say" id="p8-say3" aria-live="polite">&nbsp;</div>
    </div>
    <div class="panel-note">In the lab the same idea runs for real: <code>distilbert-base-uncased</code> (cached), the classification head trained on our labeled finance headlines, a few minutes on a laptop CPU. Licensing: vendor news usually forbids training; EDGAR filings and RSS headlines are free to use.</div>
+   <div class="guide">
+    <div class="g-see"><h4>What you are looking at</h4>
+     <p>The grey block is a frozen language-model body (6 locked layers); the <b>HEAD</b> on top is the only part that trains, and it glows while it does. The curve is accuracy per epoch on held-out finance headlines, the dashed line the general model. On the left, six headlines in phrasing the training set never shows; on the right, phrases whose label can flip.</p></div>
+    <div class="g-try"><h4>Try this</h4><ol>
+     <li>Before training, read the callout: the general model gets 47% on held-out finance headlines. In the table, &ldquo;beats estimates&rdquo; is NEU and &ldquo;cuts costs&rdquo; is NEG.</li>
+     <li>Press <b>Fine-tune 30 epochs</b> and watch the curve climb. It ends at 80%.</li>
+     <li>Read the table again: &ldquo;issues profit warning&rdquo; becomes NEG 85%, &ldquo;beats estimates&rdquo; POS 76%, &ldquo;cuts costs&rdquo; POS 64%.</li>
+     <li>Label the six headlines yourself (pos, neu or neg) and press <b>Fine-tune 30 epochs</b> again. With six correct labels it reaches 100%.</li>
+     <li>Press <b>Back to the general model</b>, give a few wrong labels on purpose, and fine-tune again.</li>
+    </ol></div>
+    <div class="g-notice"><h4>What to notice</h4>
+     <p>A general sentiment model does not know finance: &ldquo;beats&rdquo; means nothing to it and &ldquo;cuts&rdquo; sounds bad. Training only the head on 81 labeled finance headlines takes it from 47% to 80%; six labels on the missing phrasing take it to 100% on this small test set. Wrong labels teach the wrong thing just as fast. The page uses a bag-of-words head as a stand-in; the lab does it with distilbert in a few minutes on a laptop CPU.</p></div>
+    <div class="g-rem"><h4>Remember</h4>
+     <p class="say-it">Fine-tuning keeps a pretrained model and trains its last layer on labeled examples from your domain. A few hundred good finance labels beat a bigger general model; check the licence before you train on vendor news.</p>
+     <p class="g-bot"><b>In your bot:</b> use a fine-tuned model offline to score headlines; the bot only reads the resulting sentiment column.</p>
+    </div>
+   </div>
   </div>
 
   <div class="bot"><b>What this changes in your bot:</b> news becomes one more column &mdash; a decayed sentiment per symbol,
@@ -1428,6 +2040,16 @@
     <span class="chip">dedup</span><span class="chip">lexicon</span><span class="chip">Loughran&ndash;McDonald</span>
     <span class="chip">transformer</span><span class="chip">FinBERT</span><span class="chip">event study</span>
     <span class="chip">decay &middot; half-life</span><span class="chip">fine-tuning</span><span class="chip">labels</span><span class="chip">licensing</span>
+  </div>
+  <div class="pcheck">
+   <h3>Check yourself</h3>
+   <p class="sub">Answer in your head, then click to reveal.</p>
+   <details class="pit"><summary>A headline is published at 10:00:00 and reaches your feed at 10:00:03. Which time goes into the merge, and why?</summary>
+    <div class="pit-body"><p>10:00:03, the time you received it. The move between 10:00:00 and 10:00:03 was traded by someone faster; stamping at 10:00:00 puts it in your backtest and inflates the event study (here +135 bp instead of +66).</p></div></details>
+   <details class="pit"><summary>Why can a word-count lexicon call &ldquo;Meta loss narrows as ad revenue recovers&rdquo; neutral or negative?</summary>
+    <div class="pit-body"><p>It counts words, not meaning: &ldquo;loss&rdquo; is negative and &ldquo;narrows&rdquo; is not in the list. Phrases, negation and &ldquo;but&rdquo; need a model that reads the sentence, or a finance-specific list.</p></div></details>
+   <details class="pit"><summary>What does fine-tuning change, and what does it need?</summary>
+    <div class="pit-body"><p>It keeps the pretrained body and trains the classification head (sometimes the last layers) on labeled examples from your domain. It needs correct labels on the phrasing you trade, and data you are allowed to train on.</p></div></details>
   </div>
  </div>
 </section>
