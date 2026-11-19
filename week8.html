@@ -1837,7 +1837,7 @@
      </div>
      <div class="say" id="p7-say2" aria-live="polite">&nbsp;</div>
    </div>
-   <div class="panel-note">The leaderboard scores the right-hand chart, not the hit rate. Dec 4: there are learnable patterns in the flow of the house desk&#8217;s trades, and a history dataset to train on. Bring a model that beats your baseline here, after fees.</div>
+   <div class="panel-note">The leaderboard scores the right-hand chart, not the hit rate. Thu Dec 3 (the finale block, 1&#8211;4 pm CT): there are learnable patterns in the flow of the house desk&#8217;s trades, and a history dataset to train on. Bring a model that beats your baseline here, after fees.</div>
    <div class="guide">
     <div class="g-see"><h4>What you are looking at</h4>
      <p>Top left: the simulated market, regime A in blue, regime B in violet after the change. Below it: the model&rsquo;s hit rate over its last 80 trades, with the 50% coin line in red and green marks where it retrained. Bottom left: the <b>RETRAIN</b> lamp and the model version. Right: P&amp;L after fees of the model (blue) and the momentum baseline (amber) racing over 600 steps.</p></div>
@@ -1853,7 +1853,7 @@
      <p>The model was right in regime A and wrong in regime B: the relationship it learned flipped sign. Without retraining, it gives back its whole lead after step 300. With retraining it keeps winning, but only while fees are small: it changes position far more often than the baseline (about 595 bp of fees against 105 at 1 bp), so at 3 bp the turnover eats the edge and the simple rule wins.</p></div>
     <div class="g-rem"><h4>Remember</h4>
      <p class="say-it">Monitor a live model on its rolling hit rate, retrain on a schedule or on an alarm, and judge it only on P&amp;L after fees against the baseline. A better hit rate with more turnover can still be a worse strategy.</p>
-     <p class="g-bot"><b>In your bot:</b> Dec 4: there are learnable patterns in the flow of the house desk&rsquo;s trades. Train on the history dataset, then compare against your baseline after fees, here.</p>
+     <p class="g-bot"><b>In your bot:</b> Thu Dec 3 (the finale block): there are learnable patterns in the flow of the house desk&rsquo;s trades. Train on the history dataset, then compare against your baseline after fees, here.</p>
     </div>
    </div>
   </div>
@@ -1885,7 +1885,7 @@
  <div class="wrap">
   <div class="eyebrow">Part 8 &middot; Unstructured data</div>
   <h2>From a headline to a feature</h2>
-  <p class="why"><b>Why this part exists.</b> Parts 1&ndash;7 used numbers: prices, the book, trades. Much of what moves a price arrives as text first. This part turns a headline into one more column, with the same rules as before: stamp it with the time you received it, merge it as-of, test it with an event study, and keep it only if it makes the strategy better. After this part, the close and the Dec 4 block, where the whole pipeline runs on the flow of the house desk&rsquo;s trades.</p>
+  <p class="why"><b>Why this part exists.</b> Parts 1&ndash;7 used numbers: prices, the book, trades. Much of what moves a price arrives as text first. This part turns a headline into one more column, with the same rules as before: stamp it with the time you received it, merge it as-of, test it with an event study, and keep it only if it makes the strategy better. After this part, the close and the Dec 3 finale block, where the whole pipeline runs on the flow of the house desk&rsquo;s trades.</p>
   <p class="lead">Text is not a feature until a pipeline makes it one. Each headline is stamped with the time you
   <em>received</em> it, its source, tickers and topic, and duplicates are dropped. Then it gets a sentiment score, is merged
   as-of onto prices, checked with an event study, and turned into a decaying number per symbol that your signal can read.</p>
@@ -2119,9 +2119,9 @@
       <div class="d">Columnar storage, chunks and process pools: the cheap data and the fan-out that training needs.</div></a>
     <a class="nextcard" href="week9.html">
       <div class="l">Next</div><div class="t">Week 9 &middot; CI/CD, Testing &amp; UI + Season Finale &rarr;</div>
-      <div class="d">Fri Dec 4: the ML block and the finale. There are learnable patterns in the flow of the house desk&#8217;s trades; bring a model that has beaten your baseline out-of-sample.</div></a>
+      <div class="d">Thu Dec 3, 1&#8211;4 pm CT: the finale block (the desk&#8217;s tells and a news tape); Fri Dec 4: the results. There are learnable patterns in the flow of the house desk&#8217;s trades; bring a model that has beaten your baseline out-of-sample.</div></a>
   </div>
-  <p class="sub" style="margin-top:18px">Before Dec 4: the history dataset for the ML block (200 simulated sessions and a
+  <p class="sub" style="margin-top:18px">Before Dec 3: the history dataset for the finale block (200 simulated sessions and a
   starter script) is in the course LMS. Run the whole pipeline of Part 3 on it, climb the ladder of Part 6 only as far
   as the out-of-sample numbers allow, and ship it the way Part 7 does. Final exam: Fri Dec 11, 2:30 pm CT, in the classroom.</p>
  </div>
