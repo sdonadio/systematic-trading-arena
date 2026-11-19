@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="data:," />
+<title>The Recap · Nine weeks, one system · Systematic Trading Arena</title>
+<meta name="description" content="The last interactive dashboard: nine weeks of systematic trading engineering as one bot you can run, break and explain." />
+<style>
+  /* ══ Reset & tokens ═══════════════════════════════════════════ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root{
+    /* ── Systematic Trading Arena · shared palette (identical on every page) ── */
+    --accent:#3b82f6; --accent-2:#7cb0ff; --accent-3:#b9d4ff;
+    --accent-rgb:59,130,246; --accent-2-rgb:124,176,255;
+    --bg:#0f1115; --panel:#181b22; --panel2:#1e222b; --panel-2:#13161b;
+    --ink:#e8e6e3; --ink-dim:#c6c3bf; --ink-mute:#6f757f; --muted:#9aa0a6; --dim:#5f6673;
+    --line:#272c36; --line-2:#333a47;
+    --ok:#3fb950; --warn:#d29922; --bad:#f85149; --info:#6cb6ff; --sky:#58a6ff; --violet:#a78bfa; --teal:#2dd4bf;
+    --pink:#f778ba; --orange:#f0883e;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 14px; line-height: 1.65;
+    min-height: 100vh; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  .mono { font-family: var(--mono); }
+  a { color: var(--accent-3); }
+  code { font-family: var(--mono); font-size: 0.92em; color: var(--accent-3); background: rgba(var(--accent-rgb),0.10);
+    padding: 1px 5px; border-radius: 4px; }
+
+  /* ══ Top nav ══════════════════════════════════════════════════ */
+  nav.top { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    padding: 11px 26px; background: rgba(15,17,21,0.94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  nav.top::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2) 42%, transparent 82%); opacity: 0.85; pointer-events: none; }
+  nav.top > a:first-child { font-weight: 800; font-size: 14.5px; letter-spacing: -0.2px; color: var(--ink); text-decoration: none;
+    padding-left: 12px; border-left: 3px solid var(--accent); }
+  nav.top .crumbs { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  nav.top .crumbs a { color: var(--muted); text-decoration: none; }
+  nav.top .crumbs a:hover { color: var(--accent-3); }
+  nav.top .crumbs b { color: var(--ink); font-weight: 700; }
+  .jump { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; }
+  .jump a { font-size: 11px; font-weight: 700; color: var(--muted); text-decoration: none; padding: 3px 9px;
+    border: 1px solid var(--line-2); border-radius: 20px; }
+  .jump a:hover, .jump a:focus-visible { color: var(--ink); border-color: var(--accent-2); }
+
+  /* ══ Shell ════════════════════════════════════════════════════ */
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 26px; }
+  section { padding: 46px 0 50px; border-top: 1px solid var(--line); position: relative; }
+  .eyebrow { font-size: 10.5px; font-weight: 800; letter-spacing: 2.2px; text-transform: uppercase; color: var(--accent-2); }
+  h1 { font-size: clamp(30px, 6.2vw, 64px); font-weight: 850; letter-spacing: -1.6px; line-height: 1.04; }
+  h2 { font-size: clamp(21px, 3vw, 28px); font-weight: 780; letter-spacing: -0.5px; margin-top: 4px; line-height: 1.2; }
+  h3 { font-size: 15px; font-weight: 700; letter-spacing: -0.1px; }
+  h4 { font-size: 12.5px; font-weight: 700; letter-spacing: 0.2px; color: var(--ink-dim); }
+  p { color: var(--ink-dim); margin-top: 12px; max-width: 76ch; }
+  p.lead { font-size: 15.5px; color: var(--ink); }
+  p b, li b { color: var(--ink); font-weight: 650; }
+  .sub { color: var(--muted); font-size: 13px; margin-top: 8px; max-width: 82ch; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  [hidden] { display: none !important; }
+
+  .partno { font-family: var(--mono); font-size: 11px; color: var(--dim); letter-spacing: 1px; }
+  .grad { background: linear-gradient(92deg, #eaf2ff 0%, var(--accent-2) 38%, var(--teal) 68%, var(--violet) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  /* ══ Buttons & chips ══════════════════════════════════════════ */
+  .btn { font-family: var(--sans); font-size: 12px; font-weight: 700; padding: 7px 13px; border-radius: 7px; cursor: pointer;
+    background: var(--panel); color: var(--ink-dim); border: 1px solid var(--line-2);
+    transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s; }
+  .btn:hover { border-color: var(--accent-2); color: var(--ink); }
+  .btn:focus-visible, a:focus-visible, button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent-3); outline-offset: 2px; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #f4f8ff; box-shadow: 0 6px 22px -10px rgba(var(--accent-rgb),0.9); }
+  .btn.primary:hover { background: #2563eb; }
+  .btn[aria-pressed="true"] { background: rgba(var(--accent-rgb),0.30); border-color: var(--accent-2); color: #eaf2ff; }
+  .btn.brk[aria-pressed="true"] { background: rgba(248,81,73,0.18); border-color: var(--bad); color: #ffd9d6; box-shadow: 0 0 16px -6px var(--bad); }
+  .btn:disabled { opacity: 0.42; cursor: not-allowed; }
+  .btnrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 18px; }
+  .chip { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.6px; text-transform: uppercase; padding: 4px 10px;
+    border-radius: 20px; border: 1px solid var(--line-2); color: var(--muted); }
+  .chip.hl { color: var(--accent-3); border-color: rgba(var(--accent-2-rgb),0.55); }
+
+  /* ══ Explanation frames (site standard) ═══════════════════════ */
+  .wframe { margin-top: 24px; border: 1px solid var(--line-2); border-radius: 14px; padding: 12px;
+    background: linear-gradient(180deg, rgba(var(--accent-rgb),0.05), transparent 30%), #12151b; }
+  .explain { display: grid; grid-template-columns: 1fr 1.25fr; gap: 12px; }
+  .explain.bot { margin-top: 12px; grid-template-columns: 1.25fr 1fr; }
+  .explain > * { min-width: 0; }
+  .xb { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 11px 14px; }
+  .xb h4 { color: var(--accent-2); font-size: 10.5px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; }
+  .xb p { margin-top: 5px; font-size: 12.5px; max-width: none; }
+  .xb ol { margin: 6px 0 0 18px; font-size: 12.5px; color: var(--ink-dim); display: grid; gap: 3px; }
+  .xb ol b { color: var(--ink); }
+  .xb.rem { border-color: rgba(63,185,80,0.45); background: rgba(63,185,80,0.07); }
+  .xb.rem h4 { color: #7ee08a; }
+  .xb.rem p { color: var(--ink); }
+  .stage { margin-top: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; position: relative; }
+  .stage-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 15px; border-bottom: 1px solid var(--line);
+    background: linear-gradient(90deg, rgba(var(--accent-rgb),0.16), transparent 62%), var(--panel-2); }
+  .stage-head h3 { flex: 1; min-width: 180px; }
+  .tag { font-family: var(--mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--accent-3);
+    border: 1px solid rgba(var(--accent-2-rgb),0.4); border-radius: 20px; padding: 2px 9px; }
+
+  /* ══ BOOT ═════════════════════════════════════════════════════ */
+  #boot { border-top: none; padding: 0; min-height: min(92vh, 860px); display: flex; align-items: center; overflow: hidden;
+    background: radial-gradient(ellipse 900px 420px at 15% -10%, rgba(var(--accent-rgb),0.32), transparent 70%),
+                radial-gradient(ellipse 700px 380px at 95% 110%, rgba(167,139,250,0.16), transparent 70%), #0b0d12; }
+  #bootFx { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0.55; }
+  #boot::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 3px); }
+  .boot-in { position: relative; z-index: 2; width: 100%; padding-top: 46px; padding-bottom: 46px; }
+  .term { font-family: var(--mono); font-size: 12px; line-height: 1.55; color: #9fb7d6; background: rgba(8,10,14,0.78);
+    border: 1px solid var(--line-2); border-radius: 10px; padding: 12px 14px; max-width: 640px; min-height: 12.5em;
+    box-shadow: 0 20px 60px -30px rgba(var(--accent-rgb),0.8); white-space: pre-wrap; word-break: break-word; }
+  .term .ok { color: var(--ok); } .term .wk { color: var(--accent-2); } .term .pr { color: var(--teal); } .term .hd { color: var(--ink); }
+  .cursor { display: inline-block; width: 8px; height: 1.05em; vertical-align: -2px; background: var(--accent-2); animation: blink 1s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .title-block { margin-top: 26px; opacity: 0; transform: translateY(14px); transition: opacity 0.9s ease, transform 0.9s ease; }
+  .title-block.on { opacity: 1; transform: none; }
+  .title-block h1 { margin-top: 8px; }
+  .title-block .promise { margin-top: 16px; font-size: clamp(15px, 1.9vw, 18px); color: var(--ink); max-width: 66ch; }
+  .boot-ctl { margin-top: 22px; }
+  .stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-top: 26px; max-width: 760px; }
+  .stat { border: 1px solid var(--line-2); border-radius: 10px; padding: 10px 12px; background: rgba(19,22,27,0.8); }
+  .stat .v { font-family: var(--mono); font-size: 24px; font-weight: 800; color: var(--accent-3); line-height: 1.1; }
+  .stat .l { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  /* ══ LEVELS ═══════════════════════════════════════════════════ */
+  .track { position: relative; display: grid; grid-template-columns: repeat(10, minmax(0,1fr)); gap: 4px; padding: 18px 14px 10px; }
+  .track .base { position: absolute; top: 37px; height: 3px; background: var(--line-2); border-radius: 3px; }
+  .track .fill { position: absolute; top: 37px; height: 3px; border-radius: 3px; width: 0;
+    background: linear-gradient(90deg, var(--accent), var(--teal)); box-shadow: 0 0 14px var(--accent-2); transition: width 0.6s ease; }
+  .lvl { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; background: none; border: none;
+    cursor: pointer; color: var(--muted); font-family: var(--sans); padding: 0 0 4px; min-width: 0; }
+  .lvl .dot { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-family: var(--mono); font-weight: 800; font-size: 13px;
+    background: var(--panel-2); border: 2px solid var(--line-2); color: var(--dim); transition: all 0.25s; }
+  .lvl .nm { font-size: 10.5px; font-weight: 700; letter-spacing: 0.3px; text-align: center; line-height: 1.25; }
+  .lvl.open .dot { border-color: var(--lc, var(--accent-2)); color: var(--ink); background: rgba(var(--accent-rgb),0.12); }
+  .lvl.cur .dot { background: var(--lc, var(--accent)); color: #0b0d12; box-shadow: 0 0 0 5px rgba(var(--accent-rgb),0.18), 0 0 26px var(--lc, var(--accent)); transform: scale(1.08); }
+  .lvl.cur .nm { color: var(--ink); }
+  .lvl.locked { cursor: not-allowed; }
+  .lvl.locked .dot::after { content: ''; }
+  .lvl-body { display: grid; grid-template-columns: minmax(0,1.5fr) minmax(0,1fr); gap: 16px; padding: 4px 15px 16px; }
+  .lcard { border: 1px solid var(--line-2); border-radius: 12px; padding: 16px 18px; background: var(--panel-2); position: relative; overflow: hidden; }
+  .lcard::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--lc, var(--accent)); box-shadow: 0 0 20px var(--lc, var(--accent)); }
+  .lcard.pop { animation: pop 0.55s ease; }
+  @keyframes pop { 0% { transform: translateY(8px); opacity: 0.2; } 100% { transform: none; opacity: 1; } }
+  .lcard .lk { font-family: var(--mono); font-size: 11px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--lc, var(--accent-2)); }
+  .lcard h3 { font-size: clamp(18px, 2.4vw, 23px); margin-top: 3px; letter-spacing: -0.3px; }
+  .lcard .tech { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .lcard .tech span { font-size: 11.5px; padding: 3px 9px; border-radius: 6px; border: 1px solid var(--line-2); color: var(--ink-dim); background: var(--panel); }
+  .lcard .say { margin-top: 14px; padding: 10px 12px; border-radius: 8px; background: rgba(var(--accent-rgb),0.08); border: 1px solid rgba(var(--accent-2-rgb),0.28);
+    font-size: 14px; color: var(--ink); max-width: none; }
+  .lcard .say b { color: var(--accent-3); font-size: 10.5px; letter-spacing: 1.2px; text-transform: uppercase; display: block; }
+  .lcard .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .lcard .mini { font-size: 12.5px; color: var(--ink-dim); margin: 0; }
+  .lcard .mini b { display: block; font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); }
+  .lcard .go { display: inline-block; margin-top: 12px; font-size: 12px; font-weight: 700; color: var(--accent-2); text-decoration: none; }
+  .lcard .go:hover { text-decoration: underline; }
+  .rack { border: 1px solid var(--line-2); border-radius: 12px; background: #0d1015; padding: 10px; }
+  .rack h4 { font-size: 10.5px; letter-spacing: 1.3px; text-transform: uppercase; color: var(--muted); padding: 2px 4px 8px; display: flex; justify-content: space-between; }
+  .rack svg { width: 100%; height: auto; display: block; }
+  .slot rect.b { fill: #12161d; stroke: #262c37; transition: fill 0.4s, stroke 0.4s; }
+  .slot text { font-family: var(--mono); font-size: 11px; fill: #4a5160; transition: fill 0.4s; }
+  .slot circle { fill: #2a303b; transition: fill 0.3s; }
+  .slot.on rect.b { fill: rgba(59,130,246,0.10); }
+  .slot.on text { fill: #dfe7f3; }
+  .slot.new rect.b { animation: slotin 1.1s ease; }
+  @keyframes slotin { 0% { fill: rgba(185,212,255,0.55); } 100% { fill: rgba(59,130,246,0.10); } }
+  .lvl-ctl { padding: 0 15px 14px; }
+  .lprog { font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+
+  /* ══ SYSTEM MAP ═══════════════════════════════════════════════ */
+  .map-wrap { position: relative; }
+  #mapCv { display: block; width: 100%; cursor: pointer; }
+  .stn-list { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 15px; border-top: 1px solid var(--line); background: var(--panel-2); }
+  .stn-list .btn { font-size: 11px; padding: 5px 9px; }
+  .brk-row { padding: 10px 15px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .brk-row .lab { font-size: 10.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+  .map-low { display: grid; grid-template-columns: minmax(0,1.4fr) minmax(0,1fr); gap: 14px; padding: 14px 15px 16px; border-top: 1px solid var(--line); }
+  .sd { border: 1px solid var(--line-2); border-radius: 10px; padding: 14px 16px; background: var(--panel-2); min-height: 220px; }
+  .sd .wkb { font-family: var(--mono); font-size: 10.5px; color: #0b0d12; background: var(--sc, var(--accent-2)); border-radius: 5px; padding: 2px 7px; font-weight: 800; }
+  .sd h3 { font-size: 18px; margin-top: 8px; }
+  .sd .kv { display: grid; grid-template-columns: 1fr; gap: 9px; margin-top: 10px; }
+  .sd .kv div { font-size: 12.8px; color: var(--ink-dim); }
+  .sd .kv b { display: block; font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); }
+  .sd .kv .pit b { color: #ff9a92; }
+  .sd details { margin-top: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+  .sd summary { cursor: pointer; padding: 8px 11px; font-size: 12.8px; color: var(--ink); font-weight: 600; }
+  .sd summary .qid { font-family: var(--mono); font-size: 10.5px; color: var(--accent-2); margin-right: 6px; }
+  .sd details p { margin: 0; padding: 0 11px 10px; font-size: 12.5px; max-width: none; }
+  .sd a.wl { font-size: 12px; font-weight: 700; color: var(--accent-2); }
+  .health { border: 1px solid var(--line-2); border-radius: 10px; padding: 12px 14px; background: #0d1015; }
+  .health h4 { font-size: 10.5px; letter-spacing: 1.3px; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+  .health .state { font-family: var(--mono); font-size: 11px; padding: 1px 8px; border-radius: 20px; border: 1px solid var(--ok); color: var(--ok); letter-spacing: 0.5px; }
+  .health .state.bad { border-color: var(--bad); color: var(--bad); }
+  .health .state.warn { border-color: var(--warn); color: var(--warn); }
+  #eqCv { display: block; width: 100%; height: 120px; margin-top: 8px; }
+  .health .cap { font-size: 10.5px; color: var(--dim); margin-top: 4px; }
+  .health ul { list-style: none; margin-top: 8px; display: grid; gap: 7px; }
+  .health li { font-size: 12.3px; color: var(--ink-dim); padding-left: 12px; border-left: 2px solid var(--bad); }
+  .health li.okk { border-left-color: var(--ok); }
+  .health li b { color: var(--ink); }
+
+  /* ══ ARSENAL ══════════════════════════════════════════════════ */
+  #skyCv { display: block; width: 100%; height: 230px; background: radial-gradient(ellipse at 50% 40%, #121826, #0b0d12 70%); }
+  .filters { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 15px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--panel-2); }
+  .filters .btn { font-size: 11.5px; padding: 5px 10px; }
+  .filters .btn i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 0; }
+  .agrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 10px; padding: 14px 15px 16px; }
+  a.tc { display: block; text-decoration: none; color: inherit; border: 1px solid var(--line); border-radius: 10px; padding: 11px 13px 12px;
+    background: var(--panel-2); position: relative; overflow: hidden; transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s, opacity 0.3s; }
+  a.tc::before { content: ''; position: absolute; left: 0; top: 0; right: 0; height: 2px; background: var(--tcc); opacity: 0.8; }
+  a.tc:hover, a.tc:focus-visible { border-color: var(--tcc); transform: translateY(-2px); box-shadow: 0 10px 26px -16px var(--tcc); }
+  a.tc .tw { font-family: var(--mono); font-size: 10px; color: var(--tcc); letter-spacing: 0.8px; text-transform: uppercase; }
+  a.tc .tn { font-size: 13.5px; font-weight: 700; color: var(--ink); margin-top: 3px; line-height: 1.3; }
+  a.tc .td { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.45; }
+  a.tc .tg { font-size: 11px; font-weight: 700; color: var(--accent-2); margin-top: 6px; display: block; }
+  .acount { font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+
+  /* ══ BOSS ═════════════════════════════════════════════════════ */
+  .arena-b { padding: 16px 15px 18px; display: grid; grid-template-columns: minmax(0,0.9fr) minmax(0,1.6fr); gap: 16px; }
+  .boss { align-self: start; border: 1px solid rgba(248,81,73,0.4); border-radius: 12px; padding: 14px; text-align: center; position: relative; overflow: hidden;
+    background: radial-gradient(ellipse at 50% 30%, rgba(248,81,73,0.16), transparent 70%), #0d0f14; }
+  .boss svg { width: 100%; max-width: 230px; height: auto; display: block; margin: 0 auto; }
+  .boss .bn { font-weight: 800; font-size: 15px; margin-top: 4px; }
+  .boss .bs { font-size: 11.5px; color: var(--muted); }
+  .hp { margin-top: 10px; height: 12px; border-radius: 8px; background: #2a1416; border: 1px solid rgba(248,81,73,0.4); overflow: hidden; }
+  .hp i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #f85149, #ff9a6b); transition: width 0.5s ease; }
+  .hpl { font-family: var(--mono); font-size: 11px; color: #ffb4ae; margin-top: 5px; }
+  .boss.hit { animation: shake 0.45s; }
+  @keyframes shake { 0%,100% { transform: none; } 20% { transform: translateX(-7px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(3px); } }
+  .dmg { position: absolute; left: 50%; top: 34%; font-family: var(--mono); font-weight: 900; font-size: 26px; color: #fff; pointer-events: none;
+    text-shadow: 0 0 14px var(--ok); transform: translateX(-50%); animation: dmg 0.9s ease forwards; }
+  @keyframes dmg { 0% { opacity: 0; transform: translate(-50%, 8px) scale(0.7); } 25% { opacity: 1; transform: translate(-50%, -4px) scale(1.15); } 100% { opacity: 0; transform: translate(-50%, -40px) scale(1); } }
+  .qbox { border: 1px solid var(--line-2); border-radius: 12px; padding: 14px 16px; background: var(--panel-2); min-width: 0; }
+  .qbox.wrong { animation: redflash 0.6s; }
+  @keyframes redflash { 0% { box-shadow: inset 0 0 0 2px var(--bad); } 100% { box-shadow: inset 0 0 0 0 transparent; } }
+  .qmeta { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .qtext { font-size: 16px; font-weight: 650; color: var(--ink); margin-top: 8px; line-height: 1.45; }
+  .opts { display: grid; gap: 8px; margin-top: 12px; }
+  .opt { text-align: left; font-family: var(--sans); font-size: 13px; color: var(--ink-dim); background: var(--panel); border: 1px solid var(--line-2); border-radius: 9px;
+    padding: 9px 12px; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; transition: border-color 0.15s, background 0.15s; }
+  .opt:hover:not(:disabled) { border-color: var(--accent-2); color: var(--ink); }
+  .opt .k { font-family: var(--mono); font-size: 11px; color: var(--accent-2); border: 1px solid var(--line-2); border-radius: 4px; padding: 0 5px; flex: none; margin-top: 1px; }
+  .opt.right { border-color: var(--ok); background: rgba(63,185,80,0.12); color: var(--ink); }
+  .opt.bad { border-color: var(--bad); background: rgba(248,81,73,0.12); }
+  .opt:disabled { cursor: default; }
+  .fbk { margin-top: 12px; font-size: 12.8px; color: var(--ink-dim); padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); }
+  .fbk b { color: var(--ink); }
+  .fbk.okk { border-color: rgba(63,185,80,0.5); }
+  .fbk.nok { border-color: rgba(248,81,73,0.5); }
+  .pips { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 10px; justify-content: center; }
+  .pips i { width: 12px; height: 12px; border-radius: 3px; background: #262b35; border: 1px solid #333a47; }
+  .pips i.g { background: var(--ok); border-color: var(--ok); box-shadow: 0 0 8px -2px var(--ok); }
+  .pips i.r { background: var(--bad); border-color: var(--bad); }
+  .result { text-align: center; padding: 10px 6px; }
+  .result svg { width: 190px; height: 190px; }
+  .result .tier { font-size: 20px; font-weight: 800; margin-top: 6px; }
+  .result .tl { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .missed { text-align: left; margin-top: 14px; display: grid; gap: 6px; }
+  .missed a { font-size: 12.5px; }
+
+  /* ══ CLOSING ══════════════════════════════════════════════════ */
+  #built { background: radial-gradient(ellipse 900px 400px at 50% 0%, rgba(var(--accent-rgb),0.20), transparent 70%), var(--bg); }
+  .built-grid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.2fr); gap: 22px; margin-top: 22px; align-items: start; }
+  .prin { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-top: 22px; }
+  .pc { border: 1px solid var(--line-2); border-radius: 10px; padding: 12px 14px; background: var(--panel-2); }
+  .pc .n { font-family: var(--mono); font-size: 22px; font-weight: 800; color: var(--accent-2); line-height: 1; }
+  .pc h4 { color: var(--ink); font-size: 13.5px; margin-top: 6px; }
+  .pc p { font-size: 12.3px; margin-top: 4px; }
+  .pc .w { font-family: var(--mono); font-size: 10.5px; color: var(--muted); margin-top: 6px; }
+  .sendoff { margin-top: 26px; border: 1px solid rgba(var(--accent-2-rgb),0.45); border-radius: 14px; padding: 22px 24px;
+    background: linear-gradient(135deg, rgba(var(--accent-rgb),0.14), rgba(45,212,191,0.06) 60%, transparent), var(--panel-2); }
+  .sendoff p { font-size: 15px; color: var(--ink); max-width: 72ch; }
+  .sendoff p:first-child { margin-top: 0; }
+  .nextgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 22px; }
+  a.nextcard { display: block; text-decoration: none; color: inherit; background: var(--panel); border: 1px solid var(--line); border-radius: 11px; padding: 14px 16px;
+    transition: border-color 0.18s, transform 0.18s; }
+  a.nextcard:hover { border-color: var(--accent-2); transform: translateY(-2px); }
+  a.nextcard .l { font-size: 10px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: var(--accent-2); }
+  a.nextcard .t { font-size: 15px; font-weight: 700; margin-top: 5px; color: var(--ink); }
+  a.nextcard .d { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  footer { border-top: 1px solid var(--line); padding: 26px; text-align: center; font-size: 12px; color: var(--ink-mute); background: var(--panel-2); }
+  footer a { color: var(--accent-3); }
+
+  /* ══ Responsive ═══════════════════════════════════════════════ */
+  @media (max-width: 1000px) {
+    .explain, .explain.bot { grid-template-columns: 1fr; }
+    .lvl-body, .map-low, .arena-b, .built-grid { grid-template-columns: 1fr; }
+    .prin { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 520px) { .jump { display: none; } }
+  @media (max-width: 720px) {
+    .wrap { padding: 0 14px; }
+    nav.top { padding: 10px 14px; gap: 8px; }
+    .jump { margin-left: 0; }
+    .jump a { font-size: 10.5px; padding: 2px 7px; }
+    section { padding: 32px 0 36px; }
+    .wframe { padding: 8px; margin-left: -4px; margin-right: -4px; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .track { grid-template-columns: repeat(5, minmax(0,1fr)); row-gap: 14px; padding: 14px 6px 8px; }
+    .track .base, .track .fill { display: none; }
+    .lvl .dot { width: 36px; height: 36px; font-size: 12px; }
+    .lvl-body { padding: 4px 10px 14px; }
+    .lcard .row2 { grid-template-columns: 1fr; }
+    .prin { grid-template-columns: 1fr; }
+    .term { font-size: 11px; }
+    .sendoff { padding: 16px; }
+    .agrid { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="top" aria-label="Site">
+  <a href="index.html">Systematic Trading Arena</a>
+  <span class="crumbs"><a href="week9.html">&larr; Week 9</a> &middot; <b>The recap</b> &middot; <a href="index.html">Course home</a></span>
+  <span class="jump" aria-label="Jump to a part">
+    <a href="#levels">Levels</a><a href="#system">The bot</a><a href="#arsenal">Arsenal</a><a href="#boss">Boss fight</a><a href="#built">The end</a>
+  </span>
+</nav>
+
+<!-- ══════════════════════════════ BOOT ══════════════════════════════ -->
+<section id="boot" aria-labelledby="bootTitle">
+  <canvas id="bootFx" aria-hidden="true"></canvas>
+  <div class="wrap boot-in">
+    <div class="eyebrow">The recap &middot; the last interactive page of the course</div>
+    <div class="term" id="term" role="log" aria-live="off" aria-label="Boot log of the bot you built"></div>
+    <div class="title-block" id="titleBlock">
+      <div class="eyebrow" style="color:var(--teal)">Nine weeks &middot; one system</div>
+      <h1 id="bootTitle"><span class="grad">You built a trading system.</span><br/>Now see all of it at once.</h1>
+      <p class="promise">A byte comes in, a grade comes out, and every step in between is something you wrote, tested and ran live.
+      This page walks the nine weeks as levels, runs the whole bot as one machine you can break, lays out every technique,
+      and ends with one last fight against the market.</p>
+      <div class="btnrow boot-ctl">
+        <a class="btn primary" href="#levels" style="text-decoration:none">Start the journey &darr;</a>
+        <button class="btn" type="button" id="bootSkip">Skip the intro</button>
+        <button class="btn" type="button" id="bootReplay">Replay the intro</button>
+      </div>
+      <div class="stats" aria-label="What this page covers">
+        <div class="stat"><div class="v">10</div><div class="l">levels, Week 0 to Week 9</div></div>
+        <div class="stat"><div class="v">12</div><div class="l">stations in the live bot</div></div>
+        <div class="stat"><div class="v" id="stTech">60</div><div class="l">techniques in the arsenal</div></div>
+        <div class="stat"><div class="v">15</div><div class="l">questions from the 131-question bank</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ LEVELS ══════════════════════════════ -->
+<section id="levels">
+ <div class="wrap">
+  <div class="partno">PART 1 / 4</div>
+  <div class="eyebrow">The journey</div>
+  <h2>Ten levels: what each week added to your bot</h2>
+  <p class="lead">The course was a game with unlock levels. Each week gave the bot one new component and gave you one idea to keep.
+  Unlock the levels in order and watch the rack on the right fill up, one module per week.</p>
+
+  <div class="wframe">
+   <div class="explain top">
+    <div class="xb"><h4>What you are looking at</h4><p>A level track from Week 0 to Week 9. Each node is one week. The card shows what the week taught,
+    the one sentence to remember, the component it added to your bot, and what the graded live block asked of it that week.
+    The rack on the right is your bot: one module lights up per unlocked level.</p></div>
+    <div class="xb"><h4>Try this</h4><ol>
+      <li>Press <b>Unlock the next level</b> and watch the new module slide into the rack.</li>
+      <li>Keep going to Week 9, or press <b>Unlock all</b>.</li>
+      <li>Click any open node (or use the left and right arrow keys on the track) to go back to a week.</li>
+      <li>Follow <b>Open the week page</b> on any card to reread the section where it was taught.</li>
+    </ol></div>
+   </div>
+
+   <div class="stage">
+    <div class="stage-head"><h3>The level track</h3><span class="lprog" id="lvlProg">1 of 10 unlocked</span><span class="tag">Widget 1 &middot; unlock</span></div>
+    <div class="track" id="track" role="toolbar" aria-label="Levels, Week 0 to Week 9"><div class="base" id="trackBase"></div><div class="fill" id="trackFill"></div></div>
+    <div class="lvl-ctl btnrow">
+      <button class="btn primary" type="button" id="lvlNext">Unlock the next level &rarr;</button>
+      <button class="btn" type="button" id="lvlAll">Unlock all</button>
+      <button class="btn" type="button" id="lvlReset">Lock again</button>
+    </div>
+    <div class="lvl-body">
+      <div class="lcard" id="lcard" aria-live="polite"></div>
+      <div class="rack"><h4><span>Your bot, module by module</span><span id="rackN">1 / 10</span></h4><svg id="rackSvg" viewBox="0 0 300 372" role="img" aria-label="The bot as a rack of ten modules"></svg></div>
+    </div>
+   </div>
+
+   <div class="explain bot">
+    <div class="xb"><h4>What to notice</h4><p>No week stands alone. The objects of Week 1 are what the loop of Week 2 schedules, the gateway of Week 3 feeds them,
+    and the backtester of Week 4 replays the tape they produce. Week 5 added no code: it tested that the bot survives the risk rules unattended.
+    The last module is not a feature at all: it is the gate that lets every other module change without breaking the running bot.</p></div>
+    <div class="xb rem"><h4>Remember</h4><p>Ten modules: connection, objects, event loop, gateway, backtester, risk rules, fast book, research pipeline, model, gate.
+    In your bot: you can name the week and the reason behind every module, and that is the answer to most interview questions.</p></div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══════════════════════════════ SYSTEM ══════════════════════════════ -->
+<section id="system">
+ <div class="wrap">
+  <div class="partno">PART 2 / 4</div>
+  <div class="eyebrow">The centerpiece</div>
+  <h2>The whole bot, running: from a byte to the leaderboard</h2>
+  <p class="lead">Twelve stations, in the order a live tick and the order it causes cross them. Click any station to read what it does,
+  which week taught it, the trap, and the interview question about it. Then break it on purpose.</p>
+
+  <div class="wframe">
+   <div class="explain top">
+    <div class="xb"><h4>What you are looking at</h4><p>The bot as a pipeline. Each glowing dot is one tick that becomes a decision, an order and a fill.
+    Each box is a station with the week that built it. The panel at the bottom right is the bot's health: an equity curve
+    (a schematic shape, not real data) and a list of what is going wrong. The red buttons switch off one lesson at a time.</p></div>
+    <div class="xb"><h4>Try this</h4><ol>
+      <li>Watch a few dots go from <b>Market data</b> to <b>Leaderboard</b>. Click <b>Risk checks</b> and read its four blocks.</li>
+      <li>Press <b>Send a crash</b> with the kill switch armed. Watch the dots stop at the risk station.</li>
+      <li>Press <b>Kill switch off</b>, then <b>Send a crash</b> again. Watch the red dots pass and the curve dive.</li>
+      <li>Try <b>Stale data</b>, <b>Latency</b>, <b>Look-ahead leak</b> and <b>Fee blowup</b> one at a time. Find the station that turns red each time.</li>
+      <li>Press <b>Heal all</b>. Use <b>Pause</b> if you want to read a frozen frame.</li>
+    </ol></div>
+   </div>
+
+   <div class="stage">
+    <div class="stage-head"><h3>One tick, twelve stations</h3><span class="tag">Widget 2 &middot; run it, break it</span></div>
+    <div class="map-wrap"><canvas id="mapCv" role="img" aria-label="Animated map of the twelve stations of the trading bot. Use the station buttons below to select a station."></canvas></div>
+    <div class="stn-list" id="stnList" role="group" aria-label="Select a station"></div>
+    <div class="brk-row" role="group" aria-label="Break one lesson">
+      <span class="lab">Break it</span>
+      <button class="btn brk" type="button" data-brk="kill" aria-pressed="false">Kill switch off</button>
+      <button class="btn brk" type="button" data-brk="stale" aria-pressed="false">Stale data</button>
+      <button class="btn brk" type="button" data-brk="lat" aria-pressed="false">Latency</button>
+      <button class="btn brk" type="button" data-brk="leak" aria-pressed="false">Look-ahead leak</button>
+      <button class="btn brk" type="button" data-brk="fee" aria-pressed="false">Fee blowup</button>
+      <span style="flex:1"></span>
+      <button class="btn" type="button" id="crashBtn">Send a crash</button>
+      <button class="btn" type="button" id="healBtn">Heal all</button>
+      <button class="btn" type="button" id="pauseBtn" aria-pressed="false">Pause</button>
+    </div>
+    <div class="map-low">
+      <div class="sd" id="sd" aria-live="polite"></div>
+      <div class="health">
+        <h4><span>Bot health</span><span class="state" id="hState">ALL GREEN</span></h4>
+        <canvas id="eqCv" aria-hidden="true"></canvas>
+        <div class="cap" id="eqCap">Equity, schematic shape. No real data.</div>
+        <ul id="hList"></ul>
+      </div>
+    </div>
+   </div>
+
+   <div class="explain bot">
+    <div class="xb"><h4>What to notice</h4><p>Every break leaves the socket open and the other stations green, and the bot still loses. Stale data and latency fail quietly:
+    the dots keep moving, they just carry old prices. The leak does not hurt the live bot at all; it hurts you, because the backtest line
+    lies and you ship the wrong idea. The fee blowup is the Week 0 arithmetic: at the engine's default schedule a taker pays $15 on $10,000
+    of notional to capture a $2 spread (interview bank MKT-04). The kill switch is the only break that changes how bad a bad day gets.</p></div>
+    <div class="xb rem"><h4>Remember</h4><p>Byte, gateway, loop, book, features, signal, risk, order, routing, match, P&amp;L, score: say the chain and the reason
+    for each station. In your bot: you own the middle of it, from <code>on_tick</code> to the order, and the kill switch runs first.</p></div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══════════════════════════════ ARSENAL ══════════════════════════════ -->
+<section id="arsenal">
+ <div class="wrap">
+  <div class="partno">PART 3 / 4</div>
+  <div class="eyebrow">The technique arsenal</div>
+  <h2>Every technique you used, and where it was taught</h2>
+  <p class="lead">The bot is the sum of these techniques. Each card links to the section of the week page that taught it, so this is also
+  your revision map for the final.</p>
+
+  <div class="wframe">
+   <div class="explain top">
+    <div class="xb"><h4>What you are looking at</h4><p>A sky of techniques: each star is one technique, and each constellation is one theme.
+    Below it, one card per technique with its week, one line on what it is, and a link back to where it was taught.</p></div>
+    <div class="xb"><h4>Try this</h4><ol>
+      <li>Pick a theme with the chips. Watch its constellation light up and the cards narrow down.</li>
+      <li>Hover or tab onto a card. Watch its star pulse in the sky.</li>
+      <li>Pick <b>Signals &amp; ML</b> and count how many cards are about not fooling yourself.</li>
+      <li>Open one card you could not explain out loud, and reread that section.</li>
+    </ol></div>
+   </div>
+
+   <div class="stage">
+    <div class="stage-head"><h3>The sky</h3><span class="acount" id="aCount"></span><span class="tag">Widget 3 &middot; filter</span></div>
+    <canvas id="skyCv" aria-hidden="true"></canvas>
+    <div class="filters" id="filters" role="group" aria-label="Filter techniques by theme"></div>
+    <div class="agrid" id="agrid"></div>
+   </div>
+
+   <div class="explain bot">
+    <div class="xb"><h4>What to notice</h4><p>The biggest constellations are not about trading ideas. They are about the wire, speed, data and shipping:
+    the engineering that lets a trading idea survive contact with a live market. In the ML theme, most cards are about honest
+    measurement (leakage, walk-forward, baselines, drift), not about fancier models.</p></div>
+    <div class="xb rem"><h4>Remember</h4><p>A technique is worth what you can explain about it: what it is, when it fails, and the number the course measured.
+    In your bot: for every card, you can point at the line of code where you used it, or say why you did not need it.</p></div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══════════════════════════════ BOSS ══════════════════════════════ -->
+<section id="boss">
+ <div class="wrap">
+  <div class="partno">PART 4 / 4</div>
+  <div class="eyebrow">The boss fight</div>
+  <h2>Fifteen questions against the market</h2>
+  <p class="lead">One question from every theme of the interview bank, plus a few that came up every week. Each right answer is a hit.
+  A wrong one costs nothing but shows you the answer and the week to reread.</p>
+
+  <div class="wframe">
+   <div class="explain top">
+    <div class="xb"><h4>What you are looking at</h4><p>The market on the left, with fifteen hit points. On the right, one multiple-choice question at a time,
+    drawn from the course's interview bank (the question id is shown). The squares under the boss are your answers so far:
+    green right, red wrong. Your best score stays in this browser only.</p></div>
+    <div class="xb"><h4>Try this</h4><ol>
+      <li>Read the question and pick an answer with the mouse or the keys <b>1</b> to <b>4</b>.</li>
+      <li>Read the feedback, even when you were right: it carries the number from the course.</li>
+      <li>Press <b>Next</b> (or Enter) and fight through all fifteen.</li>
+      <li>On the result screen, open the weeks you missed, then press <b>Fight again</b>. The answers are shuffled.</li>
+    </ol></div>
+   </div>
+
+   <div class="stage">
+    <div class="stage-head"><h3>The final market</h3><span class="lprog" id="bestTxt"></span><span class="tag">Widget 4 &middot; quiz</span></div>
+    <div class="arena-b">
+      <div class="boss" id="bossBox">
+        <svg viewBox="0 0 220 170" aria-hidden="true" id="bossSvg">
+          <defs>
+            <radialGradient id="bg1" cx="50%" cy="45%" r="55%"><stop offset="0" stop-color="#ff6b5f" stop-opacity="0.55"/><stop offset="1" stop-color="#f85149" stop-opacity="0"/></radialGradient>
+          </defs>
+          <circle cx="110" cy="80" r="74" fill="url(#bg1)"/>
+          <g id="bossCandles"></g>
+          <circle cx="86" cy="70" r="7" fill="#ffefe9"/><circle cx="134" cy="70" r="7" fill="#ffefe9"/>
+          <circle id="eyeL" cx="86" cy="71" r="3.2" fill="#2a0d0b"/><circle id="eyeR" cx="134" cy="71" r="3.2" fill="#2a0d0b"/>
+          <path id="bossMouth" d="M88 104 Q110 92 132 104" stroke="#ffefe9" stroke-width="3" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div class="bn">The Market</div>
+        <div class="bs">Fees, noise, leaks and partial failures</div>
+        <div class="hp" aria-hidden="true"><i id="hpBar"></i></div>
+        <div class="hpl" id="hpTxt">15 / 15 HP</div>
+        <div class="pips" id="pips" aria-hidden="true"></div>
+      </div>
+      <div class="qbox" id="qbox" aria-live="polite"></div>
+    </div>
+   </div>
+
+   <div class="explain bot">
+    <div class="xb"><h4>What to notice</h4><p>Most wrong answers on this list sound reasonable: that is why they are interview questions.
+    The right answer almost always names a measurement (a split in time, a tail percentile, the fee against the spread)
+    instead of an opinion. If you missed one, the link takes you to the exact section that answers it.</p></div>
+    <div class="xb rem"><h4>Remember</h4><p>Answer with the mechanism and the course's number: "it prints at the resting price", "0.574 shuffled, 0.480 in time".
+    In your bot: every one of these questions is a line of code you can point at in your own repository.</p></div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══════════════════════════════ CLOSING ══════════════════════════════ -->
+<section id="built">
+ <div class="wrap">
+  <div class="eyebrow">The end of the season</div>
+  <h2><span class="grad">What you built</span></h2>
+  <p class="lead">Nine weeks ago the bot could barely place an order. Now it has every module below, and you can explain each one.</p>
+
+  <div class="built-grid">
+    <div class="rack"><h4><span>Your bot, complete</span><span>10 / 10</span></h4><svg id="rackDone" viewBox="0 0 300 372" role="img" aria-label="The complete bot: ten modules lit"></svg></div>
+    <div>
+      <h3>The six principles behind almost every choice</h3>
+      <p class="sub">The principles the last class closed on, with the weeks that taught each one.</p>
+      <div class="prin" id="prin"></div>
+    </div>
+  </div>
+
+  <div class="sendoff">
+    <p>You started with a bot that could barely place an order. You built the objects, the loop, the wire, the backtest, the fast book,
+    the data pipeline, the model, and the gate around all of it, and you ran it every week against a live market and the rest of the room.</p>
+    <p>Whatever you build next, you now know the difference between <b>code that works</b> and <b>a system you can leave running</b>.
+    The second one is what people pay for. Measure before you believe, keep the kill switch first, and never deploy during a session.</p>
+    <p>Thank you for building it with us. Go and build the next one.</p>
+  </div>
+
+  <div class="nextgrid">
+    <a class="nextcard" href="week9.html#pq"><div class="l">Revise</div><div class="t">The 131-question interview bank</div><div class="d">Filter by your weak themes. It is the best revision map for the final.</div></a>
+    <a class="nextcard" href="week9.html#ps"><div class="l">Week 9</div><div class="t">Nine weeks, one system</div><div class="d">The station-by-station map with the professional stack and the six principles.</div></a>
+    <a class="nextcard" href="index.html"><div class="l">All weeks</div><div class="t">The course map</div><div class="d">Every week's page, the three roles and the order lifecycle.</div></a>
+    <a class="nextcard" href="week1.html"><div class="l">Start again</div><div class="t">Week 1 &middot; UML &amp; OOP &rarr;</div><div class="d">The objects everything else was built on. It reads differently now.</div></a>
+  </div>
+ </div>
+</section>
+
+<footer>Systematic Trading Arena &middot; an interactive companion for a 9-week systematic-trading course &middot; <a href="https://github.com/sdonadio/systematic-trading-arena">Source</a></footer>
+
+<script>
+'use strict';
+/* ══ helpers ═══════════════════════════════════════════════════ */
+var REDUCE = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+var MONO = 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace';
+var SANS = 'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+function $(id) { return document.getElementById(id); }
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function clamp(x, a, b) { return x < a ? a : (x > b ? b : x); }
+function lerp(a, b, k) { return a + (b - a) * k; }
+function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+function hexA(hex, a) { var n = parseInt(hex.slice(1), 16); return 'rgba(' + (n >> 16) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; }
+function fitCanvas(cv, h) {
+  var dpr = Math.min(window.devicePixelRatio || 1, 2), w = cv.clientWidth || cv.parentNode.clientWidth;
+  cv.style.height = h + 'px'; cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+  var c = cv.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); return { c: c, w: w, h: h };
+}
+function rrect(c, x, y, w, h, r) {
+  c.beginPath(); c.moveTo(x + r, y); c.lineTo(x + w - r, y); c.quadraticCurveTo(x + w, y, x + w, y + r);
+  c.lineTo(x + w, y + h - r); c.quadraticCurveTo(x + w, y + h, x + w - r, y + h); c.lineTo(x + r, y + h);
+  c.quadraticCurveTo(x, y + h, x, y + h - r); c.lineTo(x, y + r); c.quadraticCurveTo(x, y, x + r, y); c.closePath();
+}
+/* run a loop only while its element is on screen and the tab is visible */
+function visLoop(target, frame) {
+  var on = false, raf = 0, last = 0, seen = false;
+  function tick(t) { if (!on) return; var dt = last ? Math.min(0.05, (t - last) / 1000) : 0.016; last = t; frame(dt); raf = requestAnimationFrame(tick); }
+  function set(v) { if (v === on) return; on = v; last = 0; if (on) raf = requestAnimationFrame(tick); else cancelAnimationFrame(raf); }
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (es) { seen = es[0].isIntersecting; set(seen && !document.hidden); }, { threshold: 0.02 }).observe(target);
+  } else { seen = true; set(true); }
+  document.addEventListener('visibilitychange', function () { set(seen && !document.hidden); });
+  return { stop: function () { set(false); }, start: function () { set(seen && !document.hidden); } };
+}
+
+/* ══ DATA: weeks / levels ══════════════════════════════════════ */
+var WCOL = ['#9aa0a6', '#a78bfa', '#a78bfa', '#2dd4bf', '#58a6ff', '#f85149', '#d29922', '#d29922', '#f778ba', '#3fb950'];
+var LEVELS = [
+  { wk: 'Week 0', t: 'The machine and the first fill', comp: 'Connection',
+    tech: ['toolchain and team repo', 'smoke test', 'latency vs throughput', 'first order, first fill', 'the fill rule: resting price'],
+    rem: 'The budget is the tick: at one tick a second Python is fast enough, so measure before you rewrite anything.',
+    bot: 'make install, connect to the venue, place one order and read the fill.',
+    season: 'Orientation: the smoke test, before the season starts.', href: 'index.html#start' },
+  { wk: 'Week 1', t: 'UML and object-oriented Python', comp: 'Objects',
+    tech: ['four pillars of OOP', 'UML class diagrams', 'the Trader abstract base class', 'composition over inheritance', 'dataclass vs pydantic'],
+    rem: 'A trading system is a system of objects: model it on paper before you model it in Python.',
+    bot: 'subclass arena.Trader and implement on_tick(market, portfolio), which returns a Signal or None.',
+    season: 'Paper trading: connect, place orders; long-only, nothing counts.', href: 'week1.html' },
+  { wk: 'Week 2', t: 'Concurrency and asyncio', comp: 'Event loop',
+    tech: ['the event loop and await', 'run_in_executor and to_thread', 'bounded queues', 'the GIL, races and a Lock', 'threads vs processes'],
+    rem: 'One blocking call freezes the whole loop: the bot goes quiet while it still looks connected.',
+    bot: 'on_tick never blocks; blocking work leaves the loop, and queues are bounded.',
+    season: 'Season scoring begins: long-only while you master async.', href: 'week2.html' },
+  { wk: 'Week 3', t: 'Socket streaming and protocols', comp: 'Gateway',
+    tech: ['OSI and TCP/IP', 'TCP vs UDP', 'framing a byte stream', 'FIX, ITCH, OUCH', 'WebSocket, heartbeats, close codes', 'typed schemas', 'reconnect with backoff'],
+    rem: 'One recv is not one message: frame it, validate it at the boundary, and resync after a gap.',
+    bot: 'every message is a pydantic model; the client reconnects with backoff and rebuilds its state from the venue.',
+    season: 'Signals and earnings: long-only, the wire under load.', href: 'week3.html' },
+  { wk: 'Week 4', t: 'Backtesting and its data', comp: 'Backtester',
+    tech: ['the backtest pipeline', 'SQL and indexes', 'kdb+ and columnar storage', 'Parquet and DuckDB', 'as-of joins', 'the logical clock', 'look-ahead check', 'in-sample vs out-of-sample', 'baselines'],
+    rem: 'A backtest replays the tape on its own clock and ends in numbers you can be wrong about cheaply.',
+    bot: 'replay recorded sessions with honest fills, fees and baselines before you trust a change.',
+    season: 'Market making: shorts unlock, post-only, the opening auction, the ORCA IPO, purchase window 1.', href: 'week4.html' },
+  { wk: 'Week 5', t: 'Midterm week and the risk block', comp: 'Risk rules',
+    tech: ['Weeks 1 to 4, consolidated', 'circuit breakers and halts', 'stops', 'margin and liquidation'],
+    rem: 'Nothing new to learn: consolidate what you built, and make the bot survive the block unattended.',
+    bot: 'read halt events, stop sending to a halted symbol instead of hot-looping on rejects, and respect margin.',
+    season: 'Risk: breakers, stops and liquidation live.', href: 'week5.html' },
+  { wk: 'Week 6', t: 'Algorithmic complexity and data structures', comp: 'Fast book',
+    tech: ['Big-O', 'dict, deque, heap', 'heap order book, lazy cancel', 'Welford O(1) rolling stats', 'cProfile and p99', 'dynamic programming', 'Dijkstra and Bellman-Ford'],
+    rem: 'Pick the right data structure, know its cost, and profile the hot path before you guess.',
+    bot: 'best bid from the top of a heap, rolling statistics in O(1), and never a rescan of the session.',
+    season: 'Scenario tournament: the whole market at once.', href: 'week6.html' },
+  { wk: 'Week 7', t: 'Big data and distributed computing', comp: 'Research pipeline',
+    tech: ['the memory wall', 'downcast dtypes', 'Parquet, columnar', 'vectorisation', 'chunk and carry state', 'map-reduce', 'process pools', 'offline feature cache'],
+    rem: 'Think in columns and processes, so a strategy search takes minutes, and none of it runs in on_tick.',
+    bot: 'features are built and cached offline; on_tick only reads them.',
+    season: 'Execution in a fast market: quotas, latency, cancel fees, flashes; borrow tightens; window 2.', href: 'week7.html' },
+  { wk: 'Week 8', t: 'Machine-learning signals and model ops', comp: 'Model',
+    tech: ['supervised vs unsupervised', 'the feature factory', 'leakage at every station', 'walk-forward, purge, embargo', 'regularisation and PCA', 'the model ladder', 'model ops and drift', 'news sentiment'],
+    rem: 'ML sharpens the signal, never the system: the model has to beat the baseline after fees.',
+    bot: 'the model lives behind signal(), loaded once, with the baseline rule as its fallback.',
+    season: 'Multi-venue and big data: NBBO routing, fee wars, hidden lead-lag links, the LUNA IPO.', href: 'week8.html' },
+  { wk: 'Week 9', t: 'Testing, git flow, CI/CD and the finale', comp: 'The gate',
+    tech: ['the testing pyramid', 'deterministic tests', 'coverage and property tests', 'the kill switch', 'git flow, PRs, tags', 'the CI gate', 'CD: staging, canary', 'run-books', 'the risk-adjusted score'],
+    rem: 'A test is an executable claim. CI is a gate, CD ships what passes, and you never deploy during a session.',
+    bot: 'the kill switch runs first in on_tick, the tests are a required check, and you tag what you run.',
+    season: 'ARENA-10 futures and ML, then the finale: futures, the desk\'s tells, the news tape and the full market structure in one three-hour block.', href: 'week9.html' }
+];
+
+/* ══ BOOT ══════════════════════════════════════════════════════ */
+(function boot() {
+  var cv = $('bootFx'), term = $('term'), tb = $('titleBlock');
+  var LINES = [
+    ['<span class="pr">$</span> make install', '<span class="ok">ok</span>'],
+    ['<span class="pr">$</span> connect ws://localhost:8765', '<span class="ok">101 Switching Protocols</span>'],
+    ['<span class="pr">&gt;</span> Handshake(team_id, role="trader")', '<span class="ok">accepted</span>'],
+    ['<span class="hd">  loading objects ...............</span>', '<span class="wk">W1</span>'],
+    ['<span class="hd">  starting the event loop .......</span>', '<span class="wk">W2</span>'],
+    ['<span class="hd">  gateway: framed and typed .....</span>', '<span class="wk">W3</span>'],
+    ['<span class="hd">  tape and backtester ...........</span>', '<span class="wk">W4</span>'],
+    ['<span class="hd">  risk rules ....................</span>', '<span class="wk">W5</span>'],
+    ['<span class="hd">  fast book, O(1) stats .........</span>', '<span class="wk">W6</span>'],
+    ['<span class="hd">  research pipeline .............</span>', '<span class="wk">W7</span>'],
+    ['<span class="hd">  model behind signal() .........</span>', '<span class="wk">W8</span>'],
+    ['<span class="hd">  tests, CI gate, kill switch ...</span>', '<span class="wk">W9</span>'],
+    ['<span class="pr">&lt;</span> SESSION_OPEN', '<span class="ok">all stations green</span>']
+  ];
+  var timer = 0, idx = 0;
+  function full() { return LINES.map(function (l) { return l[0] + ' ' + l[1]; }).join('\n'); }
+  function finish() { clearTimeout(timer); term.innerHTML = full(); tb.classList.add('on'); }
+  function step() {
+    idx++;
+    term.innerHTML = LINES.slice(0, idx).map(function (l) { return l[0] + ' ' + l[1]; }).join('\n') + (idx < LINES.length ? '\n<span class="cursor"></span>' : '');
+    if (idx >= 3) tb.classList.add('on');
+    if (idx < LINES.length) timer = setTimeout(step, idx < 3 ? 380 : 190);
+  }
+  function play() { clearTimeout(timer); idx = 0; tb.classList.remove('on'); term.innerHTML = '<span class="cursor"></span>'; timer = setTimeout(step, 300); }
+  $('bootSkip').addEventListener('click', finish);
+  $('bootReplay').addEventListener('click', function () { if (REDUCE) { finish(); return; } play(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && idx < LINES.length) finish(); });
+  if (REDUCE) finish(); else play();
+
+  /* byte rain: hex bytes fall and some resolve into the words of the pipeline */
+  var WORDS = ['bytes', 'frame', 'Handshake', 'on_tick', 'Signal', 'risk ok', 'Order', 'NBBO', 'Fill', 'P&L', 'score'];
+  var g, cols = [], H = 0, W = 0;
+  function setup() {
+    var box = cv.parentNode.getBoundingClientRect(); H = Math.max(300, box.height);
+    g = fitCanvas(cv, H); W = g.w; cols = [];
+    var n = Math.floor(W / 22);
+    for (var i = 0; i < n; i++) cols.push({ x: i * 22 + 8, y: Math.random() * H, v: 30 + Math.random() * 70, w: Math.random() < 0.08 ? WORDS[(Math.random() * WORDS.length) | 0] : null });
+  }
+  function hx() { var b = (Math.random() * 256) | 0; return (b < 16 ? '0' : '') + b.toString(16).toUpperCase(); }
+  function draw(dt) {
+    var c = g.c; c.clearRect(0, 0, W, H); c.font = '11px ' + MONO;
+    for (var i = 0; i < cols.length; i++) {
+      var k = cols[i]; k.y += k.v * dt; if (k.y > H + 120) { k.y = -40 - Math.random() * 200; k.w = Math.random() < 0.1 ? WORDS[(Math.random() * WORDS.length) | 0] : null; }
+      for (var j = 0; j < 7; j++) {
+        var yy = k.y - j * 15; if (yy < -10 || yy > H + 10) continue;
+        var a = (1 - j / 7) * 0.55;
+        if (j === 0 && k.w) { c.fillStyle = 'rgba(124,176,255,0.95)'; c.fillText(k.w, k.x, yy); continue; }
+        c.fillStyle = j === 0 ? 'rgba(185,212,255,' + (a + 0.3) + ')' : 'rgba(59,130,246,' + a + ')';
+        c.fillText(((i * 7 + j * 13 + Math.floor(k.y / 15)) % 5 === 0) ? hx() : (j % 2 ? '0x' : hx()), k.x, yy);
+      }
+    }
+  }
+  setup(); draw(0);
+  if (!REDUCE) visLoop($('boot'), draw);
+  window.addEventListener('resize', function () { setup(); draw(0); });
+})();
+
+/* ══ LEVELS + RACK ═════════════════════════════════════════════ */
+function drawRack(svg, nOn, fresh) {
+  var h = '', rowH = 34, y0 = 6;
+  for (var i = 9; i >= 0; i--) {
+    var y = y0 + (9 - i) * (rowH + 2.6), on = i < nOn, col = WCOL[i];
+    h += '<g class="slot' + (on ? ' on' : '') + (i === fresh ? ' new' : '') + '">' +
+      '<rect class="b" x="6" y="' + y + '" width="288" height="' + rowH + '" rx="6" ' + (on ? 'style="stroke:' + col + '"' : '') + '/>' +
+      '<circle cx="22" cy="' + (y + rowH / 2) + '" r="4.5" ' + (on ? 'style="fill:' + col + ';filter:drop-shadow(0 0 4px ' + col + ')"' : '') + '/>' +
+      '<text x="36" y="' + (y + rowH / 2 + 4) + '">' + esc(LEVELS[i].comp) + '</text>' +
+      '<text x="284" y="' + (y + rowH / 2 + 4) + '" text-anchor="end" ' + (on ? 'style="fill:' + col + '"' : '') + '>W' + i + '</text>';
+    for (var b = 0; b < 6; b++) h += '<rect x="' + (186 + b * 12) + '" y="' + (y + 11) + '" width="7" height="' + (rowH - 22) + '" rx="1.5" style="fill:' + (on ? hexA(col, 0.25 + 0.12 * ((b + i) % 3)) : '#1b2029') + '"/>';
+    h += '</g>';
+  }
+  svg.innerHTML = h;
+}
+(function levels() {
+  var track = $('track'), card = $('lcard'), unlocked = 1, cur = 0, btns = [];
+  LEVELS.forEach(function (L, i) {
+    var b = el('button', 'lvl', '<span class="dot">' + i + '</span><span class="nm">' + esc(L.comp) + '</span>');
+    b.type = 'button'; b.style.setProperty('--lc', WCOL[i]);
+    b.setAttribute('aria-label', L.wk + ': ' + L.t);
+    b.addEventListener('click', function () { if (i < unlocked) show(i); });
+    b.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault(); var j = clamp(cur + (e.key === 'ArrowRight' ? 1 : -1), 0, unlocked - 1); show(j); btns[j].focus();
+      }
+    });
+    track.appendChild(b); btns.push(b);
+  });
+  function paint(fresh) {
+    btns.forEach(function (b, i) {
+      b.classList.toggle('open', i < unlocked); b.classList.toggle('locked', i >= unlocked); b.classList.toggle('cur', i === cur);
+      b.setAttribute('aria-disabled', i >= unlocked ? 'true' : 'false'); b.setAttribute('aria-current', i === cur ? 'step' : 'false');
+      b.tabIndex = i === cur ? 0 : -1;
+      if (i >= unlocked) b.querySelector('.dot').innerHTML = '&#128274;'; else b.querySelector('.dot').textContent = i;
+    });
+    placeLine();
+    $('lvlProg').textContent = unlocked + ' of 10 unlocked';
+    $('rackN').textContent = unlocked + ' / 10';
+    $('lvlNext').disabled = unlocked >= 10;
+    drawRack($('rackSvg'), unlocked, fresh);
+  }
+  function cx(b) { return b.offsetLeft + b.offsetWidth / 2; }
+  function placeLine() {
+    var a = cx(btns[0]), z = cx(btns[9]), u = cx(btns[unlocked - 1]);
+    $('trackBase').style.left = a + 'px'; $('trackBase').style.width = (z - a) + 'px';
+    $('trackFill').style.left = a + 'px'; $('trackFill').style.width = (u - a) + 'px';
+  }
+  window.addEventListener('resize', placeLine);
+  function show(i) {
+    cur = i; var L = LEVELS[i];
+    card.style.setProperty('--lc', WCOL[i]);
+    card.innerHTML = '<div class="lk">Level ' + i + ' &middot; ' + esc(L.wk) + '</div><h3>' + esc(L.t) + '</h3>' +
+      '<div class="tech">' + L.tech.map(function (t) { return '<span>' + esc(t) + '</span>'; }).join('') + '</div>' +
+      '<p class="say"><b>The one sentence</b>' + esc(L.rem) + '</p>' +
+      '<div class="row2"><p class="mini"><b>Module added</b>' + esc(L.comp) + ': ' + esc(L.bot) + '</p>' +
+      '<p class="mini"><b>The live block that week</b>' + esc(L.season) + '</p></div>' +
+      '<a class="go" href="' + L.href + '">Open the ' + esc(L.wk) + ' page &rarr;</a>';
+    card.classList.remove('pop'); void card.offsetWidth; card.classList.add('pop');
+    paint(-1);
+  }
+  $('lvlNext').addEventListener('click', function () { if (unlocked < 10) { unlocked++; show(unlocked - 1); drawRack($('rackSvg'), unlocked, unlocked - 1); } });
+  $('lvlAll').addEventListener('click', function () { unlocked = 10; show(9); });
+  $('lvlReset').addEventListener('click', function () { unlocked = 1; show(0); });
+  show(0);
+  drawRack($('rackDone'), 10, -1);
+})();
+
+/* ══ SYSTEM MAP ════════════════════════════════════════════════ */
+var STATIONS = [
+  { n: 'Market data', w: 'W0 W3', c: '#9aa0a6', href: 'week3.html#transport',
+    does: 'A price change leaves the venue as bytes on a socket. Real feeds use UDP multicast with sequence numbers; the arena sends full snapshots over a WebSocket.',
+    pit: 'Treating the feed as reliable. A gap means the book you hold is wrong from that point on.',
+    q: ['NET-05', 'Why do exchange feeds carry sequence numbers, and what do you do on a gap?', 'Sequence numbers reveal missing, duplicated or reordered messages. On a gap, stop trusting the book, get a snapshot, then resume from its sequence number. The arena sends full snapshots, so a client resyncs from the next one.'] },
+  { n: 'Gateway', w: 'W3', c: '#2dd4bf', href: 'week3.html#design',
+    does: 'Frames the byte stream into messages and validates each one against a typed pydantic model. Answers heartbeats and reconnects with backoff.',
+    pit: 'Assuming one recv() is one message, and sending raw dicts that nobody validates.',
+    q: ['NET-02', 'What does "TCP gives you bytes, not messages" mean in practice?', 'One send is not one recv: you may get half a message or two glued together. Framing is the application\'s job: a delimiter or a length prefix read in a loop. WebSockets frame for you, which is why the arena client gets whole messages.'] },
+  { n: 'Event loop', w: 'W2', c: '#a78bfa', href: 'week2.html#why',
+    does: 'One asyncio loop runs the socket reader, the decision, the order sender and the heartbeat. Each await hands control back so nothing waits on anything else.',
+    pit: 'A blocking call inside a coroutine: time.sleep, requests.get, a heavy computation.',
+    q: ['CON-04', 'What happens if on_tick calls time.sleep(1)?', 'The loop is blocked: no reads, no heartbeats, no other task. The bot goes quiet while it still looks connected. Week 2 measured a worst heartbeat delay of 3,015 ms blocking against 5.3 ms offloaded. Use await asyncio.sleep or asyncio.to_thread.'] },
+  { n: 'Order book', w: 'W6', c: '#d29922', href: 'week6.html#how',
+    does: 'Keeps both sides of the book in price-time priority. Best bid and ask come from the top of a heap; a dict by order id handles cancels and fills.',
+    pit: 'Rescanning the whole book or the whole session on every tick, so the p99 keeps rising during the block.',
+    q: ['DSA-03', 'How does the arena\'s order book find the best bid in O(1) and keep price-time priority?', 'Each side is a heap keyed by (price, sequence, id), bids negated, so heap[0] is the best and earliest. A dict from id to order gives O(1) cancels. In Week 6 best_bid stayed near 0.08 us from 1,000 to 100,000 resting orders.'] },
+  { n: 'Features', w: 'W4 W6 W7', c: '#58a6ff', href: 'week6.html#how',
+    does: 'Turns the book into numbers: mid, spread, microprice, imbalance, rolling returns and volatility. Updated in O(1) per tick; heavy features are built offline.',
+    pit: 'A feature that uses information from after the decision: a forward as-of join, or a scaler fitted on the whole sample.',
+    q: ['DSA-05', 'Compute a rolling mean and variance over the last k prices in O(1) per tick. Why Welford?', 'Keep a deque(maxlen=k) and running sums: add the new price, drop the old one. Welford\'s update avoids the cancellation of mean(x^2) - mean(x)^2 when prices are large and the variance is small.'] },
+  { n: 'Signal / model', w: 'W1 W8', c: '#f778ba', href: 'week8.html#p7',
+    does: 'on_tick returns a Signal or None. The model sits behind signal(): loaded once, one prediction per tick within the budget, the baseline rule as its fallback.',
+    pit: 'Trusting a model validated with a shuffled split, or judging it on accuracy instead of P&L after fees.',
+    q: ['MLS-05', 'Accuracy is 53%. Is that a good trading model?', 'It depends on payoff, costs and baselines. 53% with equal wins and losses can be worthless after a 15 bp taker fee; 45% with wins three times the losses can be a good model. Compare against always-up and momentum, out of sample.'] },
+  { n: 'Risk checks', w: 'W5 W9', c: '#f85149', href: 'week9.html#fr-ks',
+    does: 'Runs before any order leaves: max position, max gross notional, a daily-loss stop. The kill switch runs first, is latched, and flattens when it trips.',
+    pit: 'A threshold set above the worst drawdown, which is the same as having no switch at all.',
+    q: ['MKT-05', 'What are LULD bands, halts and the short-sale restriction, and how should a bot react?', 'LULD stops trading outside a band around a reference price (10% by default on the arena); a velocity halt pauses a symbol that moves 5% in 60 s, for 300 s. A bot reads the halt events, stops sending to a halted symbol, and re-checks its signals when trading resumes.'] },
+  { n: 'Order', w: 'W1 W3', c: '#a78bfa', href: 'week1.html#what',
+    does: 'The decision becomes a typed order: symbol, side, quantity, price, type. The model validates it before it reaches the wire.',
+    pit: 'A dict is not a design: {"side": "BUY", "qty": -5} is a valid dict and a broken order.',
+    q: ['OOP-05', 'Why is "a dict is not a design" for an order?', 'A dict has no invariants. A class or a validated model names the fields, constrains them (side in buy or sell, quantity positive) and gives you one place to change the contract. Key typos fail at the first test instead of in production.'] },
+  { n: 'Venue routing', w: 'W6 + season', c: '#f0883e', href: 'week6.html#dp',
+    does: 'With several venues, the router compares them on the all-in price: the quote plus that venue\'s fee, or minus its rebate, and the size shown.',
+    pit: 'Routing to the best quoted price and ignoring the fee, or not re-checking after each partial fill.',
+    q: ['MKT-07', 'What is the NBBO, and how should an order be routed across several venues?', 'The best bid and best ask across all venues. Rank venues by quoted price plus fee (or minus rebate) and size, send or split, and re-check after each child order because quotes go stale between venues.'] },
+  { n: 'Matching & fill', w: 'W0', c: '#9aa0a6', href: 'index.html#season',
+    does: 'The central limit order book matches in price-time priority. A trade prints at the resting order\'s price. The taker pays a fee and the maker earns a rebate.',
+    pit: 'Crossing the spread on every trade: you pay the spread and the taker fee, so the edge has to beat both.',
+    q: ['MKT-01', 'What are the four matching rules of a price-time priority book?', 'Best price first, then earliest arrival; the trade prints at the resting price; a limit remainder rests; a market remainder is cancelled. In Week 0 a 1,000-share buy at 185.51 took 680 at 185.50 and rested 320 at 185.51.'] },
+  { n: 'OMS / P&L', w: 'W1 W4', c: '#58a6ff', href: 'week3.html#pitfalls',
+    does: 'Fills update positions, cash, realized and unrealized P&L. The tape of the session is recorded and becomes tomorrow\'s backtest.',
+    pit: 'Treating your own ledger as the truth after a reconnect. Rebuild it from the venue and log the reconciliation.',
+    q: ['NET-09', 'Your bot reconnects after a drop. What state is now wrong?', 'Everything you accumulated yourself: a shadow position ledger, open-order ids, running P&L, indicator windows that missed ticks. The venue\'s PortfolioUpdate restores positions; treat local state as a cache to rebuild.'] },
+  { n: 'Leaderboard', w: 'W9', c: '#3fb950', href: 'week9.html#fr-sc',
+    does: 'The season score: mean excess return over the cash drift, divided by volatility (with a floor), capped at 10, times max(0, 1 - 2 x max drawdown).',
+    pit: 'Chasing raw return with a big drawdown. A 25% drawdown halves the score and 50% zeroes it.',
+    q: ['MKT-09', 'How is the season score computed, and why risk-adjusted?', 'Two curves with the same +12.68% return scored +10.000 and +0.091 in the class demo. Raw return rewards the gambler; the drawdown multiplier means the steadiest curve wins.'] }
+];
+var BRK = {
+  kill: { st: 6, t: 'Kill switch off', msg: '<b>Kill switch off.</b> A crash goes straight through risk. In the Week 9 widget the armed switch held the loss near 4% while the unprotected bot sank to almost 10%.' },
+  stale: { st: 1, t: 'Stale data', msg: '<b>Stale data.</b> The socket is OPEN but nothing new arrives, so orders are priced off an old book and get picked off. Run-book: alarm on feed age, stop quoting, resync.' },
+  lat: { st: 2, t: 'Latency', msg: '<b>Latency.</b> A blocking call holds the loop; ticks queue up and every decision is late. Fix: never block on_tick, measure the p99, not the mean.' },
+  leak: { st: 4, t: 'Look-ahead leak', msg: '<b>Look-ahead leak.</b> A feature sees the future. The backtest line climbs, the live line does not. Week 8: a shuffled split scored 0.574 on a random walk, a split in time 0.480.' },
+  fee: { st: 9, t: 'Fee blowup', msg: '<b>Fee blowup.</b> Every fill crosses as a taker. At the engine default, $15 of fee on $10,000 of notional against a $2 spread (MKT-04). Rest as a maker, or trade less.' }
+};
+
+(function systemMap() {
+  var cv = $('mapCv'), eq = $('eqCv'), G = null, E = null, L = { pts: [], bw: 0, bh: 0, H: 0 };
+  var sel = 6, paused = false, brk = { kill: false, stale: false, lat: false, leak: false, fee: false };
+  var dots = [], ghosts = [], sparks = [], spawnT = 0, crashT = 0, t = 0, queue = 0, flash = {};
+  var eqLive = [], eqBt = [], EQN = 160, eqV = 0, btV = 0;
+  for (var i = 0; i < EQN; i++) { eqLive.push(0); eqBt.push(0); }
+
+  function layout() {
+    var w = cv.parentNode.clientWidth, cols = w < 640 ? 2 : 4, rows = 12 / cols;
+    var pad = w < 640 ? 10 : 18, gap = w < 640 ? 12 : 26, bh = w < 640 ? 56 : 62, rowGap = w < 640 ? 34 : 44;
+    var bw = (w - pad * 2 - gap * (cols - 1)) / cols, H = pad * 2 + rows * bh + (rows - 1) * rowGap + 14;
+    G = fitCanvas(cv, H);
+    var pts = [];
+    for (var s = 0; s < 12; s++) {
+      var r = Math.floor(s / cols), k = s % cols; if (r % 2) k = cols - 1 - k;
+      pts.push({ x: pad + k * (bw + gap) + bw / 2, y: pad + 14 + r * (bh + rowGap) + bh / 2 });
+    }
+    L = { pts: pts, bw: bw, bh: bh, H: H, w: w, small: w < 640 };
+    E = fitCanvas(eq, 120);
+  }
+  function posAt(p) {
+    p = clamp(p, 0, 11); var i = Math.min(10, Math.floor(p)), f = p - i, a = L.pts[i], b = L.pts[i + 1];
+    return { x: lerp(a.x, b.x, f), y: lerp(a.y, b.y, f) };
+  }
+  function spawn() { dots.push({ p: 0, v: 1.6 + Math.random() * 0.3, col: '#b9d4ff', state: 'ok', stale: false, crash: crashT > 0, blocked: false, life: 1 }); }
+  function spark(x, y, col, n) { for (var i = 0; i < n; i++) sparks.push({ x: x, y: y, vx: (Math.random() - 0.5) * 140, vy: (Math.random() - 0.8) * 120, l: 0.7, col: col }); }
+
+  function step(dt) {
+    t += dt;
+    if (crashT > 0) crashT -= dt;
+    spawnT -= dt;
+    if (spawnT <= 0) {
+      spawnT = brk.lat ? 0.5 : 0.42;
+      if (!brk.stale) spawn();
+      else dots.push({ p: 3, v: 1.6, col: '#6f757f', state: 'stale', stale: true, crash: false, blocked: false, life: 1 });
+    }
+    for (var i = dots.length - 1; i >= 0; i--) {
+      var d = dots[i], prev = d.p, v = d.v;
+      if (brk.lat && d.p >= 2 && d.p < 3) v *= 0.16;
+      if (d.blocked) { d.life -= dt * 1.6; if (d.life <= 0) dots.splice(i, 1); continue; }
+      d.p += v * dt;
+      if (prev < 6 && d.p >= 6 && (d.crash || crashT > 0)) {
+        if (!brk.kill) { d.blocked = true; d.p = 6; flash[6] = 0.5; continue; }
+        d.col = '#f85149'; d.state = 'crash';
+      }
+      if (prev < 3 && d.p >= 3 && brk.lat) { d.col = '#d29922'; d.state = 'late'; }
+      if (prev < 9 && d.p >= 9) {
+        var P = L.pts[9];
+        if (d.stale) { spark(P.x, P.y, '#f85149', 6); flash[9] = 0.4; }
+        if (brk.fee) { spark(P.x, P.y, '#f0883e', 4); }
+        if (d.state === 'late' && Math.random() < 0.5) { d.blocked = true; continue; }
+      }
+      if (d.p >= 11) {
+        var Q = L.pts[11];
+        spark(Q.x, Q.y, d.state === 'ok' && !brk.fee ? '#3fb950' : '#f85149', 3);
+        dots.splice(i, 1);
+        continue;
+      }
+    }
+    if (brk.lat) { queue = 0; dots.forEach(function (d) { if (d.p >= 2 && d.p < 3) queue++; }); }
+    if (brk.leak && Math.random() < dt * 3) ghosts.push({ p: 11, v: 2.2 });
+    for (var g = ghosts.length - 1; g >= 0; g--) { ghosts[g].p -= ghosts[g].v * dt; if (ghosts[g].p <= 4) { flash[4] = 0.3; ghosts.splice(g, 1); } }
+    for (var s = sparks.length - 1; s >= 0; s--) { var k = sparks[s]; k.x += k.vx * dt; k.y += k.vy * dt; k.vy += 260 * dt; k.l -= dt; if (k.l <= 0) sparks.splice(s, 1); }
+    for (var f in flash) { flash[f] -= dt; if (flash[f] <= 0) delete flash[f]; }
+
+    /* schematic equity: shapes only */
+    var drift = 0.010, noise = (Math.random() - 0.5) * 0.05;
+    if (brk.stale) drift -= 0.03;
+    if (brk.lat) drift -= 0.018;
+    if (brk.fee) drift -= 0.035;
+    if (crashT > 0) drift += brk.kill ? -0.16 : (crashT > 2.6 ? -0.06 : -0.002);
+    eqAcc += dt;
+    if (eqAcc > 0.06) {
+      eqAcc = 0;
+      if (brk.leak) { eqV += noise * 0.6; btV += 0.05 + Math.abs(noise) * 0.3; } /* the edge is fake: backtest climbs, live stays flat */
+      else { eqV += drift + noise; btV = eqV; }
+      eqLive.push(eqV); eqLive.shift(); eqBt.push(btV); eqBt.shift();
+    }
+  }
+  var eqAcc = 0;
+
+  function drawMap() {
+    var c = G.c, P = L.pts, bw = L.bw, bh = L.bh;
+    c.clearRect(0, 0, L.w, L.H);
+    /* gate band */
+    c.font = '700 10px ' + SANS; c.fillStyle = 'rgba(63,185,80,0.75)'; c.textAlign = 'left';
+    c.fillText('THE GATE (W9): EVERYTHING BELOW SHIPPED THROUGH TESTS AND CI', 10, 11, L.w - 20);
+    /* pipe */
+    c.lineCap = 'round'; c.lineJoin = 'round';
+    c.strokeStyle = '#232a36'; c.lineWidth = 10; c.beginPath(); P.forEach(function (p, i) { if (i) c.lineTo(p.x, p.y); else c.moveTo(p.x, p.y); }); c.stroke();
+    c.strokeStyle = 'rgba(59,130,246,0.35)'; c.lineWidth = 2; c.setLineDash([6, 8]); c.lineDashOffset = -t * 30; c.stroke(); c.setLineDash([]);
+    /* stations */
+    for (var i = 0; i < 12; i++) {
+      var S = STATIONS[i], x = P[i].x - bw / 2, y = P[i].y - bh / 2, broken = false;
+      for (var k in brk) if (brk[k] && BRK[k].st === i) broken = true;
+      var fl = flash[i] || 0, isSel = i === sel;
+      c.save();
+      if (isSel || broken || fl > 0) { c.shadowColor = broken || fl > 0 ? '#f85149' : S.c; c.shadowBlur = 18; }
+      rrect(c, x, y, bw, bh, 9);
+      c.fillStyle = broken ? 'rgba(248,81,73,0.16)' : (isSel ? hexA(S.c, 0.16) : '#151a22'); c.fill();
+      c.lineWidth = isSel ? 2 : 1.2; c.strokeStyle = broken ? '#f85149' : (isSel ? S.c : '#323a48'); c.stroke();
+      c.restore();
+      c.fillStyle = S.c; c.fillRect(x + 8, y + 9, 3, bh - 18);
+      c.textAlign = 'left'; c.fillStyle = '#e8e6e3'; c.font = '700 ' + (L.small ? 12 : 13) + 'px ' + SANS;
+      c.fillText((i + 1) + '. ' + S.n, x + 18, y + bh / 2 - 3, bw - 24);
+      c.font = '10.5px ' + MONO; c.fillStyle = broken ? '#ff9a92' : '#9aa0a6';
+      var lab = broken ? 'BROKEN' : S.w;
+      if (i === 6 && crashT > 0 && !brk.kill) lab = 'TRIPPED, FLAT';
+      if (i === 3 && brk.stale) lab = 'STALE BOOK';
+      if (i === 2 && brk.lat) lab = 'QUEUE ' + '|'.repeat(Math.min(12, queue));
+      if (i === 4 && brk.leak) lab = 'SEES THE FUTURE';
+      c.fillText(lab, x + 18, y + bh / 2 + 13, bw - 24);
+    }
+    /* ghosts from the future */
+    ghosts.forEach(function (g) { var q = posAt(g.p); c.fillStyle = 'rgba(167,139,250,0.85)'; c.beginPath(); c.arc(q.x, q.y - 9, 4, 0, 7); c.fill(); });
+    /* dots with trails */
+    dots.forEach(function (d) {
+      for (var j = 5; j >= 0; j--) {
+        var q = posAt(d.p - j * 0.035), a = (1 - j / 6) * (d.blocked ? d.life : 1);
+        c.fillStyle = hexA(d.col, a * (j ? 0.35 : 1)); c.beginPath(); c.arc(q.x, q.y, j ? 3 : 4.6, 0, 7); c.fill();
+      }
+      if (!d.blocked && !REDUCE) { var q0 = posAt(d.p); c.fillStyle = hexA(d.col, 0.18); c.beginPath(); c.arc(q0.x, q0.y, 11, 0, 7); c.fill(); }
+    });
+    sparks.forEach(function (k) { c.fillStyle = hexA(k.col, clamp(k.l * 1.4, 0, 1)); c.fillRect(k.x - 1.5, k.y - 1.5, 3, 3); });
+  }
+  function drawEq() {
+    var c = E.c, w = E.w, h = 120; c.clearRect(0, 0, w, h);
+    c.strokeStyle = '#232a36'; c.lineWidth = 1; for (var g = 1; g < 4; g++) { c.beginPath(); c.moveTo(0, g * h / 4); c.lineTo(w, g * h / 4); c.stroke(); }
+    var all = eqLive.concat(eqBt), mn = Math.min.apply(null, all), mx = Math.max.apply(null, all); if (mx - mn < 1) { var m = (mx + mn) / 2; mn = m - 0.5; mx = m + 0.5; }
+    function line(arr, col, wd, dash) {
+      c.strokeStyle = col; c.lineWidth = wd; c.setLineDash(dash || []); c.beginPath();
+      arr.forEach(function (v, i) { var x = i / (EQN - 1) * w, y = h - 8 - (v - mn) / (mx - mn) * (h - 16); if (i) c.lineTo(x, y); else c.moveTo(x, y); });
+      c.stroke(); c.setLineDash([]);
+    }
+    if (brk.leak) line(eqBt, '#a78bfa', 2, [5, 4]);
+    var bad = brk.stale || brk.lat || brk.fee || (crashT > 0 && brk.kill);
+    line(eqLive, bad ? '#f85149' : '#3fb950', 2.2);
+    $('eqCap').textContent = brk.leak ? 'Dashed violet: the leaky backtest. Solid: live. Schematic shapes, no real data.' : 'Equity, schematic shape. No real data.';
+  }
+  function health() {
+    var items = [], n = 0;
+    for (var k in brk) if (brk[k]) { items.push('<li>' + BRK[k].msg + '</li>'); n++; }
+    if (crashT > 0) items.unshift('<li class="' + (brk.kill ? '' : 'okk') + '">' + (brk.kill ? '<b>Crash in progress, no switch.</b> Red dots pass the risk station and the curve dives.' : '<b>Crash in progress, switch armed.</b> The kill switch tripped first in on_tick, flattened and stayed off. The loss is capped.') + '</li>');
+    if (!items.length) items.push('<li class="okk"><b>All green.</b> Ticks flow from bytes to the score. Press a red button to remove one lesson.</li>');
+    $('hList').innerHTML = items.join('');
+    var st = $('hState'); st.className = 'state' + (n ? ' bad' : (crashT > 0 ? ' warn' : ''));
+    st.textContent = n ? n + ' BROKEN' : (crashT > 0 ? 'CRASH' : 'ALL GREEN');
+  }
+  var lastHealth = '';
+  function healthIfChanged() { var key = JSON.stringify(brk) + (crashT > 0); if (key !== lastHealth) { lastHealth = key; health(); } }
+  function frame(dt) { if (!paused) step(dt); drawMap(); drawEq(); healthIfChanged(); }
+
+  function showStation(i) {
+    sel = i; var S = STATIONS[i], sd = $('sd');
+    sd.style.setProperty('--sc', S.c);
+    sd.innerHTML = '<span class="wkb">' + esc(S.w) + '</span><h3>' + (i + 1) + '. ' + esc(S.n) + '</h3><div class="kv">' +
+      '<div><b>What it does</b>' + esc(S.does) + '</div>' +
+      '<div class="pit"><b>The pitfall</b>' + esc(S.pit) + '</div></div>' +
+      '<details><summary><span class="qid">' + S.q[0] + '</span>' + esc(S.q[1]) + '</summary><p>' + esc(S.q[2]) + '</p></details>' +
+      '<p style="margin-top:10px"><a class="wl" href="' + S.href + '">Where it was taught (' + esc(S.w) + ') &rarr;</a></p>';
+    Array.prototype.forEach.call($('stnList').children, function (b, j) { b.setAttribute('aria-pressed', j === i ? 'true' : 'false'); });
+    if (REDUCE || paused) frame(0);
+  }
+  STATIONS.forEach(function (S, i) {
+    var b = el('button', 'btn', (i + 1) + '. ' + esc(S.n)); b.type = 'button'; b.setAttribute('aria-pressed', 'false');
+    b.addEventListener('click', function () { showStation(i); }); $('stnList').appendChild(b);
+  });
+  cv.addEventListener('click', function (e) {
+    var r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    for (var i = 0; i < 12; i++) { var p = L.pts[i]; if (Math.abs(x - p.x) < L.bw / 2 && Math.abs(y - p.y) < L.bh / 2) { showStation(i); return; } }
+  });
+  function reducedSim() { /* reduced motion: settle the simulation, then draw one still frame */
+    for (var i = 0; i < 160; i++) step(0.05); frame(0);
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-brk]'), function (b) {
+    b.addEventListener('click', function () {
+      var k = b.getAttribute('data-brk'); brk[k] = !brk[k]; b.setAttribute('aria-pressed', brk[k] ? 'true' : 'false');
+      if (brk[k]) showStation(BRK[k].st);
+      if (REDUCE) reducedSim();
+    });
+  });
+  $('crashBtn').addEventListener('click', function () { crashT = 4.5; showStation(6); if (REDUCE) { for (var i = 0; i < 40; i++) step(0.05); frame(0); } });
+  $('healBtn').addEventListener('click', function () {
+    for (var k in brk) brk[k] = false; crashT = 0; ghosts = [];
+    Array.prototype.forEach.call(document.querySelectorAll('[data-brk]'), function (b) { b.setAttribute('aria-pressed', 'false'); b.textContent = BRK[b.getAttribute('data-brk')].t; });
+    if (REDUCE) reducedSim();
+  });
+  $('pauseBtn').addEventListener('click', function () {
+    paused = !paused; this.setAttribute('aria-pressed', paused ? 'true' : 'false'); this.textContent = paused ? 'Resume' : 'Pause';
+  });
+  layout(); showStation(0); sel = 0;
+  if (REDUCE) { $('pauseBtn').hidden = true; reducedSim(); }
+  else { for (var w = 0; w < 60; w++) step(0.05); visLoop($('system'), frame); frame(0); }
+  var rT = 0; window.addEventListener('resize', function () { clearTimeout(rT); rT = setTimeout(function () { layout(); frame(0); }, 120); });
+})();
+
+/* ══ ARSENAL ═══════════════════════════════════════════════════ */
+var THEMES = [
+  { k: 'design', n: 'Design & concurrency', c: '#a78bfa' },
+  { k: 'wire', n: 'The wire', c: '#2dd4bf' },
+  { k: 'research', n: 'Data & backtesting', c: '#58a6ff' },
+  { k: 'speed', n: 'Speed & scale', c: '#d29922' },
+  { k: 'ml', n: 'Signals & ML', c: '#f778ba' },
+  { k: 'market', n: 'Markets, execution & risk', c: '#f0883e' },
+  { k: 'ship', n: 'Ship & operate', c: '#3fb950' }
+];
+var TECH = [
+  ['design', 'W1', 'The four pillars of OOP', 'Encapsulation, abstraction, inheritance, polymorphism: the engine calls your on_tick without knowing your class.', 'week1.html#what'],
+  ['design', 'W1', 'UML class diagrams', 'Inheritance, composition, association and dependency, drawn before the code exists.', 'week1.html#how'],
+  ['design', 'W1', 'One interface, many strategies', 'Subclass the Trader ABC: a new strategy is a new class, not a rewrite.', 'week1.html#why'],
+  ['design', 'W1', 'Composition over inheritance', 'The bot has a feed, a risk manager and a strategy. No god object called Bot.', 'week1.html#pitfalls'],
+  ['design', 'W2', 'The event loop', 'One thread, many tasks: each await hands control back to the loop.', 'week2.html#what'],
+  ['design', 'W2', 'Never block on_tick', 'Move blocking work off the loop with run_in_executor or to_thread.', 'week2.html#why'],
+  ['design', 'W2', 'Bounded queues and back-pressure', 'A bounded queue makes a slow consumer visible instead of serving stale data.', 'week2.html#why'],
+  ['design', 'W2', 'Threads, processes and the GIL', 'Threads for blocking I/O, processes for CPU work, a Lock for the read-modify-write race.', 'week2.html#threads'],
+  ['wire', 'W3', 'OSI layers and TCP/IP', 'Which header each layer adds, and which device reads it.', 'week3.html#osi'],
+  ['wire', 'W3', 'TCP vs UDP', 'Orders over TCP; market data over UDP multicast, with sequence numbers for gaps.', 'week3.html#transport'],
+  ['wire', 'W3', 'Framing a byte stream', 'One recv is not one message: a length prefix and a read loop.', 'week3.html#examples'],
+  ['wire', 'W3', 'FIX, ITCH and OUCH', 'Tag=value for order entry, fixed binary layouts for market data.', 'week3.html#finproto'],
+  ['wire', 'W3', 'WebSocket, heartbeats, close codes', 'What the arena speaks: the Upgrade handshake, frames, ping and pong.', 'week3.html#websocket'],
+  ['wire', 'W3', 'Typed schemas at the boundary', 'Validate every message with a model; add fields with defaults, never rename.', 'week3.html#design'],
+  ['wire', 'W3', 'Reconnect, backoff, resync', 'Exponential backoff with jitter, then rebuild your state from the venue.', 'week3.html#pitfalls'],
+  ['research', 'W4', 'The event-driven backtest', 'Data, replay, strategy, fills and fees, accounting, metrics: one pipeline.', 'week4.html#backtest'],
+  ['research', 'W4', 'SQL schemas and indexes', 'An index wins point lookups and narrow ranges, and does nothing for a big scan.', 'week4.html#sql'],
+  ['research', 'W4', 'Why a row store struggles with ticks', 'Research scans a few columns over many rows; a row store reads them all.', 'week4.html#sqllimits'],
+  ['research', 'W4', 'kdb+ and the as-of join', 'Columnar time-series storage; join backward in a decision, never forward.', 'week4.html#tsdb'],
+  ['research', 'W4', 'Parquet and DuckDB', 'Typed, compressed columns with row-group pruning.', 'week4.html#parquet'],
+  ['research', 'W4', 'The logical clock', 'Every decision on the tape\'s clock; one time.time() makes the P&L depend on replay speed.', 'week4.html#clocks'],
+  ['research', 'W4', 'Look-ahead and out-of-sample', 'Lag every input, fix the split before looking, open the test set once.', 'week4.html#backtester'],
+  ['research', 'W4', 'Baselines and the six biases', 'Do-nothing and buy-and-hold next to every P&L; look-ahead, free trading, survivorship, tuning on test.', 'week4.html#mistakes'],
+  ['research', 'W4', 'Transaction cost analysis', 'Buy the ask, sell the bid, walk the book, pay the fee; re-run at twice the cost.', 'week4.html#mistakes'],
+  ['speed', 'W6', 'Big-O and the right container', 'dict, set, deque, heap: choosing the container is choosing the complexity.', 'week6.html#what'],
+  ['speed', 'W6', 'The heap order book', 'Best price at the top of a heap, cancels by id with lazy deletion.', 'week6.html#how'],
+  ['speed', 'W6', 'Welford O(1) rolling statistics', 'Add the new value, drop the old one, never recompute the window.', 'week6.html#how'],
+  ['speed', 'W6', 'Profiling and tail latency', 'cProfile for the hot path; report p50, p95 and p99, because you get picked off in the tail.', 'week6.html#why'],
+  ['speed', 'W6', 'Dynamic programming', 'Solve each sub-problem once: capital allocation as a knapsack.', 'week6.html#dp'],
+  ['speed', 'W6', 'Graphs: Dijkstra and Bellman-Ford', 'Cheapest route to a fill, and arbitrage as a negative cycle.', 'week6.html#dp'],
+  ['speed', 'W7', 'The memory wall and dtypes', 'Measure memory first; downcast before you rent a cluster.', 'week7.html#what'],
+  ['speed', 'W7', 'Vectorisation', 'Replace the row loop with whole-column operations.', 'week7.html#how'],
+  ['speed', 'W7', 'Chunk, map, reduce', 'Process data larger than memory in chunks and carry the state across boundaries.', 'week7.html#how'],
+  ['speed', 'W7', 'Process pools for sweeps', 'Fan a parameter search out with ProcessPoolExecutor; pure workers, idempotent outputs.', 'week7.html#how'],
+  ['speed', 'W7', 'Read only the bytes you need', 'Column pruning: a query that reads two columns should not pay for twenty.', 'week7.html#why'],
+  ['speed', 'W7 + W8 block', 'Lead-lag discovery', 'The Week 8 block hid lead-lag links between symbols. Searching pairs and lags over a big tape is a strategy search you can only afford with the Week 7 toolkit.', 'week7.html#why'],
+  ['ml', 'W8', 'Where ML sits in the pipeline', 'It sharpens one box, the signal, and is judged on P&L after fees.', 'week8.html#p0'],
+  ['ml', 'W8', 'Supervised and unsupervised', 'Labels for a signal; clusters, factors and outliers for regimes and alarms.', 'week8.html#p1'],
+  ['ml', 'W8', 'Indicators and the feature factory', 'Every window and threshold you pick is a fitted parameter. Count them.', 'week8.html#p2'],
+  ['ml', 'W8', 'Leakage, purge and embargo', 'Scale on train only, merge as-of backward, leave a gap of the label horizon at the wall.', 'week8.html#p3'],
+  ['ml', 'W8', 'Walk-forward validation', 'Train on the past, test on the next block, roll forward; report the spread across folds.', 'week8.html#p3'],
+  ['ml', 'W8', 'Dimensionality, shrinkage, PCA', 'Every extra column empties the space; ridge, lasso and PCA fight back.', 'week8.html#p4'],
+  ['ml', 'W8', 'Overfitting and calibration', 'Pick the knob on later data; size with a calibrated probability.', 'week8.html#p5'],
+  ['ml', 'W8', 'The model ladder', 'Start simple; climb only when the next rung beats the current one out of sample, after its cost.', 'week8.html#p6'],
+  ['ml', 'W8', 'Model ops and drift', 'Load once, predict one row within the budget, fall back to the baseline, watch the rolling hit rate.', 'week8.html#p7'],
+  ['ml', 'W8', 'News sentiment as a feature', 'Lexicon or transformer (FinBERT), merged as-of on the time received, decayed per symbol.', 'week8.html#p8'],
+  ['market', 'W0', 'Price-time priority CLOB', 'Best price, then earliest arrival; the trade prints at the resting price.', 'index.html#season'],
+  ['market', 'W0', 'Maker-taker fees', 'The taker pays, the maker earns a rebate, the venue keeps the difference.', 'index.html#roles'],
+  ['market', 'Season W4', 'Market making and inventory skew', 'Earn the spread and the rebate; shade quotes to shed inventory before it moves against you.', 'index.html#roles'],
+  ['market', 'Season W4', 'Adverse selection and toxic flow', 'Being picked off by better-informed flow is the market maker\'s main cost.', 'index.html#roles'],
+  ['market', 'Season', 'Auctions, IPOs and circuit breakers', 'The opening auction, two IPOs from bookbuild to listing, LULD bands, halts and the short-sale restriction.', 'week9.html#ps'],
+  ['market', 'Season W8', 'NBBO routing on the all-in price', 'Compare venues on quote plus fee, or minus rebate, and re-check after each child order.', 'week6.html#dp'],
+  ['market', 'Season W9', 'Margin, futures and basis', 'Haircuts, maintenance and liquidation; ARENA-10 futures with basis and scarce borrow.', 'week9.html#ps'],
+  ['market', 'W9', 'The kill switch', 'Runs first in on_tick, latched, tested at its threshold.', 'week9.html#fr-ks'],
+  ['market', 'W5', 'Stops, limits and liquidation', 'The bot must survive the risk block unattended.', 'week5.html#live'],
+  ['market', 'W9', 'The risk-adjusted score', 'Return per unit of risk times a drawdown penalty: the steadiest curve wins.', 'week9.html#fr-sc'],
+  ['ship', 'W9', 'The testing pyramid', 'Each claim at the cheapest layer that can see the bug.', 'week9.html#fr-pyr'],
+  ['ship', 'W9', 'Deterministic tests', 'Seed the randomness, fake the network, inject the clock.', 'week9.html#fr-det'],
+  ['ship', 'W9', 'Coverage and property tests', 'Coverage says what ran, not what is right; a property test states an invariant.', 'week9.html#fr-cov'],
+  ['ship', 'W9', 'Git flow, PRs and tags', 'Feature off develop, PR, CI, two reviews; production only runs a tag.', 'week9.html#fr-bm'],
+  ['ship', 'W9', 'The change window', 'Freeze before the block, deploy right after it, never during.', 'week9.html#fr-cal'],
+  ['ship', 'W9', 'The CI gate', 'Every push on a clean box; the first required red stops everything after it.', 'week9.html#fr-pipe'],
+  ['ship', 'W9', 'CD: staging, canary, production', 'Ship the tag in steps; a rollback is redeploying the previous one.', 'week9.html#fr-bm'],
+  ['ship', 'W9', 'Feature flags that default OFF', 'Separate deploying from enabling; test that the OFF path is unchanged.', 'week9.html#p2'],
+  ['ship', 'W9', 'Run-books and monitoring', 'Alarm on feed age and reject rate; symptom, diagnosis, action, written before the incident.', 'week9.html#fr-fb']
+];
+(function arsenal() {
+  var grid = $('agrid'), filt = $('filters'), cur = 'all', hover = -1, cards = [];
+  var TC = {}; THEMES.forEach(function (T) { TC[T.k] = T; });
+  $('stTech').textContent = TECH.length;
+  function mkBtn(k, label, col) {
+    var b = el('button', 'btn', (col ? '<i style="background:' + col + '"></i>' : '') + esc(label)); b.type = 'button';
+    b.setAttribute('aria-pressed', k === cur ? 'true' : 'false');
+    b.addEventListener('click', function () { cur = k; render(); }); filt.appendChild(b); return b;
+  }
+  mkBtn('all', 'All themes', null); THEMES.forEach(function (T) { mkBtn(T.k, T.n, T.c); });
+  TECH.forEach(function (T, i) {
+    var a = el('a', 'tc', '<div class="tw">' + esc(T[1]) + ' &middot; ' + esc(TC[T[0]].n) + '</div><div class="tn">' + esc(T[2]) + '</div><div class="td">' + esc(T[3]) + '</div><span class="tg">Where it was taught &rarr;</span>');
+    a.href = T[4]; a.style.setProperty('--tcc', TC[T[0]].c);
+    a.addEventListener('mouseenter', function () { hover = i; if (REDUCE) drawSky(0); });
+    a.addEventListener('mouseleave', function () { hover = -1; if (REDUCE) drawSky(0); });
+    a.addEventListener('focus', function () { hover = i; if (REDUCE) drawSky(0); });
+    a.addEventListener('blur', function () { hover = -1; if (REDUCE) drawSky(0); });
+    grid.appendChild(a); cards.push(a);
+  });
+  function render() {
+    var n = 0;
+    cards.forEach(function (a, i) { var on = cur === 'all' || TECH[i][0] === cur; a.hidden = !on; if (on) n++; });
+    Array.prototype.forEach.call(filt.children, function (b, j) { b.setAttribute('aria-pressed', (j === 0 ? 'all' : THEMES[j - 1].k) === cur ? 'true' : 'false'); });
+    $('aCount').textContent = n + ' of ' + TECH.length + ' techniques';
+    if (REDUCE) drawSky(0);
+  }
+  /* the sky */
+  var cv = $('skyCv'), S = null, stars = [], tt = 0;
+  function layoutSky() {
+    S = fitCanvas(cv, cv.clientWidth < 560 ? 250 : 230); stars = [];
+    var w = S.w, h = S.h, nT = THEMES.length;
+    THEMES.forEach(function (T, ti) {
+      var cx, cy;
+      if (w < 560) { cx = w * (0.18 + 0.32 * (ti % 3)); cy = h * (0.2 + 0.3 * Math.floor(ti / 3)); }
+      else { cx = w * (0.08 + ti * (0.84 / (nT - 1))); cy = h * (ti % 2 ? 0.62 : 0.40); }
+      var mine = TECH.map(function (x, i) { return x[0] === T.k ? i : -1; }).filter(function (i) { return i >= 0; });
+      var R = w < 560 ? Math.min(w / 9, 40) : Math.min(w / (nT * 2.3), 58);
+      mine.forEach(function (idx, j) {
+        var a = j * 2.39996, r = R * Math.sqrt((j + 0.6) / mine.length);
+        stars.push({ i: idx, th: T.k, x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r * 0.8, ph: Math.random() * 6.3, c: T.c, cx: cx, cy: cy, name: T.n });
+      });
+    });
+  }
+  function drawSky(dt) {
+    tt += dt; var c = S.c, w = S.w, h = S.h; c.clearRect(0, 0, w, h);
+    for (var b = 0; b < 70; b++) { var bx = (b * 97.3) % w, by = (b * 53.7) % h; c.fillStyle = 'rgba(200,210,230,' + (0.08 + 0.06 * Math.sin(tt * 0.8 + b)) + ')'; c.fillRect(bx, by, 1.2, 1.2); }
+    THEMES.forEach(function (T) {
+      var on = cur === 'all' || cur === T.k, mine = stars.filter(function (s) { return s.th === T.k; });
+      c.strokeStyle = hexA(T.c, on ? 0.38 : 0.08); c.lineWidth = 1; c.beginPath();
+      mine.forEach(function (s, j) { if (j) c.lineTo(s.x, s.y); else c.moveTo(s.x, s.y); }); c.stroke();
+      if (on && cur !== 'all' && mine.length) {
+        c.font = '700 11px ' + SANS; c.textAlign = 'center'; c.fillStyle = hexA(T.c, 0.95);
+        c.fillText(T.n.toUpperCase(), clamp(mine[0].cx, 70, w - 70), clamp(mine[0].cy - 64, 14, h - 6));
+      }
+    });
+    stars.forEach(function (s) {
+      var on = cur === 'all' || cur === s.th, hv = hover === s.i, tw = 0.75 + 0.25 * Math.sin(tt * 2 + s.ph);
+      var r = (hv ? 6 : 2.6) * (on ? 1 : 0.7);
+      c.fillStyle = hexA(s.c, (on ? 0.9 : 0.18) * tw);
+      if (on) { c.save(); c.shadowColor = s.c; c.shadowBlur = hv ? 22 : 9; }
+      c.beginPath(); c.arc(s.x, s.y, r, 0, 7); c.fill();
+      if (on) c.restore();
+      if (hv) {
+        c.strokeStyle = hexA(s.c, 0.8); c.beginPath(); c.arc(s.x, s.y, 11 + 3 * Math.sin(tt * 5), 0, 7); c.stroke();
+        c.font = '700 12px ' + SANS; c.textAlign = s.x > w * 0.7 ? 'right' : 'left'; c.fillStyle = '#e8e6e3';
+        c.fillText(TECH[s.i][2], s.x + (s.x > w * 0.7 ? -16 : 16), s.y + 4);
+      }
+    });
+  }
+  layoutSky(); render(); drawSky(0);
+  if (!REDUCE) visLoop($('arsenal'), drawSky);
+  window.addEventListener('resize', function () { layoutSky(); drawSky(0); });
+})();
+
+/* ══ BOSS FIGHT ════════════════════════════════════════════════ */
+var QS = [
+  { id: 'MAC-03', th: 'The machine', q: 'Your bot\'s tick is half a second. Is Python fast enough?',
+    o: ['Yes: a lean on_tick measured a p99 of 6.8 us against a 500,000 us tick', 'No: Python is always too slow for trading', 'Only if the bot is rewritten with threads', 'Only if the venue runs on the same laptop'],
+    x: 'The course measured pydantic parsing near 0.8 us, best_bid 0.08 us and a lean on_tick at a p99 of 6.8 us. What breaks a Python bot is waiting on the loop, or work that grows with the session.', h: 'week6.html#why' },
+  { id: 'MKT-01', th: 'Market structure', q: 'An incoming buy limited at 185.51 meets a resting sell at 185.50. Where does the trade print?',
+    o: ['185.50, the resting order\'s price', '185.51, the incoming order\'s price', 'The midpoint, 185.505', 'The last trade price on the tape'],
+    x: 'A trade prints at the resting order\'s price. In the Week 0 example a 1,000-share buy at 185.51 took 680 shares at 185.50 and rested 320 at 185.51.', h: 'index.html#season' },
+  { id: 'OOP-05', th: 'OOP and UML', q: 'Why is {"side": "BUY", "qty": -5} a problem as an order?',
+    o: ['A dict has no invariants: nothing stops a negative quantity', 'Dicts are slower to send than classes', 'JSON cannot encode negative numbers', 'Nothing: the venue will fix it'],
+    x: 'A class or a validated model names the fields and constrains them (quantity positive, side in buy or sell). Key typos fail at the first test instead of in production.', h: 'week1.html#what' },
+  { id: 'CON-04', th: 'Concurrency', q: 'on_tick calls time.sleep(1). What do you see?',
+    o: ['The bot goes quiet while it still looks connected: no reads, no heartbeats', 'The bot crashes with an exception', 'Only that coroutine pauses; the others keep running', 'Python moves the sleep to another thread'],
+    x: 'The loop is blocked. Week 2 measured a worst heartbeat delay of 3,015 ms with a blocking call against 5.3 ms offloaded. Use await asyncio.sleep or asyncio.to_thread.', h: 'week2.html#why' },
+  { id: 'NET-02', th: 'Networking', q: 'On raw TCP, one send() on the sender becomes...',
+    o: ['Not necessarily one recv(): half a message, or two glued together', 'Exactly one recv(), always', 'One recv() unless a packet is dropped', 'One recv() on localhost, several on the internet'],
+    x: 'TCP gives you bytes, not messages. Framing is your job: a delimiter or a length prefix read in a loop until n bytes have arrived.', h: 'week3.html#examples' },
+  { id: 'BKT-10', th: 'Backtesting', q: 'Inside a decision, you attach book data to each trade with an as-of join. Which direction is safe?',
+    o: ['Backward: the most recent row at or before the trade', 'Forward: the first row at or after the trade', 'Nearest in either direction', 'Any direction, as long as both tables are sorted'],
+    x: 'Backward only uses the past. Forward peeks at the future; it belongs in reports, such as a markout 60 ticks after a fill.', h: 'week4.html#tsdb' },
+  { id: 'BKT-07', th: 'Backtesting', q: 'In the Week 4 lab you tuned a k-tick momentum on a random walk, using the whole sample. What happened?',
+    o: ['k=5 looked best at +504 bp in sample and lost 901 bp out of sample', 'The best k in sample was also the best out of sample', 'In-sample and out-of-sample returns matched', 'No value of k looked better than another'],
+    x: 'You fit the noise. Fix the split before looking and run the out-of-sample segment once; the moment you tune on it, it becomes in-sample.', h: 'week4.html#backtester' },
+  { id: 'DSA-05', th: 'Complexity', q: 'You need a rolling mean and variance over the last k prices, every tick. What do you keep?',
+    o: ['A deque(maxlen=k) and running sums, Welford style: O(1) per tick', 'The full history, recomputed each tick for accuracy', 'sum(window) each tick, which is O(1)', 'A sorted list of the window'],
+    x: 'Add the new value, drop the old one. Welford\'s update avoids the cancellation of mean(x^2) - mean(x)^2 for a stock at 300 with cent moves.', h: 'week6.html#how' },
+  { id: 'BIG-07', th: 'Big data', q: 'Workers return partial results for a map-reduce. Which partial is safe to combine in any order?',
+    o: ['(sum, count) per symbol', 'The mean per symbol', 'The median of each chunk', 'The last value of each chunk'],
+    x: 'The reduce must be associative and commutative: sums and counts, not means. In Week 7 each worker returned (sum, count) and matched the sequential run.', h: 'week7.html#how' },
+  { id: 'MLS-03', th: 'Machine learning', q: 'A 1-nearest-neighbour on a random walk scored 0.574 with a shuffled split. With a split in time?',
+    o: ['0.480: the 9.5 points were leakage', '0.574, the same', 'Higher, because time adds information', 'It cannot be measured on a random walk'],
+    x: 'Overlapping windows and labels put a near-twin of each test row in training. Split in time, purge and embargo at the wall, fit preprocessing on training rows only.', h: 'week8.html#p3' },
+  { id: 'MLS-05', th: 'Machine learning', q: 'Your model is right 53% of the time. Is it a good trading model?',
+    o: ['It depends on payoff, costs and baselines, not on accuracy', 'Yes: anything above 50% makes money', 'No: you need at least 60%', 'Yes, if the training accuracy is also 53%'],
+    x: '53% with equal wins and losses can be worthless after a 15 bp taker fee; 45% with wins three times the losses can be a good model. Compare against always-up and momentum, out of sample.', h: 'week8.html#p3' },
+  { id: 'TST-05', th: 'Testing and CI/CD', q: 'Coverage is 96%. What does that prove?',
+    o: ['That the lines ran, not that their results were checked', 'That the code is correct', 'That 4% of the bugs remain', 'That every branch is tested'],
+    x: 'In the lab\'s PR the suite reached 96.10% coverage while the EMA used the wrong smoothing constant. Only a test against a hand-computed value went red.', h: 'week9.html#fr-cov' },
+  { id: 'SYS-02', th: 'System design', q: 'How do you ship a bot change during a trading week?',
+    o: ['Behind a flag that is OFF, through PR, CI and review into a tag, deployed in the window after the block', 'Hot-patch the running bot during the block if the change is small', 'Push to main and let CD deploy it immediately', 'Wait until the season is over'],
+    x: 'Deploy the tag only in the change window after the graded block, reconcile positions, enable the flag on one symbol as a canary, then widen. The rollback is written in advance.', h: 'week9.html#fr-cal' },
+  { id: 'MKT-04', th: 'Market structure', q: 'A $100 stock, 100 shares, a 2-cent spread. At the engine\'s default fees, crossing as a taker costs...',
+    o: ['$15, against a $2 spread', '$1.50, about the spread', '$0.15, negligible', 'Nothing: the maker pays the fee'],
+    x: 'Notional is $10,000: taker 15 bp is $15, a maker earns $10, and the whole spread is $2. Taking versus making is a $25 swing on one trade.', h: 'index.html#roles' },
+  { id: 'MKT-09', th: 'Market structure', q: 'Two equity curves end at the same +12.68% return. Why did they score +10.000 and +0.091?',
+    o: ['The score is return per unit of risk, times a drawdown penalty', 'The second team traded fewer symbols', 'The score only counts the last snapshot', 'The scorer uses net worth, not return'],
+    x: 'Mean excess return over the cash drift, divided by volatility, capped at 10, times max(0, 1 - 2 x max drawdown). The steadiest curve wins.', h: 'week9.html#fr-sc' }
+];
+(function bossFight() {
+  var qb = $('qbox'), box = $('bossBox'), order = [], qi = 0, hits = 0, answered = false, res = [], opts = [];
+  var KEY = 'sta_recap_boss_best';
+  function best() { try { return parseInt(localStorage.getItem(KEY) || '-1', 10); } catch (e) { return -1; } }
+  function setBest(n) { try { if (n > best()) localStorage.setItem(KEY, String(n)); } catch (e) {} }
+  function bestTxt() { var b = best(); $('bestTxt').textContent = b >= 0 ? 'Your best: ' + b + ' / 15' : ''; }
+  function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = (Math.random() * (i + 1)) | 0, t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function candles() {
+    var g = '', hp = 15 - hits;
+    for (var i = 0; i < 9; i++) {
+      var x = 42 + i * 17, up = (i * 7 + hp) % 3 !== 0, hgt = 18 + ((i * 13 + hp * 5) % 26) * (0.4 + hp / 25), y = 86 - hgt / 2 + (i % 2 ? 6 : -4);
+      g += '<line x1="' + (x + 4) + '" x2="' + (x + 4) + '" y1="' + (y - 7) + '" y2="' + (y + hgt + 7) + '" stroke="' + (up ? '#ff8a80' : '#ffb4ae') + '" stroke-width="1.4"/>' +
+        '<rect x="' + x + '" y="' + y + '" width="8" height="' + hgt + '" rx="1.5" fill="' + (up ? '#f85149' : '#7d2a25') + '" opacity="' + (0.35 + hp / 24) + '"/>';
+    }
+    $('bossCandles').innerHTML = g;
+    var m = hp > 10 ? 'M88 104 Q110 92 132 104' : hp > 5 ? 'M90 102 L130 102' : 'M90 98 Q110 112 130 98';
+    $('bossMouth').setAttribute('d', m);
+  }
+  function hud() {
+    $('hpBar').style.width = ((15 - hits) / 15 * 100) + '%';
+    $('hpTxt').textContent = (15 - hits) + ' / 15 HP';
+    var p = ''; for (var i = 0; i < 15; i++) p += '<i class="' + (res[i] === true ? 'g' : res[i] === false ? 'r' : '') + '"></i>';
+    $('pips').innerHTML = p; candles();
+  }
+  function start() { order = QS.map(function (_, i) { return i; }); qi = 0; hits = 0; res = []; hud(); ask(); }
+  function ask() {
+    answered = false; var Q = QS[order[qi]];
+    opts = shuffle(Q.o.map(function (o, i) { return { t: o, ok: i === 0 }; }));
+    qb.classList.remove('wrong');
+    qb.innerHTML = '<div class="qmeta"><span>Question ' + (qi + 1) + ' of 15 &middot; ' + esc(Q.th) + '</span><span>' + Q.id + '</span></div>' +
+      '<div class="qtext" id="qtext">' + esc(Q.q) + '</div><div class="opts" role="group" aria-labelledby="qtext">' +
+      opts.map(function (o, i) { return '<button class="opt" type="button" data-i="' + i + '"><span class="k">' + (i + 1) + '</span><span>' + esc(o.t) + '</span></button>'; }).join('') +
+      '</div><div id="fbk"></div>';
+    Array.prototype.forEach.call(qb.querySelectorAll('.opt'), function (b) { b.addEventListener('click', function () { pick(+b.getAttribute('data-i')); }); });
+  }
+  function pick(i) {
+    if (answered) return; answered = true; var Q = QS[order[qi]], ok = opts[i].ok;
+    res[qi] = ok;
+    Array.prototype.forEach.call(qb.querySelectorAll('.opt'), function (b, j) { b.disabled = true; if (opts[j].ok) b.classList.add('right'); else if (j === i) b.classList.add('bad'); });
+    if (ok) {
+      hits++;
+      if (!REDUCE) { box.classList.remove('hit'); void box.offsetWidth; box.classList.add('hit'); var d = el('div', 'dmg', '-1 HP'); box.appendChild(d); setTimeout(function () { d.remove(); }, 950); }
+    } else if (!REDUCE) { qb.classList.add('wrong'); }
+    hud();
+    var last = qi === 14;
+    $('fbk').innerHTML = '<div class="fbk ' + (ok ? 'okk' : 'nok') + '"><b>' + (ok ? 'Hit.' : 'Not this time.') + '</b> ' + esc(Q.x) +
+      ' <a href="' + Q.h + '">Reread it</a>.</div><div class="btnrow" style="margin-top:10px"><button class="btn primary" type="button" id="nextQ">' + (last ? 'See the result' : 'Next') + ' &rarr;</button></div>';
+    $('nextQ').addEventListener('click', next); $('nextQ').focus();
+  }
+  function next() { if (qi < 14) { qi++; ask(); qb.querySelector('.opt').focus(); } else finish(); }
+  function finish() {
+    setBest(hits); bestTxt();
+    var tier = hits === 15 ? ['Market defeated', 'Fifteen of fifteen. You can walk an interviewer through the whole stack.'] :
+      hits >= 12 ? ['Ready to ship', 'A few gaps left. Reread the weeks below and fight again.'] :
+      hits >= 9 ? ['Passes CI', 'The core is there. The missed questions point at the weeks to revisit.'] :
+      hits >= 6 ? ['Needs a code review', 'Go back to the weeks below, then try again: the answers are on those pages.'] :
+      ['Back to the week pages', 'Start with the weeks below. Every answer is on the site.'];
+    var pct = hits / 15, R = 76, C = 2 * Math.PI * R, col = hits >= 12 ? '#3fb950' : hits >= 9 ? '#7cb0ff' : hits >= 6 ? '#d29922' : '#f85149';
+    var miss = order.map(function (o, k) { return res[k] ? null : QS[o]; }).filter(Boolean);
+    qb.innerHTML = '<div class="result"><svg viewBox="0 0 190 190" role="img" aria-label="Score ' + hits + ' of 15">' +
+      '<circle cx="95" cy="95" r="' + R + '" fill="none" stroke="#262b35" stroke-width="12"/>' +
+      '<circle cx="95" cy="95" r="' + R + '" fill="none" stroke="' + col + '" stroke-width="12" stroke-linecap="round" transform="rotate(-90 95 95)" stroke-dasharray="' + (C * pct).toFixed(1) + ' ' + C.toFixed(1) + '" style="filter:drop-shadow(0 0 8px ' + col + ')"/>' +
+      '<text x="95" y="96" text-anchor="middle" font-family="' + MONO + '" font-size="40" font-weight="800" fill="#e8e6e3">' + hits + '</text>' +
+      '<text x="95" y="122" text-anchor="middle" font-family="' + SANS + '" font-size="13" fill="#9aa0a6">of 15</text></svg>' +
+      '<div class="tier" style="color:' + col + '">' + tier[0] + '</div><div class="tl">' + tier[1] + '</div>' +
+      (miss.length ? '<div class="missed"><b style="font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">Reread</b>' + miss.map(function (Q) { return '<a href="' + Q.h + '">' + Q.id + ' &middot; ' + esc(Q.q) + '</a>'; }).join('') + '</div>' : '') +
+      '<div class="btnrow" style="justify-content:center;margin-top:16px"><button class="btn primary" type="button" id="again">Fight again</button><a class="btn" style="text-decoration:none" href="week9.html#pq">All 131 questions &rarr;</a></div></div>';
+    $('again').addEventListener('click', function () { start(); qb.querySelector('.opt').focus(); });
+  }
+  document.addEventListener('keydown', function (e) {
+    var sec = $('boss').getBoundingClientRect(); if (sec.top > window.innerHeight || sec.bottom < 0) return;
+    if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    if (!answered && /^[1-4]$/.test(e.key) && qb.querySelector('.opt')) { pick(+e.key - 1); e.preventDefault(); }
+    else if (answered && e.key === 'Enter' && $('nextQ') && document.activeElement !== $('nextQ')) { next(); e.preventDefault(); }
+  });
+  bestTxt(); start();
+})();
+
+/* ══ CLOSING: six principles ═══════════════════════════════════ */
+(function principles() {
+  var P = [
+    ['Measure first', 'Never optimise, rent or redesign before you have a number.', 'W0 W6 W7'],
+    ['Determinism before speed', 'A result you cannot reproduce is not a result, fast or not.', 'W4 W9'],
+    ['Simple before complex', 'Climb a rung only when it beats the one below, out of sample, after costs.', 'W7 W8'],
+    ['Fail safe', 'Assume every piece will fail, partially, at the worst moment.', 'W2 W3 W9'],
+    ['Every change behind a flag and a test', 'Ship dark, turn on gradually, roll back by flipping it off.', 'W9'],
+    ['Know each role\'s business model', 'Before you code, know who pays whom and why.', 'W0 + season']
+  ];
+  $('prin').innerHTML = P.map(function (p, i) { return '<div class="pc"><div class="n">0' + (i + 1) + '</div><h4>' + esc(p[0]) + '</h4><p>' + esc(p[1]) + '</p><div class="w">' + esc(p[2]) + '</div></div>'; }).join('');
+})();
+</script>
+</body>
+</html>
