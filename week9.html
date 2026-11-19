@@ -671,7 +671,7 @@
   </ul>
   <div class="chips">
     <span class="chip hl">3 hours</span>
-    <span class="chip hl">Fri Dec 4 &middot; double finale block: season weeks 9 + 10</span>
+    <span class="chip hl">Thu Dec 3, 1&ndash;4 pm CT &middot; the finale block &middot; results Fri Dec 4</span>
     <span class="chip">pytest &middot; determinism</span>
     <span class="chip">git flow</span>
     <span class="chip">CI gate</span>
@@ -1360,12 +1360,10 @@ score  = ratio * max(0, 1 - 2 * mdd)   <span class="c"># if ratio &gt;= 0</span>
  <div class="wrap">
   <div class="eyebrow">Take it further</div>
   <h2>This week&rsquo;s work &mdash; and the end of the season</h2>
-  <p class="sub">Tonight: the double finale block runs inside class (season week 9, ARENA-10 futures, then week 10, the
-  finale with the full market structure). Connect at 15:25.</p>
+  <p class="sub">The finale block ran yesterday, Thu Dec 3, 1:00&ndash;4:00 pm CT: one three-hour block with the ARENA-10 future, the desk&rsquo;s tells and a live news tape, on the full market structure. Today: the results and the season finale show.</p>
   <div class="grid3" style="margin-top:16px">
    <div class="box"><h4>Phase 4 &middot; Scale &amp; Operations</h4><p>Due <b>tonight, Fri Dec 4, 11:59 pm CT</b>.</p></div>
-   <div class="box"><h4>Phase 5 &middot; Demo &amp; Postmortem</h4><p>Part A is tonight&rsquo;s double block, graded from the
-   recording. The demo (problem, design, live run, results, next) and the one-page postmortem are due <b>Sat Dec 12, 11:59 pm CT</b>.</p></div>
+   <div class="box"><h4>Phase 5 &middot; Demo &amp; Postmortem</h4><p>Part A is the Dec 3 finale block, graded from the recording. The demo (problem, design, live run, results, next) and the one-page postmortem are due <b>Sat Dec 12, 11:59 pm CT</b>.</p></div>
    <div class="box"><h4>HW 9 &middot; CI/CD, testing &amp; the finale integration</h4><p>Tests including the kill-switch test,
    a CI workflow that blocks red, and the git-flow exercise on your template: a PR that fails then passes CI, a tag, a hotfix.
    Due <b>Sat Dec 12, 11:59 pm CT</b>.</p></div>
@@ -2646,8 +2644,8 @@ var CAL = (function () {
     { w: 'W6', d: 'Nov 6', ev: 'scenario tournament: the whole market', st: [4] },
     { w: 'W7', d: 'Nov 13', ev: 'fast market: 0.2 s snapshots, flashes', st: [5] },
     { w: 'W8', d: 'Nov 20', ev: 'multi-venue NBBO, fee war, LUNA IPO', st: [6, 8] },
-    { w: 'W9', d: 'Dec 4', ev: 'ARENA-10 futures, margin, a learnable signal', st: [7, 8] },
-    { w: 'FIN', d: 'Dec 4', ev: 'the finale: full market structure', st: [8, 10] }
+    { w: 'W9', d: 'Dec 3', ev: 'ARENA-10 futures, margin, a learnable signal', st: [7, 8] },
+    { w: 'FIN', d: 'Dec 3', ev: 'the finale: full market structure + a news tape', st: [8, 10] }
   ];
   var WATCH = {"machine": "the latency ladder grow a red 10 µs budget line and the queue counter climb", "wire": "the recv() window cut messages in half and JSONDecodeError count up", "objects": "the bids field arrive as null and the BookSnapshot box turn red", "loop": "the loop stop turning and the heartbeat age pass 5 s until the socket closes", "book": "the bids jump above the asks and CROSSED flash", "data": "the on_tick bar rise through the 0.2 s line and the backlog grow", "model": "test rows scatter among the training rows and accuracy read 71% against 50% live", "gate": "the commit go around the gate and raise on the first fill", "venue": "the P&L line slope down while the fee goes to the exchange", "tape": "the three replay digests stop matching", "score": "the curve turn jagged and the score fall from +1.90 to +0.80"};
   var ST2TL = [0, 3, 1, 2, 6, 7, 8, 9, 10, 4, 10];
